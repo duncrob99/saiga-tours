@@ -1,0 +1,26 @@
+{% extends 'main/main.html' %}
+{% load static %}
+
+{% block content %}
+    <h1 class="display-1">{{ region.name }}</h1>
+    {% if region.destinations.count > 0 %}
+        <h3 class="display-5">Countries</h3>
+        <div class="row">
+            {% for country in region.destinations.all %}
+                <div class="col-sm">
+                    <div class="card img-card">
+                        <img src="{{ country.card_img.url }}" class="card-img" alt="{{ country.name }}">
+                        <div class="card-img-overlay">
+                            <h5 class="card-title">{{ country.name }}</h5>
+                        </div>
+                        <a class="stretched-link" href="{% url 'destination' region.slug country.slug %}"></a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    {% if tours.count > 0 %}
+        <h3 class="display-5">Tours</h3>
+        {% include 'main/tours_cards.html' %}
+    {% endif %}
+{% endblock content %}

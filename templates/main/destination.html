@@ -1,0 +1,31 @@
+{% extends 'main/main.html' %}
+{% load static %}
+
+{% block content %}
+    <h1 class="display-1">{{ destination.name }}</h1>
+    <hr>
+    {{ destination.description | safe }}
+    {% if destination.details.count > 0 %}
+        <hr>
+        <h3 class="display-5">Details</h3>
+        <div class="row">
+            {% for detail in destination.details.all %}
+                <div class="col-sm">
+                    <div class="card img-card">
+                        <img src="{{ detail.card_img.url }}" class="card-img" alt="{{ detail.title }}">
+                        <div class="card-img-overlay">
+                            <h5 class="card-title">{{ detail.title }}</h5>
+                        </div>
+                        <a class="stretched-link"
+                           href="{% url 'destination-details' detail.destination.region.slug detail.destination.slug detail.slug %}"></a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    {% if destination.tours.count > 0 %}
+        <hr>
+        <h3 class="display-5">Tours</h3>
+        {% include 'main/tours_cards.html' with tours=destination.tours.all %}
+    {% endif %}
+{% endblock content %}

@@ -1,0 +1,19 @@
+{% extends 'main/main.html' %}
+
+{% block extrahead %}
+    <style>
+        small {
+            font-size: 40px;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="container-fluid">
+        <h1 class="display-1">{{ details.title }}
+            <a href="{% url 'destination' details.destination.region.slug details.destination.slug %}"><small
+                    class="text-muted">{{ details.destination }}</small></a>
+        </h1>
+        {{ details.content | safe }}
+    </div>
+{% endblock %}

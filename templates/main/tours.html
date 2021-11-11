@@ -1,0 +1,110 @@
+{% extends 'main/main.html' %}
+{% load static %}
+
+{% block extrahead %}
+    <link href="{% static 'nouislider/nouislider_asdlj.css' %}" rel="stylesheet">
+    <link href="{% static 'css/tours.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+    <div class="heading d-flex justify-content-between align-items-center">
+        <h1 class="display-1">Tours</h1>
+        <button id="filter-button" class="btn btn-outline-secondary d-inline-flex align-items-center"
+                data-bs-toggle="offcanvas"
+                data-bs-target="#filter-sidebar" aria-controls="filter-sidebar" role="button" style="float: right">
+            <span class="bi bi-funnel" style="font-size: 1.5rem"></span> <span style="margin-left: 4px;">Filters</span>
+        </button>
+    </div>
+    <hr>
+
+    {% include 'main/tours_cards.html' %}
+
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="filter-sidebar" aria-labelledby="filter-sidebar-title">
+        <div class="offcanvas-header">
+            <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"
+                    aria-label="Close Filter Sidebar"></button>
+            <h3 id="filter-sidebar-label" class="display-6">Filter Tours</h3>
+        </div>
+        <div class="offcanvas-body px-3">
+            <form>
+                <div class="row m-3">
+                    <div class="input-group search-bar">
+                        <input id="search-input" type="text" class="form-control" placeholder="Search"
+                               aria-label="Search">
+                        <span class="input-group-text"><i class="bi bi-search"></i></span>
+                    </div>
+                </div>
+                <div class="row m-3">
+                    <div class="col">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>Destinations</h5>
+                            </div>
+                            <div class="card-body">
+                                {% for destination in destinations %}
+                                    <div class="formcheck">
+                                        <input class="form-check-input destination-checkbox" type="checkbox" value=""
+                                               id="filter-destination-{{ destination.slug }}" checked>
+                                        <label class="form-check-label" for="filter-destination-{{ destination.slug }}">
+                                            {{ destination.name }}
+                                        </label>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row m-3">
+                    <div class="col">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>Date Range</h5>
+                            </div>
+                            <div class="card-body" id="date-selection">
+                                <div class="input-group">
+                                    <input class="form-control" type="text" id="date-start-input"
+                                           placeholder="Start Date">
+                                    <span class="input-group-text">-</span>
+                                    <input class="form-control" type="text" id="date-end-input" placeholder="End Date">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row m-3">
+                    <div class="col">
+                        <div class="card allow-overflow">
+                            <div class="card-header">
+                                <h5>Duration</h5>
+                            </div>
+                            <div class="card-body" id="date-selection">
+                                <label for="duration-input" hidden>Duration</label>
+                                <div id="duration-input" class="mt-5"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row m-3">
+                    <div class="col">
+                        <div class="card allow-overflow">
+                            <div class="card-header">
+                                <h5>Price</h5>
+                            </div>
+                            <div class="card-body" id="price-selection">
+                                <label for="price-input" hidden>Price</label>
+                                <div id="price-input" class="mt-5"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}
+
+{% block js %}
+    <script src="https://cdn.jsdelivr.net/npm/litepicker/dist/litepicker.js"></script>
+    <script src="{% static 'js/fuse.js' %}"></script>
+    <script src="{% static 'nouislider/nouislider.js' %}"></script>
+    <script src="{% static 'js/tours.js' %}"></script>
+{% endblock %}

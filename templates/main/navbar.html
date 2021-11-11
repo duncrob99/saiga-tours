@@ -1,0 +1,81 @@
+{% load static %}
+
+<link rel="stylesheet" href="{% static 'css/navbar.css' %}">
+
+<nav class="navbar navbar-expand navbar-light py-3">
+    <div class="container-md">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav" style="position: relative; left: 10px">
+            <ul class="navbar-nav">
+                {% if request.user.is_authenticated %}
+                    <li class="nav-item active">
+                        <a class="nav-link main-nav" href="{% url 'front-page' %}">*Insert Name*</a>
+                    </li>
+                {% endif %}
+                <li class="nav-item">
+                    <a class="nav-link main-nav" href="{% url 'tours' %}">Tours</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link main-nav" href="{% url 'news' %}">News</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link main-nav" href="{% url 'front-page' %}">Blog</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle main-nav" role="button" id="dropdownMenuButton"
+                       data-bs-toggle="dropdown">
+                        Destinations
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                        {% for region in regions %}
+                            <li>
+                                <a class="dropdown-item" href="{% url 'region' region.slug %}">{{ region.name }} <i
+                                        class="bi bi-caret-right-fill"></i></a>
+                                <ul class="dropdown-menu dropdown-submenu">
+                                    {% for country in region.destinations.all %}
+                                        <li>
+                                            <a class="dropdown-item"
+                                               href="{% url 'destination' region.slug country.slug %}">{{ country.name }}
+                                                <i class="bi bi-caret-right-fill"></i></a>
+                                            <ul class="dropdown-menu dropdown-submenu">
+                                                {% for detail in country.details.all %}
+                                                    <li><a class="dropdown-item"
+                                                           href="{% url 'destination-details' region.slug country.slug detail.slug %}">{{ detail.title }}</a>
+                                                    </li>
+                                                {% endfor %}
+                                            </ul>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </li>
+                <!--
+                {% if request.user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'front-page' %}">Due Tests</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'front-page' %}">View Test Data</a>
+                    </li>
+                {% endif %}
+                -->
+            </ul>
+        </div>
+
+        <!--
+        {% if request.user.is_authenticated %}
+            <span class="hello-msg">Hello, {{ request.user }}</span>
+            <span><a class="btn btn-secondary" href="{% url 'front-page' %}" style="right: 10px; position: relative;">Logout</a></span>
+        {% else %}
+            <span class="hello-msg">Hello, visitor!</span>
+            <span><a class="btn btn-primary" href="{% url 'front-page' %}"
+                     style="right: 10px; position: relative">Login</a></span>
+        {% endif %}
+        -->
+    </div>
+</nav>

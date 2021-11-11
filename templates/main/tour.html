@@ -1,0 +1,74 @@
+{% extends 'main/main.html' %}
+
+{% block extrahead %}
+    <style>
+        #tour-details {
+            text-align: center;
+            font-weight: bold;
+        }
+
+        #tour-details div div .card-header {
+            background-color: lightblue;
+        }
+
+        #itinerary-slider div div .card {
+            width: 80%;
+            left: 10%;
+            align-content: center;
+        }
+    </style>
+{% endblock %}
+{% block content %}
+    <h1 class="display-1">{{ tour }}</h1>
+    <hr>
+    <div class="row" id="tour-details">
+        <div class="col">
+            <div class="card">
+                <div class="card-header">
+                    Start Date
+                </div>
+                <div class="card-body">
+                    {{ tour.start_date }}
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card">
+                <div class="card-header">
+                    End Date
+                </div>
+                <div class="card-body">
+                    {{ tour.end_date }}
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card">
+                <div class="card-header">
+                    Duration
+                </div>
+                <div class="card-body">
+                    {{ tour.duration }} days
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card">
+                <div class="card-header">
+                    Price
+                </div>
+                <div class="card-body">
+                    US${{ tour.price }}
+                </div>
+            </div>
+        </div>
+    </div>
+    <hr>
+    {{ tour.description | safe }}
+    <hr>
+    {% include 'main/itinerary-slider.html' with itinerary=tour.itinerary.all %}
+    <hr>
+    <h6 class="display-6">Other Tours</h6>
+    {% include 'main/tours_cards.html' with tours=tour.close_tours %}
+
+{% endblock %}
