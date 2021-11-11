@@ -6,7 +6,9 @@ from .models import *
 
 # Create your views here.
 def front_page(request):
-    context = navbar_context()
+    context = {
+                  'tours': Tour.objects.all()
+              } | navbar_context()
     return render(request, 'main/front-page.html', context)
 
 

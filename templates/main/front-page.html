@@ -1,13 +1,20 @@
 {% extends 'main/main.html' %}
 {% load static %}
-{% block content %}
+{% block banner %}
     <div class="banner">
         <img alt="banner image" src="{% static 'images/banner_image.png' %}" class="banner-img">
         <div class="banner-text">
-            <h1>Benistan Tours</h1>
+            <h1 class="display-1">Benistan Tours</h1>
             <p>We do tours to cool places</p>
         </div>
     </div>
+{% endblock banner %}
+
+{% block content %}
+    <h1 class="display-1">Tours</h1>
+    <hr>
+    {% include 'main/tours_cards.html' %}
+    <hr>
     <h1>Information About Us</h1>
     We do things
-{% endblock content %}
+{% endblock %}
