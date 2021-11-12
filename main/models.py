@@ -147,17 +147,19 @@ def validate_image_size(sender, instance, created, **kwargs):
         image = Image.open(instance.card_img)
         (width, height) = image.size
 
-        if width == 2 * height:
+        ratio = 4 / 3
+
+        if width == ratio * height:
             return image
-        elif width > 2 * height:
+        elif width > ratio * height:
             new_height = height
-            new_width = height * 2
+            new_width = height * ratio
         else:
             new_width = width
-            new_height = width / 2
+            new_height = width / ratio
 
         crop_coords = (
-        (width - new_width) / 2, (height - new_height) / 2, (width + new_width) / 2, (height + new_height) / 2)
+            (width - new_width) / 2, (height - new_height) / 2, (width + new_width) / 2, (height + new_height) / 2)
         new_image = image.crop(crop_coords)
 
         img_io = BytesIO()
