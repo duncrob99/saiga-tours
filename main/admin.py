@@ -1,7 +1,6 @@
 from ckeditor_uploader.widgets import CKEditorUploadingWidget
 from django import forms
 from django.contrib import admin
-from image_cropping.admin import ImageCroppingMixin
 
 from .models import *
 
@@ -14,23 +13,23 @@ class DestinationDetailsForm(forms.ModelForm):
         model = DestinationDetails
 
 
-class DestinationDetailsAdmin(ImageCroppingMixin, admin.ModelAdmin):
+class DestinationDetailsAdmin(admin.ModelAdmin):
     form = DestinationDetailsForm
 
 
-class DestinationAdmin(ImageCroppingMixin, admin.ModelAdmin):
+class DestinationAdmin(admin.ModelAdmin):
     pass
 
 
-class TourAdmin(ImageCroppingMixin, admin.ModelAdmin):
+class TourAdmin(admin.ModelAdmin):
     pass
 
 
-class ArticleAdmin(ImageCroppingMixin, admin.ModelAdmin):
+class ArticleAdmin(admin.ModelAdmin):
     pass
 
 
-class PageAdmin(ImageCroppingMixin, admin.ModelAdmin):
+class PageAdmin(admin.ModelAdmin):
     pass
 
 
