@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 
 from pathlib import Path
 
+from easy_thumbnails.conf import Settings as thumbnail_settings
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -39,7 +41,9 @@ INSTALLED_APPS = [
     'ckeditor',
     'ckeditor_uploader',
     'django_bootstrap5',
-    'mathfilters'
+    'mathfilters',
+    'easy_thumbnails',
+    'image_cropping'
 ]
 
 MIDDLEWARE = [
@@ -152,3 +156,5 @@ CKEDITOR_CONFIGS = {
 }
 
 APPEND_SLASH = True
+
+THUMBNAIL_PROCESSORS = ('image_cropping.thumbnail_processors.crop_corners',) + thumbnail_settings.THUMBNAIL_PROCESSORS

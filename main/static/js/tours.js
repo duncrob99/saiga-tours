@@ -83,6 +83,7 @@ function setVisibleTours() {
         tour_objs.push({
             'title': tour_col.querySelector('.img-title-card .card-img-overlay .card-title').innerText,
             'excerpt': tour_col.querySelector('.tour-text .card-body').innerText,
+            'destinations': tour_col.querySelector('.tour-data').getAttribute('destinations'),
             'col_element': tour_col
         });
         tour_col.style.order = '';
@@ -90,13 +91,12 @@ function setVisibleTours() {
 
     let search = new Fuse(tour_objs, {
         includeScore: true,
-        keys: ['title', 'excerpt']
+        keys: ['title', 'excerpt', 'destinations']
     })
     let search_results = search.search(search_terms);
 
     let search_passed_cols = [];
     search_results.forEach((result, index) => {
-        console.log(result);
         result['item']['col_element'].style.order = index + 1;
         search_passed_cols.push(result['item']['col_element']);
     })

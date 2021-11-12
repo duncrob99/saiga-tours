@@ -14,7 +14,8 @@ def front_page(request):
 
 def navbar_context():
     context = {
-        'regions': Region.objects.all()
+        'regions': Region.objects.all(),
+        'pages': Page.objects.filter(parent=None)
     }
     return context
 
@@ -42,7 +43,8 @@ def destination_details(request, region, country, detail):
 
 def navbar(request):
     context = {
-        'regions': Region.objects.all()
+        'regions': Region.objects.all(),
+        'pages': Page.objects.filter(parent=None)
     }
     return render(request, 'main/navbar.html', context)
 
@@ -76,9 +78,24 @@ def news(request):
     page_number = request.GET.get('page', 1)
     page_obj = paginator.get_page(page_number)
     context = {
+                  'title': "News Articles",
                   'page_obj': page_obj
               } | navbar_context()
-    return render(request, 'main/news.html', context)
+    return render(request, 'main/article_list.html', context)
+
+
+def blog(request):
+    post_list = Article.objects.filter(type=Article.BLOG)
+    paginator = Paginator(post_list, 25)
+
+    page_number = request.GET.get('page', 1)
+    page_obj = paginator.get_page(page_number)
+    context = {
+                  'title': 'Blog Posts',
+                  'page_obj': page_obj
+              } | navbar_context()
+
+    return render(request, 'main/article_list.html', context)
 
 
 def region(request, slug):
@@ -90,3 +107,11 @@ def region(request, slug):
                   'tours': tours
               } | navbar_context()
     return render(request, 'main/region.html', context)
+
+
+def page(request, path):
+    page = Page.reverse_path(path)
+    context = {
+                  'page': page
+              } | navbar_context()
+    return render(request, 'main/page.html', context)

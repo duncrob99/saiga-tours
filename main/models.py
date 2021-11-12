@@ -1,7 +1,12 @@
 from datetime import timedelta
+from io import BytesIO
 
+from PIL import Image
 from ckeditor_uploader.fields import RichTextUploadingField
+from django.core.files import File
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 
 class Region(models.Model):
@@ -28,7 +33,7 @@ class Destination(models.Model):
 
 class DestinationDetails(models.Model):
     title = models.CharField(max_length=100)
-    slug = models.SlugField(unique=True)
+    slug = models.SlugField()
     content = RichTextUploadingField(config_name='default')
     order = models.IntegerField()
     destination = models.ForeignKey(Destination, on_delete=models.CASCADE, related_name='details')
@@ -71,7 +76,7 @@ class Tour(models.Model):
 
 class ItineraryDay(models.Model):
     tour = models.ForeignKey(Tour, on_delete=models.CASCADE, related_name='itinerary')
-    title = models.CharField(max_length=40)
+    title = models.CharField(max_length=100)
     day = models.IntegerField()
     body = RichTextUploadingField()
 
@@ -107,3 +112,54 @@ class Article(models.Model):
 
     class Meta:
         ordering = ['creation', 'title']
+
+
+class Page(models.Model):
+    slug = models.SlugField()
+    title = models.CharField(max_length=40)
+    content = RichTextUploadingField(config_name='default')
+    card_img = models.ImageField()
+    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='children')
+
+    def __str__(self):
+        return self.title
+
+    @property
+    def full_path(self):
+        if self.parent is None:
+            return self.slug
+        else:
+            return self.parent.full_path + '/' + self.slug
+
+    @classmethod
+    def reverse_path(cls, path: str):
+        split_path = path.split('/')
+        page = cls.objects.get(slug=split_path[0], parent=None)
+        for slug in split_path[1:]:
+            if slug != '':
+                page = cls.objects.get(slug=slug, parent=page)
+        return page
+
+
+@receiver(post_save)
+def validate_image_size(sender, instance, created, **kwargs):
+    if hasattr(instance, 'card_img'):
+        image = Image.open(instance.card_img)
+        (width, height) = image.size
+
+        if width == 2 * height:
+            return image
+        elif width > 2 * height:
+            new_height = height
+            new_width = height * 2
+        else:
+            new_width = width
+            new_height = width / 2
+
+        crop_coords = (
+        (width - new_width) / 2, (height - new_height) / 2, (width + new_width) / 2, (height + new_height) / 2)
+        new_image = image.crop(crop_coords)
+
+        img_io = BytesIO()
+        new_image.save(img_io, format='JPEG')
+        instance.card_img.save(instance.card_img.name, File(img_io))

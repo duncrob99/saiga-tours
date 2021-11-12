@@ -1,6 +1,6 @@
 {% load static %}
 
-<link rel="stylesheet" href="{% static 'css/navbar.css' %}">
+<link rel="stylesheet" href="{% static 'css/navbar_aa.css' %}">
 
 <nav class="navbar navbar-expand navbar-light py-3">
     <div class="container-md">
@@ -10,11 +10,30 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarNav" style="position: relative; left: 10px">
             <ul class="navbar-nav">
-                {% if request.user.is_authenticated %}
-                    <li class="nav-item active">
-                        <a class="nav-link main-nav" href="{% url 'front-page' %}">*Name*</a>
-                    </li>
-                {% endif %}
+                <li class="nav-item active">
+                    <a class="nav-link main-nav" href="{% url 'front-page' %}">*Name*</a>
+                </li>
+                {% for page in pages %}
+                    {% if page.children.count == 0 %}
+                        <li class="nav-item">
+                            <a class="nav-link main-nav" href="{% url 'page' page.full_path %}">{{ page.title }}</a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item dropdown btn-group">
+                            <a type="button" class="nav-link main-nav" role="button"
+                               href="{% url 'page' page.full_path %}">{{ page.title }}</a>
+                            <a class="nav-link dropdown-toggle-split dropdown-toggle main-nav" role="button"
+                               id="dropdownMenuButton"
+                               data-bs-toggle="dropdown">
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                {% for child_page in page.children.all %}
+                                    {% include 'main/page_dropdown.html' with page=child_page %}
+                                {% endfor %}
+                            </ul>
+                        </li>
+                    {% endif %}
+                {% endfor %}
                 <li class="nav-item">
                     <a class="nav-link main-nav" href="{% url 'tours' %}">Tours</a>
                 </li>
@@ -22,7 +41,7 @@
                     <a class="nav-link main-nav" href="{% url 'news' %}">News</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link main-nav" href="{% url 'front-page' %}">Blog</a>
+                    <a class="nav-link main-nav" href="{% url 'blog' %}">Blog</a>
                 </li>
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle main-nav" role="button" id="dropdownMenuButton"
