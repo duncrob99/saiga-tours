@@ -33,7 +33,7 @@ h5.card-title {
     border-top-right-radius: 0;
 }
 
-.text-card div {
+.text-card .card-body {
     min-height: 300px;
 }
 
