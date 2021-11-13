@@ -6,43 +6,21 @@
 {% endblock %}
 
 {% block content %}
-    <h1 class="display-1">{{ page.title }}</h1>
+    <h1 class="display-1">{{ page.title }}
+        {% if page.parent.parent is not None %}
+            <a href="{% url 'page' page.parent.full_path %}"><small
+                    class="text-muted">{{ page.parent.title }}</small></a>
+        {% endif %}
+    </h1>
     {{ page.content | safe }}
+
     {% if user.is_staff %}
-        {% if page.children.count > 0 %}
-            <hr>
-            <div class="row">
-                {% for child_page in page.children.all %}
-                    <div class="col-md-4 col-sm-12 g-0">
-                        <div class="card img-card m-3">
-                            <img src="{{ child_page.card_img.url }}" class="card-img" alt="{{ child_page.title }}">
-                            <div class="card-img-overlay">
-                                <h5 class="card-title">{{ child_page.title }}</h5>
-                            </div>
-                            <a class="stretched-link"
-                               href="{% url 'page' child_page.full_path %}"></a>
-                        </div>
-                    </div>
-                {% endfor %}
-            </div>
-        {% endif %}
+        {% include 'main/page_list.html' with pages=page.children.all %}
+
+        {% include 'main/page_list.html' with pages=page.siblings %}
     {% else %}
-        {% if page.children.all_published.count > 0 %}
-            <hr>
-            <div class="row">
-                {% for child_page in page.children.all_published %}
-                    <div class="col-md-4 col-sm-12 g-0">
-                        <div class="card img-card m-3">
-                            <img src="{{ child_page.card_img.url }}" class="card-img" alt="{{ child_page.title }}">
-                            <div class="card-img-overlay">
-                                <h5 class="card-title">{{ child_page.title }}</h5>
-                            </div>
-                            <a class="stretched-link"
-                               href="{% url 'page' child_page.full_path %}"></a>
-                        </div>
-                    </div>
-                {% endfor %}
-            </div>
-        {% endif %}
+        {% include 'main/page_list.html' with pages=page.children.all_published %}
+
+        {% include 'main/page_list.html' with pages=page.published_siblings %}
     {% endif %}
 {% endblock %}

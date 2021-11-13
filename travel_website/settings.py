@@ -40,7 +40,8 @@ INSTALLED_APPS = [
     'ckeditor_uploader',
     'django_bootstrap5',
     'mathfilters',
-    'simple_history'
+    'simple_history',
+    'colorfield',
 ]
 
 MIDDLEWARE = [

@@ -1,0 +1,17 @@
+{% if pages.count > 0 %}
+    <hr>
+    <div class="row">
+        {% for page in pages %}
+            <div class="col-md-4 col-sm-12 g-0">
+                <div class="card img-card m-3">
+                    <img src="{{ page.card_img.url }}" class="card-img" alt="{{ page.title }}">
+                    <div class="card-img-overlay">
+                        <h5 class="card-title">{{ page.title }}</h5>
+                    </div>
+                    <a class="stretched-link"
+                       href="{% url 'page' page.full_path %}"></a>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}

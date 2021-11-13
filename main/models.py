@@ -3,8 +3,10 @@ from io import BytesIO
 
 from PIL import Image
 from ckeditor_uploader.fields import RichTextUploadingField
+from colorfield.fields import ColorField
 from django.core.files import File
 from django.db import models
+from django.db.models import F
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils.functional import classproperty
@@ -76,6 +78,22 @@ class DestinationDetails(DraftHistory):
         return f'{self.title} for {self.destination.name}'
 
 
+class State(models.Model):
+    text = models.CharField(max_length=50, null=True, blank=True)
+    color = ColorField(default=None, null=True, blank=True)
+    text_color = ColorField(default=None, null=True, blank=True)
+    border_color = ColorField(default=None, null=True, blank=True)
+    priority = models.IntegerField(null=True, blank=True, help_text='0=top of list, 1 next, etc. Equivalent '
+                                                                    'priorities will be sorted as per usual.')
+    history = HistoricalRecords()
+
+    def __str__(self):
+        return self.text
+
+    class Meta:
+        ordering = ['priority', 'text']
+
+
 class Tour(DraftHistory):
     name = models.CharField(max_length=40)
     slug = models.SlugField()
@@ -86,6 +104,7 @@ class Tour(DraftHistory):
     excerpt = models.TextField()
     card_img = models.ImageField()
     price = models.DecimalField(max_digits=8, decimal_places=2)
+    state = models.ForeignKey(State, on_delete=models.CASCADE, null=True, blank=True)
 
     @property
     def duration(self):
@@ -98,8 +117,15 @@ class Tour(DraftHistory):
     def __str__(self):
         return self.name
 
+    @property
+    def priority(self):
+        if self.state is not None:
+            return self.state.priority
+        else:
+            return 9999 ** 9999
+
     class Meta:
-        ordering = ['start_date', 'price']
+        ordering = [F('state').asc(nulls_last=True), 'start_date', 'price']
 
 
 class ItineraryDay(models.Model):
@@ -111,7 +137,7 @@ class ItineraryDay(models.Model):
 
     class Meta:
         unique_together = [['tour', 'day']]
-        ordering = ['tour', 'day']
+        ordering = [F('tour'), 'day']
 
     @property
     def date(self):
@@ -173,6 +199,17 @@ class Page(DraftHistory):
     def published_children(self):
         return self.children.filter(published=True)
 
+    @property
+    def siblings(self):
+        if self.parent is not None:
+            return self.parent.children.exclude(pk=self.pk)
+        else:
+            return Page.objects.none()
+
+    @property
+    def published_siblings(self):
+        return self.siblings.filter(published=True)
+
 
 @receiver(post_save)
 def validate_image_size(sender, instance, created, **kwargs):
@@ -198,3 +235,23 @@ def validate_image_size(sender, instance, created, **kwargs):
         img_io = BytesIO()
         new_image.save(img_io, format=image.format)
         instance.card_img.save(instance.card_img.name, File(img_io))
+
+
+class Settings(models.Model):
+    accent_color = ColorField(default='#87cefa')
+    site_title = models.CharField(max_length=50, default='Crowley Tours')
+
+    def save(self, *args, **kwargs):
+        self.pk = 1
+        super(Settings, self).save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        pass
+
+    @classmethod
+    def load(cls):
+        obj, _ = cls.objects.get_or_create(pk=1)
+        return obj
+
+    class Meta:
+        verbose_name_plural = 'settings'

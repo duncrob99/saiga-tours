@@ -14,14 +14,15 @@ def assert_visible(request, model: DraftHistory):
 def front_page(request):
     context = {
                   'tours': Tour.visible(request.user.is_staff)
-              } | navbar_context(request)
+              } | global_context(request)
     return render(request, 'main/front-page.html', context)
 
 
-def navbar_context(request):
+def global_context(request):
     context = {
         'regions': Region.visible(request.user.is_staff),
-        'pages': Page.visible(request.user.is_staff).filter(parent=None)
+        'pages': Page.visible(request.user.is_staff).filter(parent=None),
+        'settings': Settings.load()
     }
     return context
 
@@ -37,7 +38,7 @@ def destination_overview(request, region_slug, country_slug):
                   'destination': destination,
                   'details': detail_list,
                   'tours': tour_list
-              } | navbar_context(request)
+              } | global_context(request)
 
     return render(request, 'main/destination.html', context)
 
@@ -52,7 +53,7 @@ def destination_details(request, region_slug, country_slug, detail_slug):
 
     context = {
                   'details': details
-              } | navbar_context(request)
+              } | global_context(request)
 
     return render(request, 'main/destination_details.html', context)
 
@@ -72,7 +73,7 @@ def tour(request, slug):
 
     context = {
                   'tour': tour_obj
-              } | navbar_context(request)
+              } | global_context(request)
     return render(request, 'main/tour.html', context)
 
 
@@ -80,7 +81,7 @@ def tours(request):
     context = {
                   'tours': Tour.visible(request.user.is_staff),
                   'destinations': Destination.visible(request.user.is_staff)
-              } | navbar_context(request)
+              } | global_context(request)
     return render(request, 'main/tours.html', context)
 
 
@@ -90,7 +91,7 @@ def article(request, slug):
 
     context = {
                   'article': article_obj
-              } | navbar_context(request)
+              } | global_context(request)
     return render(request, 'main/article.html', context)
 
 
@@ -103,7 +104,7 @@ def news(request):
     context = {
                   'title': "News Articles",
                   'page_obj': page_obj
-              } | navbar_context(request)
+              } | global_context(request)
     return render(request, 'main/article_list.html', context)
 
 
@@ -116,7 +117,7 @@ def blog(request):
     context = {
                   'title': 'Blog Posts',
                   'page_obj': page_obj
-              } | navbar_context(request)
+              } | global_context(request)
 
     return render(request, 'main/article_list.html', context)
 
@@ -132,7 +133,7 @@ def region(request, slug):
                   'region': region_obj,
                   'destinations': destination_list,
                   'tours': tours_list
-              } | navbar_context(request)
+              } | global_context(request)
     return render(request, 'main/region.html', context)
 
 
@@ -142,5 +143,5 @@ def page(request, path):
 
     context = {
                   'page': page_obj
-              } | navbar_context(request)
+              } | global_context(request)
     return render(request, 'main/page.html', context)

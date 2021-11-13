@@ -4,10 +4,11 @@
 {% block content %}
     <h1 class="display-1">{{ region.name }}</h1>
     {% if destinations.count > 0 %}
+        <hr>
         <h3 class="display-5">Countries</h3>
         <div class="row">
             {% for country in destinations.all %}
-                <div class="col-xl-4 col-lg-6 col-sm-12 g-0">
+                <div class="col-xl-4 col-md-6 col-sm-12 g-0">
                     <div class="card img-card m-3">
                         <img src="{{ country.card_img.url }}" class="card-img" alt="{{ country.name }}">
                         <div class="card-img-overlay">
@@ -20,6 +21,7 @@
         </div>
     {% endif %}
     {% if tours.count > 0 %}
+        <hr>
         <h3 class="display-5">Tours</h3>
         {% include 'main/tours_cards.html' %}
     {% endif %}

@@ -39,3 +39,7 @@ html, body {
 .hide-visually {
     opacity: 0;
 }
+
+small {
+    font-size: 40px;
+}
