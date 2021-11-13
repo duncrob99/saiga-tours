@@ -57,18 +57,19 @@
                     <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                         {% for region in regions %}
                             <li>
-                                <a class="dropdown-item" href="{% url 'region' region.slug %}">{{ region.name }} <i
+                                <a class="dropdown-item d-flex justify-content-between"
+                                   href="{% url 'region' region.slug %}">{{ region.name }} <i
                                         class="bi bi-caret-right-fill"></i></a>
                                 <ul class="dropdown-menu dropdown-submenu">
                                     {% if user.is_staff %}
                                         {% for country in region.destinations.all %}
                                             <li>
-                                                <a class="dropdown-item"
+                                                <a class="dropdown-item d-flex justify-content-between"
                                                    href="{% url 'destination' region.slug country.slug %}">{{ country.name }}
                                                     <i class="bi bi-caret-right-fill"></i></a>
                                                 <ul class="dropdown-menu dropdown-submenu">
                                                     {% for detail in country.details.all %}
-                                                        <li><a class="dropdown-item"
+                                                        <li><a class="dropdown-item d-flex justify-content-between"
                                                                href="{% url 'destination-details' region.slug country.slug detail.slug %}">{{ detail.title }}</a>
                                                         </li>
                                                     {% endfor %}
@@ -78,12 +79,12 @@
                                     {% else %}
                                         {% for country in region.destinations.all_published %}
                                             <li>
-                                                <a class="dropdown-item"
+                                                <a class="dropdown-item d-flex justify-content-between"
                                                    href="{% url 'destination' region.slug country.slug %}">{{ country.name }}
                                                     <i class="bi bi-caret-right-fill"></i></a>
                                                 <ul class="dropdown-menu dropdown-submenu">
                                                     {% for detail in country.details.all_published %}
-                                                        <li><a class="dropdown-item"
+                                                        <li><a class="dropdown-item d-flex justify-content-between"
                                                                href="{% url 'destination-details' region.slug country.slug detail.slug %}">{{ detail.title }}</a>
                                                         </li>
                                                     {% endfor %}

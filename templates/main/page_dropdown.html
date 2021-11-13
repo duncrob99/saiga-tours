@@ -1,27 +1,31 @@
 {% if user.is_staff %}
-{% if page.children.count == 0 %}
-    <li>
-        <a class="dropdown-item" href="{% url 'page' page.full_path %}">{{ page.title }}</a>
-    </li>
-{% else %}
-    <li>
-        <a class="dropdown-item" href="{% url 'page' page.full_path %}">{{ page.title }} <i
-                class="bi bi-caret-right-fill"></i></a>
-        <ul class="dropdown-menu dropdown-submenu" aria-labelledby="dropdownMenuButton">
-            {% for child_page in page.children.all %}
-                {% include 'main/page_dropdown.html' with page=child_page %}
-            {% endfor %}
-        </ul>
-    </li>
-{% endif %}
-{% else %}
-    {% if page.children.all_published.count == 0 %}
+    {% if page.children.count == 0 %}
         <li>
-            <a class="dropdown-item" href="{% url 'page' page.full_path %}">{{ page.title }}</a>
+            <a class="dropdown-item d-flex justify-content-between"
+               href="{% url 'page' page.full_path %}">{{ page.title }}</a>
         </li>
     {% else %}
         <li>
-            <a class="dropdown-item" href="{% url 'page' page.full_path %}">{{ page.title }} <i
+            <a class="dropdown-item d-flex justify-content-between"
+               href="{% url 'page' page.full_path %}">{{ page.title }} <i
+                    class="bi bi-caret-right-fill"></i></a>
+            <ul class="dropdown-menu dropdown-submenu" aria-labelledby="dropdownMenuButton">
+                {% for child_page in page.children.all %}
+                    {% include 'main/page_dropdown.html' with page=child_page %}
+                {% endfor %}
+            </ul>
+        </li>
+    {% endif %}
+{% else %}
+    {% if page.children.all_published.count == 0 %}
+        <li>
+            <a class="dropdown-item d-flex justify-content-between"
+               href="{% url 'page' page.full_path %}">{{ page.title }}</a>
+        </li>
+    {% else %}
+        <li>
+            <a class="dropdown-item d-flex justify-content-between"
+               href="{% url 'page' page.full_path %}">{{ page.title }} <i
                     class="bi bi-caret-right-fill"></i></a>
             <ul class="dropdown-menu dropdown-submenu" aria-labelledby="dropdownMenuButton">
                 {% for child_page in page.children.all_published %}

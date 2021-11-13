@@ -50,7 +50,7 @@
 }
 
 .dropdown-item .bi-caret-right-fill {
-    float: right;
+    margin-left: 30px;
 }
 
 .dropdown-menu > li:last-child > .dropdown-item {
