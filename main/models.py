@@ -16,7 +16,7 @@ class DraftHistoryManager(models.Manager):
         return self.filter(published=True)
 
     def visible(self, su: bool):
-        return self.objects.all() if su else self.all_published
+        return self.all() if su else self.all_published
 
 
 class DraftHistory(models.Model):
