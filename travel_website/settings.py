@@ -24,7 +24,7 @@ SECRET_KEY = 'django-insecure-+c1*+&n&%r5=)lirl@$3s415*!n%3!(w@^d7kg!!^*in3f7m%f
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["coolwebsite.pythonanywhere.com"]
+ALLOWED_HOSTS = ["coolwebsite.pythonanywhere.com", "127.0.0.1"]
 
 # Application definition
 
@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'ckeditor_uploader',
     'django_bootstrap5',
     'mathfilters',
+    'simple_history'
 ]
 
 MIDDLEWARE = [
@@ -50,6 +51,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'simple_history.middleware.HistoryRequestMiddleware'
 ]
 
 ROOT_URLCONF = 'travel_website.urls'

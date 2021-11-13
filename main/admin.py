@@ -1,43 +1,24 @@
-from ckeditor_uploader.widgets import CKEditorUploadingWidget
-from django import forms
 from django.contrib import admin
+from simple_history.admin import SimpleHistoryAdmin
 
 from .models import *
 
 
-class DestinationDetailsForm(forms.ModelForm):
-    content = forms.CharField(widget=CKEditorUploadingWidget())
+class DiffHistoryAdmin(SimpleHistoryAdmin):
+    history_list_display = ['changed_fields']
 
-    class Meta:
-        exclude = ()
-        model = DestinationDetails
-
-
-class DestinationDetailsAdmin(admin.ModelAdmin):
-    form = DestinationDetailsForm
-
-
-class DestinationAdmin(admin.ModelAdmin):
-    pass
-
-
-class TourAdmin(admin.ModelAdmin):
-    pass
-
-
-class ArticleAdmin(admin.ModelAdmin):
-    pass
-
-
-class PageAdmin(admin.ModelAdmin):
-    pass
+    def changed_fields(self, obj):
+        if obj.prev_record:
+            delta = obj.diff_against(obj.prev_record)
+            return ", ".join(delta.changed_fields)
+        return None
 
 
 # Register your models here.
-admin.site.register(Destination, DestinationAdmin)
-admin.site.register(DestinationDetails, DestinationDetailsAdmin)
-admin.site.register(Tour, TourAdmin)
-admin.site.register(ItineraryDay)
-admin.site.register(Article, ArticleAdmin)
-admin.site.register(Region)
-admin.site.register(Page, PageAdmin)
+admin.site.register(Destination, DiffHistoryAdmin)
+admin.site.register(DestinationDetails, DiffHistoryAdmin)
+admin.site.register(Tour, DiffHistoryAdmin)
+admin.site.register(ItineraryDay, DiffHistoryAdmin)
+admin.site.register(Article, DiffHistoryAdmin)
+admin.site.register(Region, DiffHistoryAdmin)
+admin.site.register(Page, DiffHistoryAdmin)

@@ -6,8 +6,9 @@ urlpatterns = [
     path('', views.front_page, name='front-page'),
 
     path('region/<slug:slug>', views.region, name='region'),
-    path('destination/<slug:region>/<slug:country>/', views.destination_overview, name='destination'),
-    path('details/<slug:region>/<slug:country>/<slug:detail>/', views.destination_details, name='destination-details'),
+    path('destination/<slug:region_slug>/<slug:country_slug>/', views.destination_overview, name='destination'),
+    path('details/<slug:region_slug>/<slug:country_slug>/<slug:detail_slug>/', views.destination_details,
+         name='destination-details'),
 
     path('tours/', views.tours, name='tours'),
     path('tour/<slug:slug>', views.tour, name='tour'),

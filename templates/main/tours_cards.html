@@ -1,6 +1,6 @@
 <div class="row">
     {% for tour in tours %}
-        <div class="col-md-4 d-flex flex-column tour-col">
+        <div class="d-flex flex-column tour-col col-xl-4 col-md-6 col-sm-12 g-0">
             <div start_date="{{ tour.start_date|date:'Y-m-d' }}"
                  end_date="{{ tour.end_date|date:'Y-m-d' }}"
                  price="{{ tour.price }}"
@@ -11,14 +11,14 @@
                          {% for destination in tour.destinations.all %}{% if forloop.counter > 1 %} {% endif %}{{ destination.slug }}{% endfor %}"
                  hidden class="tour-data">
             </div>
-            <div class="card img-title-card img-card mt-4">
+            <div class="card img-title-card img-card mt-4 mx-4">
                 <img src="{{ tour.card_img.url }}" class="card-img" alt="{{ tour.name }}">
                 <div class="card-img-overlay">
                     <h5 class="card-title">{{ tour.name }}</h5>
                 </div>
                 <a class="stretched-link" href="{% url 'tour' tour.slug %}"></a>
             </div>
-            <div class="card text-card tour-text flex-grow-1">
+            <div class="card text-card tour-text flex-grow-1 mx-4">
                 <div class="card-body">
                     {{ tour.excerpt }}
                 </div>

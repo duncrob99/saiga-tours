@@ -7,9 +7,36 @@ from django.core.files import File
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils.functional import classproperty
+from simple_history.models import HistoricalRecords
 
 
-class Region(models.Model):
+class DraftHistoryManager(models.Manager):
+    def all_published(self):
+        return self.filter(published=True)
+
+    def visible(self, su: bool):
+        return self.objects.all() if su else self.all_published
+
+
+class DraftHistory(models.Model):
+    history = HistoricalRecords(inherit=True, excluded_fields=['published'])
+    published = models.BooleanField(default=False)
+    objects = DraftHistoryManager()
+
+    class Meta:
+        abstract = True
+
+    @classproperty
+    def all_published(cls):
+        return cls.objects.filter(published=True)
+
+    @classmethod
+    def visible(cls, su: bool):
+        return cls.objects.all() if su else cls.all_published
+
+
+class Region(DraftHistory):
     name = models.CharField(max_length=40)
     slug = models.SlugField(primary_key=True)
 
@@ -17,10 +44,10 @@ class Region(models.Model):
         return self.name
 
 
-class Destination(models.Model):
+class Destination(DraftHistory):
     name = models.CharField(max_length=40)
     card_img = models.ImageField()
-    slug = models.SlugField(unique=True)
+    slug = models.SlugField()
     region = models.ForeignKey(Region, on_delete=models.CASCADE, null=True, related_name='destinations')
     description = RichTextUploadingField(config_name='default')
 
@@ -29,9 +56,10 @@ class Destination(models.Model):
 
     class Meta:
         ordering = ['region', 'name']
+        unique_together = [['region', 'slug'], ['region', 'name']]
 
 
-class DestinationDetails(models.Model):
+class DestinationDetails(DraftHistory):
     title = models.CharField(max_length=100)
     slug = models.SlugField()
     content = RichTextUploadingField(config_name='default')
@@ -48,7 +76,7 @@ class DestinationDetails(models.Model):
         return f'{self.title} for {self.destination.name}'
 
 
-class Tour(models.Model):
+class Tour(DraftHistory):
     name = models.CharField(max_length=40)
     slug = models.SlugField()
     destinations = models.ManyToManyField(Destination, related_name='tours')
@@ -79,6 +107,7 @@ class ItineraryDay(models.Model):
     title = models.CharField(max_length=100)
     day = models.IntegerField()
     body = RichTextUploadingField()
+    history = HistoricalRecords()
 
     class Meta:
         unique_together = [['tour', 'day']]
@@ -92,7 +121,7 @@ class ItineraryDay(models.Model):
         return f'{self.tour} day {self.day}'
 
 
-class Article(models.Model):
+class Article(DraftHistory):
     NEWS = 'n'
     BLOG = 'b'
     TYPE_CHOICES = [
@@ -114,7 +143,7 @@ class Article(models.Model):
         ordering = ['creation', 'title']
 
 
-class Page(models.Model):
+class Page(DraftHistory):
     slug = models.SlugField()
     title = models.CharField(max_length=40)
     content = RichTextUploadingField(config_name='default')
@@ -140,6 +169,10 @@ class Page(models.Model):
                 page = cls.objects.get(slug=slug, parent=page)
         return page
 
+    @property
+    def published_children(self):
+        return self.children.filter(published=True)
+
 
 @receiver(post_save)
 def validate_image_size(sender, instance, created, **kwargs):
@@ -147,9 +180,9 @@ def validate_image_size(sender, instance, created, **kwargs):
         image = Image.open(instance.card_img)
         (width, height) = image.size
 
-        ratio = 4 / 3
+        ratio = 3 / 2
 
-        if width == ratio * height:
+        if abs(width - ratio * height) < 5:
             return image
         elif width > ratio * height:
             new_height = height
@@ -163,5 +196,5 @@ def validate_image_size(sender, instance, created, **kwargs):
         new_image = image.crop(crop_coords)
 
         img_io = BytesIO()
-        new_image.save(img_io, format='JPEG')
+        new_image.save(img_io, format=image.format)
         instance.card_img.save(instance.card_img.name, File(img_io))
