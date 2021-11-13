@@ -40,8 +40,23 @@
     box-shadow: 3px 3px 8px lightgrey;
     transition: all 1s;
     top: 100%;
+    font-size: 18px;
+    line-height: 2;
+    min-width: 100%;
 }
 
 .dropdown {
     margin-bottom: 0;
+}
+
+.dropdown-item .bi-caret-right-fill {
+    float: right;
+}
+
+.dropdown-menu > li:last-child > .dropdown-item {
+    border-bottom-left-radius: 8px;
+}
+
+.dropdown-menu > li:first-child > .dropdown-item {
+    border-top-right-radius: 8px;
 }
