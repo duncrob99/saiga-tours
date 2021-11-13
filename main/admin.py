@@ -17,13 +17,21 @@ class DiffHistoryAdmin(SimpleHistoryAdmin):
 
 
 class PublishableAdmin(DiffHistoryAdmin):
-    actions = ['make_published']
+    actions = ['make_published', 'draft']
 
     @admin.action(description='Publish all selected items')
     def make_published(self, request, queryset):
         updated = queryset.update(published=True)
         self.message_user(request, ngettext('%d was successfully marked as published.',
                                             '%d stories were successfully marked as published.',
+                                            updated,
+                                            ) % updated, messages.SUCCESS)
+
+    @admin.action(description='Draft all selected items')
+    def draft(self, request, queryset):
+        updated = queryset.update(published=False)
+        self.message_user(request, ngettext('%d was successfully marked as draft.',
+                                            '%d stories were successfully marked as draft.',
                                             updated,
                                             ) % updated, messages.SUCCESS)
 
