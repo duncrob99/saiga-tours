@@ -27,6 +27,14 @@ class PublishableAdmin(DiffHistoryAdmin):
                                             updated,
                                             ) % updated, messages.SUCCESS)
 
+    @admin.action(description='Unpublish all selected items')
+    def make_published(self, request, queryset):
+        updated = queryset.update(published=False)
+        self.message_user(request, ngettext('%d was successfully marked as draft.',
+                                            '%d stories were successfully marked as draft.',
+                                            updated,
+                                            ) % updated, messages.SUCCESS)
+
 
 class ArticleAdmin(PublishableAdmin):
     date_hierarchy = 'creation'
