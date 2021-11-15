@@ -130,7 +130,7 @@ def article_list(request, type, title):
         print(search_results)
         articles = [result[0] for result in sorted(search_results, key=lambda result: result[1], reverse=True)]
 
-    paginator = Paginator(articles, 25)
+    paginator = Paginator(articles, Settings.load().articles_per_page)
 
     page_number = request.GET.get('page', 1)
     page_obj = paginator.get_page(page_number)

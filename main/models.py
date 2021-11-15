@@ -279,6 +279,9 @@ class Settings(models.Model):
     banner_delay = models.FloatField(default=15)
     banner_initial_delay = models.FloatField(default=15)
     banner_transition_time = models.FloatField(default=2)
+    pagination_middle_size = models.PositiveSmallIntegerField(default=2)
+    pagination_outer_size = models.PositiveSmallIntegerField(default=2)
+    articles_per_page = models.PositiveIntegerField(default=10)
     history = HistoricalRecords(excluded_fields=('active',))
 
     def save(self, *args, **kwargs):

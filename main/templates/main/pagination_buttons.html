@@ -1,0 +1,20 @@
+{% for button in start_buttons %}
+    <li class="page-item"><a href="?page={{ button }}" type="button" class="page-link">{{ button }}</a></li>
+{% endfor %}
+{% if start_sep %}
+    <li class="page-item disabled">
+        <a class="page-link"><i class="bi bi-three-dots"></i></a>
+    </li>
+{% endif %}
+{% for button in middle_buttons %}
+    <li class="page-item{% if page.number == button %} active{% endif %}"><a href="?page={{ button }}" type="button"
+                                                                             class="page-link">{{ button }}</a></li>
+{% endfor %}
+{% if end_sep %}
+    <li class="page-item disabled">
+        <a class="page-link"><i class="bi bi-three-dots"></i></a>
+    </li>
+{% endif %}
+{% for button in end_buttons %}
+    <li class="page-item"><a href="?page={{ button }}" type="button" class="page-link">{{ button }}</a></li>
+{% endfor %}
