@@ -17,6 +17,7 @@
 .banner-img.left {
     left: -100%;
     z-index: -1;
+    visibility: hidden;
 }
 
 .banner-img.right {

@@ -10,6 +10,7 @@
 
 
 
+
                          {% for destination in tour.destinations.all %}{% if forloop.counter > 1 %} {% endif %}{{ destination.slug }}{% endfor %}"
                  hidden class="tour-data">
             </div>
@@ -18,7 +19,7 @@
                     {% if tour.state.border_color is not None %}
                  style="border-color: {{ tour.state.border_color }}"
                     {% endif %}>
-                <img src="{{ tour.card_img.url }}" class="card-img" alt="{{ tour.name }}">
+                <img loading="lazy" src="{{ tour.card_img.url }}" class="card-img" alt="{{ tour.name }}">
                 <div class="card-img-overlay">
                     <h5 class="card-title">{{ tour.name }}</h5>
                     {% if tour.state is not None %}
@@ -47,7 +48,7 @@
                             <td class="table-value">{{ tour.duration }} days</td>
                         </tr>
                         <tr>
-                            <th class="table-icon"><i class="bi bi-coin"></ic></th>
+                            <th class="table-icon"><i class="bi bi-coin"></i></th>
                             <td class="table-value">{{ settings.price_prefix }}{{ tour.price }}</td>
                         </tr>
                     </table>
