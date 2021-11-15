@@ -1,3 +1,5 @@
+let current_idx = 0;
+
 function resize() {
     let navbar_height = document.querySelector('.navbar').getBoundingClientRect().height;
 
@@ -94,10 +96,38 @@ window.addEventListener('load', () => {
     Visibility.onVisible(() => {
         resize();
         progress(0, banner_init_delay * 1000);
+        loadNextImg();
     })
     document.querySelector('.banner-img:last-child').classList.add('hide');
 });
 window.addEventListener('resize', resize);
+
+function loadImg(img_el) {
+    img_el.src = img_el.dataset.src;
+    img_el.classList.remove('to-load')
+}
+
+function loadNextImg() {
+    let all_imgs = document.querySelectorAll('.banner-img');
+    let to_load = Array.from(document.querySelectorAll('.banner-img.to-load'));
+    if (to_load.length === 0) {
+        console.log('All images loaded');
+        return
+    }
+
+    let allowed_to_load = Array.from(document.querySelectorAll('.banner-img.to-load.well-sized'));
+    let current = all_imgs[current_idx];
+    let next_to_load;
+    if (current.classList.contains('to-load')) {
+        next_to_load = current;
+    } else if (allowed_to_load.length > 0) {
+        next_to_load = allowed_to_load.find(el => parseInt(el.getAttribute('idx')) > current_idx);
+    } else {
+        next_to_load = to_load.find(el => parseInt(el.getAttribute('idx')) > current_idx);
+    }
+    next_to_load.addEventListener('load', loadNextImg);
+    loadImg(next_to_load);
+}
 
 function shortestModDistance(origin, target, mod) {
     let raw_diff = Math.abs(target - origin);
@@ -111,6 +141,7 @@ function shortestModDistance(origin, target, mod) {
 }
 
 function progress(index, delay) {
+    current_idx = index;
     if (!Visibility.hidden()) {
         let all_els = Array.from(document.querySelectorAll('.banner-img'));
         let allowed_els = Array.from(document.querySelectorAll('.banner-img.well-sized'));

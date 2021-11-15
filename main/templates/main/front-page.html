@@ -14,7 +14,8 @@
     <div class="banner">
         <div id="banner-slideshow">
             {% for banner in banners %}
-                <img alt="banner image" src="{{ banner.img.url }}" class="banner-img hide" min_ar="{{ banner.min_AR }}"
+                <img alt="banner image" data-src="{{ banner.img.url }}" class="banner-img hide to-load"
+                     idx="{{ forloop.counter0 }}" min_ar="{{ banner.min_AR }}"
                      max_ar="{{ banner.max_AR }}">
             {% endfor %}
         </div>
