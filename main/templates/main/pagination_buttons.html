@@ -7,8 +7,9 @@
     </li>
 {% endif %}
 {% for button in middle_buttons %}
-    <li class="page-item{% if page.number == button %} active{% endif %}"><a href="?page={{ button }}" type="button"
-                                                                             class="page-link">{{ button }}</a></li>
+    <li class="page-item"><a href="?page={{ button }}" type="button"
+                             class="page-link {% if button == page.number %}accent hoverable-accent{% endif %}">{{ button }}</a>
+    </li>
 {% endfor %}
 {% if end_sep %}
     <li class="page-item disabled">
