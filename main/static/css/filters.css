@@ -1,0 +1,13 @@
+.search-bar input {
+    border-bottom-left-radius: 30px;
+    border-top-left-radius: 30px;
+}
+
+.search-bar span {
+    border-bottom-right-radius: 30px;
+    border-top-right-radius: 30px;
+}
+
+#filter-button {
+    border-radius: 20px;
+}

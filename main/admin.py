@@ -38,9 +38,13 @@ class PublishableAdmin(DiffHistoryAdmin):
 
 class ArticleAdmin(PublishableAdmin):
     date_hierarchy = 'creation'
-    list_display = ('title', 'type', 'creation', 'published')
-    list_filter = ('type', 'creation', 'published')
+    list_display = ('title', 'type', 'creation', 'tag_list', 'published')
+    list_filter = ('type', 'creation', 'published', 'tags')
     search_fields = ('title', 'content')
+    filter_horizontal = ('tags',)
+
+    def tag_list(self, obj):
+        return ', '.join(str(tag) for tag in obj.tags.all())
 
 
 class ItineraryDayInline(admin.TabularInline):
@@ -137,3 +141,4 @@ admin.site.register(Settings, SettingsAdmin)
 admin.site.register(SubscriptionSubmission, SubscriptionSubmissionAdmin)
 admin.site.register(ContactSubmission, ContactSubmissionAdmin)
 admin.site.register(BannerPhoto, BannerPhotoAdmin)
+admin.site.register(Tag)

@@ -4,6 +4,7 @@ from io import BytesIO
 from PIL import Image
 from ckeditor_uploader.fields import RichTextUploadingField
 from colorfield.fields import ColorField
+from django.core.exceptions import ValidationError
 from django.core.files import File
 from django.db import models
 from django.db.models import F
@@ -147,6 +148,24 @@ class ItineraryDay(models.Model):
         return f'{self.tour} day {self.day}'
 
 
+def check_slug(name: str):
+    new_slug = name.lower().replace(' ', '_')
+    if len(Tag.objects.filter(slug=new_slug)) > 0:
+        raise ValidationError(f'Name results in non-unique slug, {new_slug}')
+
+
+class Tag(models.Model):
+    name = models.CharField(max_length=100, unique=True, validators=[check_slug])
+    slug = models.SlugField(max_length=100, editable=False, unique=True)
+
+    def __str__(self):
+        return self.name
+
+    def save(self, *args, **kwargs):
+        self.slug = self.name.lower().replace(' ', '_')
+        super(Tag, self).save(*args, **kwargs)
+
+
 class Article(DraftHistory):
     NEWS = 'n'
     BLOG = 'b'
@@ -159,14 +178,20 @@ class Article(DraftHistory):
     title = models.CharField(max_length=40)
     creation = models.DateTimeField(auto_now_add=True)
     content = RichTextUploadingField(config_name='default')
+    excerpt = models.TextField()
     type = models.CharField(max_length=1, choices=TYPE_CHOICES, default=NEWS)
     card_img = models.ImageField(null=True)
+    keywords = models.TextField()
+    tags = models.ManyToManyField(Tag, related_name='articles')
 
     def __str__(self):
         return self.title
 
     class Meta:
         ordering = ['creation', 'title']
+
+    def tag_list(self) -> str:
+        return ' '.join([str(tag) for tag in self.tags.all()])
 
 
 class Page(DraftHistory):

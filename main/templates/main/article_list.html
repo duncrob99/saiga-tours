@@ -2,7 +2,8 @@
 {% load static %}
 
 {% block extrahead %}
-    <link rel="stylesheet" href="{% static 'css/article_list.css' %}">
+    <link rel="stylesheet" href="{% static 'css/article_list_asdf.css' %}">
+    <link rel="stylesheet" href="{% static 'css/filters.css' %}">
     <style>
         .article-date {
             background-color: {{ settings.accent_background }};
@@ -13,16 +14,25 @@
 
 {% block content %}
     <div class="container">
-        <h1 class="display-1">{{ title }}</h1>
+        <div class="heading d-flex justify-content-between align-items-center">
+            <h1 class="display-1">{{ title }}</h1>
+            <button id="filter-button" class="btn btn-outline-secondary d-inline-flex align-items-center"
+                    data-bs-toggle="offcanvas"
+                    data-bs-target="#filter-sidebar" aria-controls="filter-sidebar" role="button" style="float: right">
+                <span class="bi bi-search" style="font-size: 1.5rem"></span> <span
+                    style="margin-left: 4px;">Search</span>
+            </button>
+        </div>
         <hr>
+
         {% for article in page_obj %}
             <div class="row m-4">
                 <div class="card g-0 article-card">
-                    <div class="d-flex flex-row justify-content-between">
-                        <div class="img-container">
+                    <div class="d-flex flex-column flex-md-row justify-content-between">
+                        <div class="img-container flex-shrink-0">
                             <img src="{{ article.card_img.url }}">
                         </div>
-                        <div class="card-body">
+                        <div class="card-body flex-grow-1">
                             <h4 class="card-title display-6">{{ article.title }}</h4>
                             <p class="card-text">Here's some more information.</p>
                         </div>
@@ -35,4 +45,78 @@
             </div>
         {% endfor %}
     </div>
+
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="filter-sidebar" aria-labelledby="filter-sidebar-title">
+        <div class="offcanvas-header">
+            <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"
+                    aria-label="Close Filter Sidebar"></button>
+            <h3 id="filter-sidebar-label" class="display-6">Search</h3>
+        </div>
+        <div class="offcanvas-body px-3">
+            <form method="get">
+                <div class="row m-3">
+                    <div class="input-group search-bar">
+                        <input name="q" value="{{ query }}" id="search-input" type="text" class="form-control"
+                               placeholder="Search"
+                               aria-label="Search">
+                        <span class="input-group-text"><i class="bi bi-search"></i></span>
+                    </div>
+                </div>
+                <div class="row m-3">
+                    <div class="col">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>Date Range</h5>
+                            </div>
+                            <div class="card-body" id="date-selection">
+                                <div class="input-group">
+                                    <input name="start" class="form-control" type="text" id="date-start-input"
+                                           placeholder="Start Date" value="{{ start_date|date:'Y-m-d' }}">
+                                    <span class="input-group-text">-</span>
+                                    <input name="end" class="form-control" type="text" id="date-end-input"
+                                           placeholder="End Date" value="{{ end_date }}">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row m-3">
+                    <div class="col">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>Tags</h5>
+                            </div>
+                            <div class="card-body">
+                                {% for tag in tags %}
+                                    <div class="formcheck">
+                                        <input name="tag-{{ tag.slug }}" class="form-check-input destination-checkbox"
+                                               type="checkbox" value=""
+                                               id="filter-destination-{{ tag.slug }}">
+                                        <label class="form-check-label" for="filter-destination-{{ tag.slug }}">
+                                            {{ tag.name }}
+                                        </label>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row m-4 d-flex align-content-end">
+                    <div class="col-6">
+                        <button class="form-control btn btn-primary accent" role="button" type="submit">Search</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}
+
+{% block js %}
+    <script src="https://cdn.jsdelivr.net/npm/litepicker/dist/litepicker.js"></script>
+    <script src="{% static 'js/fuse.js' %}"></script>
+    <script src="{% static 'js/article_list.js' %}"></script>
+    <script>
+        start_picker.setDate("{{ start_date|date:'Y-m-d' }}");
+        start_picker.setDate("{{ end_date|date:'Y-m-d' }}");
+    </script>
 {% endblock %}

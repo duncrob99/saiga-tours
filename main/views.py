@@ -1,3 +1,6 @@
+from datetime import datetime
+
+import ngram
 from django.contrib import messages
 from django.core.mail import send_mail, BadHeaderError
 from django.core.paginator import Paginator
@@ -101,31 +104,55 @@ def article(request, slug):
     return render(request, 'main/article.html', context)
 
 
-def news(request):
-    news_list = Article.visible(request.user.is_staff).filter(type=Article.NEWS)
-    paginator = Paginator(news_list, 25)
+def article_list(request, type, title):
+    articles = Article.visible(request.user.is_staff).filter(type=type)
+
+    start_date = request.GET.get('start')
+    end_date = request.GET.get('end')
+    if start_date != '' and start_date is not None:
+        start_date = datetime.strptime(start_date, '%Y-%m-%d')
+        articles = articles.filter(creation__gte=start_date)
+    if end_date != '' and end_date is not None:
+        end_date = datetime.strptime(end_date, '%Y-%m-%d')
+        articles = articles.filter(creation__lte=end_date)
+
+    tags = Tag.objects.filter(articles__type=type)
+    for tag in tags:
+        if request.GET.get(f'tag-{tag.slug}') is not None:
+            print('Filtering by ' + tag.name)
+            articles = articles.filter(tags__pk=tag.pk)
+
+    query = request.GET.get('q')
+    if query is not None and query != '':
+        article_ngrams = ngram.NGram(articles, key=lambda article: ' '.join(
+            (article.title.lower(), article.keywords.lower(), article.tag_list().lower())), N=4, warp=2)
+        search_results = article_ngrams.search(query.lower())
+        print(search_results)
+        articles = [result[0] for result in sorted(search_results, key=lambda result: result[1], reverse=True)]
+
+    paginator = Paginator(articles, 25)
 
     page_number = request.GET.get('page', 1)
     page_obj = paginator.get_page(page_number)
+
     context = {
-                  'title': "News Articles",
-                  'page_obj': page_obj
+                  'title': title,
+                  'page_obj': page_obj,
+                  'destinations': Destination.visible(request.user.is_staff),
+                  'tags': tags,
+                  'query': query or '',
+                  'start_date': start_date or '',
+                  'end_date': end_date or ''
               } | global_context(request)
     return render(request, 'main/article_list.html', context)
+
+
+def news(request):
+    return article_list(request, Article.NEWS, "News Articles")
 
 
 def blog(request):
-    post_list = Article.visible(request.user.is_staff).filter(type=Article.BLOG)
-    paginator = Paginator(post_list, 25)
-
-    page_number = request.GET.get('page', 1)
-    page_obj = paginator.get_page(page_number)
-    context = {
-                  'title': 'Blog Posts',
-                  'page_obj': page_obj
-              } | global_context(request)
-
-    return render(request, 'main/article_list.html', context)
+    return article_list(request, Article.BLOG, "Blog Posts")
 
 
 def region(request, slug):

@@ -1,0 +1,56 @@
+.article-card {
+    border-top-right-radius: 0;
+    border: 8px solid white;
+    box-shadow: 5px 5px 10px darkgrey;
+    transition: all 1s;
+}
+
+img {
+    width: 200px;
+    object-fit: cover;
+    object-position: center;
+    height: 100%;
+    transition: all 1s;
+}
+
+
+.img-container {
+    object-fit: cover;
+    object-position: center;
+    overflow: hidden;
+}
+
+.article-date {
+    padding: 15px;
+    border-bottom-left-radius: 30px;
+    box-shadow: 3px 3px 8px lightgrey;
+    white-space: nowrap;
+    height: min-content;
+    width: min-content;
+}
+
+.article-card:hover div div img {
+    transform: scale(1.2);
+}
+
+.article-img-overlay {
+    float: left;
+    top: 50%;
+}
+
+@media only screen and (max-width: 767px) {
+    img {
+        width: 100%;
+        max-height: 300px;
+    }
+
+    .article-date {
+        border-top-right-radius: 30px;
+        border-bottom-left-radius: 0;
+    }
+
+    .article-card {
+        border-top-right-radius: 30px;
+        border-bottom-left-radius: 0;
+    }
+}
