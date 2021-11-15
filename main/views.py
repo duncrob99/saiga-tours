@@ -1,9 +1,8 @@
-from typing import List, Optional
-
 from django.contrib import messages
 from django.core.mail import send_mail, BadHeaderError
 from django.core.paginator import Paginator
-from django.http import Http404
+from django.db import IntegrityError
+from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404, redirect
 
 from .forms import *
@@ -174,14 +173,17 @@ def contact(request):
     return render(request, 'main/contact.html', {'form': form} | global_context(request))
 
 
-def subscribe(request, return_page: str = None, return_parms: Optional[List[str]] = None):
+def subscribe(request, return_path: str = None):
     form = SubscriptionForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
-        SubscriptionSubmission.objects.create(email_address=form.cleaned_data['email'])
-        messages.add_message(request, messages.SUCCESS, 'Successfully subscribed')
+        try:
+            SubscriptionSubmission.objects.create(email_address=form.cleaned_data['email'])
+            messages.add_message(request, messages.SUCCESS, 'Successfully subscribed')
+        except IntegrityError:
+            messages.add_message(request, messages.WARNING, 'Already subscribed')
     else:
         messages.add_message(request, messages.WARNING, 'Invalid attempt to subscribe')
-    if return_page is not None:
-        return redirect(return_page, *return_parms)
+    if return_path is not None:
+        return HttpResponseRedirect(return_path)
     else:
         return redirect('front-page')

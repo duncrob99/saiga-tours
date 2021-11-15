@@ -46,3 +46,7 @@ html, body {
 small {
     font-size: 40px;
 }
+
+.alert {
+    z-index: 100;
+}
