@@ -1,0 +1,39 @@
+.banner-img.hide {
+    opacity: 0;
+}
+
+.banner-img.hide-right {
+    left: 100%;
+}
+
+.banner-img.hide-left {
+    left: -100%;
+}
+
+.banner-img.show {
+    opacity: 1;
+}
+
+.banner-img.left {
+    left: -100%;
+    z-index: -1;
+}
+
+.banner-img.right {
+    left: 100%;
+    z-index: -2;
+}
+
+.banner-img.below {
+    z-index: -10;
+}
+
+.banner-img {
+    user-select: none;
+    z-index: 5;
+}
+
+.banner-text {
+    user-select: none;
+    z-index: 10;
+}

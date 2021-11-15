@@ -238,20 +238,84 @@ def validate_image_size(sender, instance, created, **kwargs):
 
 
 class Settings(models.Model):
-    accent_color = ColorField(default='#87cefa')
+    title = models.CharField(max_length=30)
+    active = models.BooleanField(default=False)
+    accent_background = ColorField(default='#87cefa')
+    accent_foreground = ColorField(default='#000000')
+    accent_hover_background = ColorField(default='#87cefa')
+    accent_hover_foreground = ColorField(default='#000000')
     site_title = models.CharField(max_length=50, default='Crowley Tours')
+    twitter_link = models.URLField(blank=True, null=True)
+    instagram_link = models.URLField(blank=True, null=True)
+    facebook_link = models.URLField(blank=True, null=True)
+    price_prefix = models.CharField(max_length=10, default='US$')
+    rounded_card_headers = models.BooleanField(default=True)
+    contact_form_email = models.EmailField(default='duncrob99@gmail.com')
+    banner_delay = models.FloatField(default=15)
+    banner_initial_delay = models.FloatField(default=15)
+    banner_transition_time = models.FloatField(default=2)
+    history = HistoricalRecords(excluded_fields=('active',))
 
     def save(self, *args, **kwargs):
-        self.pk = 1
+        if not self.pk:
+            if self.title == '':
+                num_defaults = Settings.objects.filter(title__startswith='Default').count()
+                if num_defaults == 0:
+                    self.title = 'Default'
+                else:
+                    self.title = 'Default ' + str(num_defaults + 1)
+        if self.active:
+            Settings.objects.exclude(pk=self.pk).update(active=False)
         super(Settings, self).save(*args, **kwargs)
-
-    def delete(self, *args, **kwargs):
-        pass
 
     @classmethod
     def load(cls):
-        obj, _ = cls.objects.get_or_create(pk=1)
+        obj, _ = cls.objects.get_or_create(active=True)
         return obj
 
     class Meta:
         verbose_name_plural = 'settings'
+
+    def __str__(self):
+        return self.title
+
+
+class ContactSubmission(models.Model):
+    from_email = models.EmailField()
+    subject = models.CharField(max_length=100)
+    message = models.TextField()
+    time = models.DateTimeField(auto_now_add=True)
+    success = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f'"{self.subject}" from {self.from_email}'
+
+    def save(self, *args, **kwargs):
+        if self.pk is None:
+            super(ContactSubmission, self).save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        pass
+
+
+class SubscriptionSubmission(models.Model):
+    email_address = models.EmailField(unique=True)
+    time = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.email_address
+
+    def save(self, *args, **kwargs):
+        if self.pk is None:
+            super(SubscriptionSubmission, self).save(*args, **kwargs)
+
+
+class BannerPhoto(models.Model):
+    img = models.ImageField()
+    min_AR = models.FloatField()
+    max_AR = models.FloatField()
+    active = models.BooleanField(default=True)
+    history = HistoricalRecords(excluded_fields=('active',))
+
+    def __str__(self):
+        return self.img.name

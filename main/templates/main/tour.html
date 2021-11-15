@@ -8,7 +8,8 @@
         }
 
         #tour-details div div .card-header {
-            background-color: {{ settings.accent_color }};
+            background-color: {{ settings.accent_background }};
+            color: {{ settings.accent_foreground }}
         }
 
         #itinerary-slider div div .card {
@@ -58,7 +59,7 @@
                     Price
                 </div>
                 <div class="card-body">
-                    US${{ tour.price }}
+                    {{ settings.price_prefix }}{{ tour.price }}
                 </div>
             </div>
         </div>

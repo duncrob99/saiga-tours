@@ -94,6 +94,36 @@ class RegionAdmin(PublishableAdmin):
     list_filter = ('published',)
 
 
+class SettingsAdmin(DiffHistoryAdmin):
+    list_display = ('title', 'active')
+    list_editable = ('active',)
+
+
+class SubscriptionSubmissionAdmin(admin.ModelAdmin):
+    list_display = ('email_address', 'time')
+    readonly_fields = ('email_address', 'time')
+
+
+class ContactSubmissionAdmin(admin.ModelAdmin):
+    list_display = ('from_email', 'time', 'subject', 'success')
+    readonly_fields = ('from_email', 'time', 'subject', 'success', 'message')
+
+
+class BannerPhotoAdmin(DiffHistoryAdmin):
+    list_display = ('filename', 'min_AR', 'max_AR', 'active')
+
+    def filename(self, obj: BannerPhoto):
+        return obj.img.name
+
+    @admin.display(description='Min Aspect Ratio')
+    def min_AR(self, obj: BannerPhoto):
+        return f'{obj.min_AR_width}:{obj.min_AR_height}'
+
+    @admin.display(description='Max Aspect Ratio')
+    def max_AR(self, obj: BannerPhoto):
+        return f'{obj.max_AR_width}:{obj.max_AR_height}'
+
+
 # Register your models here.
 admin.site.register(Destination, DestinationAdmin)
 admin.site.register(DestinationDetails, DestinationDetailsAdmin)
@@ -103,4 +133,7 @@ admin.site.register(Region, RegionAdmin)
 admin.site.register(Page, PageAdmin)
 admin.site.register(State, StateAdmin)
 admin.site.register(ItineraryDay, ItineraryDayAdmin)
-admin.site.register(Settings)
+admin.site.register(Settings, SettingsAdmin)
+admin.site.register(SubscriptionSubmission, SubscriptionSubmissionAdmin)
+admin.site.register(ContactSubmission, ContactSubmissionAdmin)
+admin.site.register(BannerPhoto, BannerPhotoAdmin)

@@ -48,7 +48,7 @@
                         </tr>
                         <tr>
                             <th class="table-icon"><i class="bi bi-coin"></ic></th>
-                            <td class="table-value">US${{ tour.price }}</td>
+                            <td class="table-value">{{ settings.price_prefix }}{{ tour.price }}</td>
                         </tr>
                     </table>
                     <a class="stretched-link" href="{% url 'tour' tour.slug %}"></a>

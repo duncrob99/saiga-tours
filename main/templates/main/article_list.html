@@ -3,6 +3,12 @@
 
 {% block extrahead %}
     <link rel="stylesheet" href="{% static 'css/article_list.css' %}">
+    <style>
+        .article-date {
+            background-color: {{ settings.accent_background }};
+            color: {{ settings.accent_foreground }}
+        }
+    </style>
 {% endblock %}
 
 {% block content %}

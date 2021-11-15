@@ -4,6 +4,9 @@ from . import views
 
 urlpatterns = [
     path('', views.front_page, name='front-page'),
+    path('contact/', views.contact, name='contact'),
+    path('subscribe/', views.subscribe, name='subscribe'),
+    path('subscribe/<str:return_page>', views.subscribe, name='subscribe-with-return'),
 
     path('region/<slug:slug>', views.region, name='region'),
     path('destination/<slug:region_slug>/<slug:country_slug>/', views.destination_overview, name='destination'),

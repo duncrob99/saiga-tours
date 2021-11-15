@@ -18,10 +18,6 @@ h5.card-title {
     overflow: hidden;
 }
 
-.card-header:first-child {
-    border-radius: 30px;
-}
-
 .img-title-card {
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;

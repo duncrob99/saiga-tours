@@ -1,7 +1,12 @@
+from typing import List, Optional
+
+from django.contrib import messages
+from django.core.mail import send_mail, BadHeaderError
 from django.core.paginator import Paginator
 from django.http import Http404
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 
+from .forms import *
 from .models import *
 
 
@@ -13,7 +18,8 @@ def assert_visible(request, model: DraftHistory):
 # Create your views here.
 def front_page(request):
     context = {
-                  'tours': Tour.visible(request.user.is_staff)
+                  'tours': Tour.visible(request.user.is_staff),
+                  'banners': BannerPhoto.objects.filter(active=True).order_by('?'),
               } | global_context(request)
     return render(request, 'main/front-page.html', context)
 
@@ -22,7 +28,8 @@ def global_context(request):
     context = {
         'regions': Region.visible(request.user.is_staff),
         'pages': Page.visible(request.user.is_staff).filter(parent=None),
-        'settings': Settings.load()
+        'settings': Settings.load(),
+        'subscription_form': SubscriptionForm()
     }
     return context
 
@@ -145,3 +152,36 @@ def page(request, path):
                   'page': page_obj
               } | global_context(request)
     return render(request, 'main/page.html', context)
+
+
+def contact(request):
+    form = ContactForm(request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        from_email = form.cleaned_data['from_email']
+        subject = form.cleaned_data['subject']
+        message = form.cleaned_data['message']
+        try:
+            send_mail(f'Contact form submission: "{subject}"',
+                      f'From: {from_email}\nSubject: {subject}\nMessage: \n{message}', from_email,
+                      [Settings.load().contact_form_email])
+            ContactSubmission.objects.create(from_email=from_email, subject=subject, message=message)
+            messages.add_message(request, messages.SUCCESS, 'Successfully sent')
+            return redirect('front-page')
+        except BadHeaderError:
+            form.add_error('from_email', 'Invalid header found.')
+            ContactSubmission.objects.create(from_email=from_email, subject=subject, message=message, success=False)
+            return render(request, 'main/contact.html', {'form': form} | global_context(request))
+    return render(request, 'main/contact.html', {'form': form} | global_context(request))
+
+
+def subscribe(request, return_page: str = None, return_parms: Optional[List[str]] = None):
+    form = SubscriptionForm(request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        SubscriptionSubmission.objects.create(email_address=form.cleaned_data['email'])
+        messages.add_message(request, messages.SUCCESS, 'Successfully subscribed')
+    else:
+        messages.add_message(request, messages.WARNING, 'Invalid attempt to subscribe')
+    if return_page is not None:
+        return redirect(return_page, *return_parms)
+    else:
+        return redirect('front-page')
