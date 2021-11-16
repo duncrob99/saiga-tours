@@ -60,3 +60,17 @@
 .dropdown-menu > li:first-child > .dropdown-item {
     border-top-right-radius: 8px;
 }
+
+@media only screen and (max-width: 991px) {
+    .navbar .dropdown-menu {
+        display: none !important;
+    }
+
+    .main-nav.dropdown-toggle {
+        display: none !important;
+    }
+
+    .main-nav.nav-link {
+        width: 100%;
+    }
+}
