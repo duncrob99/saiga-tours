@@ -21,31 +21,41 @@
 .prev, .next {
   cursor: pointer;
   position: absolute;
-  top: 50%;
-  width: auto;
+  width: 50%;
   margin-top: -22px;
   padding: 16px;
-  color: darkgrey;
+  color: var(--accent-background);
   font-weight: bolder;
   font-size: 30px;
   transition: 0.6s ease;
   border-radius: 0 3px 3px 0;
   user-select: none;
+  height: 100%;
+  top: 0;
 }
 
 /* Position the "next button" to the right */
 .next {
-  right: -40px;
+  left: 50%;
   border-radius: 3px 0 0 3px;
 }
 
-.prev {
-  left: -40px;
+.prev > i {
+  float: left;
+}
+
+.next > i {
+  float: right;
+}
+
+.prev > i, .next > i {
+  top: 50%;
+  position: relative;
 }
 
 /* On hover, add a black background color with a little bit see-through */
 .prev:hover, .next:hover {
-  color: darkred;
+  color: var(--accent-hover-background);
 }
 
 /* Caption text */
@@ -98,4 +108,15 @@
 
 .mySlides * img:hover {
   filter: grayscale(0.5);
+}
+
+.dot-container {
+  text-align: center;
+  margin: 20px;
+  padding-bottom: 20px;
+}
+
+hr {
+  top: 10px;
+  position: relative;
 }

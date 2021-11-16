@@ -8,6 +8,7 @@ function plusSlides(n) {
 
 // Thumbnail image controls
 function currentSlide(n) {
+    console.log(`Going to slide ${n}`);
     showSlides(slideIndex = n);
 }
 
@@ -57,7 +58,13 @@ function setVerticalHeight() {
         console.log(slides[i].style);
     }
     document.querySelector('.slideshow-container').style.height = max_height + 'px';
+    document.querySelector('.slides').style.height = max_height + 'px';
 }
 
 window.addEventListener('resize', setVerticalHeight);
 window.addEventListener('load', setVerticalHeight);
+document.querySelectorAll('.dot').forEach((el, index) => {
+    el.addEventListener('click', () => {
+        currentSlide(index + 1);
+    })
+})
