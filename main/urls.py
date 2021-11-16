@@ -8,6 +8,7 @@ urlpatterns = [
     path('subscribe/', views.subscribe, name='subscribe'),
     path('subscribe/<path:return_path>', views.subscribe, name='subscribe'),
 
+    path('destinations/', views.destinations, name='destinations'),
     path('region/<slug:slug>', views.region, name='region'),
     path('destination/<slug:region_slug>/<slug:country_slug>/', views.destination_overview, name='destination'),
     path('details/<slug:region_slug>/<slug:country_slug>/<slug:detail_slug>/', views.destination_details,

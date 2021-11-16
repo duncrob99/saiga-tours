@@ -1,0 +1,26 @@
+object, svg {
+    width: 100%;
+    height: auto;
+    mask-image: linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%),
+    linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%);
+    mask-composite: intersect;
+}
+
+g.available {
+    fill: var(--accent-background);
+}
+
+g.available:not(:hover) {
+    transition: all 2s;
+}
+
+g.available:hover {
+    fill: var(--accent-hover-background);
+    stroke: darkgrey;
+    stroke-width: 1px;
+    transition: all 0.1s;
+}
+
+.pre-load {
+    visibility: hidden;
+}

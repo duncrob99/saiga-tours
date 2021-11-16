@@ -1,0 +1,21 @@
+{% extends 'main/main.html' %}
+{% load static %}
+
+{% block extrahead %}
+    <link rel="stylesheet" href="{% static 'css/map.css' %}">
+{% endblock %}
+
+{% block content %}
+    {% include 'main/map.html' %}
+{% endblock %}
+
+{% block js %}
+    <script src="{% static 'js/map.js' %}"></script>
+    <script>
+        let destinations = [];
+        {% for destination in destinations %}
+            destinations.push(["{{ destination.name }}", "{% url 'destination' destination.region.slug destination.slug %}"]);
+        {% endfor %}
+        make_map_work(destinations);
+    </script>
+{% endblock %}

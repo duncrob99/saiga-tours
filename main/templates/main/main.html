@@ -6,20 +6,15 @@
     <meta charset="UTF-8">
     <title>{{ settings.site_title }}</title>
     {% bootstrap_css %}
-    <link rel="stylesheet" href="{% static 'css/main_za.css' %}">
+    <link rel="stylesheet" href="{% static 'css/main_zaasf.css' %}">
     <link rel="stylesheet" href="{% static 'css/cards_lfas.css' %}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.0/font/bootstrap-icons.css">
     <style>
-        .accent {
-            background-color: {{ settings.accent_background }};
-            color: {{ settings.accent_foreground }};
-            border-color: {{ settings.accent_background }};
-        }
-
-        .hoverable-accent:hover {
-            background-color: {{ settings.accent_hover_background }};
-            color: {{ settings.accent_hover_foreground }};
-            border-color: {{ settings.accent_hover_background }};
+        :root {
+            --accent-background: {{ settings.accent_background }};
+            --accent-foreground: {{ settings.accent_foreground }};
+            --accent-hover-background: {{ settings.accent_hover_background }};
+            --accent-hover-foreground: {{ settings.accent_hover_foreground }};
         }
 
         {% if settings.rounded_card_headers %}

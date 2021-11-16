@@ -214,3 +214,8 @@ def subscribe(request, return_path: str = None):
         return HttpResponseRedirect(return_path)
     else:
         return redirect('front-page')
+
+
+def destinations(request):
+    context = {'destinations': Destination.visible(request.user.is_staff)} | global_context(request)
+    return render(request, 'main/destinations.html', context)
