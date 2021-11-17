@@ -47,7 +47,7 @@ small {
     font-size: 40px;
 }
 
-.alert, .navbar {
+.alert {
     z-index: 100;
 }
 
@@ -63,8 +63,4 @@ small {
     border-color: var(--accent-hover-background);
 }
 
-.navbar-brand {
-    color: var(--accent-background) !important;
-    font-size: xx-large;
-}
 

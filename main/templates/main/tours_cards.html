@@ -7,30 +7,12 @@
                  duration="{{ tour.duration }}"
                  destinations="
 
-
-
-
-
                          {% for destination in tour.destinations.all %}{% if forloop.counter > 1 %} {% endif %}{{ destination.slug }}{% endfor %}"
                  hidden class="tour-data">
             </div>
 
-            <div class="card img-title-card img-card mt-4 mx-4"
-                    {% if tour.state.border_color is not None %}
-                 style="border-color: {{ tour.state.border_color }}"
-                    {% endif %}>
-                <img loading="lazy" src="{{ tour.card_img.url }}" class="card-img" alt="{{ tour.name }}">
-                <div class="card-img-overlay">
-                    <h5 class="card-title">{{ tour.name }}</h5>
-                    {% if tour.state is not None %}
-                        <div class="state" style="background-color: {{ tour.state.color }};
-                                color: {{ tour.state.text_color }}">{{ tour.state.text }}</div>
-                    {% endif %}
-                </div>
-                <a class="stretched-link" href="{% url 'tour' tour.slug %}"></a>
-            </div>
 
-            <div class="card text-card tour-text flex-grow-1 mx-4"
+            <div class="card order-2 text-card tour-text flex-grow-1 mx-4"
                     {% if tour.state.border_color is not None %}
                  style="border-color: {{ tour.state.border_color }};"
                     {% endif %}>
@@ -54,6 +36,21 @@
                     </table>
                     <a class="stretched-link" href="{% url 'tour' tour.slug %}"></a>
                 </div>
+            </div>
+
+            <div class="card order-1 img-title-card img-card mt-4 mx-4"
+                    {% if tour.state.border_color is not None %}
+                 style="border-color: {{ tour.state.border_color }}"
+                    {% endif %}>
+                <img loading="lazy" src="{{ tour.card_img.url }}" class="card-img" alt="{{ tour.name }}">
+                <div class="card-img-overlay">
+                    <h5 class="card-title">{{ tour.name }}</h5>
+                    {% if tour.state is not None %}
+                        <div class="state" style="background-color: {{ tour.state.color }};
+                                color: {{ tour.state.text_color }}">{{ tour.state.text }}</div>
+                    {% endif %}
+                </div>
+                <a class="stretched-link" href="{% url 'tour' tour.slug %}"></a>
             </div>
         </div>
     {% endfor %}

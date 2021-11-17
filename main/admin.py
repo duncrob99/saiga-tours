@@ -36,7 +36,16 @@ class PublishableAdmin(DiffHistoryAdmin):
                                             ) % updated, messages.SUCCESS)
 
 
-class ArticleAdmin(PublishableAdmin):
+class PhotoAdmin(PublishableAdmin):
+    actions = ['fix_images', 'make_published', 'draft']
+
+    @admin.action(description='Fix image ratios')
+    def fix_images(self, request, queryset):
+        for obj in queryset:
+            validate_image_size(None, obj, None)
+
+
+class ArticleAdmin(PhotoAdmin):
     date_hierarchy = 'creation'
     list_display = ('title', 'type', 'creation', 'tag_list', 'published')
     list_filter = ('type', 'creation', 'published', 'tags')
@@ -53,7 +62,7 @@ class ItineraryDayInline(admin.TabularInline):
     classes = ['collapse']
 
 
-class TourAdmin(PublishableAdmin):
+class TourAdmin(PhotoAdmin):
     date_hierarchy = 'start_date'
     list_display = ('name', 'start_date', 'end_date', 'duration', 'published')
     inlines = [ItineraryDayInline]
@@ -69,7 +78,7 @@ class StateAdmin(DiffHistoryAdmin):
             f'<div style="background-color: {obj.color}; color: {obj.text_color}; height: 100%; width: 100%; border-radius: 5px; padding: 3px;">{obj.text}</div>')
 
 
-class DestinationAdmin(PublishableAdmin):
+class DestinationAdmin(PhotoAdmin):
     list_display = ('name', 'region', 'published')
     list_filter = ('region', 'published')
     search_fields = ('name', 'description', 'region__name')
@@ -81,13 +90,13 @@ class ItineraryDayAdmin(DiffHistoryAdmin):
     search_fields = ('tour__name', 'day', 'title', 'body')
 
 
-class DestinationDetailsAdmin(PublishableAdmin):
+class DestinationDetailsAdmin(PhotoAdmin):
     list_display = ('title', 'destination', 'order', 'published')
     list_filter = ('destination', 'published')
     search_fields = ('title', 'destination__name', 'content')
 
 
-class PageAdmin(PublishableAdmin):
+class PageAdmin(PhotoAdmin):
     list_display = ('title', 'parent', 'published')
     list_filter = ('parent', 'published')
     search_fields = ('title', 'parent__title', 'content')
@@ -118,14 +127,6 @@ class BannerPhotoAdmin(DiffHistoryAdmin):
 
     def filename(self, obj: BannerPhoto):
         return obj.img.name
-
-    @admin.display(description='Min Aspect Ratio')
-    def min_AR(self, obj: BannerPhoto):
-        return f'{obj.min_AR_width}:{obj.min_AR_height}'
-
-    @admin.display(description='Max Aspect Ratio')
-    def max_AR(self, obj: BannerPhoto):
-        return f'{obj.max_AR_width}:{obj.max_AR_height}'
 
 
 # Register your models here.

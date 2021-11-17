@@ -21,5 +21,7 @@ urlpatterns = [
     path('news/', views.news, name='news'),
     path('blog/', views.blog, name='blog'),
 
+    path('favicon.ico', views.favicon, name='favicon'),
+
     path('<path:path>', views.page, name='page')
 ]

@@ -219,3 +219,7 @@ def subscribe(request, return_path: str = None):
 def destinations(request):
     context = {'destinations': Destination.visible(request.user.is_staff)} | global_context(request)
     return render(request, 'main/destinations.html', context)
+
+
+def favicon(request):
+    return HttpResponseRedirect(Settings.load().logo.url)

@@ -4,7 +4,7 @@
     box-shadow: 5px 5px 10px darkgrey;
 }
 
-img {
+.card img {
     width: 200px;
     object-fit: cover;
     object-position: center;
@@ -38,7 +38,7 @@ img {
 }
 
 @media only screen and (max-width: 991px) {
-    img {
+    .card img {
         width: 100%;
         max-height: 300px;
     }
@@ -52,4 +52,13 @@ img {
         border-top-right-radius: 30px;
         border-bottom-left-radius: 0;
     }
+}
+
+.page-link:not(.accent) {
+    color: var(--accent-background);
+}
+
+.page-link:hover {
+    color: var(--accent-hover-foreground);
+    background-color: var(--accent-hover-background);
 }

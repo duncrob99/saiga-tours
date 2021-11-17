@@ -178,11 +178,11 @@ class Article(DraftHistory):
     title = models.CharField(max_length=40)
     creation = models.DateTimeField(auto_now_add=True)
     content = RichTextUploadingField(config_name='default')
-    excerpt = models.TextField()
+    excerpt = models.TextField(null=True, blank=True)
     type = models.CharField(max_length=1, choices=TYPE_CHOICES, default=NEWS)
     card_img = models.ImageField(null=True)
-    keywords = models.TextField()
-    tags = models.ManyToManyField(Tag, related_name='articles')
+    keywords = models.TextField(null=True, blank=True)
+    tags = models.ManyToManyField(Tag, related_name='articles', blank=True)
 
     def __str__(self):
         return self.title
@@ -270,6 +270,7 @@ class Settings(models.Model):
     accent_hover_background = ColorField(default='#87cefa')
     accent_hover_foreground = ColorField(default='#000000')
     site_title = models.CharField(max_length=50, default='Crowley Tours')
+    logo = models.ImageField(null=True, blank=True)
     twitter_link = models.URLField(blank=True, null=True)
     instagram_link = models.URLField(blank=True, null=True)
     facebook_link = models.URLField(blank=True, null=True)
