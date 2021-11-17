@@ -2,3 +2,4 @@
 /main/migrations/
 /db.sqlite3
 /assets/
+/travel_website/.env

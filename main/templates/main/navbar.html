@@ -43,16 +43,7 @@
                     {% endif %}
                 {% endfor %}
                 <li class="nav-item">
-                    <a class="nav-link main-nav" href="{% url 'contact' %}">Contact</a>
-                </li>
-                <li class="nav-item">
                     <a class="nav-link main-nav" href="{% url 'tours' %}">Tours</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link main-nav" href="{% url 'news' %}">News</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link main-nav" href="{% url 'blog' %}">Blog</a>
                 </li>
                 <li class="nav-item dropdown btn-group">
                     <a type="button" class="nav-link main-nav" role="button"
@@ -103,6 +94,15 @@
                             </li>
                         {% endfor %}
                     </ul>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link main-nav" href="{% url 'blog' %}">Blog</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link main-nav" href="{% url 'news' %}">News</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link main-nav" href="{% url 'contact' %}">Contact</a>
                 </li>
                 <!--
                 {% if request.user.is_authenticated %}
