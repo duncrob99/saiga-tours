@@ -63,4 +63,7 @@ small {
     border-color: var(--accent-hover-background);
 }
 
+.offcanvas {
+    z-index: 12000;
+}
 

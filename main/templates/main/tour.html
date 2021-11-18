@@ -1,4 +1,5 @@
 {% extends 'main/main.html' %}
+{% load django_bootstrap5 %}
 
 {% block extrahead %}
     <style>
@@ -17,18 +18,49 @@
             left: 10%;
             align-content: center;
         }
+
+        .cool-img {
+            border-radius: 10px;
+            transform: rotate(10deg);
+        }
+
+        #editor-toolbar {
+            position: sticky;
+            top: var(--navbar-height);
+            z-index: 1;
+        }
     </style>
 {% endblock %}
+{% block banner %}
+    {% if request.user.is_staff %}
+        <button id="editor-button" class="btn btn-outline-secondary d-inline-flex align-items-center"
+                data-bs-toggle="offcanvas"
+                data-bs-target="#editor-offcanvas" aria-controls="editor-offcanvas" role="button"
+                style="float: left; position: sticky; margin: 50px; top: 200px;">
+            <span class="bi bi-pencil" style="font-size: 1.5rem"></span> <span style="margin-left: 4px;">Edit</span>
+        </button>
+    {% endif %}
+{% endblock %}
 {% block content %}
-    <h1 class="display-1">{{ tour }}</h1>
-    <hr>
+    <div id="editor-toolbar"></div>
+    <div class="heading d-flex justify-content-between align-items-center">
+        <h1 class="display-1" id="title">{{ tour }}</h1>
+        <form method="post" action="{% url 'contact' %}">
+            {% csrf_token %}
+            <input name="subject" value="Inquiry about {{ tour }}" hidden>
+            <button class="btn btn-primary d-inline-flex align-items-center" role="button" type="submit"
+                    style="float: right; border-radius: 20px;">
+                <span class="bi bi-chat-left-dots" style="font-size: 1.5rem"></span> <span style="margin-left: 10px;">Inquire Now</span>
+            </button>
+        </form>
+    </div>
     <div class="row" id="tour-details">
         <div class="col-lg-3 col-md-12 g-2">
             <div class="card">
                 <div class="card-header">
                     Start Date
                 </div>
-                <div class="card-body">
+                <div class="card-body" id="start-date">
                     {{ tour.start_date }}
                 </div>
             </div>
@@ -38,7 +70,7 @@
                 <div class="card-header">
                     End Date
                 </div>
-                <div class="card-body">
+                <div class="card-body" id="end-date">
                     {{ tour.end_date }}
                 </div>
             </div>
@@ -59,17 +91,175 @@
                     Price
                 </div>
                 <div class="card-body">
-                    {{ settings.price_prefix }}{{ tour.price }}
+                    {{ settings.price_prefix }}<span id="price">{{ tour.price }}</span>
                 </div>
             </div>
         </div>
     </div>
     <hr>
-    {{ tour.description | safe }}
+    <div id="tour-desc">
+        {{ tour.description | safe }}
+    </div>
     <hr>
     {% include 'main/itinerary-slider.html' with itinerary=tour.itinerary.all %}
     <hr>
     <h6 class="display-6">Other Tours</h6>
     {% include 'main/tours_cards.html' with tours=tour.close_tours %}
 
+    {% if request.user.is_staff %}
+        <div class="offcanvas offcanvas-start" tabindex="-1" id="editor-offcanvas">
+            <form style="margin: 20px;" method="post">
+                {% bootstrap_form_errors form %}
+                {% bootstrap_formset_errors itinerary_forms %}
+                {% csrf_token %}
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="" id="editing">
+                    <label class="form-check-label" for="editing">
+                        In-place editing
+                    </label>
+                </div>
+                {% bootstrap_form form %}
+                <div hidden>
+                    {% bootstrap_formset itinerary_forms %}
+                </div>
+                <button class="btn btn-primary accent hoverable-accent">Submit Changes</button>
+            </form>
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% block js %}
+    {% if request.user.is_staff %}
+        <script src="https://cdn.jsdelivr.net/npm/litepicker/dist/litepicker.js"></script>
+        <script src="https://cdn.ckeditor.com/4.16.2/standard-all/ckeditor.js"></script>
+        <script>
+            CKEDITOR.disableAutoInline = true;
+            let desc = document.querySelector('#tour-desc');
+            desc.setAttribute('contenteditable', true);
+
+            document.querySelector('[name="description"]').parentElement.parentElement.style.display = 'none';
+            document.querySelector('[name="name"]').parentElement.style.display = 'none';
+            document.querySelector('[name="start_date"]').parentElement.style.display = 'none';
+            document.querySelector('[name="end_date"]').parentElement.style.display = 'none';
+            document.querySelector('[name="price"]').parentElement.style.display = 'none';
+
+            let csrf_token = document.querySelector('input[name="csrfmiddlewaretoken"]');
+
+            CKEDITOR.stylesSet.add('img_styles', [
+                {name: 'Cool image', element: 'img', attributes: {'class': 'cool-img'}}
+            ])
+
+            let rich_field_map = {
+                'tour-desc': document.querySelector('textarea[name="description"]'),
+            }
+
+            let poor_field_map = {
+                'title': 'id_name',
+                'start-date': 'id_start_date',
+                'end-date': 'id_end_date',
+                'price': 'id_price'
+            }
+
+            let num_days_forms = document.querySelector('#id_itinerary-TOTAL_FORMS').value;
+            for (let i = 0; i < num_days_forms; i++) {
+                rich_field_map[`day-${i + 1}-body`] = document.querySelector(`#id_itinerary-${i}-body`);
+                poor_field_map[`day-${i + 1}-title`] = `id_itinerary-${i}-title`;
+                poor_field_map[`day-${i + 1}-day`] = `id_itinerary-${i}-day`;
+            }
+
+            function deactivateEditor() {
+                for (let editor_name in rich_field_map) {
+                    console.log(`deactivating ${editor_name}`);
+                    document.querySelector(`#${editor_name}`).setAttribute('contenteditable', false);
+                    if (Object.keys(CKEDITOR.instances).includes(editor_name)) {
+                        CKEDITOR.instances[editor_name].destroy();
+                    }
+                }
+
+                for (let input_id in poor_field_map) {
+                    let input_field = document.querySelector(`#${input_id}`);
+                    input_field.setAttribute('contenteditable', false);
+                }
+
+                document.querySelector('#create-day').setAttribute('hidden', 'hidden');
+                document.querySelector('#delete-day').setAttribute('hidden', 'hidden');
+            }
+
+            function activateEditor() {
+                for (let editor_name in rich_field_map) {
+                    console.log(`activating ${editor_name}`);
+                    document.querySelector(`#${editor_name}`).setAttribute('contenteditable', true);
+                    let editor = CKEDITOR.inline(editor_name, {
+                        extraPlugins: 'sourcedialog, uploadimage, sharedspace',
+                        removePlugins: 'floatingspace, maximize, resize',
+                        filebrowserImageBrowseUrl: '/ckeditor/browse/?csrfmiddlewaretoken=' + csrf_token,
+                        filebrowserImageUploadUrl: "/ckeditor/upload/?csrfmiddlewaretoken=" + csrf_token,
+                        image: {
+                            styles: {
+                                options: [{
+                                    name: 'cool',
+                                    title: 'Cool image',
+                                    className: 'cool-img',
+                                    modelElements: ['imageInline']
+                                }]
+                            }
+                        },
+                        stylesSet: 'img_styles',
+                        sharedSpaces: {
+                            top: 'editor-toolbar'
+                        }
+                    });
+                    editor.on('saveSnapshot', () => rich_field_map[editor_name].value = document.querySelector(`#${editor_name}`).innerHTML);
+                    document.querySelector(`#${editor_name}`).addEventListener('input', () => rich_field_map[editor_name].value = document.querySelector(`#${editor_name}`).innerHTML);
+                }
+
+                for (let input_id in poor_field_map) {
+                    let input_field = document.querySelector(`#${input_id}`);
+                    let output_field = document.querySelector(`#${poor_field_map[input_id]}`);
+                    input_field.setAttribute('contenteditable', true);
+                    input_field.addEventListener('input', () => {
+                        output_field.value = input_field.innerText;
+                    })
+                }
+
+                document.querySelector('#create-day').removeAttribute('hidden');
+                document.querySelector('#delete-day').removeAttribute('hidden');
+            }
+
+            // Set editing iff editing checkbox checked
+            let editing = document.querySelector('#editing');
+            if (!editing.checked) {
+                deactivateEditor();
+                document.querySelector(':root').style.setProperty('--slider-button-width', '50%');
+            } else {
+                activateEditor();
+                document.querySelector(':root').style.setProperty('--slider-button-width', '10%');
+            }
+
+            editing.addEventListener('change', () => {
+                if (editing.checked) {
+                    activateEditor();
+                    document.querySelector(':root').style.setProperty('--slider-button-width', '10%');
+                } else {
+                    deactivateEditor();
+                    document.querySelector(':root').style.setProperty('--slider-button-width', '50%');
+                }
+            })
+
+
+            desc.addEventListener('input', editorChange);
+
+            function editorChange() {
+                document.querySelector('textarea[name="description"]').value = desc.innerHTML;
+            }
+
+            document.querySelector('#create-day').addEventListener('click', () => {
+                console.log('creating day');
+            })
+
+            document.querySelector('#delete-day').addEventListener('click', () => {
+                console.log('deleting day');
+            })
+        </script>
+    {% endif %}
 {% endblock %}

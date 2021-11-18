@@ -1,6 +1,6 @@
 {% load static %}
 {% load mathfilters %}
-<link rel="stylesheet" href="{% static 'css/itinerary_asdf.css' %}">
+<link rel="stylesheet" href="{% static 'css/itinerary_ase.css' %}">
 
 
 <!-- Slideshow container -->
@@ -9,12 +9,13 @@
     <!-- Full-width images with number and caption text -->
     <div class="slides">
         {% for day in itinerary %}
-            <div class="mySlides fade show card{% if forloop.counter == 1 %} active{% endif %}">
+            <div id="day-{{ forloop.counter }}"
+                 class="mySlides fade show card{% if forloop.counter == 1 %} active{% endif %}">
                 <div class="card-header">
-                    <h6 class="display-6">Day {{ day.day }}</h6>
-                    <h5>{{ day.title }}</h5>
+                    <h6 class="display-6">Day <span id="day-{{ forloop.counter }}-day">{{ day.day }}</span></h6>
+                    <h5 id="day-{{ forloop.counter }}-title">{{ day.title }}</h5>
                 </div>
-                <div class="card-body">
+                <div id="day-{{ forloop.counter }}-body" class="card-body">
                     {{ day.body | safe }}
                 </div>
             </div>
@@ -25,10 +26,14 @@
     <a class="prev" onclick="plusSlides(-1)"><i class="bi bi-arrow-left-circle"></i></a>
     <a class="next" onclick="plusSlides(1)"><i class="bi bi-arrow-right-circle"></i></a>
     <!-- The dots/circles -->
-    <div class="dot-container">
-        {% for day in itinerary %}
-            <a class="dot" onclick="currentSlide({{ forloop.counter }});"></a>
-        {% endfor %}
+    <div class="bottom-container d-flex justify-content-around">
+        <a id="delete-day" hidden><i class="bi bi-dash-circle-dotted"></i></a>
+        <div class="dot-container">
+            {% for day in itinerary %}
+                <a class="dot" onclick="currentSlide({{ forloop.counter }});"></a>
+            {% endfor %}
+        </div>
+        <a id="create-day" hidden><i class="bi bi-plus-circle-dotted"></i></a>
     </div>
 
 </div>

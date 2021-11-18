@@ -17,11 +17,15 @@
   width: 80%;
 }
 
+:root {
+  --slider-button-width: 50%;
+}
+
 /* Next & previous buttons */
 .prev, .next {
   cursor: pointer;
   position: absolute;
-  width: 50%;
+  width: var(--slider-button-width);
   margin-top: -22px;
   padding: 16px;
   color: var(--accent-background);
@@ -36,7 +40,7 @@
 
 /* Position the "next button" to the right */
 .next {
-  left: 50%;
+  left: calc(100% - var(--slider-button-width));
   border-radius: 3px 0 0 3px;
 }
 
@@ -119,4 +123,17 @@
 hr {
   top: 10px;
   position: relative;
+}
+
+#delete-day, #create-day {
+  font-size: 2em;
+  cursor: pointer;
+}
+
+#delete-day {
+  color: red;
+}
+
+#create-day {
+  color: green;
 }

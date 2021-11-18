@@ -9,14 +9,17 @@
     height: 55px;
 }
 
-.dropdown > .main-nav:hover {
-    height: 70px;
+@media only screen and (min-width: 992px) {
+    .dropdown > .main-nav:hover {
+        height: 70px;
+    }
 }
 
 .navbar {
     box-shadow: 0 2px 10px grey;
     background: white;
     padding-bottom: 0;
+    z-index: 10000;
 }
 
 .dropdown-menu li {
@@ -99,6 +102,10 @@
     #inline-contact {
         display: block !important;
     }
+
+    ul.navbar-nav {
+        margin-top: 30px;
+    }
 }
 
 .navbar-nav {
@@ -143,4 +150,8 @@
     max-height: 80px;
     margin-bottom: -80px;
     margin-top: -80px;
+}
+
+:root {
+    --navbar-height: 106px;
 }

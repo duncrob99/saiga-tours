@@ -5,6 +5,7 @@ from django.contrib import messages
 from django.core.mail import send_mail, BadHeaderError
 from django.core.paginator import Paginator
 from django.db import IntegrityError
+from django.forms import modelform_factory, inlineformset_factory
 from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404, redirect
 
@@ -80,8 +81,25 @@ def tour(request, slug):
     tour_obj = get_object_or_404(Tour, slug=slug)
     assert_visible(request, tour_obj)
 
+    if request.user.is_staff:
+        form_factory = modelform_factory(Tour, exclude=())
+        form = form_factory(request.POST or None, request.FILES or None, instance=tour_obj)
+        itinerary_formset_factory = inlineformset_factory(Tour, ItineraryDay, exclude=('tour',), extra=0)
+        itinerary_formset = itinerary_formset_factory(request.POST or None, request.FILES or None, instance=tour_obj)
+        if request.method == 'POST' and form.is_valid() and itinerary_formset.is_valid():
+            print('valid form')
+            form.save()
+            itinerary_formset.save()
+        elif request.method == 'POST':
+            print(form.errors)
+    else:
+        form = None
+        itinerary_formset = None
+
     context = {
-                  'tour': tour_obj
+                  'tour': tour_obj,
+                  'form': form,
+                  'itinerary_forms': itinerary_formset
               } | global_context(request)
     return render(request, 'main/tour.html', context)
 
