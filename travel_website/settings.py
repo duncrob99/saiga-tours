@@ -164,6 +164,7 @@ CKEDITOR_CONFIGS = {
     'default': {
         'toolbar': None,
         'extraPlugins': 'codesnippet',
+        'skin': 'moono'
     },
 }
 

@@ -1,0 +1,26 @@
+#tour-details {
+    text-align: center;
+    font-weight: bold;
+}
+
+#tour-details div div .card-header {
+    background-color: var(--accent-background);
+    color: var(--accent-foreground);
+}
+
+#itinerary-slider div div .card {
+    width: 80%;
+    left: 10%;
+    align-content: center;
+}
+
+.cool-img {
+    border-radius: 10px;
+    transform: rotate(10deg);
+}
+
+#editor-toolbar {
+    position: sticky;
+    top: var(--navbar-height);
+    z-index: 1;
+}

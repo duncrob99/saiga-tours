@@ -1,36 +1,11 @@
 {% extends 'main/main.html' %}
 {% load django_bootstrap5 %}
+{% load static %}
 
 {% block extrahead %}
-    <style>
-        #tour-details {
-            text-align: center;
-            font-weight: bold;
-        }
-
-        #tour-details div div .card-header {
-            background-color: {{ settings.accent_background }};
-            color: {{ settings.accent_foreground }}
-        }
-
-        #itinerary-slider div div .card {
-            width: 80%;
-            left: 10%;
-            align-content: center;
-        }
-
-        .cool-img {
-            border-radius: 10px;
-            transform: rotate(10deg);
-        }
-
-        #editor-toolbar {
-            position: sticky;
-            top: var(--navbar-height);
-            z-index: 1;
-        }
-    </style>
+    <link rel="stylesheet" href="{% static 'css/tour.css' %}">
 {% endblock %}
+
 {% block banner %}
     {% if request.user.is_staff %}
         <button id="editor-button" class="btn btn-outline-secondary d-inline-flex align-items-center"
@@ -41,6 +16,7 @@
         </button>
     {% endif %}
 {% endblock %}
+
 {% block content %}
     <div id="editor-toolbar"></div>
     <div class="heading d-flex justify-content-between align-items-center">
@@ -81,7 +57,7 @@
                     Duration
                 </div>
                 <div class="card-body">
-                    {{ tour.duration }} days
+                    <span id="duration">{{ tour.duration }}</span> days
                 </div>
             </div>
         </div>
@@ -132,134 +108,7 @@
     {% if request.user.is_staff %}
         <script src="https://cdn.jsdelivr.net/npm/litepicker/dist/litepicker.js"></script>
         <script src="https://cdn.ckeditor.com/4.16.2/standard-all/ckeditor.js"></script>
-        <script>
-            CKEDITOR.disableAutoInline = true;
-            let desc = document.querySelector('#tour-desc');
-            desc.setAttribute('contenteditable', true);
-
-            document.querySelector('[name="description"]').parentElement.parentElement.style.display = 'none';
-            document.querySelector('[name="name"]').parentElement.style.display = 'none';
-            document.querySelector('[name="start_date"]').parentElement.style.display = 'none';
-            document.querySelector('[name="end_date"]').parentElement.style.display = 'none';
-            document.querySelector('[name="price"]').parentElement.style.display = 'none';
-
-            let csrf_token = document.querySelector('input[name="csrfmiddlewaretoken"]');
-
-            CKEDITOR.stylesSet.add('img_styles', [
-                {name: 'Cool image', element: 'img', attributes: {'class': 'cool-img'}}
-            ])
-
-            let rich_field_map = {
-                'tour-desc': document.querySelector('textarea[name="description"]'),
-            }
-
-            let poor_field_map = {
-                'title': 'id_name',
-                'start-date': 'id_start_date',
-                'end-date': 'id_end_date',
-                'price': 'id_price'
-            }
-
-            let num_days_forms = document.querySelector('#id_itinerary-TOTAL_FORMS').value;
-            for (let i = 0; i < num_days_forms; i++) {
-                rich_field_map[`day-${i + 1}-body`] = document.querySelector(`#id_itinerary-${i}-body`);
-                poor_field_map[`day-${i + 1}-title`] = `id_itinerary-${i}-title`;
-                poor_field_map[`day-${i + 1}-day`] = `id_itinerary-${i}-day`;
-            }
-
-            function deactivateEditor() {
-                for (let editor_name in rich_field_map) {
-                    console.log(`deactivating ${editor_name}`);
-                    document.querySelector(`#${editor_name}`).setAttribute('contenteditable', false);
-                    if (Object.keys(CKEDITOR.instances).includes(editor_name)) {
-                        CKEDITOR.instances[editor_name].destroy();
-                    }
-                }
-
-                for (let input_id in poor_field_map) {
-                    let input_field = document.querySelector(`#${input_id}`);
-                    input_field.setAttribute('contenteditable', false);
-                }
-
-                document.querySelector('#create-day').setAttribute('hidden', 'hidden');
-                document.querySelector('#delete-day').setAttribute('hidden', 'hidden');
-            }
-
-            function activateEditor() {
-                for (let editor_name in rich_field_map) {
-                    console.log(`activating ${editor_name}`);
-                    document.querySelector(`#${editor_name}`).setAttribute('contenteditable', true);
-                    let editor = CKEDITOR.inline(editor_name, {
-                        extraPlugins: 'sourcedialog, uploadimage, sharedspace',
-                        removePlugins: 'floatingspace, maximize, resize',
-                        filebrowserImageBrowseUrl: '/ckeditor/browse/?csrfmiddlewaretoken=' + csrf_token,
-                        filebrowserImageUploadUrl: "/ckeditor/upload/?csrfmiddlewaretoken=" + csrf_token,
-                        image: {
-                            styles: {
-                                options: [{
-                                    name: 'cool',
-                                    title: 'Cool image',
-                                    className: 'cool-img',
-                                    modelElements: ['imageInline']
-                                }]
-                            }
-                        },
-                        stylesSet: 'img_styles',
-                        sharedSpaces: {
-                            top: 'editor-toolbar'
-                        }
-                    });
-                    editor.on('saveSnapshot', () => rich_field_map[editor_name].value = document.querySelector(`#${editor_name}`).innerHTML);
-                    document.querySelector(`#${editor_name}`).addEventListener('input', () => rich_field_map[editor_name].value = document.querySelector(`#${editor_name}`).innerHTML);
-                }
-
-                for (let input_id in poor_field_map) {
-                    let input_field = document.querySelector(`#${input_id}`);
-                    let output_field = document.querySelector(`#${poor_field_map[input_id]}`);
-                    input_field.setAttribute('contenteditable', true);
-                    input_field.addEventListener('input', () => {
-                        output_field.value = input_field.innerText;
-                    })
-                }
-
-                document.querySelector('#create-day').removeAttribute('hidden');
-                document.querySelector('#delete-day').removeAttribute('hidden');
-            }
-
-            // Set editing iff editing checkbox checked
-            let editing = document.querySelector('#editing');
-            if (!editing.checked) {
-                deactivateEditor();
-                document.querySelector(':root').style.setProperty('--slider-button-width', '50%');
-            } else {
-                activateEditor();
-                document.querySelector(':root').style.setProperty('--slider-button-width', '10%');
-            }
-
-            editing.addEventListener('change', () => {
-                if (editing.checked) {
-                    activateEditor();
-                    document.querySelector(':root').style.setProperty('--slider-button-width', '10%');
-                } else {
-                    deactivateEditor();
-                    document.querySelector(':root').style.setProperty('--slider-button-width', '50%');
-                }
-            })
-
-
-            desc.addEventListener('input', editorChange);
-
-            function editorChange() {
-                document.querySelector('textarea[name="description"]').value = desc.innerHTML;
-            }
-
-            document.querySelector('#create-day').addEventListener('click', () => {
-                console.log('creating day');
-            })
-
-            document.querySelector('#delete-day').addEventListener('click', () => {
-                console.log('deleting day');
-            })
-        </script>
+        <script src="https://cdn.jsdelivr.net/npm/luxon@2/build/global/luxon.min.js"></script>
+        <script src="{% static 'js/tour_editing.js' %}"></script>
     {% endif %}
 {% endblock %}
