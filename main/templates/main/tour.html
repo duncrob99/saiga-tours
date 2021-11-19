@@ -21,14 +21,12 @@
     <div id="editor-toolbar"></div>
     <div class="heading d-flex justify-content-between align-items-center">
         <h1 class="display-1" id="title">{{ tour }}</h1>
-        <form method="post" action="{% url 'contact' %}">
-            {% csrf_token %}
-            <input name="subject" value="Inquiry about {{ tour }}" hidden>
-            <button class="btn btn-primary d-inline-flex align-items-center" role="button" type="submit"
+        <a href="{% url 'contact' %}?subject=Inquiry about {{ tour }}">
+            <button class="btn btn-primary d-inline-flex align-items-center" role="button"
                     style="float: right; border-radius: 20px;">
                 <span class="bi bi-chat-left-dots" style="font-size: 1.5rem"></span> <span style="margin-left: 10px;">Inquire Now</span>
             </button>
-        </form>
+        </a>
     </div>
     <div class="row" id="tour-details">
         <div class="col-lg-3 col-md-12 g-2">

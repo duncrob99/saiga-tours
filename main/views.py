@@ -215,6 +215,8 @@ def contact(request):
             form.add_error('from_email', 'Invalid header found.')
             ContactSubmission.objects.create(from_email=from_email, subject=subject, message=message, success=False)
             return render(request, 'main/contact.html', {'form': form} | global_context(request))
+    elif request.method == 'GET':
+        form.fields['subject'].initial = request.GET.get('subject')
     return render(request, 'main/contact.html', {'form': form} | global_context(request))
 
 
