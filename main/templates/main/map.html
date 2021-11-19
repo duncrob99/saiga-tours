@@ -1,3 +1,16 @@
+<style>
+    {% for destination in destinations %}
+        #{{ destination.name }} {
+        fill: {% if destination.map_colour is None %}var(--accent-background)
+        {% else %}{{ destination.map_colour }}{% endif %};
+        }
+
+        #{{ destination.name }}:hover {
+        fill: var(--accent-hover-background);
+    }
+    {% endfor %}
+</style>
+
 <div class="pre-load">
     {% include 'main/new_world.svg' %}
 </div>

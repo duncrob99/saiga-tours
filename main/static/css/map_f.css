@@ -6,9 +6,11 @@ object, svg {
     mask-composite: intersect;
 }
 
+/*
 g.available {
     fill: var(--accent-background);
 }
+*/
 
 g.available:not(:hover) {
     transition: all 2s;

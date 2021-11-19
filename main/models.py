@@ -53,6 +53,7 @@ class Destination(DraftHistory):
     slug = models.SlugField()
     region = models.ForeignKey(Region, on_delete=models.CASCADE, null=True, related_name='destinations')
     description = RichTextUploadingField(config_name='default')
+    map_colour = ColorField(null=True, blank=True)
 
     def __str__(self):
         return self.name
