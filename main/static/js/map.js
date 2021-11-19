@@ -13,7 +13,25 @@ function minBBox(bbox1, bbox2) {
     return [x, y, width, height];
 }
 
-function make_map_work(destinations) {
+
+function make_map_work(destinations, width, height) {
+    resize_map(destinations, width, height);
+    window.addEventListener('resize', () => {
+        resize_map(destinations, width, height);
+    })
+}
+
+function resize_map(destinations, width, height) {
+    let navbar_height = document.querySelector('.navbar').getBoundingClientRect().height;
+    if (width === undefined) {
+        width = document.querySelector('#content-container').getBoundingClientRect().width;
+    }
+    if (height === undefined) {
+        height = document.documentElement.clientHeight - navbar_height;
+    }
+
+    let ar = width / height;
+
     let dest_path;
     let min_bbox = [999999, 999999, -999999, -999999];
     for (let i = 0; i < destinations.length; i++) {
@@ -28,8 +46,18 @@ function make_map_work(destinations) {
         }
     }
 
-    let margin_factor = 0.3;
+    let margin_factor = 0.2;
     min_bbox = [min_bbox[0] - margin_factor / 2 * min_bbox[2], min_bbox[1] - margin_factor / 2 * min_bbox[3], min_bbox[2] * (1 + margin_factor), min_bbox[3] * (1 + margin_factor)];
+    if (ar !== undefined) {
+        let cur_ar = min_bbox[2] / min_bbox[3];
+        if (cur_ar > ar) {
+            min_bbox[1] += (((cur_ar / ar) - 1) * min_bbox[3]) / 2;
+            min_bbox[3] *= (cur_ar / ar);
+        } else {
+            min_bbox[0] += (((cur_ar / ar) - 1) * min_bbox[2]) / 2;
+            min_bbox[2] *= (ar / cur_ar);
+        }
+    }
     document.querySelector('svg').setAttribute('viewBox', `${min_bbox[0]} ${min_bbox[1]} ${min_bbox[2]} ${min_bbox[3]}`);
 
     document.querySelectorAll('.pre-load').forEach((el) => el.classList.remove('pre-load'));

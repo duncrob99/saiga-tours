@@ -6,15 +6,19 @@
 {% endblock %}
 
 {% block content %}
-    {% include 'main/map.html' %}
+    {% include 'main/map.html' with destinations=countries %}
+    <hr>
+    {{ region.tour_blurb | safe }}
+    <hr>
+    {% include 'main/tours_cards.html' %}
 {% endblock %}
 
 {% block js %}
     <script src="{% static 'js/map.js' %}"></script>
     <script>
         let destinations = [];
-        {% for destination in destinations %}
-            destinations.push(["{{ destination.name }}", "{% url 'destination' destination.region.slug destination.slug %}"]);
+        {% for country in countries %}
+            destinations.push(["{{ country.name }}", "{% url 'tours' country.region.slug country.slug %}"]);
         {% endfor %}
         make_map_work(destinations);
     </script>

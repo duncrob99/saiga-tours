@@ -1,8 +1,12 @@
+:root {
+    --map-fade: 10%;
+}
+
 object, svg {
     width: 100%;
     height: auto;
-    mask-image: linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%),
-    linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%);
+    mask-image: linear-gradient(to right, transparent 0%, black var(--map-fade), black calc(100% - var(--map-fade)), transparent 100%),
+    linear-gradient(to bottom, transparent 0%, black var(--map-fade), black calc(100% - var(--map-fade)), transparent 100%);
     mask-composite: intersect;
 }
 
@@ -21,6 +25,7 @@ g.available:hover {
     stroke: darkgrey;
     stroke-width: 1px;
     transition: all 0.1s;
+    cursor: pointer;
 }
 
 .pre-load {

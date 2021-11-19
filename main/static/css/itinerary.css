@@ -5,7 +5,7 @@
 /* Slideshow container */
 .slideshow-container {
   position: relative;
-  margin: auto;
+  margin: 30px auto auto;
 }
 
 .slides {
@@ -18,7 +18,7 @@
 }
 
 :root {
-  --slider-button-width: 50%;
+  --slider-button-width: 15%;
 }
 
 /* Next & previous buttons */
@@ -26,7 +26,7 @@
   cursor: pointer;
   position: absolute;
   width: var(--slider-button-width);
-  margin-top: -22px;
+  margin-top: -4px;
   padding: 16px;
   color: var(--accent-background);
   font-weight: bolder;

@@ -66,7 +66,7 @@ class TourAdmin(PhotoAdmin):
     date_hierarchy = 'start_date'
     list_display = ('name', 'start_date', 'end_date', 'duration', 'published')
     inlines = [ItineraryDayInline]
-    list_filter = ['start_date', 'end_date', 'destinations', 'published']
+    list_filter = ['start_date', 'duration', 'destinations', 'published']
 
 
 class StateAdmin(DiffHistoryAdmin):

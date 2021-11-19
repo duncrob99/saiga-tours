@@ -1,6 +1,6 @@
 {% load static %}
 
-<link rel="stylesheet" href="{% static 'css/navbar_asl.css' %}">
+<link rel="stylesheet" href="{% static 'css/navbar.css' %}">
 
 <nav class="navbar sticky-top navbar-expand-lg navbar-light py-4">
     <div class="container-fluid">
@@ -44,12 +44,64 @@
                         </li>
                     {% endif %}
                 {% endfor %}
+                {% comment %}
                 <li class="nav-item">
                     <a class="nav-link main-nav" href="{% url 'tours' %}">Tours</a>
                 </li>
+                {% endcomment %}
                 <li class="nav-item dropdown btn-group">
                     <a type="button" class="nav-link main-nav" role="button"
-                       href="{% url 'destinations' %}">Destinations</a>
+                       href="{% url 'tours' %}">Tours</a>
+                    <a class="nav-link dropdown-toggle-split dropdown-toggle main-nav" role="button"
+                       id="dropdownMenuButton"
+                       data-bs-toggle="dropdown">
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                        {% for region in regions %}
+                            <li>
+                                <a class="dropdown-item d-flex justify-content-between"
+                                   href="{% url 'tours' region.slug %}">{{ region.name }} <i
+                                        class="bi bi-caret-right-fill"></i></a>
+                                <ul class="dropdown-menu dropdown-submenu">
+                                    {% if user.is_staff %}
+                                        {% for country in region.destinations.all %}
+                                            <li>
+                                                <a class="dropdown-item d-flex justify-content-between"
+                                                   href="{% url 'tours' region.slug country.slug %}">{{ country.name }}
+                                                    <i class="bi bi-caret-right-fill"></i></a>
+                                                <ul class="dropdown-menu dropdown-submenu">
+                                                    {% for detail in country.tour_info %}
+                                                        <li><a class="dropdown-item d-flex justify-content-between"
+                                                               href="{% url 'tours' region.slug country.slug detail.slug %}">{{ detail.title }}</a>
+                                                        </li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </li>
+                                        {% endfor %}
+                                    {% else %}
+                                        {% for country in region.destinations.all_published %}
+                                            <li>
+                                                <a class="dropdown-item d-flex justify-content-between"
+                                                   href="{% url 'destination' region.slug country.slug %}">{{ country.name }}
+                                                    <i class="bi bi-caret-right-fill"></i></a>
+                                                <ul class="dropdown-menu dropdown-submenu">
+                                                    {% for detail in country.details.all_published %}
+                                                        <li><a class="dropdown-item d-flex justify-content-between"
+                                                               href="{% url 'destination-details' region.slug country.slug detail.slug %}">{{ detail.title }}</a>
+                                                        </li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </li>
+                                        {% endfor %}
+                                    {% endif %}
+                                </ul>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </li>
+                <li class="nav-item dropdown btn-group">
+                    <a type="button" class="nav-link main-nav" role="button"
+                       href="{% url 'destinations' %}">Destination Guides</a>
                     <a class="nav-link dropdown-toggle-split dropdown-toggle main-nav" role="button"
                        id="dropdownMenuButton"
                        data-bs-toggle="dropdown">
@@ -68,7 +120,7 @@
                                                    href="{% url 'destination' region.slug country.slug %}">{{ country.name }}
                                                     <i class="bi bi-caret-right-fill"></i></a>
                                                 <ul class="dropdown-menu dropdown-submenu">
-                                                    {% for detail in country.details.all %}
+                                                    {% for detail in country.guide_details %}
                                                         <li><a class="dropdown-item d-flex justify-content-between"
                                                                href="{% url 'destination-details' region.slug country.slug detail.slug %}">{{ detail.title }}</a>
                                                         </li>

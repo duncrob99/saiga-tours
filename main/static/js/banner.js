@@ -2,10 +2,9 @@ let current_idx = 0;
 
 function resize() {
     let navbar_height = document.querySelector('.navbar').getBoundingClientRect().height;
+    let aspect_ratio = document.documentElement.clientWidth / (document.documentElement.clientHeight - navbar_height);
 
     let banner_imgs = document.querySelectorAll('#banner-slideshow img');
-
-    let aspect_ratio = document.documentElement.clientWidth / (document.documentElement.clientHeight - navbar_height);
 
     banner_imgs.forEach(el => {
         el.style.top = navbar_height + "px";

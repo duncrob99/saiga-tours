@@ -39,8 +39,8 @@ def global_context(request):
 
 def destination_overview(request, region_slug, country_slug):
     destination = get_object_or_404(Destination, region__slug=region_slug, slug=country_slug)
-    detail_list = destination.details.visible(request.user.is_staff)
-    tour_list = destination.tours.visible(request.user.is_staff)
+    detail_list = destination.details.visible(request.user.is_staff).filter(type=DestinationDetails.GUIDE)
+    tour_list = destination.tours.visible(request.user.is_staff).filter(display=True)
 
     assert_visible(request, destination)
 
@@ -57,7 +57,7 @@ def destination_details(request, region_slug, country_slug, detail_slug):
     details = get_object_or_404(DestinationDetails,
                                 destination__region__slug=region_slug,
                                 destination__slug=country_slug,
-                                slug=detail_slug)
+                                slug=detail_slug, type=DestinationDetails.GUIDE)
 
     assert_visible(request, details)
 
@@ -106,7 +106,7 @@ def tour(request, slug):
 
 def tours(request):
     context = {
-                  'tours': Tour.visible(request.user.is_staff),
+                  'tours': Tour.visible(request.user.is_staff).filter(display=True),
                   'destinations': Destination.visible(request.user.is_staff)
               } | global_context(request)
     return render(request, 'main/tours.html', context)
@@ -175,7 +175,7 @@ def blog(request):
 
 def region(request, slug):
     region_obj = get_object_or_404(Region, slug=slug)
-    tours_list = Tour.visible(request.user.is_staff).filter(destinations__region=region_obj).distinct()
+    tours_list = Tour.visible(request.user.is_staff).filter(destinations__region=region_obj, display=True).distinct()
     destination_list = Destination.visible(request.user.is_staff).filter(region=region_obj)
 
     assert_visible(request, region_obj)
@@ -254,3 +254,49 @@ def destinations(request):
 
 def favicon(request):
     return HttpResponseRedirect(Settings.load().logo.url)
+
+
+def country_tours(request, region_slug, country_slug):
+    destination = get_object_or_404(Destination, region__slug=region_slug, slug=country_slug)
+    detail_list = destination.details.visible(request.user.is_staff).filter(type=DestinationDetails.TOURS)
+    tour_list = destination.tours.visible(request.user.is_staff).filter(display=True)
+
+    assert_visible(request, destination)
+
+    context = {
+                  'destination': destination,
+                  'details': detail_list,
+                  'tours': tour_list
+              } | global_context(request)
+
+    return render(request, 'main/country_tours.html', context)
+
+
+def region_tours(request, region_slug):
+    region_obj = get_object_or_404(Region, slug=region_slug)
+    countries = region_obj.destinations.visible(request.user.is_staff)
+    tours = Tour.objects.visible(request.user.is_staff).filter(display=True)
+
+    assert_visible(request, region_obj)
+
+    context = {
+                  'region': region_obj,
+                  'countries': countries,
+                  'tours': tours
+              } | global_context(request)
+    return render(request, 'main/region-tours.html', context)
+
+
+def country_tours_info(request, region_slug, country_slug, detail_slug):
+    details = get_object_or_404(DestinationDetails,
+                                destination__region__slug=region_slug,
+                                destination__slug=country_slug,
+                                slug=detail_slug, type=DestinationDetails.TOURS)
+
+    assert_visible(request, details)
+
+    context = {
+                  'details': details
+              } | global_context(request)
+
+    return render(request, 'main/tour_info.html', context)

@@ -42,6 +42,7 @@ class DraftHistory(models.Model):
 class Region(DraftHistory):
     name = models.CharField(max_length=40)
     slug = models.SlugField(primary_key=True)
+    tour_blurb = RichTextUploadingField(config_name='default')
 
     def __str__(self):
         return self.name
@@ -53,10 +54,19 @@ class Destination(DraftHistory):
     slug = models.SlugField()
     region = models.ForeignKey(Region, on_delete=models.CASCADE, null=True, related_name='destinations')
     description = RichTextUploadingField(config_name='default')
+    tour_blurb = RichTextUploadingField(config_name='default')
     map_colour = ColorField(null=True, blank=True)
 
     def __str__(self):
         return self.name
+
+    @property
+    def guide_details(self):
+        return self.details.filter(type=DestinationDetails.GUIDE)
+
+    @property
+    def tour_info(self):
+        return self.details.filter(type=DestinationDetails.TOURS)
 
     class Meta:
         ordering = ['region', 'name']
@@ -64,16 +74,27 @@ class Destination(DraftHistory):
 
 
 class DestinationDetails(DraftHistory):
+    TOURS = 't'
+    GUIDE = 'g'
+    TYPE_CHOICES = (
+        (TOURS, 'Tours'),
+        (GUIDE, 'Guide')
+    )
+
     title = models.CharField(max_length=100)
     slug = models.SlugField()
     content = RichTextUploadingField(config_name='default')
     order = models.IntegerField()
     destination = models.ForeignKey(Destination, on_delete=models.CASCADE, related_name='details')
+    type = models.CharField(max_length=1, choices=TYPE_CHOICES)
     card_img = models.ImageField()
+    linked_tours = models.ManyToManyField('Tour')
 
     class Meta:
         verbose_name_plural = 'Destination details'
-        unique_together = [['destination', 'order'], ['destination', 'title'], ['destination', 'slug']]
+        unique_together = [['destination', 'order', 'type'],
+                           ['destination', 'title', 'type'],
+                           ['destination', 'slug', 'type']]
         ordering = ['destination', 'order', 'slug']
 
     def __str__(self):
@@ -100,21 +121,28 @@ class Tour(DraftHistory):
     name = models.CharField(max_length=40)
     slug = models.SlugField()
     destinations = models.ManyToManyField(Destination, related_name='tours')
-    start_date = models.DateField()
-    end_date = models.DateField()
+    start_date = models.DateField(null=True, blank=True)
+    duration = models.IntegerField(null=True)
     description = RichTextUploadingField()
     excerpt = models.TextField()
     card_img = models.ImageField()
     price = models.DecimalField(max_digits=8, decimal_places=2)
     state = models.ForeignKey(State, on_delete=models.CASCADE, null=True, blank=True)
+    extensions = models.ManyToManyField('self', blank=True, symmetrical=False)
+    display = models.BooleanField(default=True)
 
     @property
-    def duration(self):
-        return (self.end_date - self.start_date + timedelta(days=1)).days
+    def dated(self):
+        return self.start_date is not None
+
+    @property
+    def end_date(self):
+        return self.start_date + timedelta(days=(self.duration or 1) - 1) if self.start_date is not None else None
 
     @property
     def close_tours(self):
-        return sorted(Tour.objects.exclude(slug=self.slug), key=lambda tour: abs(tour.start_date - self.start_date))[:4]
+        return sorted(Tour.objects.exclude(slug=self.slug).filter(display=True, start_date__isnull=False),
+                      key=lambda tour: abs(tour.start_date - self.start_date))[:4]
 
     def __str__(self):
         return self.name

@@ -1,0 +1,16 @@
+{% extends 'main/main.html' %}
+
+{% block content %}
+    <div class="container-fluid">
+        <h1 class="display-1">{{ details.title }}
+            <a href="{% url 'tours' details.destination.region.slug details.destination.slug %}"><small
+                    class="text-muted">{{ details.destination }}</small></a>
+        </h1>
+        {{ details.content | safe }}
+    </div>
+    {% if details.linked_tours.count > 0 %}
+        <hr>
+        <h4 class="display-4">Example Tours</h4>
+        {% include 'main/tours_cards.html' with tours=details.linked_tours.all %}
+    {% endif %}
+{% endblock %}

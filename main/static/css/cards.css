@@ -32,9 +32,11 @@ h5.card-title {
     border-width: 0 10px 10px 10px;
 }
 
+/*
 .text-card .card-body {
     min-height: 300px;
 }
+ */
 
 .text-card .card-footer table tr td {
     word-wrap: anywhere;
