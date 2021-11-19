@@ -192,8 +192,19 @@ def page(request, path):
     page_obj = Page.reverse_path(path)
     assert_visible(request, page_obj)
 
+    if request.user.is_staff:
+        form_factory = modelform_factory(Page, exclude=())
+        form = form_factory(request.POST or None, request.FILES or None, instance=page_obj)
+        if request.method == 'POST' and form.is_valid():
+            instance = form.save()
+            if 'parent' in form.changed_data or 'slug' in form.changed_data:
+                return redirect('page', instance.full_path)
+    else:
+        form = None
+
     context = {
-                  'page': page_obj
+                  'page': page_obj,
+                  'form': form
               } | global_context(request)
     return render(request, 'main/page.html', context)
 

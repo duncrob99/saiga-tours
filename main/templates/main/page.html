@@ -1,26 +1,66 @@
 {% extends 'main/main.html' %}
 {% load static %}
+{% load django_bootstrap5 %}
 
 {% block extrahead %}
     <link rel="stylesheet" href="{% static 'css/article.css' %}">
 {% endblock %}
 
+{% block banner %}
+    {% if request.user.is_staff %}
+        <button id="editor-button" class="btn btn-outline-secondary d-inline-flex align-items-center"
+                data-bs-toggle="offcanvas"
+                data-bs-target="#editor-offcanvas" aria-controls="editor-offcanvas" role="button"
+                style="float: left; position: sticky; margin: 50px; top: 200px;">
+            <span class="bi bi-pencil" style="font-size: 1.5rem"></span> <span style="margin-left: 4px;">Edit</span>
+        </button>
+    {% endif %}
+{% endblock %}
+
 {% block content %}
-    <h1 class="display-1">{{ page.title }}
+    <div id="editor-toolbar"></div>
+    <h1 class="display-1"><span id="title">{{ page.title }}</span>
         {% if page.parent.parent is not None %}
             <a href="{% url 'page' page.parent.full_path %}"><small
                     class="text-muted">{{ page.parent.title }}</small></a>
         {% endif %}
     </h1>
-    {{ page.content | safe }}
+
+    <div id="content">
+        {{ page.content | safe }}
+    </div>
 
     {% if user.is_staff %}
-        {% include 'main/page_list.html' with pages=page.children.all %}
+        {% include 'main/page_list.html' with pages=page.children.all title='Subpages' %}
 
-        {% include 'main/page_list.html' with pages=page.siblings %}
+        {% include 'main/page_list.html' with pages=page.siblings title='Other pages in ' title_suffix=page.parent.title %}
     {% else %}
-        {% include 'main/page_list.html' with pages=page.children.all_published %}
+        {% include 'main/page_list.html' with pages=page.children.all_published title='Subpages' %}
 
-        {% include 'main/page_list.html' with pages=page.published_siblings %}
+        {% include 'main/page_list.html' with pages=page.published_siblings title='Other pages in ' title_suffix=page.parent.title %}
+    {% endif %}
+
+    {% if request.user.is_staff %}
+        <div class="offcanvas offcanvas-start" tabindex="-1" id="editor-offcanvas">
+            <form style="margin: 20px;" method="post" enctype="multipart/form-data">
+                {% bootstrap_form_errors form %}
+                {% csrf_token %}
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="" id="editing">
+                    <label class="form-check-label" for="editing">
+                        In-place editing
+                    </label>
+                </div>
+                {% bootstrap_form form %}
+                <button class="btn btn-primary accent hoverable-accent">Submit Changes</button>
+            </form>
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% block js %}
+    {% if request.user.is_staff %}
+        <script src="https://cdn.ckeditor.com/4.16.2/standard-all/ckeditor.js"></script>
+        <script src="{% static 'js/page_editing.js' %}"></script>
     {% endif %}
 {% endblock %}

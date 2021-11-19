@@ -82,7 +82,7 @@
 
     {% if request.user.is_staff %}
         <div class="offcanvas offcanvas-start" tabindex="-1" id="editor-offcanvas">
-            <form style="margin: 20px;" method="post">
+            <form style="margin: 20px;" method="post" enctype="multipart/form-data">
                 {% bootstrap_form_errors form %}
                 {% bootstrap_formset_errors itinerary_forms %}
                 {% csrf_token %}
