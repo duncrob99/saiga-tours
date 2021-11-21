@@ -21,7 +21,7 @@ def assert_visible(request, model: DraftHistory):
 # Create your views here.
 def front_page(request):
     context = {
-                  'tours': Tour.visible(request.user.is_staff),
+                  'tours': Tour.visible(request.user.is_staff).filter(display=True),
                   'banners': BannerPhoto.objects.filter(active=True).order_by('?'),
               } | global_context(request)
     return render(request, 'main/front-page.html', context)
@@ -81,6 +81,15 @@ def tour(request, slug):
     tour_obj = get_object_or_404(Tour, slug=slug)
     assert_visible(request, tour_obj)
 
+    extensions = tour_obj.extensions.visible(request.user.is_staff)
+
+    if request.GET.get('parent') is not None:
+        parent = Tour.objects.get(slug=request.GET.get('parent'))
+        other_extensions = parent.extensions.visible(request.user.is_staff).exclude(pk=tour_obj.pk)
+    else:
+        other_extensions = None
+        parent = None
+
     if request.user.is_staff:
         form_factory = modelform_factory(Tour, exclude=())
         form = form_factory(request.POST or None, request.FILES or None, instance=tour_obj)
@@ -99,7 +108,10 @@ def tour(request, slug):
     context = {
                   'tour': tour_obj,
                   'form': form,
-                  'itinerary_forms': itinerary_formset
+                  'itinerary_forms': itinerary_formset,
+                  'other_extensions': other_extensions,
+                  'parent': parent,
+                  'extensions': extensions
               } | global_context(request)
     return render(request, 'main/tour.html', context)
 

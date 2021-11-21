@@ -19,7 +19,7 @@ class DraftHistoryManager(models.Manager):
         return self.filter(published=True)
 
     def visible(self, su: bool):
-        return self.all() if su else self.all_published
+        return self.all() if su else self.all_published()
 
 
 class DraftHistory(models.Model):
@@ -119,7 +119,7 @@ class State(models.Model):
 
 class Tour(DraftHistory):
     name = models.CharField(max_length=40)
-    slug = models.SlugField()
+    slug = models.SlugField(unique=True)
     destinations = models.ManyToManyField(Destination, related_name='tours')
     start_date = models.DateField(null=True, blank=True)
     duration = models.IntegerField(null=True)

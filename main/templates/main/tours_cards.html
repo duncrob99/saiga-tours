@@ -45,7 +45,8 @@
                             <td class="table-value">{{ settings.price_prefix }}{{ tour.price }}</td>
                         </tr>
                     </table>
-                    <a class="stretched-link" href="{% url 'tour' tour.slug %}"></a>
+                    <a class="stretched-link"
+                       href="{% url 'tour' tour.slug %}{% if parent %}?parent={{ parent }}{% endif %}"></a>
                 </div>
             </div>
 
@@ -61,7 +62,8 @@
                                 color: {{ tour.state.text_color }}">{{ tour.state.text }}</div>
                     {% endif %}
                 </div>
-                <a class="stretched-link" href="{% url 'tour' tour.slug %}"></a>
+                <a class="stretched-link"
+                   href="{% url 'tour' tour.slug %}{% if parent %}?parent={{ parent }}{% endif %}"></a>
             </div>
         </div>
     {% endfor %}

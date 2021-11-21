@@ -35,7 +35,8 @@ function resize_map(destinations, width, height) {
     let dest_path;
     let min_bbox = [999999, 999999, -999999, -999999];
     for (let i = 0; i < destinations.length; i++) {
-        dest_path = document.querySelector('#' + destinations[i][0]);
+        //dest_path = document.querySelector('#' + destinations[i][0]);
+        dest_path = document.querySelector(`[title="${destinations[i][0]}"]`);
         if (dest_path !== null) {
             dest_path.classList.add('available');
             dest_path.addEventListener('click', () => {
@@ -51,10 +52,10 @@ function resize_map(destinations, width, height) {
     if (ar !== undefined) {
         let cur_ar = min_bbox[2] / min_bbox[3];
         if (cur_ar > ar) {
-            min_bbox[1] += (((cur_ar / ar) - 1) * min_bbox[3]) / 2;
+            min_bbox[1] -= min_bbox[3] * (cur_ar / ar - 1) / 2;
             min_bbox[3] *= (cur_ar / ar);
         } else {
-            min_bbox[0] += (((cur_ar / ar) - 1) * min_bbox[2]) / 2;
+            min_bbox[0] -= min_bbox[2] * (ar / cur_ar - 1) / 2;
             min_bbox[2] *= (ar / cur_ar);
         }
     }

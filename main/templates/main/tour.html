@@ -86,10 +86,16 @@
     <h6 class="display-6">Itinerary</h6>
     {% include 'main/itinerary-slider.html' with itinerary=tour.itinerary.all %}
 
-    {% if tour.extensions.count > 0 %}
+    {% if extensions.count > 0 %}
         <hr>
         <h6 class="display-6">Extensions</h6>
-        {% include 'main/tours_cards.html' with tours=tour.extensions.all min_height=1 uid="extensions" %}
+        {% include 'main/tours_cards.html' with tours=extensions.all min_height=1 uid="extensions" parent=tour.slug %}
+    {% endif %}
+
+    {% if other_extensions.count > 0 %}
+        <hr>
+        <h6 class="display-6">Other Extensions for {{ parent }}</h6>
+        {% include 'main/tours_cards.html' with tours=other_extensions min_height=1 uid="other_extensions" parent=parent.slug %}
     {% endif %}
 
     {% if tour.dated %}
