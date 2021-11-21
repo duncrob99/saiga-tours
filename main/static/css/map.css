@@ -5,8 +5,8 @@
 object, svg {
     width: 100%;
     height: auto;
-    mask-image: linear-gradient(to right, transparent 0%, black var(--map-fade), black calc(100% - var(--map-fade)), transparent 100%),
-    linear-gradient(to bottom, transparent 0%, black var(--map-fade), black calc(100% - var(--map-fade)), transparent 100%);
+    mask-image: linear-gradient(to right, transparent 0%, white var(--map-fade), white calc(100% - var(--map-fade)), transparent 100%),
+    linear-gradient(to bottom, transparent 0%, white var(--map-fade), white calc(100% - var(--map-fade)), transparent 100%);
     mask-composite: intersect;
 }
 
@@ -16,15 +16,13 @@ g.available {
 }
 */
 
-g.available:not(:hover) {
+path.available:not(:hover) {
     transition: all 2s;
 }
 
-g.available:hover {
+path.available:hover {
     fill: var(--accent-hover-background);
-    stroke: darkgrey;
-    stroke-width: 1px;
-    transition: all 0.1s;
+    transition: all 0.2s;
     cursor: pointer;
 }
 
