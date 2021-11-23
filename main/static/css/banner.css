@@ -56,5 +56,8 @@
     mask-image: linear-gradient(to right, transparent 0, var(--banner-text-transparency) var(--banner-text-fade), var(--banner-text-transparency) calc(100% - var(--banner-text-fade)), transparent 100%),
     linear-gradient(to bottom, transparent 0, var(--banner-text-transparency) var(--banner-text-fade), var(--banner-text-transparency) calc(100% - var(--banner-text-fade)), transparent 100%);
     mask-composite: intersect;
+    -webkit-mask-image: linear-gradient(to right, transparent 0, var(--banner-text-transparency) var(--banner-text-fade), var(--banner-text-transparency) calc(100% - var(--banner-text-fade)), transparent 100%),
+    linear-gradient(to bottom, transparent 0, var(--banner-text-transparency) var(--banner-text-fade), var(--banner-text-transparency) calc(100% - var(--banner-text-fade)), transparent 100%);
+    -webkit-mask-composite: destination-in;
     z-index: -50;
 }

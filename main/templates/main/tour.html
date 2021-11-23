@@ -4,6 +4,9 @@
 
 {% block extrahead %}
     <link rel="stylesheet" href="{% static 'css/tour.css' %}">
+    {% if tour.stops.count %}
+        <link rel="stylesheet" href="{% static 'css/map.css' %}">
+    {% endif %}
 {% endblock %}
 
 {% block banner %}
@@ -86,13 +89,17 @@
     <h6 class="display-6">Itinerary</h6>
     {% include 'main/itinerary-slider.html' with itinerary=tour.itinerary.all %}
 
-    {% if extensions.count > 0 %}
+    {% if tour.stops.count %}
+        {% include 'main/map.html' with destinations=tour.destinations.all hoverable=0 %}
+    {% endif %}
+
+    {% if extensions.count %}
         <hr>
         <h6 class="display-6">Extensions</h6>
         {% include 'main/tours_cards.html' with tours=extensions.all min_height=1 uid="extensions" parent=tour.slug %}
     {% endif %}
 
-    {% if other_extensions.count > 0 %}
+    {% if other_extensions.count %}
         <hr>
         <h6 class="display-6">Other Extensions for {{ parent }}</h6>
         {% include 'main/tours_cards.html' with tours=other_extensions min_height=1 uid="other_extensions" parent=parent.slug %}
@@ -106,7 +113,7 @@
 
     {% if request.user.is_staff %}
         <div class="offcanvas offcanvas-start" tabindex="-1" id="editor-offcanvas" style="overflow-y: scroll;">
-            <form style="margin: 20px;" method="post" enctype="multipart/form-data">
+            <form style="margin: 20px;" method="post" enctype="multipart/form-data" id="editor-form">
                 {% bootstrap_form_errors form %}
                 {% bootstrap_formset_errors itinerary_forms %}
                 {% csrf_token %}
@@ -119,14 +126,94 @@
                 {% bootstrap_form form %}
                 <div hidden>
                     {% bootstrap_formset itinerary_forms %}
+                    {% bootstrap_formset stop_forms %}
                 </div>
                 <button class="btn btn-primary accent hoverable-accent">Submit Changes</button>
             </form>
+        </div>
+        <div class="modal fade" data-bs-scroll="true" data-bs-backdrop="false" id="change-day-modal" tabindex="-1"
+             aria-labelledby="changeDayModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="changeDayModalLabel">Change Day</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input aria-label="Change Day" type="number" id="change-day-input" class="form-control">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" id="save-day-change">Save changes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" data-bs-scroll="true" data-bs-backdrop="false" id="rename-modal" tabindex="-1"
+             aria-labelledby="renameModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Rename Stop</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input aria-label="Rename stop" type="text" id="rename-stop-input" class="form-control">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" id="save-stop-rename">Save changes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div hidden id="form-template">
+            <input hidden id="id_stops-%i-x" name="stops-%i-x" value="%x">
+            <input hidden id="id_stops-%i-y" name="stops-%i-y" value="%y">
+            <input hidden id="id_stops-%i-name" name="stops-%i-name" value="%name">
+            <input hidden id="id_stops-%i-day" name="stops-%i-day" value="%day">
+            <input hidden id="id_stops-%i-order" name="stops-%i-order" value="%order">
+            <input hidden id="id_stops-%i-id" name="stops-%i-id">
+            <input hidden id="id_stops-%i-DELETE" name="stops-%i-DELETE" type="checkbox">
+            <input hidden id="id_stops-%i-tour" name="stops-%i-tour">
         </div>
     {% endif %}
 {% endblock %}
 
 {% block js %}
+    {% if tour.stops.count %}
+        <script src="{% static 'js/map.js' %}"></script>
+
+        {% if request.user.is_staff %}
+            <script src="//code.jquery.com/jquery-2.1.4.min.js"></script>
+            <script src="{% static 'js/bootstrap_contextmenu.js' %}"></script>
+        {% endif %}
+
+        <script>
+            let destinations = [];
+            {% for destination in tour.destinations.all %}
+                destinations.push(["{{ destination.name }}", "{% url 'destination' destination.region.slug destination.slug %}"]);
+            {% endfor %}
+
+            let stops = [];
+            {% for stop in tour.stops.all %}
+                {% comment %}
+                stops.push(["{{ stop.name }}", {{ stop.x }}, {{ stop.y }}, {{ stop.day }}, {{ forloop.counter0 }}])
+                {% endcomment %}
+                stops.push({
+                    name: "{{ stop.name }}",
+                    x: {{ stop.x }},
+                    y: {{ stop.y }},
+                    day: {{ stop.day }},
+                    form_ix: {{ forloop.counter0 }}
+                });
+            {% endfor %}
+
+            make_map_work(destinations, undefined, 500, false, stops);
+        </script>
+    {% endif %}
+
     {% if request.user.is_staff %}
         <script>let dated = "{{ tour.dated }}" === "True";</script>
         <script src="https://cdn.jsdelivr.net/npm/litepicker/dist/litepicker.js"></script>

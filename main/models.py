@@ -377,3 +377,29 @@ class BannerPhoto(models.Model):
 
     def __str__(self):
         return self.img.name
+
+
+class Stop(models.Model):
+    x = models.FloatField()
+    y = models.FloatField()
+    tour = models.ForeignKey(Tour, on_delete=models.CASCADE, related_name='stops')
+    name = models.CharField(max_length=100)
+    day = models.PositiveSmallIntegerField()
+    order = models.PositiveSmallIntegerField(null=True)
+
+    def __str__(self):
+        return f'Stop {self.name} in {self.tour}'
+
+    class Meta:
+        ordering = ['tour__name', 'order', 'day', 'name']
+
+
+class MapPoint(models.Model):
+    x = models.FloatField()
+    y = models.FloatField()
+    name = models.CharField(max_length=100)
+    activation_radius = models.FloatField(default=1)
+    size = models.FloatField(default=1)
+
+    def __str__(self):
+        return self.name

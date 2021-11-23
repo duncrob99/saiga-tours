@@ -95,20 +95,24 @@ def tour(request, slug):
         form = form_factory(request.POST or None, request.FILES or None, instance=tour_obj)
         itinerary_formset_factory = inlineformset_factory(Tour, ItineraryDay, exclude=('tour',), extra=0)
         itinerary_formset = itinerary_formset_factory(request.POST or None, request.FILES or None, instance=tour_obj)
-        if request.method == 'POST' and form.is_valid() and itinerary_formset.is_valid():
-            print('valid form')
+        stops_formset_factory = inlineformset_factory(Tour, Stop, exclude=('tour',), extra=0)
+        stops_formset = stops_formset_factory(request.POST or None, instance=tour_obj)
+        if request.method == 'POST' and form.is_valid() and itinerary_formset.is_valid() and stops_formset.is_valid():
             form.save()
             itinerary_formset.save()
+            stops_formset.save()
         elif request.method == 'POST':
             print(form.errors)
     else:
         form = None
         itinerary_formset = None
+        stops_formset = None
 
     context = {
                   'tour': tour_obj,
                   'form': form,
                   'itinerary_forms': itinerary_formset,
+                  'stop_forms': stops_formset,
                   'other_extensions': other_extensions,
                   'parent': parent,
                   'extensions': extensions

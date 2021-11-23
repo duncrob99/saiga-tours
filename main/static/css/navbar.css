@@ -22,31 +22,31 @@
     z-index: 9995;
 }
 
-.dropdown-menu li {
+.navbar .dropdown-menu li {
     position: relative;
 }
 
-.dropdown-menu .dropdown-submenu {
+.navbar .dropdown-menu .dropdown-submenu {
     position: absolute;
     left: 100%;
     top: 0;
 }
 
-.dropdown-menu > li:hover > .dropdown-submenu {
+.navbar .dropdown-menu > li:hover > .dropdown-submenu {
     display: block;
     top: 0;
     opacity: 1;
     transform: translateY(0) rotateX(0);
 }
 
-.dropdown:hover > .dropdown-menu {
+.navbar .dropdown:hover > .dropdown-menu {
     display: block;
     margin-top: 0;
     opacity: 1;
     transform: translateY(0) rotateX(0);
 }
 
-.dropdown-menu {
+.navbar .dropdown-menu {
     border-bottom-left-radius: 20px;
     border-top-right-radius: 20px;
     box-shadow: 3px 3px 8px lightgrey;
@@ -62,19 +62,19 @@
     z-index: -10000;
 }
 
-.dropdown {
+.navbar .dropdown {
     margin-bottom: 0;
 }
 
-.dropdown-item .bi-caret-right-fill {
+.navbar .dropdown-item .bi-caret-right-fill {
     margin-left: 30px;
 }
 
-.dropdown-menu > li:last-child > .dropdown-item {
+.navbar .dropdown-menu > li:last-child > .dropdown-item {
     border-bottom-left-radius: 8px;
 }
 
-.dropdown-menu > li:first-child > .dropdown-item {
+.navbar .dropdown-menu > li:first-child > .dropdown-item {
     border-top-right-radius: 8px;
 }
 
@@ -83,15 +83,15 @@
         display: none !important;
     }
 
-    .main-nav.dropdown-toggle {
+    .navbar .main-nav.dropdown-toggle {
         display: none !important;
     }
 
-    .main-nav.nav-link {
+    .navbar .main-nav.nav-link {
         width: 100%;
     }
 
-    .navbar-nav {
+    .navbar .navbar-nav {
         position: relative !important;
     }
 
@@ -108,7 +108,7 @@
     }
 }
 
-.navbar-nav {
+.navbar .navbar-nav {
     height: 100%;
     top: 100%;
     position: absolute;
@@ -124,18 +124,18 @@
     display: none;
 }
 
-.nav-item {
+.navbar .nav-item {
     margin-left: 15px;
     margin-right: 15px;
     white-space: nowrap;
 }
 
-.navbar-brand {
+.navbar .navbar-brand {
     color: var(--accent-background) !important;
     font-size: xx-large;
 }
 
-.navbar-brand:hover {
+.navbar .navbar-brand:hover {
     color: var(--accent-hover-background) !important;
 }
 
@@ -147,7 +147,7 @@
     color: var(--accent-hover-background);
 }
 
-.logo {
+.navbar .logo {
     max-height: 80px;
     margin-bottom: -80px;
     margin-top: -80px;

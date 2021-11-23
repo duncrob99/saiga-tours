@@ -124,16 +124,3 @@ hr {
   top: 10px;
   position: relative;
 }
-
-#delete-day, #create-day {
-  font-size: 2em;
-  cursor: pointer;
-}
-
-#delete-day {
-  color: red;
-}
-
-#create-day {
-  color: green;
-}

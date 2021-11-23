@@ -48,7 +48,6 @@ for (let i = 0; i < num_days_forms; i++) {
 
 function deactivateEditor() {
     for (let editor_name in rich_field_map) {
-        console.log(`deactivating ${editor_name}`);
         document.querySelector(`#${editor_name}`).setAttribute('contenteditable', false);
         if (Object.keys(CKEDITOR.instances).includes(editor_name)) {
             CKEDITOR.instances[editor_name].destroy();
@@ -60,8 +59,8 @@ function deactivateEditor() {
         input_field.setAttribute('contenteditable', false);
     }
 
-    document.querySelector('#create-day').setAttribute('hidden', 'hidden');
-    document.querySelector('#delete-day').setAttribute('hidden', 'hidden');
+    document.querySelector('#create-stop').setAttribute('hidden', 'hidden');
+    document.querySelector('#delete-stop').setAttribute('hidden', 'hidden');
 
     if (dated) {
         if (start_picker !== undefined) {
@@ -73,11 +72,12 @@ function deactivateEditor() {
     }
 
     document.querySelector(':root').style.setProperty('--slider-button-width', initial_slider_button_width);
+
+    updateStops(stops, false);
 }
 
 function activateEditor() {
     for (let editor_name in rich_field_map) {
-        console.log(`activating ${editor_name}`);
         document.querySelector(`#${editor_name}`).setAttribute('contenteditable', true);
         let editor = CKEDITOR.inline(editor_name, {
             extraPlugins: 'sourcedialog, uploadimage, sharedspace',
@@ -112,8 +112,8 @@ function activateEditor() {
         })
     }
 
-    document.querySelector('#create-day').removeAttribute('hidden');
-    document.querySelector('#delete-day').removeAttribute('hidden');
+    document.querySelector('#create-stop').removeAttribute('hidden');
+    document.querySelector('#delete-stop').removeAttribute('hidden');
 
     if (dated) {
         start_picker = new Litepicker({
@@ -122,7 +122,6 @@ function activateEditor() {
             scrollToDate: true
         });
         start_picker.on('selected', (date) => {
-            console.log(date);
             document.querySelector('#start-date').innerHTML = DateTime.fromJSDate(date.dateInstance).toLocaleString(DateTime.DATE_MED);
             let end_date = DateTime.fromJSDate(end_picker.getDate().dateInstance);
             let duration = end_date.diff(DateTime.fromJSDate(date.dateInstance), 'days').toObject()['days'] + 1
@@ -136,7 +135,6 @@ function activateEditor() {
             scrollToDate: true
         });
         end_picker.on('selected', (date) => {
-            console.log(date);
             document.querySelector('#end-date').innerHTML = DateTime.fromJSDate(date.dateInstance).toLocaleString(DateTime.DATE_MED);
             let start_date = DateTime.fromJSDate(start_picker.getDate().dateInstance);
             let duration = DateTime.fromJSDate(date.dateInstance).diff(start_date, 'days').toObject()['days'] + 1
@@ -147,6 +145,8 @@ function activateEditor() {
     }
 
     document.querySelector(':root').style.setProperty('--slider-button-width', '10%');
+
+    updateStops(stops, true);
 }
 
 // Set editing iff editing checkbox checked
@@ -172,10 +172,10 @@ function editorChange() {
     document.querySelector('textarea[name="description"]').value = desc.innerHTML;
 }
 
-document.querySelector('#create-day').addEventListener('click', () => {
-    console.log('creating day');
+document.querySelector('#create-stop').addEventListener('click', () => {
+    console.log('creating stop');
 })
 
-document.querySelector('#delete-day').addEventListener('click', () => {
-    console.log('deleting day');
+document.querySelector('#delete-stop').addEventListener('click', () => {
+    console.log('deleting stop');
 })

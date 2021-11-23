@@ -2,12 +2,15 @@
     --map-fade: 10%;
 }
 
-object, svg {
+object, .map svg {
     width: 100%;
     height: auto;
     mask-image: linear-gradient(to right, transparent 0%, white var(--map-fade), white calc(100% - var(--map-fade)), transparent 100%),
     linear-gradient(to bottom, transparent 0%, white var(--map-fade), white calc(100% - var(--map-fade)), transparent 100%);
     mask-composite: intersect;
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, white var(--map-fade), white calc(100% - var(--map-fade)), transparent 100%),
+    linear-gradient(to bottom, transparent 0%, white var(--map-fade), white calc(100% - var(--map-fade)), transparent 100%);
+    -webkit-mask-composite: destination-in;
 }
 
 /*
@@ -28,4 +31,35 @@ path.available:hover {
 
 .pre-load {
     visibility: hidden;
+}
+
+#delete-stop, #create-stop {
+    font-size: 2em;
+    cursor: pointer;
+    transition: all 0.5s;
+}
+
+#delete-stop {
+    color: red;
+}
+
+#delete-stop:hover {
+    color: darkred;
+}
+
+#create-stop {
+    color: #00d500;
+}
+
+#create-stop:hover {
+    color: darkgreen;
+}
+
+.alt-context-menu a {
+    color: black;
+    text-decoration: none;
+}
+
+li.alt-context-menu:hover {
+    cursor: pointer;
 }
