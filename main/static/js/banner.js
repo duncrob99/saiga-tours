@@ -110,7 +110,6 @@ function loadNextImg() {
     let all_imgs = document.querySelectorAll('.banner-img');
     let to_load = Array.from(document.querySelectorAll('.banner-img.to-load'));
     if (to_load.length === 0) {
-        console.log('All images loaded');
         return
     }
 
@@ -192,7 +191,6 @@ function progress(index, delay) {
             }
         })
 
-        console.log(index);
         setTimeout(progress, delay, index + 1, banner_delay * 1000);
     } else {
         setTimeout(() => {
