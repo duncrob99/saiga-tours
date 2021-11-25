@@ -12,5 +12,16 @@ function hideOffscreen() {
     })
 }
 
+function resizeMobileDropdown() {
+    let items = document.querySelectorAll('.navbar-nav > .nav-item');
+    let bottom = 0;
+    items.forEach(el => {
+        bottom = Math.max(bottom, el.getBoundingClientRect().bottom);
+    })
+    document.querySelector('#navbarNav').style.setProperty('--navbar-height', `calc(${bottom}px - 10vh)`);
+}
+
+document.querySelector('.navbar-toggler').addEventListener('click', resizeMobileDropdown);
+
 hideOffscreen();
 window.addEventListener('resize', hideOffscreen);
