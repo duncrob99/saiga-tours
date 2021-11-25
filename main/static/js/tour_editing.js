@@ -59,9 +59,6 @@ function deactivateEditor() {
         input_field.setAttribute('contenteditable', false);
     }
 
-    document.querySelector('#create-stop').setAttribute('hidden', 'hidden');
-    document.querySelector('#delete-stop').setAttribute('hidden', 'hidden');
-
     if (dated) {
         if (start_picker !== undefined) {
             start_picker.destroy();
@@ -111,9 +108,6 @@ function activateEditor() {
             output_field.value = input_field.innerText;
         })
     }
-
-    document.querySelector('#create-stop').removeAttribute('hidden');
-    document.querySelector('#delete-stop').removeAttribute('hidden');
 
     if (dated) {
         start_picker = new Litepicker({
@@ -172,10 +166,12 @@ function editorChange() {
     document.querySelector('textarea[name="description"]').value = desc.innerHTML;
 }
 
-document.querySelector('#create-stop').addEventListener('click', () => {
-    console.log('creating stop');
-})
-
-document.querySelector('#delete-stop').addEventListener('click', () => {
-    console.log('deleting stop');
+document.querySelectorAll('textarea').forEach(el => {
+    el.style.resize = 'none';
+    el.style.height = '1px';
+    el.style.height = `${el.scrollHeight + parseInt(getComputedStyle(el).lineHeight) / 2}px`;
+    el.addEventListener('input', () => {
+        el.style.height = '1px';
+        el.style.height = `${el.scrollHeight + parseInt(getComputedStyle(el).lineHeight) / 2}px`;
+    })
 })
