@@ -1,4 +1,5 @@
 let menu_instances = [];
+let map_content_width = 0;
 
 function minBBox(bbox1, bbox2) {
     let right1 = bbox1.x + bbox1.width;
@@ -17,12 +18,12 @@ function minBBox(bbox1, bbox2) {
 
 
 function make_map_work(destinations, width, height, hoverable, stops, editable) {
+    resize_map(destinations, width, height, hoverable);
 
     if (stops !== undefined) {
         updateStops(stops, editable);
     }
 
-    resize_map(destinations, width, height, hoverable);
     document.querySelectorAll('.pre-load').forEach((el) => el.classList.remove('pre-load'));
     window.addEventListener('resize', () => {
         resize_map(destinations, width, height, hoverable);
@@ -31,6 +32,8 @@ function make_map_work(destinations, width, height, hoverable, stops, editable) 
 
 function updatePath(stops) {
     let map_svg = document.querySelector('.map svg');
+
+    let path_width = map_content_width * 0.006;
 
     let x = [];
     let y = [];
@@ -46,7 +49,7 @@ function updatePath(stops) {
         path_el.id = 'stop_path';
         path_el.setAttributeNS(null, 'fill', 'none');
         path_el.setAttributeNS(null, 'stroke', '#106e2e');
-        path_el.setAttributeNS(null, 'stroke-width', '0.25px');
+        path_el.setAttributeNS(null, 'stroke-width', `${path_width}px`);
         path_el.setAttributeNS(null, 'd', path_str);
         map_svg.appendChild(path_el);
     } else {
@@ -57,6 +60,9 @@ function updatePath(stops) {
 
 function updateStops(stops, editable) {
     let map_svg = document.querySelector('.map svg');
+
+    let text_size = map_content_width * 0.04;
+    let pointer_size = map_content_width * 0.004;
 
     updatePath(stops);
 
@@ -70,10 +76,10 @@ function updateStops(stops, editable) {
         let stop = stops[i];
         let text_el = document.createElementNS('http://www.w3.org/2000/svg', 'text');
         text_el.setAttributeNS(null, 'x', `${stop.x}`);
-        text_el.setAttributeNS(null, 'y', `${stop.y - 4}`);
+        text_el.setAttributeNS(null, 'y', `${stop.y - pointer_size * 20}`);
         text_el.setAttributeNS(null, 'fill', 'black');
         text_el.setAttributeNS(null, 'stroke', 'none');
-        text_el.setAttributeNS(null, 'style', 'font-size: 2px;');
+        text_el.setAttributeNS(null, 'style', `font-size: ${text_size}px;`);
         text_el.setAttributeNS(null, 'text-anchor', 'middle');
         text_el.classList.add('pointer-text');
         text_el.id = `pointer-text-${i}`;
@@ -83,7 +89,7 @@ function updateStops(stops, editable) {
         let point_el = document.createElementNS('http://www.w3.org/2000/svg', 'path');
         point_el.setAttributeNS(null, 'd', 'm0 0s6-5.686 6-10a6 6 0 00-12 0c0 4.314 6 10 6 10zm0-7a3 3 0 110-6 3 3 0 010 6z');
         point_el.setAttributeNS(null, 'style', 'fill: red;');
-        point_el.setAttributeNS(null, 'transform', `translate(${stop.x}, ${stop.y}) scale(0.2)`);
+        point_el.setAttributeNS(null, 'transform', `translate(${stop.x}, ${stop.y}) scale(${pointer_size})`);
         point_el.id = `pointer-${i}`;
         point_el.classList.add('pointer');
 
@@ -94,12 +100,12 @@ function updateStops(stops, editable) {
         document.querySelector(`#id_stops-${stop.form_ix}-order`).value = i;
 
         let transition_start_time;
-        let transition_start_val = 0.2;
-        let transition_cur_val = 0.2;
+        let transition_start_val = pointer_size;
+        let transition_cur_val = pointer_size;
         let grow_dur = 500;
         let shrink_dur = 1000;
-        let max_size = 0.25;
-        let min_size = 0.2
+        let max_size = pointer_size * 1.25;
+        let min_size = pointer_size;
         let x = stop.x;
         let y = stop.y;
 
@@ -166,7 +172,7 @@ function updateStops(stops, editable) {
                     y = stops[i].y;
                     point_el.setAttributeNS(null, 'transform', `translate(${x} ${y}) scale(${transition_cur_val})`);
                     text_el.setAttributeNS(null, 'x', `${x}`);
-                    text_el.setAttributeNS(null, 'y', `${y - 4}`);
+                    text_el.setAttributeNS(null, 'y', `${y - pointer_size * 20}`);
                     updatePath(stops);
 
                     // Edit value in form
@@ -415,6 +421,7 @@ function resize_map(destinations, width, height, hoverable) {
         }
     }
 
+    map_content_width = min_bbox[2];
     let margin_factor = 0.2;
     min_bbox = [min_bbox[0] - margin_factor / 2 * min_bbox[2], min_bbox[1] - margin_factor / 2 * min_bbox[3], min_bbox[2] * (1 + margin_factor), min_bbox[3] * (1 + margin_factor)];
     if (ar !== undefined) {

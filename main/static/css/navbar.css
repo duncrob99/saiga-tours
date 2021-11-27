@@ -55,7 +55,7 @@
     border-top-right-radius: 20px;
     box-shadow: 3px 3px 8px lightgrey;
     transition: all 0.8s;
-    top: 55px;
+    top: calc(100% + 2px);
     font-size: 20px;
     line-height: 2;
     min-width: 100%;
