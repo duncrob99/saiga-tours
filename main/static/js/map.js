@@ -36,11 +36,13 @@ function make_map_work(destinations, width, height, hoverable, stops, editable, 
 
 function createPoints(points) {
     let map_svg = document.querySelector('.map svg');
-    let text_size = map_content_width * 0.03;
-    let pointer_size = map_content_width * 0.003;
 
     for (let i = 0; i < points.length; i++) {
         let point = points[i];
+
+        let text_size = map_content_width * 0.03 * point.size;
+        let pointer_size = map_content_width * 0.003 * point.size;
+
         let text_el = document.createElementNS('http://www.w3.org/2000/svg', 'text');
         text_el.setAttributeNS(null, 'x', `${point.x}`);
         text_el.setAttributeNS(null, 'y', `${point.y}`);
