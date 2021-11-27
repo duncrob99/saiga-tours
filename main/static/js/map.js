@@ -17,17 +17,130 @@ function minBBox(bbox1, bbox2) {
 }
 
 
-function make_map_work(destinations, width, height, hoverable, stops, editable) {
+function make_map_work(destinations, width, height, hoverable, stops, editable, points) {
     resize_map(destinations, width, height, hoverable);
 
     if (stops !== undefined) {
-        updateStops(stops, editable);
+        updateStops(stops, points, editable);
+    }
+
+    if (points !== undefined) {
+        createPoints(points);
     }
 
     document.querySelectorAll('.pre-load').forEach((el) => el.classList.remove('pre-load'));
     window.addEventListener('resize', () => {
         resize_map(destinations, width, height, hoverable);
     })
+}
+
+function createPoints(points) {
+    let map_svg = document.querySelector('.map svg');
+    let text_size = map_content_width * 0.03;
+    let pointer_size = map_content_width * 0.003;
+
+    for (let i = 0; i < points.length; i++) {
+        let point = points[i];
+        let text_el = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text_el.setAttributeNS(null, 'x', `${point.x}`);
+        text_el.setAttributeNS(null, 'y', `${point.y}`);
+        text_el.setAttributeNS(null, 'fill', 'black');
+        text_el.setAttributeNS(null, 'stroke', 'none');
+        text_el.setAttributeNS(null, 'style', `font-size: ${0}px;`);
+        text_el.setAttributeNS(null, 'text-anchor', 'middle');
+        text_el.classList.add('pointer-text');
+        text_el.id = `pointer-text-${i}`;
+        let text = document.createTextNode(point.name);
+        text_el.appendChild(text);
+
+        let point_el = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        point_el.setAttributeNS(null, 'd', 'm0 0s6-5.686 6-10a6 6 0 00-12 0c0 4.314 6 10 6 10zm0-7a3 3 0 110-6 3 3 0 010 6z');
+        point_el.setAttributeNS(null, 'style', 'fill: red;');
+        point_el.setAttributeNS(null, 'transform', `translate(${point.x}, ${point.y}) scale(${0})`);
+        point_el.id = `pointer-${i}`;
+        point_el.classList.add('pointer');
+
+        map_svg.appendChild(text_el);
+        map_svg.appendChild(point_el);
+
+        let transition_start_time;
+        let transition_start_val = 0;
+        let transition_cur_val = 0;
+        let grow_dur = 500;
+        let shrink_dur = 1000;
+        let max_size = pointer_size;
+        let min_size = 0;
+
+        function set_size() {
+            let cur_time = new Date().getTime();
+            if (point_el.classList.contains('growing') || point_el.classList.contains('shrinking')) {
+                if (transition_start_time === undefined) {
+                    transition_start_time = cur_time;
+                    setTimeout(set_size, 1);
+                } else if (cur_time - transition_start_time <= grow_dur && point_el.classList.contains('growing')) {
+                    let perc_done = (new Date().getTime() - transition_start_time) / grow_dur;
+                    transition_cur_val = transition_start_val + perc_done * (max_size - transition_start_val);
+                    text_el.setAttributeNS(null, 'y', `${point.y - transition_cur_val * pointer_size * 20 / pointer_size}`);
+                    text_el.setAttributeNS(null, 'style', `font-size: ${transition_cur_val * text_size / pointer_size}px;`);
+                    point_el.setAttributeNS(null, 'transform', `translate(${point.x}, ${point.y}) scale(${transition_cur_val})`);
+                    setTimeout(set_size, 1);
+                } else if (cur_time - transition_start_time <= shrink_dur && point_el.classList.contains('shrinking')) {
+                    let perc_done = (new Date().getTime() - transition_start_time) / shrink_dur;
+                    transition_cur_val = transition_start_val - perc_done * (transition_start_val - min_size);
+                    text_el.setAttributeNS(null, 'y', `${point.y - transition_cur_val * pointer_size * 20 / pointer_size}`);
+                    text_el.setAttributeNS(null, 'style', `font-size: ${transition_cur_val * text_size / pointer_size}px;`);
+                    point_el.setAttributeNS(null, 'transform', `translate(${point.x}, ${point.y}) scale(${transition_cur_val})`);
+                    setTimeout(set_size, 1);
+                } else if (point_el.classList.contains('growing')) {
+                    point_el.classList.remove('growing');
+                    point_el.classList.remove('shrinking');
+                    text_el.setAttributeNS(null, 'y', `${point.y - pointer_size * 20}`);
+                    text_el.setAttributeNS(null, 'style', `font-size: ${text_size}px;`);
+                    point_el.setAttributeNS(null, 'transform', `translate(${point.x}, ${point.y}) scale(${max_size})`);
+                    transition_start_time = undefined;
+                } else {
+                    point_el.classList.remove('growing');
+                    point_el.classList.remove('shrinking');
+                    text_el.setAttributeNS(null, 'y', `${0}`);
+                    text_el.setAttributeNS(null, 'style', `font-size: ${0}px;`);
+                    point_el.setAttributeNS(null, 'transform', `translate(${point.x}, ${point.y}) scale(${min_size})`);
+                    transition_start_time = undefined;
+                }
+            }
+        }
+
+        window.addEventListener('mousemove', (ev) => {
+            let map_rect = map_svg.getAttributeNS(null, 'viewBox').split(' ');
+            let map_bounds = map_svg.getBoundingClientRect();
+            let perc_x = (ev.x - map_bounds.x) / map_bounds.width;
+            let perc_y = (ev.y - map_bounds.y) / map_bounds.height;
+            let x = perc_x * parseInt(map_rect[2]) + parseInt(map_rect[0]);
+            let y = perc_y * parseInt(map_rect[3]) + parseInt(map_rect[1]);
+
+            // if (Math.sqrt((x-point.x)**2 + (y-point.y)**2) < point.radius * map_content_width/10) {
+            //     point_el.setAttributeNS(null, 'transform', `translate(${point.x}, ${point.y}) scale(${pointer_size})`);
+            //     text_el.setAttributeNS(null, 'style', `font-size: ${text_size}px;`);
+            // } else {
+            //     point_el.setAttributeNS(null, 'transform', `translate(${point.x}, ${point.y}) scale(${0})`);
+            //     text_el.setAttributeNS(null, 'style', `font-size: ${0}px;`);
+            // }
+
+            if (Math.sqrt((x - point.x) ** 2 + (y - point.y) ** 2) < point.radius * map_content_width / 10) {
+                point_el.classList.add('growing');
+                point_el.classList.remove('shrinking');
+                transition_start_val = transition_cur_val;
+                transition_start_time = new Date().getTime();
+                set_size();
+            } else {
+                point_el.classList.remove('growing');
+                point_el.classList.add('shrinking');
+                transition_start_val = transition_cur_val;
+                transition_start_time = new Date().getTime();
+                set_size();
+            }
+        })
+    }
+
 }
 
 function updatePath(stops) {

@@ -1,22 +1,18 @@
 <style>
-    #
-    {{ uid|default:"tour_cards" }}
-    .text-card .card-body {
+    .{{ uid|default:"tour_cards" }} .text-card .card-body {
         min-height: {{ min_height|default:300 }}px;
     }
 </style>
 
-<div class="row" id="{{ uid|default:"tour_cards" }}">
+<div class="row {{ uid|default:"tour_cards" }}">
     {% for tour in tours %}
         <div class="d-flex flex-column tour-col col-xl-4 col-lg-6 col-md-12 g-0">
             <div start_date="{{ tour.start_date|date:'Y-m-d' }}"
                  end_date="{{ tour.end_date|date:'Y-m-d' }}"
                  price="{{ tour.price }}"
                  duration="{{ tour.duration }}"
-                 destinations="
-
-
-                         {% for destination in tour.destinations.all %}{% if forloop.counter > 1 %} {% endif %}{{ destination.slug }}{% endfor %}"
+                 destinations="{% for destination in tour.destinations.all %}
+                        {% if forloop.counter > 1 %} {% endif %}{{ destination.slug }}{% endfor %}"
                  hidden class="tour-data">
             </div>
 
