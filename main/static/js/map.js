@@ -70,27 +70,29 @@ function createPoints(points) {
         let shrink_dur = 1000;
         let max_size = pointer_size;
         let min_size = 0;
+        let changing = false;
 
         function set_size() {
+            changing = true;
             let cur_time = new Date().getTime();
             if (point_el.classList.contains('growing') || point_el.classList.contains('shrinking')) {
                 if (transition_start_time === undefined) {
                     transition_start_time = cur_time;
-                    setTimeout(set_size, 1);
+                    setTimeout(set_size, 50);
                 } else if (cur_time - transition_start_time <= grow_dur && point_el.classList.contains('growing')) {
                     let perc_done = (new Date().getTime() - transition_start_time) / grow_dur;
                     transition_cur_val = transition_start_val + perc_done * (max_size - transition_start_val);
                     text_el.setAttributeNS(null, 'y', `${point.y - transition_cur_val * pointer_size * 20 / pointer_size}`);
                     text_el.setAttributeNS(null, 'style', `font-size: ${transition_cur_val * text_size / pointer_size}px;`);
                     point_el.setAttributeNS(null, 'transform', `translate(${point.x}, ${point.y}) scale(${transition_cur_val})`);
-                    setTimeout(set_size, 1);
+                    setTimeout(set_size, 50);
                 } else if (cur_time - transition_start_time <= shrink_dur && point_el.classList.contains('shrinking')) {
                     let perc_done = (new Date().getTime() - transition_start_time) / shrink_dur;
                     transition_cur_val = transition_start_val - perc_done * (transition_start_val - min_size);
                     text_el.setAttributeNS(null, 'y', `${point.y - transition_cur_val * pointer_size * 20 / pointer_size}`);
                     text_el.setAttributeNS(null, 'style', `font-size: ${transition_cur_val * text_size / pointer_size}px;`);
                     point_el.setAttributeNS(null, 'transform', `translate(${point.x}, ${point.y}) scale(${transition_cur_val})`);
-                    setTimeout(set_size, 1);
+                    setTimeout(set_size, 50);
                 } else if (point_el.classList.contains('growing')) {
                     point_el.classList.remove('growing');
                     point_el.classList.remove('shrinking');
@@ -98,6 +100,7 @@ function createPoints(points) {
                     text_el.setAttributeNS(null, 'style', `font-size: ${text_size}px;`);
                     point_el.setAttributeNS(null, 'transform', `translate(${point.x}, ${point.y}) scale(${max_size})`);
                     transition_start_time = undefined;
+                    changing = false;
                 } else {
                     point_el.classList.remove('growing');
                     point_el.classList.remove('shrinking');
@@ -105,11 +108,12 @@ function createPoints(points) {
                     text_el.setAttributeNS(null, 'style', `font-size: ${0}px;`);
                     point_el.setAttributeNS(null, 'transform', `translate(${point.x}, ${point.y}) scale(${min_size})`);
                     transition_start_time = undefined;
+                    changing = false;
                 }
             }
         }
 
-        window.addEventListener('mousemove', (ev) => {
+        map_svg.addEventListener('mousemove', (ev) => {
             let map_rect = map_svg.getAttributeNS(null, 'viewBox').split(' ');
             let map_bounds = map_svg.getBoundingClientRect();
             let perc_x = (ev.x - map_bounds.x) / map_bounds.width;
@@ -125,19 +129,28 @@ function createPoints(points) {
             //     text_el.setAttributeNS(null, 'style', `font-size: ${0}px;`);
             // }
 
-            if (Math.sqrt((x - point.x) ** 2 + (y - point.y) ** 2) < point.radius * map_content_width / 10) {
-                point_el.classList.add('growing');
-                point_el.classList.remove('shrinking');
-                transition_start_val = transition_cur_val;
-                transition_start_time = new Date().getTime();
-                set_size();
-            } else {
-                point_el.classList.remove('growing');
-                point_el.classList.add('shrinking');
-                transition_start_val = transition_cur_val;
-                transition_start_time = new Date().getTime();
-                set_size();
-            }
+            // if (Math.sqrt((x - point.x) ** 2 + (y - point.y) ** 2) < point.radius * map_content_width / 10) {
+            //     point_el.classList.add('growing');
+            //     point_el.classList.remove('shrinking');
+            //     transition_start_val = transition_cur_val;
+            //     transition_start_time = new Date().getTime();
+            //     if (!changing) {
+            //         set_size();
+            //     }
+            // } else {
+            //     point_el.classList.remove('growing');
+            //     point_el.classList.add('shrinking');
+            //     transition_start_val = transition_cur_val;
+            //     transition_start_time = new Date().getTime();
+            //     if (!changing) {
+            //         set_size();
+            //     }
+            // }
+
+            let dist = Math.max(1 - Math.sqrt((x - point.x) ** 2 + (y - point.y) ** 2) / (point.radius * 20), 0);
+            text_el.setAttributeNS(null, 'y', `${point.y - dist * pointer_size * 20}`);
+            text_el.setAttributeNS(null, 'style', `font-size: ${dist * text_size}px;`);
+            point_el.setAttributeNS(null, 'transform', `translate(${point.x}, ${point.y}) scale(${pointer_size * dist})`);
         })
     }
 
