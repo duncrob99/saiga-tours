@@ -49,7 +49,6 @@ INSTALLED_APPS = [
     'simple_history',
     'colorfield',
     'analytics',
-    'computedfields'
 ]
 
 MIDDLEWARE = [

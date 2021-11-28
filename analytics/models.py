@@ -2,7 +2,6 @@ import datetime
 import uuid
 from enum import Enum
 
-from computedfields.models import ComputedFieldsModel
 from django.db import models
 from django.db.models import Max, Min
 
@@ -27,7 +26,7 @@ class Page(models.Model):
     path = models.CharField(max_length=300, editable=False)
 
 
-class PageView(ComputedFieldsModel):
+class PageView(models.Model):
     session = models.ForeignKey(Session, on_delete=models.CASCADE, editable=False)
     time = models.DateTimeField(editable=False, auto_now_add=True)
     end_time = models.DateTimeField(null=True)
