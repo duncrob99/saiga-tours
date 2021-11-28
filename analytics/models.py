@@ -35,6 +35,12 @@ class PageView(models.Model):
     complete = models.BooleanField(default=False, editable=False)
     ip_info = models.JSONField(null=True, blank=True)
 
+    @classmethod
+    def calc_durs(cls):
+        for page in cls.objects.all():
+            page.end_time = page.time + page.duration
+            page.save()
+
 
 class MouseAction(models.Model):
     class Button(Enum):

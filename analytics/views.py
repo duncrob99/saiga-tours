@@ -18,7 +18,8 @@ def daterange(start_date, end_date):
 
 
 def ip_location(ip: str):
-    response = requests.get(f'https://ipwhois.app/json/{ip}')
+    # response = requests.get(f'https://ipwhois.app/json/{ip}')
+    response = requests.get(f'http://ip-api.com/json/{ip}')
     return json.loads(response.content)
 
 
@@ -130,6 +131,7 @@ def statistics(request):
     for visitor in UserCookie.objects.all():
         views_per_visitor.append(PageView.objects.filter(session__user=visitor).count())
 
+    PageView.calc_durs()
     session_durations = []
     for session in Session.objects.all():
         session_durations.append(session.duration.seconds / 60)
