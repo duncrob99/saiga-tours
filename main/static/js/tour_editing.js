@@ -70,7 +70,9 @@ function deactivateEditor() {
 
     document.querySelector(':root').style.setProperty('--slider-button-width', initial_slider_button_width);
 
-    updateStops(stops, false);
+    if (typeof updateStops === 'function') {
+        updateStops(stops, false);
+    }
 }
 
 function activateEditor() {
@@ -140,7 +142,9 @@ function activateEditor() {
 
     document.querySelector(':root').style.setProperty('--slider-button-width', '10%');
 
-    updateStops(stops, true);
+    if (typeof updateStops === 'function') {
+        updateStops(stops, true);
+    }
 }
 
 // Set editing iff editing checkbox checked

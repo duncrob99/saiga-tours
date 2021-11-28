@@ -25,7 +25,7 @@ def ip_location(ip: str):
 # Create your views here.
 def view(request):
     if 'userID' not in request.COOKIES:
-        user = UserCookie.objects.create(staff=request.user.is_staff)
+        user = UserCookie.objects.create(staff=request.user.is_staff, user_agent=request.META['HTTP_USER_AGENT'])
         response = JsonResponse({'new_user': True})
         response.set_cookie('userID', user.uuid, samesite='Lax')
     else:
@@ -35,8 +35,10 @@ def view(request):
             if request.user.is_staff and not user.staff:
                 user.staff = True
                 user.save()
+            if not user.user_agent:
+                user.user_agent = request.META['HTTP_USER_AGENT']
         except ValidationError:
-            user = UserCookie.objects.create(staff=request.user.is_staff)
+            user = UserCookie.objects.create(staff=request.user.is_staff, user_agent=request.META['HTTP_USER_AGENT'])
             response = JsonResponse({'new_user': True})
             response.set_cookie('userID', user.uuid, samesite='Lax')
 

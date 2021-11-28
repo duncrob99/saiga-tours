@@ -11,6 +11,7 @@ from django.db.models import Max, Min
 class UserCookie(models.Model):
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4)
     staff = models.BooleanField(default=False)
+    user_agent = models.CharField(max_length=200)
 
 
 class Session(models.Model):
