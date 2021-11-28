@@ -1,0 +1,118 @@
+<script src="//code.jquery.com/jquery-2.1.4.min.js"></script>
+<script>
+    (function () {
+        let cookie = document.cookie;
+        let csrfToken = cookie.substring(cookie.indexOf('csrftoken=') + 'csrftoken='.length).split(';')[0];
+        let reportInterval = 5000;
+
+        $.ajax({
+            type: "POST",
+            url: "{% url 'view' %}",
+            data: {
+                'path': window.location.pathname,
+                'interval': reportInterval,
+            },
+            success: data => {
+                console.log(data);
+                if (data.new_user) {
+                    document.querySelector('#cookie-banner').classList.remove('hidden');
+                }
+            },
+            error: () => {
+                console.log("You're not being tracked");
+            },
+            headers: {
+                'X-CSRFToken': csrfToken
+            }
+        })
+
+        setInterval(() => {
+            $.ajax({
+                type: "POST",
+                url: "{% url 'heartbeat' %}",
+                data: {
+                    'path': window.location.pathname,
+                    'interval': reportInterval,
+                },
+                success: function () {
+                    console.log("You're still being tracked");
+                },
+                error: () => {
+                    console.log("You're not being tracked anymore");
+                },
+                headers: {
+                    'X-CSRFToken': csrfToken
+                }
+            })
+        }, reportInterval)
+
+        window.addEventListener('beforeunload', () => {
+            $.ajax({
+                type: "POST",
+                url: "{% url 'close' %}",
+                data: {
+                    'path': window.location.pathname
+                },
+                success: function () {
+                    console.log("You're still being tracked");
+                },
+                error: () => {
+                    console.log("You're not being tracked anymore");
+                },
+                headers: {
+                    'X-CSRFToken': csrfToken
+                }
+            })
+        })
+
+        let last_pos;
+        let distance_trigger = 50;
+        window.addEventListener('mousemove', (ev) => {
+            if (last_pos === undefined || Math.sqrt((last_pos.x - ev.x) ** 2 + (last_pos.y - ev.y) ** 2) > distance_trigger) {
+                last_pos = {x: ev.x, y: ev.y};
+                $.ajax({
+                    type: "POST",
+                    url: "{% url 'mouse-action' %}",
+                    data: {
+                        'path': window.location.pathname,
+                        'x': ev.x,
+                        'y': ev.y,
+                    },
+                    success: function () {
+                        console.log("You're still being tracked");
+                    },
+                    error: () => {
+                        console.log("You're not being tracked anymore");
+                    },
+                    headers: {
+                        'X-CSRFToken': csrfToken
+                    }
+                })
+            }
+        })
+
+        window.addEventListener('mousedown', (ev) => {
+            console.log(ev.button);
+            $.ajax({
+                type: "POST",
+                url: "{% url 'mouse-action' %}",
+                data: {
+                    'path': window.location.pathname,
+                    'x': ev.x,
+                    'y': ev.y,
+                    'clicked': ev.button
+                },
+                success: function () {
+                    console.log("You're still being tracked");
+                },
+                error: () => {
+                    console.log("You're not being tracked anymore");
+                },
+                headers: {
+                    'X-CSRFToken': csrfToken
+                }
+            })
+        })
+    })();
+</script>
+<div id="analytics-debug"></div>

@@ -48,6 +48,8 @@ INSTALLED_APPS = [
     'mathfilters',
     'simple_history',
     'colorfield',
+    'analytics',
+    'computedfields'
 ]
 
 MIDDLEWARE = [
@@ -176,3 +178,8 @@ SILENCED_SYSTEM_CHECKS = ['security.W019']
 FIXTURE_DIRS = (
     BASE_DIR / 'fixtures',
 )
+
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SAMESITE = 'Strict'
+SESSION_COOKIE_SAMESITE = 'Strict'
