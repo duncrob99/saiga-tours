@@ -23,6 +23,12 @@
             box-shadow: 5px 5px 10px darkgrey;
             border-radius: 10px;
         }
+
+        .dropdown {
+            user-select: none;
+            margin-left: 10px;
+            margin-right: 10px;
+        }
     </style>
 </head>
 <body>
@@ -76,9 +82,60 @@
             </div>
         </div>
     </div>
+    <div class="row m-3">
+        <div class="col-6">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="display-5">User Platforms</h5>
+                    <div class="d-flex align-items-center">
+                        <div class="dropdown">
+                            <a class="btn btn-secondary dropdown-toggle" href="#" role="button" id="platform-data"
+                               data-bs-toggle="dropdown" aria-expanded="false">
+                                Pageviews
+                            </a>
+
+                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                                <li><a class="dropdown-item" id="select-pageviews">Pageviews</a></li>
+                                <li><a class="dropdown-item" id="select-viewtime">Viewtime</a></li>
+                                <li><a class="dropdown-item" id="select-users">Unique users</a></li>
+                            </ul>
+                        </div>
+                        per
+                        <div class="dropdown">
+                            <a class="btn btn-secondary dropdown-toggle" href="#" role="button" id="platform-type"
+                               data-bs-toggle="dropdown" aria-expanded="false">
+                                Browser
+                            </a>
+
+                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                                <li><a class="dropdown-item" id="select-browser">Browser</a></li>
+                                <li><a class="dropdown-item" id="select-device">Device</a></li>
+                                <li><a class="dropdown-item" id="select-os">Operating System</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="users-per-browser"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="display-5">User Location</h5>
+                </div>
+                <div class="card-body">
+                    <div id="user-location"></div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 </body>
 <!--<script src="{% static 'analytics/js/plotly.js' %}"></script>-->
+<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+<script src="{% static 'analytics/js/d3-charts.js' %}"></script>
 <script>
     let days = [];
     {% for day in days %}
@@ -105,6 +162,30 @@
         session_durations.push("{{ dur }}");
     {% endfor %}
     console.log(session_durations);
+
+    let browser_labels = [];
+    let users_per_browser = [];
+    {% for browser, value in users_per_browser.items %}
+        browser_labels.push("{{ browser }}");
+        users_per_browser.push({{ value }});
+    {% endfor %}
+
+    let platform_value = d => d.pageviews;
+    let platform_data = {{ browser_stats|safe }};
+
+    function set_sunburst() {
+        let sunburst = Sunburst(platform_data, {
+            value: platform_value,
+            label: d => d.name,
+            title: (d, n) => `${n.ancestors().reverse().map(d => d.data.name).join(".").substring(1).replace('.', ' ')}\n${n.value.toLocaleString("en")}`
+        })
+
+        if (document.querySelector('#users-per-browser').hasChildNodes()) {
+            document.querySelector('#users-per-browser').querySelector('svg').replaceWith(sunburst);
+        } else {
+            document.querySelector('#users-per-browser').appendChild(sunburst);
+        }
+    }
 
     window.addEventListener('load', () => {
         Plotly.newPlot('daily-page-views', [{
@@ -151,6 +232,81 @@
             },
             type: 'histogram'
         }])
+
+        set_sunburst();
+
+        let data = [{
+            type: 'scattergeo',
+            mode: 'markers',
+            lon: {{ lons|safe }},
+            lat: {{ lats|safe }},
+            marker: {
+                size: 7,
+                line: {
+                    width: 1
+                }
+            },
+        }];
+
+        let layout = {
+            geo: {
+                scope: 'world',
+                resolution: 50,
+                showrivers: true,
+                rivercolor: '#fff',
+                showlakes: true,
+                lakecolor: '#fff',
+                showland: true,
+                landcolor: '#EAEAAE',
+                countrycolor: '#d3d3d3',
+                countrywidth: 1.5,
+                subunitcolor: '#d3d3d3'
+            },
+            margin: {
+                t: 0,
+                b: 0,
+                l: 0,
+                r: 0
+            },
+            width: document.querySelector('.card').clientWidth - 80,
+            height: document.querySelector('.card').clientHeight - 80
+        };
+
+        Plotly.newPlot('user-location', data, layout);
+
+
+    })
+
+    document.querySelector('#select-pageviews').addEventListener('click', () => {
+        document.querySelector('#platform-data').innerText = 'Pageviews';
+        platform_value = d => d.pageviews;
+        set_sunburst();
+    })
+    document.querySelector('#select-viewtime').addEventListener('click', () => {
+        document.querySelector('#platform-data').innerText = 'Viewtime';
+        platform_value = d => d.viewtime;
+        set_sunburst();
+    })
+    document.querySelector('#select-users').addEventListener('click', () => {
+        document.querySelector('#platform-data').innerText = 'Users';
+        platform_value = d => d.users;
+        set_sunburst();
+    })
+
+    document.querySelector('#select-browser').addEventListener('click', () => {
+        document.querySelector('#platform-type').innerText = 'Browser';
+        platform_data = {{ browser_stats|safe }};
+        set_sunburst();
+    })
+    document.querySelector('#select-os').addEventListener('click', () => {
+        document.querySelector('#platform-type').innerText = 'Operating System';
+        platform_data = {{ os_stats|safe }};
+        set_sunburst();
+    })
+    document.querySelector('#select-device').addEventListener('click', () => {
+        document.querySelector('#platform-type').innerText = 'Device';
+        platform_data = {{ device_stats|safe }};
+        set_sunburst();
     })
 </script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"

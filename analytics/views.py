@@ -1,5 +1,6 @@
 import datetime
 import json
+from collections import defaultdict
 
 import requests
 from django.core.exceptions import ValidationError
@@ -98,12 +99,14 @@ def mouse_action(request):
 def batch_close_views():
     current_time = timezone.now()
     for page_view in PageView.objects.filter(complete=False):
-        if current_time - page_view.time - page_view.duration > 60:
+        if current_time - page_view.time - page_view.duration > datetime.timedelta(seconds=60):
             page_view.complete = True
             page_view.save()
 
 
 def statistics(request):
+    batch_close_views()
+
     if not request.user.is_staff:
         raise Http404()
 
@@ -136,11 +139,63 @@ def statistics(request):
     for session in Session.objects.all():
         session_durations.append(session.duration.seconds / 60)
 
+    UserCookie.calc_uas()
+    browser_stats = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(int)))))
+    os_stats = defaultdict(
+        lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(int))))))
+    device_stats = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(int))))
+    for user in UserCookie.objects.all():
+        browser = user.user_agent_info['user_agent']
+        os = user.user_agent_info['os']
+        device = user.user_agent_info['device']
+
+        pageviews = user.pageviews
+        viewtime = user.viewtime or datetime.timedelta(seconds=0)
+
+        browser_stats[browser['family']][browser['major']][browser['minor']][browser['patch']]['users'] += 1
+        browser_stats[browser['family']][browser['major']][browser['minor']][browser['patch']][
+            'pageviews'] += pageviews
+
+        os_stats[os['family']][os['major']][os['minor']][os['patch']][os['patch_minor']]['users'] += 1
+        os_stats[os['family']][os['major']][os['minor']][os['patch']][os['patch_minor']]['pageviews'] += pageviews
+
+        device_stats[device['family']][device['brand']][device['model']]['users'] += 1
+        device_stats[device['family']][device['brand']][device['model']]['pageviews'] += pageviews
+
+        if viewtime is not None:
+            browser_stats[browser['family']][browser['major']][browser['minor']][browser['patch']][
+                'viewtime'] += viewtime.seconds / 60
+            os_stats[os['family']][os['major']][os['minor']][os['patch']][os['patch_minor']][
+                'viewtime'] += viewtime.seconds / 60
+            device_stats[device['family']][device['brand']][device['model']]['viewtime'] += viewtime.seconds / 60
+
+    def format_children_for_sunburst(data: dict):
+        if isinstance(list(list(data.values())[0].values())[0], dict):
+            return [{'name': key, 'children': format_children_for_sunburst(value)} for key, value in data.items()]
+        else:
+            return [{'name': key} | values for key, values in data.items()]
+
+    def format_for_sunburst(data: dict):
+        return {'name': '', 'children': format_children_for_sunburst(data)}
+
+    lats = []
+    lons = []
+    for view in PageView.objects.filter(ip_info__isnull=False, ip_info__lat__isnull=False, ip_info__lon__isnull=False):
+        lats.append(view.ip_info['lat'])
+        lons.append(view.ip_info['lon'])
+
+    print(lats, lons)
+
     context = {
         'days': daterange(min_date, max_date),
         'daily_viewcounts': daily_viewcounts,
         'daily_visitors': daily_visitors,
         'views_per_visitor': views_per_visitor,
-        'session_durations': session_durations
+        'session_durations': session_durations,
+        'browser_stats': json.dumps(format_for_sunburst(browser_stats)),
+        'os_stats': json.dumps(format_for_sunburst(os_stats)),
+        'device_stats': json.dumps(format_for_sunburst(device_stats)),
+        'lats': json.dumps(lats),
+        'lons': json.dumps(lons)
     }
     return render(request, 'analytics/statistics.html', context)
