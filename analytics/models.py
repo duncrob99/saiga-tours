@@ -3,7 +3,8 @@ import uuid
 from enum import Enum
 
 from django.db import models
-from django.db.models import Max, Min
+from django.db.models import Max, Min, Sum, Count
+from ua_parser import user_agent_parser
 
 
 # Create your models here.
@@ -11,6 +12,24 @@ class UserCookie(models.Model):
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4)
     staff = models.BooleanField(default=False)
     user_agent = models.CharField(max_length=200)
+    user_agent_info = models.JSONField(null=True, blank=True)
+
+    @classmethod
+    def calc_uas(cls):
+        for user in cls.objects.filter(user_agent_info__isnull=True):
+            user.user_agent_info = user_agent_parser.Parse(user.user_agent)
+            user.save()
+
+    @property
+    def pageviews(self):
+        return self.session_set.aggregate(pageviews=Count('pageview'))['pageviews']
+
+    @property
+    def viewtime(self):
+        return self.session_set.aggregate(viewtime=Sum('pageview__duration'))['viewtime']
+    #     time = 0
+    #     for session in self.session_set:
+    #         time += session.pageview_set.annotate(watch_time=Sum('duration'))
 
 
 class Session(models.Model):
