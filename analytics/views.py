@@ -142,7 +142,7 @@ def statistics(request):
     PageView.calc_durs()
     session_durations = []
     for session in Session.objects.all():
-        session_durations.append(session.duration.seconds / 60)
+        session_durations.append(session.duration.seconds / 60 or None)
 
     UserCookie.calc_uas()
     browser_stats = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(int)))))
@@ -155,7 +155,7 @@ def statistics(request):
         device = user.user_agent_info['device']
 
         pageviews = user.pageviews
-        viewtime = user.viewtime or datetime.timedelta(seconds=0)
+        viewtime = user.viewtime.seconds / 60 or datetime.timedelta(seconds=0)
 
         browser_stats[browser['family']][browser['major']][browser['minor']][browser['patch']]['users'] += 1
         browser_stats[browser['family']][browser['major']][browser['minor']][browser['patch']][
@@ -169,10 +169,10 @@ def statistics(request):
 
         if viewtime is not None:
             browser_stats[browser['family']][browser['major']][browser['minor']][browser['patch']][
-                'viewtime'] += viewtime.seconds / 60
+                'viewtime'] += viewtime
             os_stats[os['family']][os['major']][os['minor']][os['patch']][os['patch_minor']][
-                'viewtime'] += viewtime.seconds / 60
-            device_stats[device['family']][device['brand']][device['model']]['viewtime'] += viewtime.seconds / 60
+                'viewtime'] += viewtime
+            device_stats[device['family']][device['brand']][device['model']]['viewtime'] += viewtime
 
     def format_children_for_sunburst(data: dict):
         if isinstance(list(list(data.values())[0].values())[0], dict):
