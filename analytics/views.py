@@ -77,7 +77,7 @@ def heartbeat(request):
 
 def close_view(request):
     user = UserCookie.objects.get(uuid=request.COOKIES['userID'])
-    session = Session.objects.get(session_id=request.COOKIES['sessionid'], user=user)
+    session = Session.objects.get(session_id=request.session['session_id'], user=user)
     page = Page.objects.get(path=request.POST.get('path'))
     page_view = PageView.objects.get(session=session, page=page, complete=False)
     page_view.duration = timezone.now() - page_view.time
@@ -89,7 +89,7 @@ def close_view(request):
 
 def mouse_action(request):
     user = UserCookie.objects.get(uuid=request.COOKIES['userID'])
-    session = Session.objects.get(session_id=request.COOKIES['sessionid'], user=user)
+    session = Session.objects.get(session_id=request.session['session_id'], user=user)
     page = Page.objects.get(path=request.POST.get('path'))
     page_view = PageView.objects.get(session=session, page=page, complete=False)
     clicked = int(request.POST.get('clicked')) + 1 if request.POST.get('clicked') is not None else None
