@@ -142,7 +142,8 @@ def statistics(request):
     PageView.calc_durs()
     session_durations = []
     for session in Session.objects.all():
-        session_durations.append(session.duration.seconds / 60 or None)
+        if session.duration is not None:
+            session_durations.append(session.duration.seconds / 60)
 
     UserCookie.calc_uas()
     browser_stats = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(int)))))
@@ -155,7 +156,7 @@ def statistics(request):
         device = user.user_agent_info['device']
 
         pageviews = user.pageviews
-        viewtime = user.viewtime.seconds / 60 or datetime.timedelta(seconds=0)
+        viewtime = (user.viewtime or datetime.timedelta(seconds=0)).seconds / 60
 
         browser_stats[browser['family']][browser['major']][browser['minor']][browser['patch']]['users'] += 1
         browser_stats[browser['family']][browser['major']][browser['minor']][browser['patch']][
