@@ -20,7 +20,8 @@
 }
 
 .navbar {
-    box-shadow: 0 2px 10px grey;
+    /*box-shadow: 0 2px 10px grey;*/
+    box-shadow: 5px 5px 20px rgba(0, 0, 0, 0.5);
     background: white;
     padding-bottom: 0;
     z-index: 9995;
@@ -53,7 +54,8 @@
 .navbar .dropdown-menu {
     border-bottom-left-radius: 20px;
     border-top-right-radius: 20px;
-    box-shadow: 3px 3px 8px lightgrey;
+    /*box-shadow: 3px 3px 8px lightgrey;*/
+    box-shadow: 5px 5px 8px rgba(0, 0, 0, 0.5);
     transition: all 0.8s;
     top: calc(100% + 2px);
     font-size: 20px;
