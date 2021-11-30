@@ -44,7 +44,12 @@ def view(request):
             response = JsonResponse({'new_user': True})
             response.set_cookie('userID', user.uuid, samesite='Lax')
 
-    session, _ = Session.objects.get_or_create(session_id=request.COOKIES['sessionid'], user=user)
+    if 'session_id' in request.session:
+        session, _ = Session.objects.get_or_create(session_id=request.session['session_id'], user=user)
+    else:
+        session = Session.objects.create(user=user)
+        request.session['session_id'] = str(session.session_id)
+
     page, _ = Page.objects.get_or_create(path=request.POST.get('path'))
     PageView.objects.filter(session=session).update(complete=True)
     page_view = PageView.objects.create(session=session, page=page)
@@ -52,8 +57,7 @@ def view(request):
 
     client_ip, is_routable = get_client_ip(request)
     if client_ip is not None:
-        # page_view.ip_info = ip_location(client_ip)
-        page_view.ip_info = ip_location("14.137.208.189")
+        page_view.ip_info = ip_location(client_ip)
         page_view.save()
 
     return response
@@ -61,7 +65,7 @@ def view(request):
 
 def heartbeat(request):
     user = UserCookie.objects.get(uuid=request.COOKIES['userID'])
-    session = Session.objects.get(session_id=request.COOKIES['sessionid'], user=user)
+    session = Session.objects.get(session_id=request.session['session_id'], user=user)
     page = Page.objects.get(path=request.POST.get('path'))
     page_view = PageView.objects.get(session=session, page=page, complete=False)
     page_view.duration = timezone.now() - page_view.time + datetime.timedelta(

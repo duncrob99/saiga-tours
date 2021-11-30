@@ -13,7 +13,8 @@
                 'interval': reportInterval,
             },
             success: data => {
-                console.log(data);
+                console.log("You're being tracked")
+
                 if (data.new_user) {
                     document.querySelector('#cookie-banner').classList.remove('hidden');
                 }

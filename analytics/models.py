@@ -34,7 +34,7 @@ class UserCookie(models.Model):
 
 class Session(models.Model):
     user = models.ForeignKey(UserCookie, on_delete=models.CASCADE, editable=False)
-    session_id = models.CharField(max_length=100, editable=False)
+    session_id = models.CharField(max_length=100, default=uuid.uuid4)
 
     @property
     def duration(self):
