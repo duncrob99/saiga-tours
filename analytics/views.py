@@ -142,7 +142,7 @@ def statistics(request):
     PageView.calc_durs()
     session_durations = []
     for session in Session.objects.all():
-        session_durations.append(session.duration.seconds / 60)
+        session_durations.append(session.duration.seconds / 60 or None)
 
     UserCookie.calc_uas()
     browser_stats = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(int)))))
