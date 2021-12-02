@@ -1,9 +1,19 @@
+{% load static %}
+
 <script src="//code.jquery.com/jquery-2.1.4.min.js"></script>
+<script src="{% static 'analytics/js/visibility/visibility.core.js' %}"></script>
+<script src="{% static 'analytics/js/visibility/visibility.timers.js' %}"></script>
 <script>
     (function () {
         let cookie = document.cookie;
         let csrfToken = cookie.substring(cookie.indexOf('csrftoken=') + 'csrftoken='.length).split(';')[0];
         let reportInterval = 5000;
+
+        let time_visible = 0;
+        let became_visible;
+        Visibility.onVisible(() => {
+            became_visible = new Date().getTime();
+        });
 
         $.ajax({
             type: "POST",
@@ -15,20 +25,35 @@
             success: data => {
                 console.log("You're being tracked")
 
+                Visibility.change((ev, state) => {
+                    if (state === 'visible') {
+                        became_visible = new Date().getTime();
+                    } else {
+                        time_visible += new Date().getTime() - became_visible;
+                    }
+                })
+
                 if (data.new_user) {
                     document.querySelector('#cookie-banner').classList.remove('hidden');
                 }
 
                 setInterval(() => {
+                    if (!Visibility.hidden()) {
+                        time_visible += new Date().getTime() - became_visible;
+                        became_visible = new Date().getTime();
+                    }
+                    console.log(`Time visible : ${time_visible}`);
                     $.ajax({
                         type: "POST",
                         url: "{% url 'heartbeat' %}",
                         data: {
                             'path': window.location.pathname,
                             'interval': reportInterval,
+                            'time_visible': time_visible
                         },
                         success: function () {
                             console.log("You're still being tracked");
+                            time_visible = 0;
                         },
                         error: () => {
                             console.log("You're not being tracked anymore");
@@ -40,11 +65,16 @@
                 }, reportInterval)
 
                 window.addEventListener('beforeunload', () => {
+                    if (!Visibility.hidden()) {
+                        time_visible += new Date().getTime() - became_visible;
+                        became_visible = new Date().getTime();
+                    }
                     $.ajax({
                         type: "POST",
                         url: "{% url 'close' %}",
                         data: {
-                            'path': window.location.pathname
+                            'path': window.location.pathname,
+                            'time_visible': time_visible
                         },
                         success: function () {
                             console.log("You're still being tracked");

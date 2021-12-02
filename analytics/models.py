@@ -47,12 +47,15 @@ class Page(models.Model):
 
 class PageView(models.Model):
     session = models.ForeignKey(Session, on_delete=models.CASCADE, editable=False)
+
     time = models.DateTimeField(editable=False, auto_now_add=True)
     end_time = models.DateTimeField(null=True)
-    page = models.ForeignKey(Page, on_delete=models.CASCADE, editable=False)
     duration = models.DurationField(default=datetime.timedelta(0), editable=False)
+    time_visible = models.DurationField(default=datetime.timedelta(0))
+
     complete = models.BooleanField(default=False, editable=False)
     ip_info = models.JSONField(null=True, blank=True)
+    page = models.ForeignKey(Page, on_delete=models.CASCADE, editable=False)
 
     @classmethod
     def calc_durs(cls):

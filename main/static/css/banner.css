@@ -42,7 +42,7 @@
 :root {
     --banner-text-transparency: rgba(0, 0, 0, 60%);
     --banner-text-background: black;
-    --banner-text-margin: 200px;
+    --banner-text-margin: 300px;
     --banner-text-fade: 30%;
 }
 
