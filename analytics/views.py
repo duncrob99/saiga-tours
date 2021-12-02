@@ -67,9 +67,11 @@ def heartbeat(request):
     user = UserCookie.objects.get(uuid=request.COOKIES['userID'])
     session = Session.objects.get(session_id=request.session['session_id'], user=user)
     page = Page.objects.get(path=request.POST.get('path'))
+
     page_view = PageView.objects.get(session=session, page=page, complete=False)
     page_view.duration = timezone.now() - page_view.time + datetime.timedelta(
         milliseconds=int(request.POST.get('interval')) / 2)
+    page_view.time_visible += datetime.timedelta(milliseconds=int(request.POST.get('time_visible')))
     page_view.save()
 
     return JsonResponse({'success': True})
@@ -79,8 +81,10 @@ def close_view(request):
     user = UserCookie.objects.get(uuid=request.COOKIES['userID'])
     session = Session.objects.get(session_id=request.session['session_id'], user=user)
     page = Page.objects.get(path=request.POST.get('path'))
+
     page_view = PageView.objects.get(session=session, page=page, complete=False)
     page_view.duration = timezone.now() - page_view.time
+    page_view.time_visible += datetime.timedelta(milliseconds=request.POST.get('time_visible'))
     page_view.complete = True
     page_view.save()
 
@@ -189,8 +193,6 @@ def statistics(request):
     for view in PageView.objects.filter(ip_info__isnull=False, ip_info__lat__isnull=False, ip_info__lon__isnull=False):
         lats.append(view.ip_info['lat'])
         lons.append(view.ip_info['lon'])
-
-    print(lats, lons)
 
     context = {
         'days': daterange(min_date, max_date),
