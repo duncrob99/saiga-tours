@@ -54,6 +54,7 @@ def view(request):
     PageView.objects.filter(session=session).update(complete=True)
     page_view = PageView.objects.create(session=session, page=page)
     page_view.duration = datetime.timedelta(milliseconds=int(request.POST.get('interval')) / 2)
+    page_view.referer = request.META['HTTP_REFERER']
 
     client_ip, is_routable = get_client_ip(request)
     if client_ip is not None:

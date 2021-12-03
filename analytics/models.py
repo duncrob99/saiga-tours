@@ -47,6 +47,7 @@ class Page(models.Model):
 
 class PageView(models.Model):
     session = models.ForeignKey(Session, on_delete=models.CASCADE, editable=False)
+    referer = models.URLField(null=True, blank=True)
 
     time = models.DateTimeField(editable=False, auto_now_add=True)
     end_time = models.DateTimeField(null=True)
