@@ -207,7 +207,8 @@
                     x: {{ stop.x }},
                     y: {{ stop.y }},
                     day: {{ stop.day }},
-                    form_ix: {{ forloop.counter0 }}
+                    marked: {{ stop.marked|lower }},
+                    form_ix: {{ forloop.counter0 }},
                 });
             {% endfor %}
 

@@ -72,6 +72,7 @@ function deactivateEditor() {
 
     if (typeof updateStops === 'function') {
         updateStops(stops, false);
+        setMapZooming(true);
     }
 }
 
@@ -144,6 +145,7 @@ function activateEditor() {
 
     if (typeof updateStops === 'function') {
         updateStops(stops, true);
+        setMapZooming(false);
     }
 }
 
