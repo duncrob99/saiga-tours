@@ -387,7 +387,6 @@ class Stop(models.Model):
     name = models.CharField(max_length=100)
     day = models.PositiveSmallIntegerField()
     order = models.PositiveSmallIntegerField(null=True)
-    marked = models.BooleanField(default=True)
 
     def __str__(self):
         return f'Stop {self.name} in {self.tour}'
