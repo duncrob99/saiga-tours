@@ -259,6 +259,7 @@ function updateStops(stops, editable) {
             point_el.classList.add('stop-pointer');
 
             point_el.addEventListener('click', () => {
+                document.querySelector('#itinerary').scrollIntoView({behavior: 'smooth'});
                 currentSlide(stop.day);
             });
 

@@ -81,3 +81,7 @@ a {
 a:hover {
     color: var(--accent-hover-foreground);
 }
+
+body * {
+    scroll-margin-top: calc(var(--navbar-height) + 20px);
+}
