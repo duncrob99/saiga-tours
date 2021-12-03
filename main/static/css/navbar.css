@@ -18,7 +18,8 @@
 .navbar {
     /*box-shadow: 0 2px 10px grey;*/
     box-shadow: 5px 5px 20px rgba(0, 0, 0, 0.5);
-    background: white;
+    /*background: white;*/
+    background: var(--accent-background);
     padding-bottom: 0;
     z-index: 9995;
 }
@@ -133,20 +134,20 @@
 }
 
 .navbar .navbar-brand {
-    color: var(--accent-background) !important;
+    color: var(--accent-foreground) !important;
     font-size: xx-large;
 }
 
 .navbar .navbar-brand:hover {
-    color: var(--accent-hover-background) !important;
+    color: var(--accent-hover-foreground) !important;
 }
 
 #separate-contact a {
-    color: var(--accent-background);
+    color: var(--accent-foreground);
 }
 
 #separate-contact:hover a {
-    color: var(--accent-hover-background);
+    color: var(--accent-hover-foreground);
 }
 
 .navbar .logo {
@@ -157,4 +158,9 @@
 
 :root {
     --navbar-height: 106px;
+}
+
+.dropdown-item:hover {
+    background-color: var(--accent-hover-background);
+    color: var(--accent-hover-foreground);
 }

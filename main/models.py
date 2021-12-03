@@ -229,6 +229,7 @@ class Page(DraftHistory):
     content = RichTextUploadingField(config_name='default')
     card_img = models.ImageField()
     parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='children')
+    sibling_label = models.CharField(max_length=100, default='Extra')
 
     def __str__(self):
         return self.title

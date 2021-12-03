@@ -31,13 +31,13 @@
     </div>
 
     {% if user.is_staff %}
-        {% include 'main/page_list.html' with pages=page.children.all title='Subpages' %}
+        {% include 'main/page_list.html' with pages=page.children.all %}
 
-        {% include 'main/page_list.html' with pages=page.siblings title='Other pages in ' title_suffix=page.parent.title %}
+        {% include 'main/page_list.html' with pages=page.siblings title=page.parent.sibling_label %}
     {% else %}
-        {% include 'main/page_list.html' with pages=page.children.all_published title='Subpages' %}
+        {% include 'main/page_list.html' with pages=page.children.all_published %}
 
-        {% include 'main/page_list.html' with pages=page.published_siblings title='Other pages in ' title_suffix=page.parent.title %}
+        {% include 'main/page_list.html' with pages=page.published_siblings title=page.parent.sibling_label %}
     {% endif %}
 
     {% if request.user.is_staff %}

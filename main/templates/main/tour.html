@@ -11,7 +11,8 @@
 
 {% block banner %}
     {% if request.user.is_staff %}
-        <button id="editor-button" class="btn btn-outline-secondary d-inline-flex align-items-center"
+        <button id="editor-button"
+                class="btn btn-outline-secondary d-inline-flex align-items-center accent hoverable-accent"
                 data-bs-toggle="offcanvas"
                 data-bs-target="#editor-offcanvas" aria-controls="editor-offcanvas" role="button"
                 style="float: left; position: sticky; margin: 50px; top: 200px;">
@@ -25,7 +26,7 @@
     <div class="heading d-flex justify-content-between align-items-center">
         <h1 class="display-1" id="title">{{ tour }}</h1>
         <a href="{% url 'contact' %}?subject=Inquiry about {{ tour }}">
-            <button class="btn btn-primary d-inline-flex align-items-center" role="button"
+            <button class="btn btn-primary d-inline-flex align-items-center accent hoverable-accent" role="button"
                     style="float: right; border-radius: 20px;">
                 <span class="bi bi-chat-left-dots" style="font-size: 1.5rem"></span> <span style="margin-left: 10px;">Inquire Now</span>
             </button>

@@ -63,7 +63,21 @@ small {
     border-color: var(--accent-hover-background);
 }
 
+.hoverable-accent:focus {
+    background-color: var(--accent-hover-background);
+    color: var(--accent-hover-foreground);
+    border-color: var(--accent-hover-background);
+}
+
 .offcanvas {
     z-index: 9998;
 }
 
+a {
+    text-decoration: none;
+    color: var(--accent-foreground);
+}
+
+a:hover {
+    color: var(--accent-hover-foreground);
+}

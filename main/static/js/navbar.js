@@ -3,7 +3,7 @@ function hideOffscreen() {
     dropdowns.forEach(el => {
         let caret = el.parentElement.querySelector('.bi')
         if (caret !== null) {
-            if (el.getBoundingClientRect().right > document.body.getBoundingClientRect().right) {
+            if (el.getBoundingClientRect().right > document.body.getBoundingClientRect().right || el.children.length === 0) {
                 el.style.visibility = 'hidden';
                 caret.style.visibility = 'hidden';
             } else {
