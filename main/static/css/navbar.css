@@ -53,7 +53,7 @@
     /*box-shadow: 3px 3px 8px lightgrey;*/
     box-shadow: 5px 5px 8px rgba(0, 0, 0, 0.5);
     transition: all 0.8s;
-    top: calc(100% + 2px);
+    top: 55px;
     font-size: 20px;
     line-height: 2;
     min-width: 100%;
