@@ -63,3 +63,12 @@ path.available:hover {
 li.alt-context-menu:hover {
     cursor: pointer;
 }
+
+#country-labels text tspan {
+    pointer-events: none;
+    display: none;
+}
+
+.pointer, .pointer-text {
+    pointer-events: none;
+}

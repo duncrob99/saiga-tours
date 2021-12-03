@@ -1,3 +1,4 @@
+{% load static %}
 <style>
     {% for destination in destinations %}
         [title="{{ destination.name }}"] {
@@ -11,7 +12,18 @@
         {% endif %}
     {% endfor %}
 </style>
+<script src="{% static 'js/svg.min.js' %}"></script>
+<script src="{% static 'js/svg.panzoom.min.js' %}"></script>
+<script src="{% static 'js/svg.easing.min.js' %}"></script>
 
 <div class="pre-load map">
+    <div style="float: right; z-index: 5; margin-bottom: -100%; position: relative">
+        <button class="btn btn-primary accent hoverable-accent" type="button" id="map-zoom-in"><i
+                class="bi bi-zoom-in"></i></button>
+        <button class="btn btn-primary accent hoverable-accent" type="button" id="map-zoom-out"><i
+                class="bi bi-zoom-out"></i></button>
+        <button class="btn btn-primary accent hoverable-accent" type="button" id="map-zoom-reset"><i
+                class="bi bi-arrows-fullscreen"></i></button>
+    </div>
     {% include 'main/world_map.svg' %}
 </div>

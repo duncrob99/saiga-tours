@@ -29,9 +29,63 @@ function make_map_work(destinations, width, height, hoverable, stops, editable, 
     }
 
     document.querySelectorAll('.pre-load').forEach((el) => el.classList.remove('pre-load'));
+    setCountryNames(destinations);
+
     window.addEventListener('resize', () => {
         resize_map(destinations, width, height, hoverable);
+        //setCountryNames(destinations);
     })
+
+    let map_svg = SVG(document.querySelector('.map svg'))
+    map_svg.panZoom({
+        zoomMax: 20,
+        zoomMin: 1,
+        wheelZoom: false
+    });
+
+    document.querySelector('#map-zoom-in').addEventListener('click', () => {
+        let cur_zoom = map_svg.zoom();
+        console.log(cur_zoom);
+        map_svg.animate().zoom(cur_zoom * 1.5);
+    })
+
+    document.querySelector('#map-zoom-out').addEventListener('click', () => {
+        let cur_zoom = map_svg.zoom();
+        map_svg.animate().zoom(cur_zoom / 1.5);
+    })
+    document.querySelector('#map-zoom-reset').addEventListener('click', () => {
+        resize_map(destinations, width, height, hoverable);
+    });
+}
+
+function setCountryNames(destinations) {
+    let svg_map = document.querySelector('.map svg');
+
+    for (let country of destinations) {
+        //let text_el = new Array(svg_map.querySelectorAll('#country-labels text')).filter(el => el.innerText === country[0]);
+        let text_els = Array.from(svg_map.querySelectorAll('#country-labels text tspan')).filter(el => el.textContent === country[0]);
+        if (text_els.length > 0) {
+            let text_el = SVG(text_els[0]);
+            text_el.css('display', 'initial');
+
+            let path_el = document.querySelector(`[title="${country[0]}"]`);
+
+            path_el.addEventListener('mouseenter', () => {
+                //text_el.attr('fill', '#3a8f9e');
+                text_el.parent().animate({
+                    swing: true,
+                    when: 'now',
+                }).ease('bounce').scale(1.2);
+            })
+            path_el.addEventListener('mouseleave', () => {
+                //text_el.attr('fill', null);
+                text_el.parent().animate({
+                    swing: true,
+                    when: 'now',
+                }).scale(1 / 1.2);
+            })
+        }
+    }
 }
 
 function createPoints(points) {
@@ -40,20 +94,29 @@ function createPoints(points) {
     for (let i = 0; i < points.length; i++) {
         let point = points[i];
 
-        let text_size = map_content_width * 0.03 * point.size;
-        let pointer_size = map_content_width * 0.003 * point.size;
+        let text_size = map_content_width * 0.01 * point.size;
+        text_size = text_size - text_size % 1;
+        let pointer_size = map_content_width * 0.001 * point.size;
+        let default_pointer_scale = 1;
 
-        let text_el = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-        text_el.setAttributeNS(null, 'x', `${point.x}`);
-        text_el.setAttributeNS(null, 'y', `${point.y}`);
-        text_el.setAttributeNS(null, 'fill', 'black');
-        text_el.setAttributeNS(null, 'stroke', 'none');
-        text_el.setAttributeNS(null, 'style', `font-size: ${0}px;`);
-        text_el.setAttributeNS(null, 'text-anchor', 'middle');
-        text_el.classList.add('pointer-text');
-        text_el.id = `pointer-text-${i}`;
-        let text = document.createTextNode(point.name);
-        text_el.appendChild(text);
+        // let text_el = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        // text_el.setAttributeNS(null, 'x', `${point.x}`);
+        // text_el.setAttributeNS(null, 'y', `${point.y}`);
+        // text_el.setAttributeNS(null, 'fill', 'black');
+        // text_el.setAttributeNS(null, 'stroke', 'none');
+        // text_el.setAttributeNS(null, 'style', `font-size: ${text_size}px;`);
+        // text_el.setAttributeNS(null, 'text-anchor', 'middle');
+        // text_el.setAttributeNS(null, 'transform', `scale(0.001)`);
+        // text_el.classList.add('pointer-text');
+        // text_el.id = `pointer-text-${i}`;
+        // let text = document.createTextNode(point.name);
+        // text_el.appendChild(text);
+        //SVG(text_el).path('m0 0q3-1 6 0');
+
+        let text_svg = SVG(map_svg).text(point.name).font({
+            size: text_size,
+            anchor: 'middle'
+        }).fill('black').stroke('none').transform({tx: point.x, ty: point.y}).opacity(0).css('pointer-events', 'none');
 
         let point_el = document.createElementNS('http://www.w3.org/2000/svg', 'path');
         point_el.setAttributeNS(null, 'd', 'm0 0s6-5.686 6-10a6 6 0 00-12 0c0 4.314 6 10 6 10zm0-7a3 3 0 110-6 3 3 0 010 6z');
@@ -62,97 +125,38 @@ function createPoints(points) {
         point_el.id = `pointer-${i}`;
         point_el.classList.add('pointer');
 
-        map_svg.appendChild(text_el);
+        // map_svg.appendChild(text_el);
         map_svg.appendChild(point_el);
 
-        let transition_start_time;
-        let transition_start_val = 0;
-        let transition_cur_val = 0;
-        let grow_dur = 500;
-        let shrink_dur = 1000;
-        let max_size = pointer_size;
-        let min_size = 0;
-        let changing = false;
-
-        function set_size() {
-            changing = true;
-            let cur_time = new Date().getTime();
-            if (point_el.classList.contains('growing') || point_el.classList.contains('shrinking')) {
-                if (transition_start_time === undefined) {
-                    transition_start_time = cur_time;
-                    setTimeout(set_size, 50);
-                } else if (cur_time - transition_start_time <= grow_dur && point_el.classList.contains('growing')) {
-                    let perc_done = (new Date().getTime() - transition_start_time) / grow_dur;
-                    transition_cur_val = transition_start_val + perc_done * (max_size - transition_start_val);
-                    text_el.setAttributeNS(null, 'y', `${point.y - transition_cur_val * pointer_size * 20 / pointer_size}`);
-                    text_el.setAttributeNS(null, 'style', `font-size: ${transition_cur_val * text_size / pointer_size}px;`);
-                    point_el.setAttributeNS(null, 'transform', `translate(${point.x}, ${point.y}) scale(${transition_cur_val})`);
-                    setTimeout(set_size, 50);
-                } else if (cur_time - transition_start_time <= shrink_dur && point_el.classList.contains('shrinking')) {
-                    let perc_done = (new Date().getTime() - transition_start_time) / shrink_dur;
-                    transition_cur_val = transition_start_val - perc_done * (transition_start_val - min_size);
-                    text_el.setAttributeNS(null, 'y', `${point.y - transition_cur_val * pointer_size * 20 / pointer_size}`);
-                    text_el.setAttributeNS(null, 'style', `font-size: ${transition_cur_val * text_size / pointer_size}px;`);
-                    point_el.setAttributeNS(null, 'transform', `translate(${point.x}, ${point.y}) scale(${transition_cur_val})`);
-                    setTimeout(set_size, 50);
-                } else if (point_el.classList.contains('growing')) {
-                    point_el.classList.remove('growing');
-                    point_el.classList.remove('shrinking');
-                    text_el.setAttributeNS(null, 'y', `${point.y - pointer_size * 20}`);
-                    text_el.setAttributeNS(null, 'style', `font-size: ${text_size}px;`);
-                    point_el.setAttributeNS(null, 'transform', `translate(${point.x}, ${point.y}) scale(${max_size})`);
-                    transition_start_time = undefined;
-                    changing = false;
-                } else {
-                    point_el.classList.remove('growing');
-                    point_el.classList.remove('shrinking');
-                    text_el.setAttributeNS(null, 'y', `${0}`);
-                    text_el.setAttributeNS(null, 'style', `font-size: ${0}px;`);
-                    point_el.setAttributeNS(null, 'transform', `translate(${point.x}, ${point.y}) scale(${min_size})`);
-                    transition_start_time = undefined;
-                    changing = false;
-                }
+        let activation_circle = SVG(map_svg).circle(point.radius * 2 * 10).cx(point.x).cy(point.y).fill('#0000').stroke('#0000').css('pointer-events', 'none');
+        // text_svg.animate({when: 'now'}).transform({scale: 0.001, origin: 'center center'});
+        map_svg.addEventListener('mousemove', ev => {
+            let mouse = SVG(map_svg).point(ev.pageX, ev.pageY);
+            let cur_scale = SVG(point_el).transform().scaleX;
+            SVG(point_el).transform({scale: cur_scale, tx: point.x, ty: point.y, origin: 'bottom center'});
+            if (activation_circle.inside(mouse.x, mouse.y)) {
+                SVG(point_el).animate({when: 'now'}).ease('bounce').transform({
+                    scale: pointer_size,
+                    tx: point.x,
+                    ty: point.y,
+                    origin: 'bottom center'
+                });
+                text_svg.opacity(1);
+                text_svg.animate({when: 'now'}).ease('bounce').transform({
+                    scale: 1,
+                    ty: point.y - pointer_size * 20,
+                    tx: point.x
+                });
+            } else {
+                SVG(point_el).animate({when: 'now'}).transform({
+                    scale: 2 ** -20,
+                    tx: point.x,
+                    ty: point.y,
+                    origin: 'bottom center'
+                });
+                text_svg.animate({when: 'now'}).transform({scale: 2 ** -20, tx: point.x, ty: point.y});
             }
-        }
-
-        window.addEventListener('mousemove', (ev) => {
-            let map_rect = map_svg.getAttributeNS(null, 'viewBox').split(' ');
-            let map_bounds = map_svg.getBoundingClientRect();
-            let perc_x = (ev.x - map_bounds.x) / map_bounds.width;
-            let perc_y = (ev.y - map_bounds.y) / map_bounds.height;
-            let x = perc_x * parseInt(map_rect[2]) + parseInt(map_rect[0]);
-            let y = perc_y * parseInt(map_rect[3]) + parseInt(map_rect[1]);
-
-            let dist = Math.max(1 - Math.sqrt((x - point.x) ** 2 + (y - point.y) ** 2) / (point.radius * 20), 0);
-            text_el.setAttributeNS(null, 'y', `${point.y - dist * pointer_size * 20}`);
-            text_el.setAttributeNS(null, 'style', `font-size: ${dist * text_size}px;`);
-            point_el.setAttributeNS(null, 'transform', `translate(${point.x}, ${point.y}) scale(${pointer_size * dist})`);
-
-            // if (Math.sqrt((x-point.x)**2 + (y-point.y)**2) < point.radius * map_content_width/10) {
-            //     point_el.setAttributeNS(null, 'transform', `translate(${point.x}, ${point.y}) scale(${pointer_size})`);
-            //     text_el.setAttributeNS(null, 'style', `font-size: ${text_size}px;`);
-            // } else {
-            //     point_el.setAttributeNS(null, 'transform', `translate(${point.x}, ${point.y}) scale(${0})`);
-            //     text_el.setAttributeNS(null, 'style', `font-size: ${0}px;`);
-            // }
-
-            // if (Math.sqrt((x - point.x) ** 2 + (y - point.y) ** 2) < point.radius * map_content_width / 10) {
-            //     point_el.classList.add('growing');
-            //     point_el.classList.remove('shrinking');
-            //     transition_start_val = transition_cur_val;
-            //     transition_start_time = new Date().getTime();
-            //     if (!changing) {
-            //         set_size();
-            //     }
-            // } else {
-            //     point_el.classList.remove('growing');
-            //     point_el.classList.add('shrinking');
-            //     transition_start_val = transition_cur_val;
-            //     transition_start_time = new Date().getTime();
-            //     if (!changing) {
-            //         set_size();
-            //     }
-            // }
+            text_svg.rebuild();
         })
     }
 
@@ -219,7 +223,7 @@ function updateStops(stops, editable) {
         point_el.setAttributeNS(null, 'style', 'fill: red;');
         point_el.setAttributeNS(null, 'transform', `translate(${stop.x}, ${stop.y}) scale(${pointer_size})`);
         point_el.id = `pointer-${i}`;
-        point_el.classList.add('pointer');
+        point_el.classList.add('stop-pointer');
 
         point_el.addEventListener('click', () => {
             currentSlide(stop.day);
@@ -442,11 +446,9 @@ function updateStops(stops, editable) {
     }
 }
 
-
 function getScale(svg_el) {
     return svg_el.getBoundingClientRect().height / parseFloat(svg_el.getAttribute('viewBox').split(' ')[3])
 }
-
 
 function computeControlPoints(K) {
     let p1 = [];
@@ -499,10 +501,6 @@ function computeControlPoints(K) {
     return {p1: p1, p2: p2};
 }
 
-// function pathString(x1, y1, px1, py1, px2, py2, x2, y2) {
-//     return `M${x1} ${y1} C ${px1} ${py1} ${px2} ${py2} ${x2} ${y2}`;
-// }
-
 function pathString(x, y) {
     let str;
     if (x.length > 2) {
@@ -540,8 +538,18 @@ function resize_map(destinations, width, height, hoverable) {
         if (dest_path !== null) {
             if (hoverable) {
                 dest_path.classList.add('available')
-                dest_path.addEventListener('click', () => {
-                    window.location.href = destinations[i][1];
+                let start_ev;
+                dest_path.addEventListener('mousedown', (ev) => {
+                    start_ev = ev
+                })
+                dest_path.addEventListener('mouseup', (end_ev) => {
+                    console.log(start_ev, end_ev);
+                    if (start_ev !== undefined) {
+                        if ((start_ev.x - end_ev.x) ** 2 + (start_ev.y - end_ev.y) ** 2 < 10 ** 2) {
+                            window.location.href = destinations[i][1];
+                        }
+                        start_ev = undefined;
+                    }
                 })
             }
 
@@ -562,5 +570,8 @@ function resize_map(destinations, width, height, hoverable) {
             min_bbox[2] *= (ar / cur_ar);
         }
     }
-    document.querySelector('svg').setAttribute('viewBox', `${min_bbox[0]} ${min_bbox[1]} ${min_bbox[2]} ${min_bbox[3]}`);
+    //document.querySelector('svg').setAttribute('viewBox', `${min_bbox[0]} ${min_bbox[1]} ${min_bbox[2]} ${min_bbox[3]}`);
+    Visibility.onVisible(() => {
+        SVG('.map svg').animate(2000).ease('quartInOut').viewbox(`${min_bbox[0]} ${min_bbox[1]} ${min_bbox[2]} ${min_bbox[3]}`);
+    })
 }
