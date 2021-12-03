@@ -87,7 +87,7 @@
         {{ tour.description | safe }}
     </div>
     <hr>
-    <h6 class="display-6">Itinerary</h6>
+    <h6 class="display-6" id="itinerary">Itinerary</h6>
     {% include 'main/itinerary-slider.html' with itinerary=tour.itinerary.all %}
 
     {% if tour.stops.count %}
