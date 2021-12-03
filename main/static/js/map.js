@@ -16,6 +16,7 @@ function minBBox(bbox1, bbox2) {
     return [x, y, width, height];
 }
 
+let map_settings;
 
 function make_map_work(destinations, width, height, hoverable, stops, editable, points) {
     resize_map(destinations, width, height, hoverable);
@@ -39,6 +40,16 @@ function make_map_work(destinations, width, height, hoverable, stops, editable, 
         //setCountryNames(destinations);
     })
 
+    map_settings = {
+        destinations: destinations,
+        width: width,
+        height: height,
+        hoverable: hoverable,
+        stops: stops,
+        editable: editable,
+        points: points
+    }
+
     setMapZooming(true);
 }
 
@@ -54,7 +65,7 @@ function setMapZooming(en) {
     }
 
     function resetZoom() {
-        resize_map(destinations, width, height, hoverable);
+        resize_map(map_settings.destinations, map_settings.width, map_settings.height, map_settings.hoverable);
     }
 
     let map_svg = SVG(document.querySelector('.map svg'))
