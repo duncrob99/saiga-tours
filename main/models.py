@@ -195,6 +195,15 @@ class Tag(models.Model):
         super(Tag, self).save(*args, **kwargs)
 
 
+class Author(DraftHistory):
+    name = models.CharField(max_length=100)
+    picture = models.ImageField()
+    blurb = RichTextUploadingField(config_name='default')
+
+    def __str__(self):
+        return self.name
+
+
 class Article(DraftHistory):
     NEWS = 'n'
     BLOG = 'b'
@@ -212,6 +221,7 @@ class Article(DraftHistory):
     card_img = models.ImageField(null=True)
     keywords = models.TextField(null=True, blank=True)
     tags = models.ManyToManyField(Tag, related_name='articles', blank=True)
+    author = models.ForeignKey(Author, on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
         return self.title

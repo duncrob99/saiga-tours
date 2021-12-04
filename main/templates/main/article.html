@@ -6,8 +6,32 @@
 {% endblock %}
 
 {% block content %}
-    <div class="container">
-        <h1 class="display-1">{{ article.title }}</h1>
-        {{ article.content | safe }}
+    <h1 class="display-1">{{ article.title }}</h1>
+    <div>
+        {% if article.author %}
+            <h6 style="float: right" class="display-6">{{ article.author }}</h6>
+        {% endif %}
+        <h6 style="text-align: left" class="display-6">{{ article.creation | date }}</h6>
     </div>
+    <hr>
+    {{ article.content | safe }}
+
+    {% if article.author %}
+        <div class="row">
+            <div class="col-6">
+                <div class="card">
+                    <div class="card-body d-flex">
+                        <img src="{{ article.author.picture.url }}" height="200px"
+                             style="border-radius: 500px; margin-right: 20px;" alt="{{ article.author }}">
+                        <div>
+                            <h3>{{ article.author }}</h3>
+                            {{ article.author.blurb | safe }}
+                            <a href="/{% if article.type == 'n' %}news{% else %}blog{% endif %}/?author={{ article.author }}">Read
+                                more from {{ article.author }}</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
 {% endblock %}

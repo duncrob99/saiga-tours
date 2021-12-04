@@ -47,9 +47,9 @@ class PhotoAdmin(PublishableAdmin):
 
 class ArticleAdmin(PhotoAdmin):
     date_hierarchy = 'creation'
-    list_display = ('title', 'type', 'creation', 'tag_list', 'published')
-    list_filter = ('type', 'creation', 'published', 'tags')
-    search_fields = ('title', 'content')
+    list_display = ('title', 'author', 'type', 'creation', 'tag_list', 'published')
+    list_filter = ('type', 'author', 'creation', 'published', 'tags')
+    search_fields = ('title', 'author', 'content')
     filter_horizontal = ('tags',)
 
     def tag_list(self, obj):
@@ -145,3 +145,4 @@ admin.site.register(BannerPhoto, BannerPhotoAdmin)
 admin.site.register(Tag)
 admin.site.register(Stop)
 admin.site.register(MapPoint)
+admin.site.register(Author, DiffHistoryAdmin)

@@ -141,6 +141,9 @@ def article(request, slug):
 def article_list(request, type, title):
     articles = Article.visible(request.user.is_staff).filter(type=type)
 
+    if request.GET.get('author') is not None:
+        articles = articles.filter(author__name=request.GET.get('author'))
+
     start_date = request.GET.get('start')
     end_date = request.GET.get('end')
     if start_date != '' and start_date is not None:
