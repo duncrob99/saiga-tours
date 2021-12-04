@@ -39,6 +39,10 @@
     z-index: 10;
 }
 
+.banner-img.badly-sized {
+    display: none;
+}
+
 :root {
     --banner-text-transparency: rgba(0, 0, 0, 60%);
     --banner-text-background: black;
