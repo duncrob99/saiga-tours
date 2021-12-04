@@ -1,10 +1,12 @@
 from datetime import datetime
+from functools import reduce
 
 import ngram
 from django.contrib import messages
 from django.core.mail import send_mail, BadHeaderError
 from django.core.paginator import Paginator
 from django.db import IntegrityError
+from django.db.models import Q
 from django.forms import modelform_factory, inlineformset_factory
 from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404, redirect
@@ -154,10 +156,18 @@ def article_list(request, type, title):
         articles = articles.filter(creation__lte=end_date)
 
     tags = Tag.objects.filter(articles__type=type)
+    checked_tags = []
     for tag in tags:
         if request.GET.get(f'tag-{tag.slug}') is not None:
-            print('Filtering by ' + tag.name)
             articles = articles.filter(tags__pk=tag.pk)
+            checked_tags.append(tag.slug)
+
+    checked_authors = []
+    for author in Author.visible(request.user.is_staff):
+        if request.GET.get(f'author-{author.name}') is not None:
+            checked_authors.append(author.name)
+    if checked_authors:
+        articles = articles.filter(reduce(lambda q, f: q | Q(author__name=f), checked_authors, Q()))
 
     query = request.GET.get('q')
     if query is not None and query != '':
@@ -179,7 +189,10 @@ def article_list(request, type, title):
                   'tags': tags,
                   'query': query or '',
                   'start_date': start_date or '',
-                  'end_date': end_date or ''
+                  'end_date': end_date or '',
+                  'authors': Author.visible(request.user.is_staff),
+                  'checked_authors': checked_authors,
+                  'checked_tags': checked_tags
               } | global_context(request)
     return render(request, 'main/article_list.html', context)
 

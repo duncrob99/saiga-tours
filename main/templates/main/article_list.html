@@ -102,8 +102,7 @@
                     {% endif %}
                 </ul>
             </nav>
-    </div>
-
+        </nav>
     </div>
 
     <div class="offcanvas offcanvas-end" tabindex="-1" id="filter-sidebar" aria-labelledby="filter-sidebar-title">
@@ -151,9 +150,32 @@
                                     <div class="formcheck">
                                         <input name="tag-{{ tag.slug }}" class="form-check-input destination-checkbox"
                                                type="checkbox" value=""
-                                               id="filter-destination-{{ tag.slug }}">
+                                               id="filter-destination-{{ tag.slug }}"
+                                               {% if tag.slug in checked_tags %}checked{% endif %}>
                                         <label class="form-check-label" for="filter-destination-{{ tag.slug }}">
                                             {{ tag.name }}
+                                        </label>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row m-3">
+                    <div class="col">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>Author</h5>
+                            </div>
+                            <div class="card-body">
+                                {% for author in authors %}
+                                    <div class="formcheck">
+                                        <input name="author-{{ author }}" class="form-check-input"
+                                               type="checkbox" value=""
+                                               id="filter-{{ author }}"
+                                               {% if author.name in checked_authors %}checked{% endif %}>
+                                        <label class="form-check-label" for="filter-{{ author }}">
+                                            {{ author }}
                                         </label>
                                     </div>
                                 {% endfor %}
