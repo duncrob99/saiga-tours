@@ -31,7 +31,7 @@ function make_map_work(destinations, width, height, hoverable, stops, editable, 
 
     document.querySelectorAll('.pre-load').forEach((el) => el.classList.remove('pre-load'));
 
-    if (stops.length === 0) {
+    if (stops === undefined || stops.length === 0) {
         setCountryNames(destinations);
     }
 
@@ -56,12 +56,12 @@ function make_map_work(destinations, width, height, hoverable, stops, editable, 
 function setMapZooming(en) {
     function zoomIn() {
         let cur_zoom = map_svg.zoom();
-        map_svg.animate().zoom(cur_zoom * 1.5);
+        map_svg.animate({when: 'now'}).zoom(cur_zoom * 1.5);
     }
 
     function zoomOut() {
         let cur_zoom = map_svg.zoom();
-        map_svg.animate().zoom(cur_zoom / 1.5);
+        map_svg.animate({when: 'now'}).zoom(cur_zoom / 1.5);
     }
 
     function resetZoom() {
@@ -581,6 +581,9 @@ function resize_map(destinations, width, height, hoverable) {
     }
     //document.querySelector('svg').setAttribute('viewBox', `${min_bbox[0]} ${min_bbox[1]} ${min_bbox[2]} ${min_bbox[3]}`);
     Visibility.onVisible(() => {
-        SVG('.map svg').animate(2000).ease('quartInOut').viewbox(`${min_bbox[0]} ${min_bbox[1]} ${min_bbox[2]} ${min_bbox[3]}`);
+        SVG('.map svg').animate({
+            when: 'now',
+            duration: 2000
+        }).ease('quartInOut').viewbox(`${min_bbox[0]} ${min_bbox[1]} ${min_bbox[2]} ${min_bbox[3]}`);
     })
 }

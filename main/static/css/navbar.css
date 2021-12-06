@@ -55,7 +55,7 @@
     box-shadow: 5px 5px 8px rgba(0, 0, 0, 0.5);
     transition: all 0.8s;
     top: 55px;
-    font-size: 20px;
+    font-size: 1rem;
     line-height: 2;
     min-width: 100%;
     position: relative;
@@ -119,7 +119,6 @@
 
 #navbarNav {
     position: relative;
-    left: 10px;
     height: 100%;
 }
 
@@ -128,14 +127,14 @@
 }
 
 .navbar .nav-item {
-    margin-left: 15px;
-    margin-right: 15px;
+    margin-left: 1em;
+    margin-right: 1em;
     white-space: nowrap;
 }
 
 .navbar .navbar-brand {
     color: var(--accent-foreground) !important;
-    font-size: xx-large;
+    font-size: 1.5em;
 }
 
 .navbar .navbar-brand:hover {

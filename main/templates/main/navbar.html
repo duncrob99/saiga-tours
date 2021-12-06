@@ -15,7 +15,7 @@
                 data-bs-toggle="collapse">
             <span class="navbar-toggler-icon"></span>
         </button>
-        <div class="collapse navbar-collapse" id="navbarNav" style="position: relative; left: 10px">
+        <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav">
                 {% for page in pages %}
                     {% if page.children.count == 0 and user.is_staff or page.published_children.count == 0 and not user.is_staff %}

@@ -14,5 +14,18 @@ function hideOffscreen() {
     })
 }
 
+function resizeText() {
+    let navbar = document.querySelector('.navbar');
+    let menus = document.querySelector('#navbarNav > .navbar-nav');
+    let contact_button = document.querySelector('#separate-contact');
+    navbar.style.fontSize = '';
+    while (menus.getBoundingClientRect().right > contact_button.getBoundingClientRect().left) {
+        navbar.style.fontSize = parseFloat(window.getComputedStyle(navbar, null).getPropertyValue('font-size')) - 0.1 + 'px';
+    }
+}
+
 hideOffscreen();
 window.addEventListener('resize', hideOffscreen);
+
+resizeText();
+window.addEventListener('resize', resizeText);
