@@ -16,6 +16,17 @@
         {% for destination in destinations %}
             destinations.push(["{{ destination.name }}", "{% url 'destination' destination.region.slug destination.slug %}"]);
         {% endfor %}
-        make_map_work(destinations);
+
+        let points = [];
+        {% for point in points %}
+            points.push({
+                x: {{ point.x }},
+                y: {{ point.y }},
+                name: "{{ point.name }}",
+                radius: {{ point.activation_radius }},
+                size: {{ point.size }}
+            })
+        {% endfor %}
+        make_map_work(destinations, undefined, undefined, undefined, undefined, undefined, points);
     </script>
 {% endblock %}

@@ -25,6 +25,8 @@ def front_page(request):
     context = {
                   'tours': Tour.visible(request.user.is_staff).filter(display=True),
                   'banners': BannerPhoto.objects.filter(active=True).order_by('?'),
+                  'frontpage_sections': Page.visible(request.user.is_staff).filter(
+                      front_page_pos__isnull=False).order_by('front_page_pos')
               } | global_context(request)
     return render(request, 'main/front-page.html', context)
 
@@ -32,9 +34,9 @@ def front_page(request):
 def global_context(request):
     context = {
         'regions': Region.visible(request.user.is_staff),
-        'pages': Page.visible(request.user.is_staff).filter(parent=None),
+        'pages': Page.visible(request.user.is_staff).filter(parent=None, in_navbar=True),
         'settings': Settings.load(),
-        'subscription_form': SubscriptionForm()
+        'subscription_form': SubscriptionForm(),
     }
     return context
 
@@ -280,7 +282,9 @@ def subscribe(request, return_path: str = None):
 
 
 def destinations(request):
-    context = {'destinations': Destination.visible(request.user.is_staff)} | global_context(request)
+    context = {'destinations': Destination.visible(request.user.is_staff),
+               'points': MapPoint.objects.all()
+               } | global_context(request)
     return render(request, 'main/destinations.html', context)
 
 

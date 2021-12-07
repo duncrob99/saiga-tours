@@ -241,8 +241,12 @@ class Page(DraftHistory):
     title = models.CharField(max_length=40)
     content = RichTextUploadingField(config_name='default')
     card_img = models.ImageField()
+    banner_img = models.ImageField(null=True, blank=True)
     parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='children')
     sibling_label = models.CharField(max_length=100, default='Extra')
+    in_navbar = models.BooleanField(default=True)
+    front_page_pos = models.IntegerField(null=True, blank=True)
+    front_page_colour = ColorField(default='#FFFFFF')
 
     def __str__(self):
         return self.title

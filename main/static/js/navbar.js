@@ -17,11 +17,20 @@ function hideOffscreen() {
 function resizeText() {
     let navbar = document.querySelector('.navbar');
     let menus = document.querySelector('#navbarNav > .navbar-nav');
-    let contact_button = document.querySelector('#separate-contact');
+    let menu_eg = document.querySelector('.nav-link.main-nav');
     navbar.style.fontSize = '';
-    while (menus.getBoundingClientRect().right > contact_button.getBoundingClientRect().left) {
+    while (menus.getBoundingClientRect().right > document.documentElement.getBoundingClientRect().right) {
         navbar.style.fontSize = parseFloat(window.getComputedStyle(navbar, null).getPropertyValue('font-size')) - 0.1 + 'px';
     }
+
+    menus.style.top = '';
+    let iter = 0;
+    while (navbar.getBoundingClientRect().bottom > menu_eg.getBoundingClientRect().bottom && iter < 100) {
+        menus.style.top = parseFloat(window.getComputedStyle(menus, null).getPropertyValue('top')) + 1 + 'px';
+        iter++;
+    }
+
+    document.querySelector(':root').style.setProperty('--navbar-menu-height', parseFloat(window.getComputedStyle(menu_eg).getPropertyValue('height')) + 1 + 'px');
 }
 
 hideOffscreen();

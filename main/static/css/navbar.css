@@ -5,13 +5,13 @@
 }
 
 .main-nav {
-    font-size: 1.8em;
-    height: 55px;
+    font-size: 1.3em;
+    height: min-content;
+    padding-bottom: 0.1rem;
 }
 
 @media only screen and (min-width: 1200px) {
     .dropdown > .main-nav:hover {
-        height: 70px;
     }
 }
 
@@ -54,9 +54,8 @@
     /*box-shadow: 3px 3px 8px lightgrey;*/
     /*box-shadow: 5px 5px 8px rgba(0, 0, 0, 0.5);*/
     transition: all 0.2s;
-    top: 55px;
+    top: var(--navbar-menu-height);
     font-size: 1rem;
-    line-height: 2;
     position: relative;
     display: block;
     transform: translateY(0) rotateX(90deg);
@@ -156,6 +155,7 @@
 
 :root {
     --navbar-height: 106px;
+    --navbar-menu-height: 40px;
 }
 
 .dropdown-item:hover {

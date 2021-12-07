@@ -30,6 +30,7 @@ h5.card-title {
     border-top-right-radius: 0;
     border: solid white;
     border-width: 0 10px 10px 10px;
+    z-index: 1;
 }
 
 /*

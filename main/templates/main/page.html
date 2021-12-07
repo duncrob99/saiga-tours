@@ -4,6 +4,7 @@
 
 {% block extrahead %}
     <link rel="stylesheet" href="{% static 'css/article.css' %}">
+    <link rel="stylesheet" href="{% static 'css/banner.css' %}">
 {% endblock %}
 
 {% block banner %}
@@ -14,6 +15,18 @@
                 style="float: left; position: sticky; margin: 50px; top: 200px;">
             <span class="bi bi-pencil" style="font-size: 1.5rem"></span> <span style="margin-left: 4px;">Edit</span>
         </button>
+    {% endif %}
+
+    {% if page.banner_img %}
+        <div class="banner">
+            <div id="banner-slideshow">
+                <img alt="banner image" src="{{ page.banner_img.url }}" class="banner-img">
+            </div>
+            <div class="banner-text">
+                <h1 class="display-1">{{ page.title }}</h1>
+                <div class="banner-text-background"></div>
+            </div>
+        </div>
     {% endif %}
 {% endblock %}
 

@@ -7,6 +7,27 @@
         .banner-img {
             transition: left {{ settings.banner_transition_time }}s;
         }
+
+        .wide-bg {
+            background-color: var(--background);
+            height: calc(100% + 5rem);
+            position: relative;
+            padding-bottom: 1rem;
+            padding-top: 1rem;
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .wide-bg:before {
+            content: "";
+            background-color: var(--background);
+            position: absolute;
+            top: -0.5rem;
+            height: calc(100% + 0.5rem);
+            width: 4000px;
+            left: -2000px;
+            z-index: -1;
+        }
     </style>
 {% endblock %}
 
@@ -31,9 +52,13 @@
     <h1 class="display-1">Tours</h1>
     <hr>
     {% include 'main/tours_cards.html' %}
-    <hr>
-    <h1>Information About Us</h1>
-    We do things
+    {% for section in frontpage_sections %}
+        <div class="page-section wide-bg" style="--background: {{ section.front_page_colour }}"
+             id="page-section-{{ forloop.counter }}">
+            <h1 class="display-1">{{ section.title }}</h1>
+            {{ section.content | safe }}
+        </div>
+    {% endfor %}
 {% endblock %}
 
 {% block js %}
