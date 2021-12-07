@@ -131,6 +131,9 @@ class Tour(DraftHistory):
     extensions = models.ManyToManyField('self', blank=True, symmetrical=False)
     display = models.BooleanField(default=True)
 
+    start_location = models.CharField(max_length=100, null=True, blank=True)
+    end_location = models.CharField(max_length=100, null=True, blank=True)
+
     @property
     def dated(self):
         return self.start_date is not None

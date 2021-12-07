@@ -87,34 +87,177 @@ function setMapZooming(en) {
 }
 
 function setCountryNames(destinations) {
-    let svg_map = document.querySelector('.map svg');
+    let svg_map = SVG('.map svg');
+    let text_els = [];
 
     for (let country of destinations) {
         //let text_el = new Array(svg_map.querySelectorAll('#country-labels text')).filter(el => el.innerText === country[0]);
-        let text_els = Array.from(svg_map.querySelectorAll('#country-labels text tspan')).filter(el => el.textContent === country[0]);
-        if (text_els.length > 0) {
-            let text_el = SVG(text_els[0]);
-            text_el.css('display', 'initial');
-
-            let path_el = document.querySelector(`[title="${country[0]}"]`);
-
-            path_el.addEventListener('mouseenter', () => {
-                //text_el.attr('fill', '#3a8f9e');
-                text_el.parent().animate({
-                    swing: true,
-                    when: 'now',
-                }).ease('bounce').scale(1.2);
-            })
-            path_el.addEventListener('mouseleave', () => {
-                //text_el.attr('fill', null);
-                text_el.parent().animate({
-                    swing: true,
-                    when: 'now',
-                }).scale(1 / 1.2);
-            })
+        // let text_els = Array.from(svg_map.querySelectorAll('#country-labels text tspan')).filter(el => el.textContent === country[0]);
+        // if (text_els.length > 0) {
+        //     let text_el = SVG(text_els[0]);
+        //     text_el.css('display', 'initial');
+        //
+        //     let path_el = document.querySelector(`[title="${country[0]}"]`);
+        //
+        //     path_el.addEventListener('mouseenter', () => {
+        //         //text_el.attr('fill', '#3a8f9e');
+        //         text_el.parent().animate({
+        //             swing: true,
+        //             when: 'now',
+        //         }).ease('bounce').scale(1.2);
+        //     })
+        //     path_el.addEventListener('mouseleave', () => {
+        //         //text_el.attr('fill', null);
+        //         text_el.parent().animate({
+        //             swing: true,
+        //             when: 'now',
+        //         }).scale(1 / 1.2);
+        //     })
+        // }
+        let path_el = SVG(`[title="${country[0]}"]`);
+        if (path_el !== null) {
+            // let text_el = SVG('.map svg').text(country[0]).cx(path_el.cx()).cy(path_el.cy());
+            // let point_array = [for (let path of path_el.array()) if (path.length === 3) path.slice(1)]
+            let {com, area} = findCentroid(path_el, country[0]);
+            text_els.push(svg_map.text(country[0]).font('size', 5).cx(com.x).cy(com.y).css('pointer-events', 'none').fill('black').stroke('none'));
+            // svg_map.circle(1).fill('red').cx(com.x).cy(com.y);
         }
     }
+
+    text_els.forEach(el => {
+        el.remember('orig_x', el.cx());
+        el.remember('orig_y', el.cy());
+
+        el.moved = () => dist(el.cx(), el.cy(), el.remember('orig_x'), el.remember('orig_y'));
+    });
+
+    let change = true;
+    let x_margin = 5;
+    let y_margin = 1;
+    let margin = 5;
+    while (change) {
+        change = false;
+        for (let text_el of text_els) {
+            let other_els = text_els.filter(el => el !== text_el);
+            for (let other_el of other_els) {
+                //console.log(rect_distance(text_el.bbox(), other_el.bbox()));
+                if (text_el.bbox().x < other_el.bbox().x2 + x_margin && text_el.bbox().x2 + x_margin > other_el.bbox().x && (text_el.bbox().y < other_el.bbox().y2 + y_margin && text_el.bbox().y2 + y_margin > other_el.bbox().y)) {
+                    // if (rect_distance(text_el.bbox(), other_el.bbox()) <= margin) {
+                    let direction = {
+                        x: text_el.bbox().cx - other_el.bbox().cx,
+                        y: text_el.bbox().cy - other_el.bbox().cy
+                    };
+                    let mag = Math.sqrt(direction.x ** 2 + direction.y ** 2);
+                    direction = {x: direction.x / mag, y: direction.y / mag};
+
+                    if (text_el.moved() <= other_el.moved()) {
+                        text_el.dmove(direction.x, direction.y);
+                    }
+                    other_el.dmove(-direction.x, -direction.y);
+
+                    change = true;
+                }
+            }
+        }
+    }
+
+    // for (let text_el of text_els) {
+    // SVG('.map svg').rect(text_el.bbox().width + margin, text_el.bbox().height + margin).cx(text_el.cx()).cy(text_el.cy()).stroke('red').fill('none');
+    // SVG('.map svg').rect(text_el.bbox().width + x_margin, text_el.bbox().height + y_margin).cx(text_el.cx()).cy(text_el.cy()).stroke('red').fill('none');
+    // SVG('.map svg').rect(text_el.bbox().width, text_el.bbox().height).cx(text_el.cx()).cy(text_el.cy()).stroke('blue').fill('none');
+    // console.log(text_el.moved());
+    // }
 }
+
+//function rect_distance(x1, y1, x1b, y1b, x2, y2, x2b, y2b) {
+function rect_distance(bbox1, bbox2) {
+    let x1 = bbox1.x;
+    let y1 = bbox1.y;
+    let x1b = bbox1.x2;
+    let y1b = bbox1.y2;
+    let x2 = bbox2.x;
+    let y2 = bbox2.y;
+    let x2b = bbox2.x2;
+    let y2b = bbox2.y2;
+    let left = x2b < x1;
+    let right = x1b < x2;
+    let bottom = y2b < y1;
+    let top = y1b < y2;
+    if (top && left) {
+        return dist(x1, y1b, x2b, y2);
+    } else if (left && bottom) {
+        return dist(x1, y1, x2b, y2b);
+    } else if (bottom && right) {
+        return dist(x1b, y1, x2, y2b);
+    } else if (right && top) {
+        return dist(x1b, y1b, x2, y2);
+    } else if (left) {
+        return x1 - x2b;
+    } else if (right) {
+        return x2 - x1b;
+    } else if (bottom) {
+        return y1 - y2b;
+    } else if (top) {
+        return y2 - y1b;
+    } else {
+        return 0
+    }
+}
+
+function dist(x1, y1, x2, y2) {
+    return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+}
+
+function findCentroid(path) {
+    let polygons = path.array().reduce((polygons, path) => {
+        if (path[0] === 'M') {
+            polygons.push([{x: path[1], y: path[2]}]);
+        } else if (path[0] === 'L') {
+            polygons[polygons.length - 1].push({x: path[1], y: path[2]});
+        } else if (path[0] === 'V') {
+            let cur_poly = polygons[polygons.length - 1];
+            polygons[polygons.length - 1].push({x: cur_poly[cur_poly.length - 1].x, y: path[1]});
+        } else if (path[0] === 'H') {
+            let cur_poly = polygons[polygons.length - 1];
+            polygons[polygons.length - 1].push({y: cur_poly[cur_poly.length - 1].y, x: path[1]});
+        }
+        return polygons;
+    }, [])
+    let coms = [];
+    let areas = [];
+    for (let pts of polygons) {
+        let nPts = pts.length;
+        let off = pts[0];
+        let twicearea = 0;
+        let x = 0;
+        let y = 0;
+        let p1, p2;
+        let f;
+        for (let i = 0, j = nPts - 1; i < nPts; j = i++) {
+            p1 = pts[i];
+            p2 = pts[j];
+            f = (p1.x - off.x) * (p2.y - off.y) - (p2.x - off.x) * (p1.y - off.y);
+            twicearea += f;
+            x += (p1.x + p2.x - 2 * off.x) * f;
+            y += (p1.y + p2.y - 2 * off.y) * f;
+        }
+        f = twicearea * 3;
+
+        let com = {
+            x: x / f + off.x,
+            y: y / f + off.y
+        };
+        coms.push(com);
+        areas.push(Math.abs(twicearea / 2));
+    }
+    let area = areas.reduce((sum, value) => sum + value);
+    let com = coms.reduce((sum, value, ix) => {
+        return {x: sum.x + value.x * areas[ix] / area, y: sum.y + value.y * areas[ix] / area};
+    }, {x: 0, y: 0});
+
+    return {com: com, area: area};
+}
+
 
 function createPoints(points) {
     let map_svg = document.querySelector('.map svg');

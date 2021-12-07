@@ -32,15 +32,16 @@
             </button>
         </a>
     </div>
-    <div class="row" id="tour-details">
+    <div class="row" id="tour-details" class="d-flex align-items-stretch">
         {% if tour.dated %}
             <div class="col-lg-3 col-md-12 g-2">
                 <div class="card">
                     <div class="card-header">
-                        Start Date
+                        Start
                     </div>
                     <div class="card-body" id="start-date">
                         {{ tour.start_date|date:"M j, Y" }}
+                        {% if tour.start_location %}<br>{{ tour.start_location }}{% endif %}
                     </div>
                     <div hidden id="iso-start">
                         {{ tour.start_date|date:"Y-m-d" }}
@@ -50,10 +51,11 @@
             <div class="col-lg-3 col-md-12 g-2">
                 <div class="card">
                     <div class="card-header">
-                        End Date
+                        End
                     </div>
                     <div class="card-body" id="end-date">
                         {{ tour.end_date|date:"M j, Y" }}
+                        {% if tour.end_location %}<br>{{ tour.end_location }}{% endif %}
                     </div>
                     <div hidden id="iso-end">
                         {{ tour.end_date|date:"Y-m-d" }}
@@ -61,23 +63,23 @@
                 </div>
             </div>
         {% endif %}
-        <div class="col-lg-3 col-md-12 g-2">
-            <div class="card">
+        <div class="col-lg-3 col-md-12 g-2 d-flex flex-column">
+            <div class="card flex-grow-1">
                 <div class="card-header">
                     Duration
                 </div>
-                <div class="card-body">
-                    <span id="duration">{{ tour.duration|default_if_none:'0' }}</span> days
+                <div class="card-body d-flex flex-column justify-content-center">
+                    <div><span id="duration">{{ tour.duration|default_if_none:'0' }}</span> days</div>
                 </div>
             </div>
         </div>
-        <div class="col-lg-3 col-md-12 g-2">
-            <div class="card">
+        <div class="col-lg-3 col-md-12 g-2 d-flex flex-column justify-content-center">
+            <div class="card flex-grow-1">
                 <div class="card-header">
                     Price
                 </div>
-                <div class="card-body">
-                    {{ settings.price_prefix }}<span id="price">{{ tour.price }}</span>
+                <div class="card-body d-flex flex-column justify-content-center">
+                    <div>{{ settings.price_prefix }}<span id="price">{{ tour.price }}</span></div>
                 </div>
             </div>
         </div>
