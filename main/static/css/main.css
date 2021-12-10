@@ -85,3 +85,28 @@ a:hover {
 body * {
     scroll-margin-top: calc(var(--navbar-height) + 20px);
 }
+
+.wide-bg {
+    background-color: var(--background);
+    height: calc(100% + 5rem);
+    position: relative;
+    padding-bottom: 1rem;
+    padding-top: 1rem;
+    margin-top: 2rem;
+    margin-bottom: -1.5rem;
+    min-height: 500px;
+    text-align: center;
+    vertical-align: center;
+}
+
+.wide-bg:before {
+    content: "";
+    background-color: var(--background);
+    position: absolute;
+    top: -0.5rem;
+    height: calc(100% + 0.5rem);
+    width: 4000px;
+    left: -2000px;
+    z-index: -1;
+    min-height: 500px;
+}
