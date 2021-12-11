@@ -10,26 +10,30 @@ h5.card-title {
 
 .card {
     position: relative;
-    border-radius: 30px;
-    box-shadow: 5px 5px 8px rgba(0, 0, 0, 0.3);
+    border-radius: var(--border-radius);
+    /*box-shadow: 5px 5px 8px rgba(0, 0, 0, 0.3);*/
 }
 
 .card:not(.allow-overflow) {
     overflow: hidden;
 }
 
+:root {
+    --card-border-width: 1px;
+}
+
 .img-title-card {
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
-    border: solid white;
-    border-width: 10px 10px 0 10px;
+    border: solid lightgrey;
+    border-width: var(--card-border-width) var(--card-border-width) 0 var(--card-border-width);
 }
 
 .text-card {
     border-top-left-radius: 0;
     border-top-right-radius: 0;
-    border: solid white;
-    border-width: 0 10px 10px 10px;
+    border: solid lightgrey;
+    border-width: 0 var(--card-border-width) var(--card-border-width) var(--card-border-width);
     z-index: 1;
 }
 

@@ -317,12 +317,14 @@ class Settings(models.Model):
     accent_hover_background = ColorField(default='#87cefa')
     accent_hover_foreground = ColorField(default='#000000')
     site_title = models.CharField(max_length=50, default='Crowley Tours')
+    catchphrase = models.CharField(max_length=50, default='We do cool tours')
     logo = models.ImageField(null=True, blank=True)
     twitter_link = models.URLField(blank=True, null=True)
     instagram_link = models.URLField(blank=True, null=True)
     facebook_link = models.URLField(blank=True, null=True)
     price_prefix = models.CharField(max_length=10, default='US$')
     rounded_card_headers = models.BooleanField(default=True)
+    corner_radius = models.FloatField(default=20)
     contact_form_email = models.EmailField(default='duncrob99@gmail.com')
     banner_delay = models.FloatField(default=15)
     banner_initial_delay = models.FloatField(default=15)
@@ -330,6 +332,13 @@ class Settings(models.Model):
     pagination_middle_size = models.PositiveSmallIntegerField(default=2)
     pagination_outer_size = models.PositiveSmallIntegerField(default=2)
     articles_per_page = models.PositiveIntegerField(default=10)
+
+    frontpage_map_pos = models.PositiveSmallIntegerField(default=1)
+    frontpage_highlights_pos = models.PositiveSmallIntegerField(default=2)
+    frontpage_tours_pos = models.PositiveSmallIntegerField(default=3)
+    frontpage_blog_pos = models.PositiveSmallIntegerField(default=4)
+    frontpage_news_pos = models.PositiveSmallIntegerField(default=5)
+
     history = HistoricalRecords(excluded_fields=('active',))
 
     def save(self, *args, **kwargs):
@@ -422,3 +431,15 @@ class MapPoint(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class HightlightBox(DraftHistory):
+    title = models.CharField(max_length=100, blank=True, null=True)
+    content = RichTextUploadingField(blank=True, null=True)
+    background_colour = ColorField(default='#FFFFFF')
+    border_colour = ColorField(default='#FFFFFF')
+    row = models.PositiveSmallIntegerField(default=1)
+    col = models.PositiveSmallIntegerField(default=1)
+
+    def __str__(self):
+        return self.title

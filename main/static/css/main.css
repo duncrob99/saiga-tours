@@ -6,7 +6,7 @@ html, body {
 }
 
 .banner {
-    height: 100%;
+    height: calc(100% - var(--navbar-height) - 6px);
 }
 
 .banner-img {
@@ -30,7 +30,7 @@ html, body {
 }
 
 #content-container {
-    margin-top: 20px;
+    margin-top: 0;
     height: min-content;
     overflow: visible;
 }
@@ -92,8 +92,8 @@ body * {
     position: relative;
     padding-bottom: 1rem;
     padding-top: 1rem;
-    margin-top: 2rem;
-    margin-bottom: -1.5rem;
+    margin-top: 0;
+    margin-bottom: 0;
     min-height: 500px;
     text-align: center;
     vertical-align: center;
@@ -103,10 +103,14 @@ body * {
     content: "";
     background-color: var(--background);
     position: absolute;
-    top: -0.5rem;
+    top: 0;
     height: calc(100% + 0.5rem);
     width: 4000px;
     left: -2000px;
     z-index: -1;
     min-height: 500px;
+}
+
+h1, .navbar-brand {
+    font-family: 'Permanent Marker', sans-serif;
 }

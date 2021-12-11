@@ -1,5 +1,7 @@
+from dataclasses import dataclass
 from datetime import datetime
 from functools import reduce
+from typing import Optional, Dict
 
 import ngram
 from django.contrib import messages
@@ -20,13 +22,46 @@ def assert_visible(request, model: DraftHistory):
         raise Http404
 
 
+@dataclass
+class FrontPageRow:
+    pos: int
+    type: str
+    contents: Optional = None
+
+
 # Create your views here.
 def front_page(request):
+    settings = Settings.load()
+
+    rows = [FrontPageRow(settings.frontpage_tours_pos, 'tours'), FrontPageRow(settings.frontpage_map_pos, 'map'),
+            FrontPageRow(settings.frontpage_blog_pos, 'blog'), FrontPageRow(settings.frontpage_news_pos, 'news')] + [
+               FrontPageRow(pg.front_page_pos, 'section', pg) for pg in
+               Page.visible(request.user.is_staff).filter(front_page_pos__isnull=False).order_by('front_page_pos')]
+
+    highlight_rows: Dict[int, list] = {}
+    for highlight in HightlightBox.visible(request.user.is_staff):
+        if highlight.row in highlight_rows:
+            highlight_rows[highlight.row].append(highlight)
+        else:
+            highlight_rows[highlight.row] = [highlight]
+
+    for row_num, highlight_row in highlight_rows.items():
+        highlight_row.sort(key=lambda box: box.col)
+        rows.append(FrontPageRow(row_num, 'highlight', highlight_row))
+
+    rows.sort(key=lambda row: row.pos)
+    print(rows)
+    print(rows[0].pos)
+
     context = {
                   'tours': Tour.visible(request.user.is_staff).filter(display=True),
                   'banners': BannerPhoto.objects.filter(active=True).order_by('?'),
                   'frontpage_sections': Page.visible(request.user.is_staff).filter(
-                      front_page_pos__isnull=False).order_by('front_page_pos')
+                      front_page_pos__isnull=False).order_by('front_page_pos'),
+                  'highlights': HightlightBox.visible(request.user.is_staff),
+                  'destinations': Destination.visible(request.user.is_staff),
+                  'points': MapPoint.objects.all(),
+                  'rows': rows
               } | global_context(request)
     return render(request, 'main/front-page.html', context)
 
@@ -127,7 +162,8 @@ def tour(request, slug):
 def tours(request):
     context = {
                   'tours': Tour.visible(request.user.is_staff).filter(display=True),
-                  'destinations': Destination.visible(request.user.is_staff)
+                  'destinations': Destination.visible(request.user.is_staff),
+                  'query': request.GET.get('q')
               } | global_context(request)
     return render(request, 'main/tours.html', context)
 

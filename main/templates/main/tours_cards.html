@@ -19,7 +19,8 @@
 
             <div class="card order-2 text-card tour-text flex-grow-1 mx-4"
                     {% if tour.state.border_color is not None %}
-                 style="border-color: {{ tour.state.border_color }};"
+                 style="border-color: {{ tour.state.border_color }};
+                         --card-border-width: 10px; "
                     {% endif %}>
                 <div class="card-body">
                     {{ tour.excerpt }}
@@ -48,7 +49,8 @@
 
             <div class="card order-1 img-title-card img-card mt-4 mx-4"
                     {% if tour.state.border_color is not None %}
-                 style="border-color: {{ tour.state.border_color }}"
+                 style="border-color: {{ tour.state.border_color }};
+                         --card-border-width: 10px;"
                     {% endif %}>
                 <img src="{{ tour.card_img.url }}" class="card-img" alt="{{ tour.name }}">
                 <div class="card-img-overlay">

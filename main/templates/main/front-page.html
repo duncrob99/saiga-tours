@@ -8,6 +8,20 @@
             transition: left {{ settings.banner_transition_time }}s;
         }
 
+        :root {
+            --search-bar-radius: 15px;
+        }
+
+        #search-input {
+            font-size: 1.5rem;
+            border-bottom-left-radius: var(--search-bar-radius);
+            border-top-left-radius: var(--search-bar-radius);
+        }
+
+        #search-button {
+            border-bottom-right-radius: var(--search-bar-radius);
+            border-top-right-radius: var(--search-bar-radius);
+        }
     </style>
 {% endblock %}
 
@@ -21,25 +35,63 @@
             {% endfor %}
         </div>
         <div class="banner-text">
-            <h1 class="display-1">{{ settings.site_title }}</h1>
-            <p>We do tours to cool places</p>
+            <h1 class="display-1">{{ settings.catchphrase }}</h1>
+            <form method="get" action="{% url 'tours' %}">
+                <div class="input-group search-bar">
+                    <input id="search-input" type="text" class="form-control"
+                           placeholder="Search for your next adventure"
+                           aria-label="Search" name="q">
+                    <button class="btn btn-primary accent hoverable-accent input-group-text" id="search-button"><i
+                            class="bi bi-search"></i></button>
+                </div>
+            </form>
             <div class="banner-text-background"></div>
         </div>
     </div>
 {% endblock banner %}
 
 {% block content %}
-    <h1 class="display-1">Tours</h1>
-    <hr>
-    {% include 'main/tours_cards.html' %}
-    {% for section in frontpage_sections %}
-        <div class="page-section wide-bg d-flex justify-content-center flex-column"
-             style="--background: {{ section.front_page_colour }}"
-             id="page-section-{{ forloop.counter }}">
-            <h1 class="display-1">{{ section.title }}</h1>
-            {{ section.content | safe }}
-        </div>
+    {% for row in rows %}
+        {% if row.type == 'tours' %}
+            <h1 class="display-1">Tours</h1>
+            <hr>
+            {% include 'main/tours_cards.html' %}
+        {% elif row.type == 'section' %}
+            {% with section=row.contents %}
+                <div class="page-section wide-bg d-flex justify-content-center flex-column"
+                     style="--background: {{ section.front_page_colour }}"
+                     id="page-section-{{ forloop.counter }}">
+                    <h1 class="display-1">{{ section.title }}</h1>
+                    {{ section.content | safe }}
+                </div>
+            {% endwith %}
+        {% elif row.type == 'map' %}
+            <div class="wide-bg" style='--background: #e1f8ff'>
+                {% include 'main/map.html' %}
+            </div>
+        {% elif row.type == 'highlight' %}
+            <div class="row m-5 d-flex align-items-stretch">
+                {% for highlight in row.contents %}
+                    <div class="col flex-grow-1 d-flex flex-column">
+                        <div class="card d-flex flex-grow-1"
+                             style="background-color: {{ highlight.background_colour }}; border: 5px solid {{ highlight.border_colour }}">
+                            <div class="card-header">
+                                <h6 class="display-6">{{ highlight.title }}</h6>
+                            </div>
+                            <div class="card-body">
+                                {{ highlight.content | safe }}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            {#        {% else %}#}
+            {#            {{ row }}#}
+        {% endif %}
     {% endfor %}
+
+
+
 {% endblock %}
 
 {% block js %}
@@ -51,4 +103,24 @@
         let banner_init_delay = {{ settings.banner_initial_delay }};
     </script>
     <script src="{% static 'js/banner.js' %}"></script>
+
+    <script src="{% static 'js/map.js' %}"></script>
+    <script>
+        let destinations = [];
+        {% for destination in destinations %}
+            destinations.push(["{{ destination.name }}", "{% url 'destination' destination.region.slug destination.slug %}"]);
+        {% endfor %}
+
+        let points = [];
+        {% for point in points %}
+            points.push({
+                x: {{ point.x }},
+                y: {{ point.y }},
+                name: "{{ point.name }}",
+                radius: {{ point.activation_radius }},
+                size: {{ point.size }}
+            })
+        {% endfor %}
+        make_map_work(destinations, undefined, undefined, undefined, undefined, undefined, points);
+    </script>
 {% endblock %}

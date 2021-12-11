@@ -31,7 +31,7 @@
                 <div class="row m-3">
                     <div class="input-group search-bar">
                         <input id="search-input" type="text" class="form-control" placeholder="Search"
-                               aria-label="Search">
+                               aria-label="Search" {% if query %}value="{{ query }}"{% endif %}>
                         <span class="input-group-text"><i class="bi bi-search"></i></span>
                     </div>
                 </div>

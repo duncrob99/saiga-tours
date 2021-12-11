@@ -27,7 +27,7 @@
         <h1 class="display-1" id="title">{{ tour }}</h1>
         <a href="{% url 'contact' %}?subject=Inquiry about {{ tour }}">
             <button class="btn btn-primary d-inline-flex align-items-center accent hoverable-accent" role="button"
-                    style="float: right; border-radius: 20px;">
+                    style="float: right; border-radius: var(--border-radius);">
                 <span class="bi bi-chat-left-dots" style="font-size: 1.5rem"></span> <span style="margin-left: 10px;">Inquire Now</span>
             </button>
         </a>
