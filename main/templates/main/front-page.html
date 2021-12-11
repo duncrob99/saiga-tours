@@ -22,6 +22,10 @@
             border-bottom-right-radius: var(--search-bar-radius);
             border-top-right-radius: var(--search-bar-radius);
         }
+
+        .card:hover img {
+            transform: scale(1.2);
+        }
     </style>
 {% endblock %}
 
@@ -85,8 +89,58 @@
                     </div>
                 {% endfor %}
             </div>
-            {#        {% else %}#}
-            {#            {{ row }}#}
+        {% elif row.type == 'articles' %}
+            <div class="heading d-flex justify-content-between align-items-center">
+                <h1 class="display-1">{{ row.title }}</h1>
+                <a href="{{ row.link }}">
+                    <button id="filter-button"
+                            class="btn btn-outline-secondary d-inline-flex align-items-center accent hoverable-accent"
+                            data-bs-toggle="offcanvas" href="{{ row.link }}"
+                            data-bs-target="#filter-sidebar" aria-controls="filter-sidebar" role="button"
+                            style="float: right">
+                        View More
+                    </button>
+                </a>
+            </div>
+            <hr>
+            <div class="row mb-5">
+                {% for article in row.contents %}
+                    <div class="d-flex flex-column col-xl-4 col-lg-6 col-md-12 g-0">
+                        <div class="card order-2 text-card flex-grow-1 mx-4">
+                            <div class="card-body">
+                                {{ article.excerpt | default:"Introductory info" }}
+                            </div>
+                            <div class="card-footer">
+                                <table class="table table-borderless">
+                                    {% if article.creation %}
+                                        <tr>
+                                            <th class="table-icon"><i class="bi bi-calendar4-range"></i></th>
+                                            <td class="table-value">{{ article.creation|date }}</td>
+                                        </tr>
+                                    {% endif %}
+                                    <tr{% if not article.author %} style="opacity: 0" {% endif %}>
+                                        <th class="table-icon"><i class="bi bi-person"></i></th>
+                                        <td class="table-value">{{ article.author }}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <a class="stretched-link"
+                               href="{% url 'article' article.slug %}"></a>
+                        </div>
+
+                        <div class="card order-1 img-title-card img-card mt-4 mx-4">
+                            <img src="{{ article.card_img.url }}" class="card-img" alt="{{ article }}">
+                            <div class="card-img-overlay">
+                                <h5 class="card-title">{{ article }}</h5>
+                            </div>
+                            <a class="stretched-link"
+                               href="{% url 'article' article.slug %}"></a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            {{ row }}
         {% endif %}
     {% endfor %}
 

@@ -35,7 +35,7 @@
                         </div>
                         <div class="card-body flex-grow-1">
                             <h4 class="card-title display-6">{{ article.title }}</h4>
-                            <p class="card-text">Here's some more information.</p>
+                            <p class="card-text">{{ article.excerpt | default:"Here's some more info." }}</p>
                         </div>
                         <div class="article-date">
                             {{ article.creation|date }}

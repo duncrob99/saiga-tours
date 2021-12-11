@@ -45,8 +45,8 @@
 
 :root {
     --banner-text-transparency: rgba(0, 0, 0, 60%);
-    --banner-text-background: black;
-    --banner-text-margin: 300px;
+    --banner-text-background: rgba(0, 0, 0, 0.48);
+    --banner-text-margin: 100%;
     --banner-text-fade: 30%;
 }
 

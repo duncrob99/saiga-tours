@@ -12,6 +12,7 @@ from django.db.models import Q
 from django.forms import modelform_factory, inlineformset_factory
 from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404, redirect
+from django.urls import reverse
 
 from .forms import *
 from .models import *
@@ -27,6 +28,8 @@ class FrontPageRow:
     pos: int
     type: str
     contents: Optional = None
+    title: Optional[str] = None
+    link: Optional[str] = None
 
 
 # Create your views here.
@@ -34,7 +37,11 @@ def front_page(request):
     settings = Settings.load()
 
     rows = [FrontPageRow(settings.frontpage_tours_pos, 'tours'), FrontPageRow(settings.frontpage_map_pos, 'map'),
-            FrontPageRow(settings.frontpage_blog_pos, 'blog'), FrontPageRow(settings.frontpage_news_pos, 'news')] + [
+            FrontPageRow(settings.frontpage_blog_pos, 'articles',
+                         Article.visible(request.user.is_staff).filter(type=Article.BLOG)[:3], 'Blogs',
+                         reverse('blog')), FrontPageRow(settings.frontpage_news_pos, 'articles',
+                                                        Article.visible(request.user.is_staff).filter(
+                                                            type=Article.NEWS)[:3], 'News', reverse('news'))] + [
                FrontPageRow(pg.front_page_pos, 'section', pg) for pg in
                Page.visible(request.user.is_staff).filter(front_page_pos__isnull=False).order_by('front_page_pos')]
 
