@@ -2,12 +2,13 @@
 
 <link rel="stylesheet" href="{% static 'css/navbar.css' %}">
 
-<nav class="navbar sticky-top navbar-expand-xl navbar-light py-4">
-    <div class="container-fluid">
+<nav class="navbar sticky-top navbar-expand-xl navbar-light py-0">
+    <div class="container px-5">
         <div class="navbar-brand">
             <a class="navbar-brand" href="{% url 'front-page' %}">
                 <img class="logo" src="{{ settings.logo.url }}">
-                {{ settings.site_title }}</a>
+                {#                {{ settings.site_title }}#}
+            </a>
         </div>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
                 aria-expanded="false"
@@ -24,7 +25,7 @@
                         </li>
                     {% else %}
                         <li class="nav-item dropdown btn-group">
-                            <a type="button" class="nav-link main-nav" role="button"
+                            <a type="button" class="main-nav nav-link" role="button"
                                href="{% url 'page' page.full_path %}">{{ page.title }}</a>
                             <a class="nav-link dropdown-toggle-split dropdown-toggle main-nav" role="button"
                                id="dropdownMenuButton"
@@ -181,5 +182,7 @@
                      style="right: 10px; position: relative">Login</a></span>
         {% endif %}
         -->
+        <a class="navbar-contact main-nav" href="mailto:contact@saigatours.com">contact@saigatours.com</a>
     </div>
 </nav>
+

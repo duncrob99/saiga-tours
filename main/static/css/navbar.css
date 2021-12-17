@@ -1,26 +1,21 @@
-.hello-msg {
-    font-size: 18px;
-    color: #fff;
-    margin-right: 20px;
-}
-
 .main-nav {
-    font-size: 1.3em;
+    font-size: 1em;
     height: min-content;
-    padding-bottom: 0.1rem;
+    font-weight: bold;
+    color: #123a32 !important;
+    padding: 2rem;
 }
 
-@media only screen and (min-width: 1200px) {
-    .dropdown > .main-nav:hover {
-    }
+.navbar-contact {
+    font-weight: normal;
+}
+
+.main-nav:hover, .main-nav:hover * {
+    color: var(--accent-hover-background) !important;
 }
 
 .navbar {
-    /*box-shadow: 0 2px 10px grey;*/
-    /*box-shadow: 5px 5px 20px rgba(0, 0, 0, 0.5);*/
-    /*background: white;*/
     background: var(--accent-background);
-    padding-bottom: 0;
     z-index: 1000;
 }
 
@@ -59,6 +54,7 @@
     position: relative;
     display: block;
     transform: translateY(0) rotateX(90deg);
+    opacity: 0;
     transform-origin: 0 0;
     z-index: -10000;
 }
@@ -109,12 +105,6 @@
     }
 }
 
-.navbar .navbar-nav {
-    height: 100%;
-    top: 100%;
-    position: absolute;
-}
-
 #navbarNav {
     position: relative;
     height: 100%;
@@ -132,7 +122,7 @@
 
 .navbar .navbar-brand {
     color: var(--accent-foreground) !important;
-    font-size: 1.5em;
+    font-size: 1.1em;
 }
 
 .navbar .navbar-brand:hover {
@@ -148,9 +138,9 @@
 }
 
 .navbar .logo {
-    max-height: 80px;
-    margin-bottom: -80px;
-    margin-top: -80px;
+    max-height: calc(0.5 * var(--navbar-height));
+    margin-bottom: calc(-0.5 * var(--navbar-height));
+    margin-top: calc(-0.5 * var(--navbar-height));
 }
 
 :root {
@@ -159,6 +149,6 @@
 }
 
 .dropdown-item:hover {
-    background-color: var(--accent-hover-background);
-    color: var(--accent-hover-foreground);
+    color: var(--accent-hover-background);
+    background-color: transparent;
 }

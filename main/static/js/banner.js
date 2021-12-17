@@ -20,6 +20,8 @@ function resize() {
         }
     });
 
+    document.querySelector('.banner').style.top = navbar_height + "px";
+    document.querySelector('.banner').style.height = document.documentElement.clientHeight - navbar_height + "px";
 }
 
 function setVisible() {

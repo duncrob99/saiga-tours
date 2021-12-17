@@ -19,6 +19,7 @@
             --accent-hover-background: {{ settings.accent_hover_background }};
             --accent-hover-foreground: {{ settings.accent_hover_foreground }};
             --border-radius: {{ settings.corner_radius }}px;
+            --bs-font-sans-serif: "Poppin";
         }
 
         {% if settings.rounded_card_headers %}
@@ -31,6 +32,16 @@
             border-radius: var(--border-radius);
         }
 
+        @font-face {
+            font-family: "Poppin";
+            src: url("{% static 'fonts/Poppins-Regular.ttf' %}");
+        }
+
+        @font-face {
+            font-family: "Poppin";
+            src: url("{% static "fonts/Poppins-SemiBold.ttf" %}");
+            font-weight: bold;
+        }
     </style>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
