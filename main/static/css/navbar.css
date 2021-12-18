@@ -90,6 +90,11 @@
         position: relative !important;
     }
 
+    #navbarNav {
+        max-height: calc(100vh - var(--navbar-height));
+        overflow-y: scroll;
+    }
+
     #separate-contact {
         display: none;
     }
