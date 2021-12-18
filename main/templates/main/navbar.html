@@ -3,7 +3,7 @@
 <link rel="stylesheet" href="{% static 'css/navbar.css' %}">
 
 <nav class="navbar sticky-top navbar-expand-xl navbar-light py-0">
-    <div class="container px-5">
+    <div class="container">
         <div class="navbar-brand">
             <a class="navbar-brand" href="{% url 'front-page' %}">
                 <img class="logo" src="{{ settings.logo.url }}">
@@ -16,7 +16,7 @@
                 data-bs-toggle="collapse">
             <span class="navbar-toggler-icon"></span>
         </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
+        <div class="collapse navbar-collapse justify-content-between" id="navbarNav">
             <ul class="navbar-nav">
                 {% for page in pages %}
                     {% if page.children.count == 0 and user.is_staff or page.published_children.count == 0 and not user.is_staff %}
@@ -26,7 +26,8 @@
                     {% else %}
                         <li class="nav-item dropdown btn-group">
                             <a type="button" class="main-nav nav-link" role="button"
-                               href="{% url 'page' page.full_path %}">{{ page.title }}</a>
+                               href="{% url 'page' page.full_path %}">{{ page.title }}
+                                <i class="bi bi-chevron-down"></i></a>
                             <a class="nav-link dropdown-toggle-split dropdown-toggle main-nav" role="button"
                                id="dropdownMenuButton"
                                data-bs-toggle="dropdown">
@@ -52,7 +53,8 @@
                 {% endcomment %}
                 <li class="nav-item dropdown btn-group">
                     <a type="button" class="nav-link main-nav" role="button"
-                       href="{% url 'tours' %}">Tours</a>
+                       href="{% url 'tours' %}">Tours
+                        <i class="bi bi-chevron-down"></i></a>
                     <a class="nav-link dropdown-toggle-split dropdown-toggle main-nav" role="button"
                        id="dropdownMenuButton"
                        data-bs-toggle="dropdown">
@@ -62,14 +64,14 @@
                             <li>
                                 <a class="dropdown-item d-flex justify-content-between"
                                    href="{% url 'tours' region.slug %}">{{ region.name }} <i
-                                        class="bi bi-caret-right-fill"></i></a>
+                                        class="bi bi-chevron-right"></i></a>
                                 <ul class="dropdown-menu dropdown-submenu">
                                     {% if user.is_staff %}
                                         {% for country in region.destinations.all %}
                                             <li>
                                                 <a class="dropdown-item d-flex justify-content-between"
                                                    href="{% url 'tours' region.slug country.slug %}">{{ country.name }}
-                                                    <i class="bi bi-caret-right-fill"></i></a>
+                                                    <i class="bi bi-chevron-right"></i></a>
                                                 <ul class="dropdown-menu dropdown-submenu">
                                                     {% for detail in country.tour_info %}
                                                         <li><a class="dropdown-item d-flex justify-content-between"
@@ -84,7 +86,7 @@
                                             <li>
                                                 <a class="dropdown-item d-flex justify-content-between"
                                                    href="{% url 'destination' region.slug country.slug %}">{{ country.name }}
-                                                    <i class="bi bi-caret-right-fill"></i></a>
+                                                    <i class="bi bi-chevron-right"></i></a>
                                                 <ul class="dropdown-menu dropdown-submenu">
                                                     {% for detail in country.details.all_published %}
                                                         <li><a class="dropdown-item d-flex justify-content-between"
@@ -102,7 +104,8 @@
                 </li>
                 <li class="nav-item dropdown btn-group">
                     <a type="button" class="nav-link main-nav" role="button"
-                       href="{% url 'destinations' %}">Destination Guides</a>
+                       href="{% url 'destinations' %}">Destination Guides
+                        <i class="bi bi-chevron-down"></i></a>
                     <a class="nav-link dropdown-toggle-split dropdown-toggle main-nav" role="button"
                        id="dropdownMenuButton"
                        data-bs-toggle="dropdown">
@@ -112,14 +115,14 @@
                             <li>
                                 <a class="dropdown-item d-flex justify-content-between"
                                    href="{% url 'region' region.slug %}">{{ region.name }} <i
-                                        class="bi bi-caret-right-fill"></i></a>
+                                        class="bi bi-chevron-right"></i></a>
                                 <ul class="dropdown-menu dropdown-submenu">
                                     {% if user.is_staff %}
                                         {% for country in region.destinations.all %}
                                             <li>
                                                 <a class="dropdown-item d-flex justify-content-between"
                                                    href="{% url 'destination' region.slug country.slug %}">{{ country.name }}
-                                                    <i class="bi bi-caret-right-fill"></i></a>
+                                                    <i class="bi bi-chevron-right"></i></a>
                                                 <ul class="dropdown-menu dropdown-submenu">
                                                     {% for detail in country.guide_details %}
                                                         <li><a class="dropdown-item d-flex justify-content-between"
@@ -134,7 +137,7 @@
                                             <li>
                                                 <a class="dropdown-item d-flex justify-content-between"
                                                    href="{% url 'destination' region.slug country.slug %}">{{ country.name }}
-                                                    <i class="bi bi-caret-right-fill"></i></a>
+                                                    <i class="bi bi-chevron-right"></i></a>
                                                 <ul class="dropdown-menu dropdown-submenu">
                                                     {% for detail in country.details.all_published %}
                                                         <li><a class="dropdown-item d-flex justify-content-between"
@@ -170,6 +173,9 @@
                 {% endif %}
                 -->
             </ul>
+            <div class="nav-item">
+                <a class="nav-link" href="mailto:contact@saigatours.com">contact@saigatours.com</a>
+            </div>
         </div>
 
         <!--
@@ -182,7 +188,6 @@
                      style="right: 10px; position: relative">Login</a></span>
         {% endif %}
         -->
-        <a class="navbar-contact main-nav" href="mailto:contact@saigatours.com">contact@saigatours.com</a>
     </div>
 </nav>
 

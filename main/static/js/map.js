@@ -406,8 +406,6 @@ function updateStops(stops, editable) {
                 currentSlide(stop.day);
             });
 
-            document.querySelector(`#id_stops-${stop.form_ix}-order`).value = i;
-
             point_el.addEventListener('mouseenter', () => {
                 SVG(point_el).animate({when: 'now'}).transform({
                     scale: pointer_size * 1.2,
@@ -434,6 +432,8 @@ function updateStops(stops, editable) {
         }
 
         if (editable) {
+            document.querySelector(`#id_stops-${stop.form_ix}-order`).value = i;
+
             point_el.addEventListener('mousedown', click_ev => {
                 let start = {x: stops[i].x, y: stops[i].y}
 

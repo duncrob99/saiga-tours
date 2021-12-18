@@ -8,7 +8,7 @@
         <li>
             <a class="dropdown-item d-flex justify-content-between"
                href="{% url 'page' page.full_path %}">{{ page.title }} <i
-                    class="bi bi-caret-right-fill"></i></a>
+                    class="bi bi-chevron-right"></i></a>
             <ul class="dropdown-menu dropdown-submenu" aria-labelledby="dropdownMenuButton">
                 {% for child_page in page.children.all %}
                     {% include 'main/page_dropdown.html' with page=child_page %}
@@ -26,7 +26,7 @@
         <li>
             <a class="dropdown-item d-flex justify-content-between"
                href="{% url 'page' page.full_path %}">{{ page.title }} <i
-                    class="bi bi-caret-right-fill"></i></a>
+                    class="bi bi-chevron-right"></i></a>
             <ul class="dropdown-menu dropdown-submenu" aria-labelledby="dropdownMenuButton">
                 {% for child_page in page.children.all_published %}
                     {% include 'main/page_dropdown.html' with page=child_page %}
