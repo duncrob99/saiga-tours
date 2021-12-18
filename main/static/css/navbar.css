@@ -19,10 +19,6 @@
     z-index: 1000;
 }
 
-.navbar > .container {
-    padding: 0 5rem;
-}
-
 .navbar .dropdown-menu li {
     position: relative;
 }
@@ -108,10 +104,6 @@
 
     .main-nav {
         padding: 1rem 0;
-    }
-
-    .navbar > .container {
-        padding: 0 1rem;
     }
 }
 
