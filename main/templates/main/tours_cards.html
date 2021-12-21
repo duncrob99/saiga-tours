@@ -17,29 +17,32 @@
             </div>
 
 
-            <div class="card order-2 text-card tour-text flex-grow-1 mx-4"
+            <div class="card order-2 text-card tour-text flex-grow-1 mx-4 d-flex flex-column"
                     {% if tour.state.border_color is not None %}
                  style="border-color: {{ tour.state.border_color }};
                          --card-border-width: 10px; "
                     {% endif %}>
-                <div class="card-body">
-                    {{ tour.excerpt }}
-                </div>
-                <div class="card-footer">
+                <div class="card-body flex-grow-1 d-flex flex-column">
+                    <h5 class="tour-name">{{ tour.name }}</h5>
+                    <div class="tour-excerpt flex-grow-1">
+                        {{ tour.excerpt }}
+                    </div>
+                    <hr>
                     <table class="table table-borderless">
-                        {% if tour.dated %}
-                            <tr>
-                                <th class="table-icon"><i class="bi bi-calendar4-range"></i></th>
-                                <td class="table-value">{{ tour.start_date }} - {{ tour.end_date }}</td>
-                            </tr>
-                        {% endif %}
                         <tr>
+                            {% if tour.dated %}
+                                <th class="table-icon"><i class="bi bi-calendar4-range"></i></th>
+                                <td class="table-value">{{ tour.start_date }}</td>
+                            {% endif %}
                             <th class="table-icon"><i class="bi bi-clock-history"></i></th>
                             <td class="table-value">{{ tour.duration }} day{% if tour.duration > 1 %}s{% endif %}</td>
                         </tr>
                         <tr>
                             <th class="table-icon"><i class="bi bi-coin"></i></th>
                             <td class="table-value">{{ settings.price_prefix }}{{ tour.price }}</td>
+                            <th colspan="2">
+                                <button class="btn accent hoverable-accent">BOOK NOW</button>
+                            </th>
                         </tr>
                     </table>
                     <a class="stretched-link"
@@ -52,13 +55,14 @@
                  style="border-color: {{ tour.state.border_color }};
                          --card-border-width: 10px;"
                     {% endif %}>
-                <img src="{{ tour.card_img.url }}" class="card-img" alt="{{ tour.name }}">
-                <div class="card-img-overlay">
-                    <h5 class="card-title">{{ tour.name }}</h5>
-                    {% if tour.state is not None %}
-                        <div class="state" style="background-color: {{ tour.state.color }};
-                                color: {{ tour.state.text_color }}">{{ tour.state.text }}</div>
-                    {% endif %}
+                <div class="img-card-contents">
+                    <img src="{{ tour.card_img.url }}" class="card-img" alt="{{ tour.name }}">
+                    <div class="card-img-overlay">
+                        {% if tour.state is not None %}
+                            <div class="state" style="background-color: {{ tour.state.color }};
+                                    color: {{ tour.state.text_color }}">{{ tour.state.text }}</div>
+                        {% endif %}
+                    </div>
                 </div>
                 <a class="stretched-link"
                    href="{% url 'tour' tour.slug %}{% if parent %}?parent={{ parent }}{% endif %}"></a>

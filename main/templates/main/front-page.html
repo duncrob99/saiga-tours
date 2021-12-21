@@ -57,15 +57,18 @@
 {% block content %}
     {% for row in rows %}
         {% if row.type == 'tours' %}
-            <h1 class="display-1">Tours</h1>
-            <hr>
+            <h1 class="section-title">Tours
+                <div class="underline"></div>
+            </h1>
             {% include 'main/tours_cards.html' %}
         {% elif row.type == 'section' %}
             {% with section=row.contents %}
                 <div class="page-section wide-bg d-flex justify-content-center flex-column"
                      style="--background: {{ section.front_page_colour }}"
                      id="page-section-{{ forloop.counter }}">
-                    <h1 class="display-1">{{ section.title }}</h1>
+                    <h1 class="section-title">{{ section.title }}
+                        <div class="underline"></div>
+                    </h1>
                     {{ section.content | safe }}
                 </div>
             {% endwith %}
@@ -90,19 +93,9 @@
                 {% endfor %}
             </div>
         {% elif row.type == 'articles' %}
-            <div class="heading d-flex justify-content-between align-items-center">
-                <h1 class="display-1">{{ row.title }}</h1>
-                <a href="{{ row.link }}">
-                    <button id="filter-button"
-                            class="btn btn-outline-secondary d-inline-flex align-items-center accent hoverable-accent"
-                            data-bs-toggle="offcanvas" href="{{ row.link }}"
-                            data-bs-target="#filter-sidebar" aria-controls="filter-sidebar" role="button"
-                            style="float: right">
-                        View More
-                    </button>
-                </a>
-            </div>
-            <hr>
+            <h1 class="section-title">{{ row.title }}
+                <div class="underline"></div>
+            </h1>
             <div class="row mb-5">
                 {% for article in row.contents %}
                     <div class="d-flex flex-column col-xl-4 col-lg-6 col-md-12 g-0">
@@ -138,6 +131,17 @@
                         </div>
                     </div>
                 {% endfor %}
+            </div>
+            <div class="d-flex justify-content-center mb-5">
+                <a href="{{ row.link }}">
+                    <button id="filter-button"
+                            class="btn btn-outline-secondary d-inline-flex align-items-center accent hoverable-accent"
+                            data-bs-toggle="offcanvas" href="{{ row.link }}"
+                            data-bs-target="#filter-sidebar" aria-controls="filter-sidebar" role="button"
+                            style="align-self: center">
+                        View More
+                    </button>
+                </a>
             </div>
         {% else %}
             {{ row }}

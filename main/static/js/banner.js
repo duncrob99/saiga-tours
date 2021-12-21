@@ -3,12 +3,13 @@ let current_idx = 0;
 function resize() {
     let navbar_height = document.querySelector('.navbar').getBoundingClientRect().height;
     let aspect_ratio = document.documentElement.clientWidth / (document.documentElement.clientHeight - navbar_height);
+    let bottom_margin = 50;
 
     let banner_imgs = document.querySelectorAll('#banner-slideshow img');
 
     banner_imgs.forEach(el => {
         el.style.top = navbar_height + "px";
-        el.style.height = document.documentElement.clientHeight - navbar_height + 'px';
+        el.style.height = document.documentElement.clientHeight - navbar_height - bottom_margin + 'px';
         let min_ar = parseFloat(el.getAttribute('min_ar'));
         let max_ar = parseFloat(el.getAttribute('max_ar'));
         if (min_ar < aspect_ratio && aspect_ratio < max_ar) {
@@ -21,7 +22,7 @@ function resize() {
     });
 
     document.querySelector('.banner').style.top = navbar_height + "px";
-    document.querySelector('.banner').style.height = document.documentElement.clientHeight - navbar_height + "px";
+    document.querySelector('.banner').style.height = document.documentElement.clientHeight - navbar_height - bottom_margin + "px";
 }
 
 function setVisible() {

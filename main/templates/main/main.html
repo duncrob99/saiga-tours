@@ -21,6 +21,11 @@
             --accent-hover-foreground: {{ settings.accent_hover_foreground }};
             --border-radius: {{ settings.corner_radius }}px;
             --bs-font-sans-serif: "Poppin";
+            --paper-rip: url("{% static 'images/torn-mask.png' %}");
+            --bottom-transition: url("{% static 'images/bottom-transition.png' %}");
+            --top-transition: url("{% static 'images/top-transition.png' %}");
+            --both-transition: url("{% static 'images/both-transition.png' %}");
+            --underline: url("{% static 'images/underline.svg' %}");
         }
 
         {% if settings.rounded_card_headers %}
@@ -42,6 +47,11 @@
             font-family: "Poppin";
             src: url("{% static "fonts/Poppins-SemiBold.ttf" %}");
             font-weight: bold;
+        }
+
+        @font-face {
+            font-family: "Caveat";
+            src: url("{% static 'fonts/Caveat-VariableFont_wght.ttf' %}");
         }
     </style>
     <link rel="preconnect" href="https://fonts.googleapis.com">

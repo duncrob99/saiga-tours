@@ -87,11 +87,10 @@ body * {
 }
 
 .wide-bg {
-    background-color: var(--background);
     height: calc(100% + 5rem);
     position: relative;
-    padding-bottom: 1rem;
-    padding-top: 1rem;
+    padding-bottom: 10rem;
+    padding-top: 10rem;
     margin-top: 0;
     margin-bottom: 0;
     min-height: 500px;
@@ -101,7 +100,8 @@ body * {
 
 .wide-bg:before {
     content: "";
-    background-color: var(--background);
+    background-image: var(--both-transition);
+    background-size: auto 100%;
     position: absolute;
     top: 0;
     height: calc(100% + 0.5rem);
@@ -111,6 +111,33 @@ body * {
     min-height: 500px;
 }
 
-h1, .navbar-brand {
-    font-family: 'Permanent Marker', sans-serif;
+.display-1, .navbar-brand {
+    font-family: 'Caveat', sans-serif;
+    font-weight: 700 !important;
+}
+
+.section-title {
+    font-family: 'Poppin', sans-serif;
+    font-weight: bold;
+    text-align: center;
+    line-height: 2rem;
+    margin-top: 10rem;
+    font-size: 2.2rem;
+}
+
+.section-title > div.underline {
+    content: var(--underline);
+    text-align: center;
+    position: relative;
+    left: 50%;
+    top: 0.8em;
+    margin-bottom: 5rem;
+    transform: translateX(-50%);
+}
+
+.center-align-link {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-bottom: 100rem;
 }
