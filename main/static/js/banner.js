@@ -1,9 +1,14 @@
 let current_idx = 0;
+let banner_width = 10;
+let banner_height = 10;
 
 function resize() {
     let navbar_height = document.querySelector('.navbar').getBoundingClientRect().height;
     let aspect_ratio = document.documentElement.clientWidth / (document.documentElement.clientHeight - navbar_height);
     let bottom_margin = 50;
+
+    banner_width = Math.max(Math.round(document.documentElement.clientWidth), banner_width);
+    banner_height = Math.max(Math.round(document.documentElement.clientHeight - navbar_height - bottom_margin), banner_height);
 
     let banner_imgs = document.querySelectorAll('#banner-slideshow img');
 
@@ -18,6 +23,10 @@ function resize() {
         } else {
             el.classList.remove('well-sized');
             el.classList.add('badly-sized');
+        }
+
+        if (el.getAttribute('src') !== undefined) {
+            loadImg(el);
         }
     });
 
@@ -105,7 +114,7 @@ window.addEventListener('load', () => {
 window.addEventListener('resize', resize);
 
 function loadImg(img_el) {
-    img_el.src = img_el.dataset.src;
+    img_el.src = "resized-image/" + img_el.dataset.filename + "/" + banner_width + 'x' + banner_height + '/';
     img_el.classList.remove('to-load')
 }
 

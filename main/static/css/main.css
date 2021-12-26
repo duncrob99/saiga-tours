@@ -73,12 +73,14 @@ small {
     z-index: 9998;
 }
 
-a {
+a.nice-link {
     text-decoration: none;
+    border-bottom: 2px dashed var(--accent-foreground);
     color: var(--accent-foreground);
 }
 
-a:hover {
+a.nice-link:hover {
+    border-bottom: 2px dashed var(--accent-hover-foreground);
     color: var(--accent-hover-foreground);
 }
 

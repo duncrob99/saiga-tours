@@ -33,7 +33,7 @@
     <div class="banner">
         <div id="banner-slideshow">
             {% for banner in banners %}
-                <img alt="banner image" data-src="{{ banner.img.url }}" class="banner-img hide to-load"
+                <img alt="banner image" data-filename="{{ banner.img.name }}" class="banner-img hide to-load"
                      idx="{{ forloop.counter0 }}" min_ar="{{ banner.min_AR }}"
                      max_ar="{{ banner.max_AR }}">
             {% endfor %}
@@ -134,13 +134,16 @@
             </div>
             <div class="d-flex justify-content-center mb-5">
                 <a href="{{ row.link }}">
-                    <button id="filter-button"
-                            class="btn btn-outline-secondary d-inline-flex align-items-center accent hoverable-accent"
-                            data-bs-toggle="offcanvas" href="{{ row.link }}"
-                            data-bs-target="#filter-sidebar" aria-controls="filter-sidebar" role="button"
-                            style="align-self: center">
-                        View More
-                    </button>
+                    {#                    <button id="filter-button"#}
+                    {#                            class="btn btn-outline-secondary d-inline-flex align-items-center accent hoverable-accent"#}
+                    {#                            data-bs-toggle="offcanvas" href="{{ row.link }}"#}
+                    {#                            data-bs-target="#filter-sidebar" aria-controls="filter-sidebar" role="button"#}
+                    {#                            style="align-self: center">#}
+                    {#                        View More#}
+                    {#                    </button>#}
+                    <a href="{{ row.link }}" class="nice-link">
+                        VIEW MORE
+                    </a>
                 </a>
             </div>
         {% else %}

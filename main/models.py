@@ -286,6 +286,7 @@ class Page(DraftHistory):
 @receiver(post_save)
 def validate_image_size(sender, instance, created, **kwargs):
     if hasattr(instance, 'card_img'):
+        print(instance.card_img.path)
         image = Image.open(instance.card_img)
         (width, height) = image.size
 
@@ -301,7 +302,7 @@ def validate_image_size(sender, instance, created, **kwargs):
             new_height = width / ratio
 
         crop_coords = (
-            (width - new_width) / 2, (height - new_height) / 2, (width + new_width) / 2, (height + new_height) / 2)
+            (width - new_width) // 2, (height - new_height) // 2, (width + new_width) // 2, (height + new_height) // 2)
         new_image = image.crop(crop_coords)
 
         img_io = BytesIO()

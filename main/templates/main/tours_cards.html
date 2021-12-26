@@ -56,7 +56,7 @@
                          --card-border-width: 10px;"
                     {% endif %}>
                 <div class="img-card-contents">
-                    <img src="{{ tour.card_img.url }}" class="card-img" alt="{{ tour.name }}">
+                    <img data-filename="{{ tour.card_img.name }}" class="card-img" alt="{{ tour.name }}">
                     <div class="card-img-overlay">
                         {% if tour.state is not None %}
                             <div class="state" style="background-color: {{ tour.state.color }};
@@ -70,3 +70,19 @@
         </div>
     {% endfor %}
 </div>
+
+<script>
+    (function () {
+        let col_width = 10;
+
+        function size_images() {
+            col_width = Math.max(document.querySelector('.{{ uid|default:"tour_cards" }} .tour-col').getBoundingClientRect().width, col_width);
+            document.querySelectorAll('.{{ uid|default:"tour_cards" }} img').forEach(el => {
+                el.src = "resized-image/" + el.dataset.filename + "/" + col_width + "x99999999" + "/";
+            });
+        }
+
+        window.addEventListener('load', size_images);
+        window.addEventListener('resize', size_images);
+    })();
+</script>

@@ -25,6 +25,7 @@ urlpatterns = [
     path('blog/', views.blog, name='blog'),
 
     path('favicon.ico', views.favicon, name='favicon'),
+    path('resized-image/<str:filename>/<int:width>x<int:height>/', views.resized_imaged, name='resized-image'),
 
     path('<path:path>', views.page, name='page')
 ]

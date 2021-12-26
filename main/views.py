@@ -1,16 +1,18 @@
 from dataclasses import dataclass
 from datetime import datetime
 from functools import reduce
-from typing import Optional, Dict
+from os import path
+from typing import Optional, Dict, Tuple
 
 import ngram
+from django.conf import settings
 from django.contrib import messages
 from django.core.mail import send_mail, BadHeaderError
 from django.core.paginator import Paginator
 from django.db import IntegrityError
 from django.db.models import Q
 from django.forms import modelform_factory, inlineformset_factory
-from django.http import Http404, HttpResponseRedirect
+from django.http import Http404, HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 
@@ -381,3 +383,38 @@ def country_tours_info(request, region_slug, country_slug, detail_slug):
               } | global_context(request)
 
     return render(request, 'main/tour_info.html', context)
+
+
+def resized_imaged(request, filename: str, width: int = None, height: int = None):
+    image = Image.open(path.join(settings.MEDIA_ROOT, filename), mode='r')
+    if width is not None or height is not None:
+        (old_width, old_height) = image.size
+
+        ar = old_width / old_height
+        if old_width / width > old_width / height:
+            height = int(width / ar)
+        else:
+            width = int(height * ar)
+
+        if height < old_height:
+            image = image.resize((width, height))
+
+        response = HttpResponse(content_type='image/webp')
+        # noinspection PyTypeChecker
+        image.save(response, 'webp')
+        return response
+
+
+def crop_to_ar(image: Image, ratio: float) -> Tuple[int, int, int, int]:
+    (width, height) = image.size
+    if abs(width - ratio * height) < 5:
+        return image
+    elif width > ratio * height:
+        new_height = height
+        new_width = height * ratio
+    else:
+        new_width = width
+        new_height = width / ratio
+
+    return (
+        (width - new_width) // 2, (height - new_height) // 2, (width + new_width) // 2, (height + new_height) // 2)

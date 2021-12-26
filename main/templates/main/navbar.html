@@ -21,12 +21,13 @@
                 {% for page in pages %}
                     {% if page.children.count == 0 and user.is_staff or page.published_children.count == 0 and not user.is_staff %}
                         <li class="nav-item">
-                            <a class="nav-link main-nav" href="{% url 'page' page.full_path %}">{{ page.title }}</a>
+                            <a class="nav-link main-nav"
+                               href="{% url 'page' page.full_path %}">{{ page.title.upper }}</a>
                         </li>
                     {% else %}
                         <li class="nav-item dropdown btn-group">
                             <a type="button" class="main-nav nav-link" role="button"
-                               href="{% url 'page' page.full_path %}">{{ page.title }}
+                               href="{% url 'page' page.full_path %}">{{ page.title.upper }}
                                 <i class="bi bi-chevron-down"></i></a>
                             <a class="nav-link dropdown-toggle-split dropdown-toggle main-nav" role="button"
                                id="dropdownMenuButton"
