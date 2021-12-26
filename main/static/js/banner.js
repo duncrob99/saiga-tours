@@ -7,8 +7,8 @@ function resize() {
     let aspect_ratio = document.documentElement.clientWidth / (document.documentElement.clientHeight - navbar_height);
     let bottom_margin = 50;
 
-    banner_width = Math.max(Math.round(document.documentElement.clientWidth), banner_width);
-    banner_height = Math.max(Math.round(document.documentElement.clientHeight - navbar_height - bottom_margin), banner_height);
+    banner_width = Math.max(Math.round(document.documentElement.clientWidth * window.devicePixelRatio), banner_width);
+    banner_height = Math.max(Math.round(document.documentElement.clientHeight - navbar_height - bottom_margin * window.devicePixelRatio), banner_height);
 
     let banner_imgs = document.querySelectorAll('#banner-slideshow img');
 
