@@ -32,6 +32,8 @@
     user-select: none;
     z-index: 5;
     mask-image: var(--paper-rip);
+    -webkit-mask-image: var(--paper-rip);
+    -webkit-mask-size: 100% 100%;
     mask-size: 100% 100%;
 }
 
