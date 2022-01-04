@@ -96,7 +96,7 @@
             <h1 class="section-title">{{ row.title }}
                 <div class="underline"></div>
             </h1>
-            <div class="row mb-5">
+            <div class="row mb-5 article-section">
                 {% for article in row.contents %}
                     <div class="d-flex flex-column col-xl-4 col-lg-6 col-md-12 g-0">
                         <div class="card order-2 text-card flex-grow-1 mx-4">
@@ -122,7 +122,7 @@
                         </div>
 
                         <div class="card order-1 img-title-card img-card mt-4 mx-4">
-                            <img src="{{ article.card_img.url }}" class="card-img" alt="{{ article }}">
+                            <img data-filename="{{ article.card_img.name }}" class="card-img" alt="{{ article }}">
                             <div class="card-img-overlay">
                                 <h5 class="card-title">{{ article }}</h5>
                             </div>
@@ -183,5 +183,20 @@
             })
         {% endfor %}
         make_map_work(destinations, undefined, undefined, undefined, undefined, undefined, points);
+    </script>
+    <script>
+        (function () {
+            let col_width = 10;
+
+            function size_images() {
+                col_width = Math.max(Math.round(document.querySelectorAll('.article-section img')[0].getBoundingClientRect().width * window.devicePixelRatio), col_width);
+                document.querySelectorAll('.article-section img').forEach(el => {
+                    el.src = "resized-image/" + el.dataset.filename + "/" + col_width + "x99999999" + "/";
+                });
+            }
+
+            window.addEventListener('load', size_images);
+            window.addEventListener('resize', size_images);
+        })();
     </script>
 {% endblock %}

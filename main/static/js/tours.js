@@ -81,7 +81,8 @@ function setVisibleTours() {
     let tour_objs = [];
     tour_cols.forEach((tour_col) => {
         tour_objs.push({
-            'title': tour_col.querySelector('.img-title-card .card-img-overlay .card-title').innerText,
+            // 'title': tour_col.querySelector('.img-title-card .card-img-overlay .card-title').innerText,
+            'title': tour_col.querySelector('.card-body .tour-name').innerText,
             'excerpt': tour_col.querySelector('.tour-text .card-body').innerText,
             'destinations': tour_col.querySelector('.tour-data').getAttribute('destinations'),
             'col_element': tour_col
