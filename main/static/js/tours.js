@@ -78,7 +78,6 @@ let price_slider = noUiSlider.create(document.getElementById('price-input'), {
         'min': slider_min_price - price_margin,
         'max': slider_max_price + price_margin
     },
-    step: 100,
     tooltips: true,
     format: {
         to: value => 'US$' + Math.min(Math.max(Math.round(value), slider_min_price), slider_max_price),
