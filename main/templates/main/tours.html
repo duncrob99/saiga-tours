@@ -32,6 +32,15 @@
                 display: none;
             }
         }
+
+        #filter-form .form-check-input:focus {
+            border-color: var(--accent-hover-foreground);
+            box-shadow: 0 0 0 .25rem var(--accent-foreground);
+        }
+
+        #filter-form .form-check-input:checked {
+            background-color: var(--accent-hover-foreground);
+        }
     </style>
 {% endblock %}
 
