@@ -56,34 +56,35 @@
 
 {% block content %}
     {% for row in rows %}
-        {% if row.type == 'tours' %}
-            <h1 class="section-title">Tours
-                <div class="underline"></div>
-            </h1>
-            {% include 'main/tours_cards.html' %}
-        {% elif row.type == 'section' %}
-            {% with section=row.contents %}
-                <div class="page-section wide-bg d-flex justify-content-center flex-column"
-                     style="--background: {{ section.front_page_colour }}"
-                     id="page-section-{{ forloop.counter }}">
-                    <h1 class="section-title">{{ section.title }}
-                        <div class="underline"></div>
-                    </h1>
-                    {{ section.content | safe }}
+        <div class="front-page-row wide-bg">
+            {% if row.type == 'tours' %}
+                <h1 class="section-title">Tours
+                    <div class="underline"></div>
+                </h1>
+                {% include 'main/tours_cards.html' %}
+            {% elif row.type == 'section' %}
+                {% with section=row.contents %}
+                    <div class="page-section {# wide-bg #} d-flex justify-content-center flex-column"
+                         style="--background: {{ section.front_page_colour }}"
+                         id="page-section-{{ forloop.counter }}">
+                        <h1 class="section-title">{{ section.title }}
+                            <div class="underline"></div>
+                        </h1>
+                        {{ section.content | safe }}
+                    </div>
+                {% endwith %}
+            {% elif row.type == 'map' %}
+                <div {# class="wide-bg" #} style='--background: #e1f8ff'>
+                    {% include 'main/map.html' %}
                 </div>
-            {% endwith %}
-        {% elif row.type == 'map' %}
-            <div class="wide-bg" style='--background: #e1f8ff'>
-                {% include 'main/map.html' %}
-            </div>
-        {% elif row.type == 'highlight' %}
-            <div class="row m-5 d-flex align-items-stretch">
-                {% for highlight in row.contents %}
-                    <div class="col flex-grow-1 d-flex flex-column">
-                        <div class="card d-flex flex-grow-1"
-                             style="background-color: {{ highlight.background_colour }}; border: 5px solid {{ highlight.border_colour }}">
-                            <div class="card-header">
-                                <h6 class="display-6">{{ highlight.title }}</h6>
+            {% elif row.type == 'highlight' %}
+                <div class="row m-5 d-flex align-items-stretch">
+                    {% for highlight in row.contents %}
+                        <div class="col flex-grow-1 d-flex flex-column">
+                            <div class="card d-flex flex-grow-1"
+                                 style="background-color: {{ highlight.background_colour }}; border: 5px solid {{ highlight.border_colour }}">
+                                <div class="card-header">
+                                    <h6 class="display-6">{{ highlight.title }}</h6>
                             </div>
                             <div class="card-body">
                                 {{ highlight.content | safe }}
@@ -149,6 +150,7 @@
         {% else %}
             {{ row }}
         {% endif %}
+        </div>
     {% endfor %}
 
 
