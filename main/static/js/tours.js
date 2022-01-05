@@ -56,12 +56,14 @@ let duration_slider = noUiSlider.create(document.getElementById('duration-input'
             return new_val + ' day' + (new_val === 1 ? '' : 's');
         },
         from: value => parseInt(value.replace(' days', '').replace('+', ''))
-    },
-    animate: true
+    }
 });
 
 duration_slider.on('change', (values, handle, unencoded, tap, positions, noUiSlider) => {
     unencoded[handle] = Math.min(Math.max(Math.round(unencoded[handle]), slider_min_duration), slider_max_duration);
+    if (unencoded[1] - unencoded[0] < 1) {
+        unencoded[handle] = handle === 0 ? unencoded[1] - 1 : unencoded[0] + 1;
+    }
     duration_slider.set(unencoded);
     // duration_slider.setHandle(handle, Math.round(unencoded[handle]), true, false);
 })
@@ -82,11 +84,13 @@ let price_slider = noUiSlider.create(document.getElementById('price-input'), {
         to: value => 'US$' + Math.min(Math.max(Math.round(value), slider_min_price), slider_max_price),
         from: value => parseInt(value.replace('US$', '').replace('+', ''))
     },
-    margin: 1000
 });
 
 price_slider.on('change', (values, handle, unencoded, tap, positions, noUiSlider) => {
     unencoded[handle] = Math.min(Math.max(unencoded[handle], slider_min_price), slider_max_price);
+    if (unencoded[1] - unencoded[0] < 500) {
+        unencoded[handle] = handle === 0 ? unencoded[1] - 500 : unencoded[0] + 500;
+    }
     price_slider.set(unencoded);
     // price_slider.setHandle(handle, Math.min(Math.max(unencoded[handle], slider_min_price), slider_max_price), true, false);
 })
