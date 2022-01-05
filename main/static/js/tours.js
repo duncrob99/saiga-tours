@@ -40,7 +40,7 @@ document.querySelectorAll('.tour-col').forEach(tour_col => {
     }
 });
 
-const duration_margin = 1;
+const duration_margin = 0.1 * (slider_max_duration - slider_min_duration);
 let duration_slider = noUiSlider.create(document.getElementById('duration-input'), {
     start: [slider_min_duration, slider_max_duration],
     connect: true,
@@ -68,7 +68,7 @@ duration_slider.on('change', (values, handle, unencoded, tap, positions, noUiSli
 
 mergeTooltips(document.getElementById('duration-input'), 30, ' - ', document.getElementById('duration-selection'));
 
-const price_margin = 1000;
+const price_margin = 0.1 * (slider_max_price - slider_min_price);
 let price_slider = noUiSlider.create(document.getElementById('price-input'), {
     start: [slider_min_price, slider_max_price],
     connect: true,
