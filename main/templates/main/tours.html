@@ -33,12 +33,16 @@
             }
         }
 
-        #filter-form .form-check-input:focus {
+        .form-check-input:focus {
             border-color: var(--accent-hover-foreground);
-            box-shadow: 0 0 0 .25rem var(--accent-foreground);
+            box-shadow: 0 0 .5rem var(--accent-foreground);
         }
 
-        #filter-form .form-check-input:checked {
+        .form-control:focus {
+            box-shadow: 0 0 .5rem var(--accent-foreground);
+        }
+
+        .form-check-input:checked {
             background-color: var(--accent-hover-foreground);
         }
     </style>
