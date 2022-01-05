@@ -433,6 +433,7 @@ function updateStops(stops, editable) {
 
         if (editable) {
             document.querySelector(`#id_stops-${stop.form_ix}-order`).value = i;
+            document.querySelector(`#id_stops-${stop.form_ix}-marked`).checked = stop.marked;
 
             point_el.addEventListener('mousedown', click_ev => {
                 let start = {x: stops[i].x, y: stops[i].y}
