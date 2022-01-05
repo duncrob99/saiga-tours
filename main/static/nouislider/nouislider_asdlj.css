@@ -135,7 +135,7 @@
 }
 
 .noUi-connect {
-    background: #3FB8AF;
+    background: var(--accent-foreground);
 }
 
 /* Handles and cursors;

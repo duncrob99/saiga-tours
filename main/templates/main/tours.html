@@ -5,28 +5,47 @@
     <link href="{% static 'nouislider/nouislider_asdlj.css' %}" rel="stylesheet">
     <link href="{% static 'css/tours.css' %}" rel="stylesheet">
     <link href="{% static 'css/filters.css' %}" rel="stylesheet">
+    <style>
+        #filter-form .card, #filter-form .card-header {
+            border: none;
+            border-top: 1px solid lightgrey;
+            border-radius: 0;
+            box-shadow: none;
+            background-color: transparent;
+        }
+
+        #filter-form .card-header {
+            padding-top: 1rem;
+            padding-bottom: 0;
+        }
+
+        #filter-form .card-header * {
+            margin-bottom: 0;
+        }
+
+        #filter-form .card-body {
+            padding-top: 1rem;
+        }
+
+        @media only screen and (max-width: 1199px) {
+            #filter-form {
+                display: none;
+            }
+        }
+    </style>
 {% endblock %}
 
 {% block content %}
     <div class="heading d-flex justify-content-between align-items-center">
         <h1 class="display-1">Tours</h1>
-        <button id="filter-button" class="btn btn-outline-secondary d-inline-flex align-items-center"
-                data-bs-toggle="offcanvas"
-                data-bs-target="#filter-sidebar" aria-controls="filter-sidebar" role="button" style="float: right">
-            <span class="bi bi-funnel" style="font-size: 1.5rem"></span> <span style="margin-left: 4px;">Filters</span>
-        </button>
     </div>
     <hr>
 
-    {% include 'main/tours_cards.html' %}
-
-    <div class="offcanvas offcanvas-end" tabindex="-1" id="filter-sidebar" aria-labelledby="filter-sidebar-title">
-        <div class="offcanvas-header">
-            <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"
-                    aria-label="Close Filter Sidebar"></button>
-            <h3 id="filter-sidebar-label" class="display-6">Filter Tours</h3>
+    <div class="row">
+        <div class="col-xl-8">
+            {% include 'main/tours_cards.html' with two_col=True %}
         </div>
-        <div class="offcanvas-body px-3">
+        <div class="col-4" id="filter-form">
             <form>
                 <div class="row m-3">
                     <div class="input-group search-bar">
@@ -78,7 +97,7 @@
                             <div class="card-header">
                                 <h5>Duration</h5>
                             </div>
-                            <div class="card-body" id="date-selection">
+                            <div class="card-body" id="duration-selection">
                                 <label for="duration-input" hidden>Duration</label>
                                 <div id="duration-input" class="mt-5"></div>
                             </div>

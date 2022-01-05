@@ -1,3 +1,10 @@
+HTMLElement.prototype.isInvisible = function () {
+    if (this.style.display === 'none') return true;
+    if (getComputedStyle(this).display === 'none') return true;
+    if (this.parentNode.isInvisible) return this.parentNode.isInvisible();
+    return false;
+};
+
 // Filter form elements
 const start_picker = new Litepicker({
     element: document.getElementById('date-start-input'),
@@ -10,40 +17,81 @@ const end_picker = new Litepicker({
     resetButton: true
 });
 
-const slider_min_duration = 0;
-const slider_max_duration = 60;
+// Get min and max durations and prices of tours
+let slider_min_duration = 9e99;
+let slider_max_duration = -9e99;
+let slider_min_price = 9e99;
+let slider_max_price = -9e99;
+
+document.querySelectorAll('.tour-col').forEach(tour_col => {
+    let duration = parseInt(tour_col.querySelector('.tour-data').getAttribute('duration'));
+    let price = parseInt(tour_col.querySelector('.tour-data').getAttribute('price'));
+
+    if (duration < slider_min_duration) {
+        slider_min_duration = duration;
+    } else if (duration > slider_max_duration) {
+        slider_max_duration = duration;
+    }
+
+    if (price < slider_min_price) {
+        slider_min_price = Math.floor(price / 1000) * 1000;
+    } else if (price > slider_max_price) {
+        slider_max_price = Math.ceil(price / 1000) * 1000;
+    }
+});
+
+const duration_margin = 1;
 let duration_slider = noUiSlider.create(document.getElementById('duration-input'), {
     start: [slider_min_duration, slider_max_duration],
     connect: true,
     range: {
-        'min': slider_min_duration,
-        'max': slider_max_duration
+        'min': Math.max(slider_min_duration - duration_margin, 0),
+        'max': slider_max_duration + duration_margin - 1e-10
     },
-    step: 1,
+    // step: 1,
     tooltips: true,
     format: {
-        to: value => Math.floor(value) + (value >= slider_max_duration ? '+' : '') + ' days',
+        to: value => {
+            let new_val = Math.min(Math.max(Math.round(value), slider_min_duration), slider_max_duration);
+            return new_val + ' day' + (new_val === 1 ? '' : 's');
+        },
         from: value => parseInt(value.replace(' days', '').replace('+', ''))
     },
+    animate: true
 });
 
-const slider_min_price = 0;
-const slider_max_price = 20000;
+duration_slider.on('change', (values, handle, unencoded, tap, positions, noUiSlider) => {
+    unencoded[handle] = Math.min(Math.max(Math.round(unencoded[handle]), slider_min_duration), slider_max_duration);
+    duration_slider.set(unencoded);
+    // duration_slider.setHandle(handle, Math.round(unencoded[handle]), true, false);
+})
+
+mergeTooltips(document.getElementById('duration-input'), 30, ' - ', document.getElementById('duration-selection'));
+
+const price_margin = 1000;
 let price_slider = noUiSlider.create(document.getElementById('price-input'), {
     start: [slider_min_price, slider_max_price],
     connect: true,
     range: {
-        'min': slider_min_price,
-        'max': slider_max_price
+        'min': slider_min_price - price_margin,
+        'max': slider_max_price + price_margin
     },
-    step: 500,
+    step: 100,
     tooltips: true,
     format: {
-        to: value => 'US$' + Math.floor(value) + (value >= slider_max_price ? '+' : ''),
+        to: value => 'US$' + Math.min(Math.max(Math.round(value), slider_min_price), slider_max_price),
         from: value => parseInt(value.replace('US$', '').replace('+', ''))
     },
     margin: 1000
 });
+
+price_slider.on('change', (values, handle, unencoded, tap, positions, noUiSlider) => {
+    unencoded[handle] = Math.min(Math.max(unencoded[handle], slider_min_price), slider_max_price);
+    price_slider.set(unencoded);
+    // price_slider.setHandle(handle, Math.min(Math.max(unencoded[handle], slider_min_price), slider_max_price), true, false);
+})
+
+mergeTooltips(document.getElementById('price-input'), 40, ' - ', document.getElementById('price-selection'));
 
 
 // Filter callbacks
@@ -65,8 +113,9 @@ function setVisibleTours() {
     let tour_cols = document.querySelectorAll('.tour-col');
 
     // Get filter parameters
-    let duration_lims = duration_slider.get(true);
-    let price_lims = price_slider.get(true);
+    let duration_lims = duration_slider.get(true).map(Math.round);
+    let price_lims = price_slider.get(true).map(Math.round);
+
     let start_date_lim = new Date(start_date_input.value);
     let end_date_lim = new Date(end_date_input.value);
 
@@ -150,4 +199,114 @@ function showTour(col_el) {
     col_el.classList.remove('should-hide');
     col_el.classList.remove('hide');
     setTimeout(() => col_el.classList.remove('hide-visually'), 1);
+}
+
+/**
+ * @param slider HtmlElement with an initialized slider
+ * @param threshold Minimum proximity (in percentages) to merge tooltips
+ * @param separator String joining tooltips
+ * @param boundingElement Element that defines max & min pos of tooltip
+ */
+function mergeTooltips(slider, threshold, separator, boundingElement) {
+
+    var textIsRtl = getComputedStyle(slider).direction === 'rtl';
+    var isRtl = slider.noUiSlider.options.direction === 'rtl';
+    var isVertical = slider.noUiSlider.options.orientation === 'vertical';
+    var tooltips = slider.noUiSlider.getTooltips();
+    var origins = slider.noUiSlider.getOrigins();
+
+    // Move tooltips into the origin element. The default stylesheet handles this.
+    tooltips.forEach(function (tooltip, index) {
+        if (tooltip) {
+            origins[index].appendChild(tooltip);
+        }
+    });
+
+    slider.noUiSlider.on('update', function (values, handle, unencoded, tap, positions) {
+
+        var pools = [[]];
+        var poolPositions = [[]];
+        var poolValues = [[]];
+        var atPool = 0;
+
+        // Assign the first tooltip to the first pool, if the tooltip is configured
+        if (tooltips[0]) {
+            pools[0][0] = 0;
+            poolPositions[0][0] = positions[0];
+            poolValues[0][0] = values[0];
+        }
+
+        for (var i = 1; i < positions.length; i++) {
+            if (!tooltips[i] || (positions[i] - positions[i - 1]) > threshold) {
+                atPool++;
+                pools[atPool] = [];
+                poolValues[atPool] = [];
+                poolPositions[atPool] = [];
+            }
+
+            if (tooltips[i]) {
+                pools[atPool].push(i);
+                poolValues[atPool].push(values[i]);
+                poolPositions[atPool].push(positions[i]);
+            }
+        }
+
+        pools.forEach(function (pool, poolIndex) {
+            var handlesInPool = pool.length;
+
+            for (var j = 0; j < handlesInPool; j++) {
+                var handleNumber = pool[j];
+
+                if (j === handlesInPool - 1) {
+                    var offset = 0;
+
+                    poolPositions[poolIndex].forEach(function (value) {
+                        offset += 1000 - value;
+                    });
+
+                    var direction = isVertical ? 'bottom' : 'right';
+                    var last = isRtl ? 0 : handlesInPool - 1;
+                    var lastOffset = 1000 - poolPositions[poolIndex][last];
+                    offset = (textIsRtl && !isVertical ? 100 : 0) + (offset / handlesInPool) - lastOffset;
+
+                    // Center this tooltip over the affected handles
+                    tooltips[handleNumber].innerHTML = poolValues[poolIndex].join(separator);
+                    tooltips[handleNumber].style.display = 'block';
+                    tooltips[handleNumber].style[direction] = offset + '%';
+                } else {
+                    // Hide this tooltip
+                    tooltips[handleNumber].style.display = 'none';
+                }
+            }
+
+            // let margin = 10;
+            // tooltips.forEach(function (tooltip, index) {
+            //     if (tooltip && !tooltip.isInvisible()) {
+            //         let maxRect = boundingElement.getBoundingClientRect();
+            //         let rect = tooltip.getBoundingClientRect();
+            //         let iter = 0;
+            //         tooltip.style.right = window.getComputedStyle(tooltip).right;
+            //         while (rect.left <= maxRect.left + margin) {
+            //             tooltip.style.right = Math.round(parseInt(tooltip.style.right)) - 1 + 'px';
+            //             rect = tooltip.getBoundingClientRect();
+            //             if (iter++ > 500) {
+            //                 console.log('breaking left');
+            //                 console.log(tooltip.style.right);
+            //                 console.log(rect, maxRect);
+            //                 console.log(tooltip);
+            //                 break;
+            //             }
+            //         }
+            //         while (rect.right >= maxRect.right - margin) {
+            //             tooltip.style.right = Math.round(parseInt(tooltip.style.right)) + 1 + 'px';
+            //             rect = tooltip.getBoundingClientRect();
+            //             if (iter++ > 500) {
+            //                 console.log('breaking left');
+            //                 console.log(tooltip);
+            //             }
+            //         }
+            //     }
+            // });
+        });
+    });
 }

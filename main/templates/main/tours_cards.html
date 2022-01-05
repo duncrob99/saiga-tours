@@ -6,7 +6,7 @@
 
 <div class="row {{ uid|default:"tour_cards" }}">
     {% for tour in tours %}
-        <div class="d-flex flex-column tour-col col-xl-4 col-lg-6 col-md-12 g-0">
+        <div class="d-flex flex-column tour-col {% if not two_col %}col-xl-4{% endif %} col-lg-6 col-md-12 g-0">
             <div start_date="{{ tour.start_date|date:'Y-m-d' }}"
                  end_date="{{ tour.end_date|date:'Y-m-d' }}"
                  price="{{ tour.price }}"
