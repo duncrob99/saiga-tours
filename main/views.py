@@ -149,6 +149,9 @@ def tour(request, slug):
             form.save()
             itinerary_formset.save()
             stops_formset.save()
+            stops_formset = stops_formset_factory(None, instance=tour_obj)
+            itinerary_formset = itinerary_formset_factory(None, request.FILES or None,
+                                                          instance=tour_obj)
         elif request.method == 'POST':
             print(form.errors)
     else:
