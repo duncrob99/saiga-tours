@@ -1,3 +1,36 @@
+let btn = document.querySelector('#map-download');
+let svg = document.querySelector('.map svg');
+
+let triggerDownload = (imgURI, fileName) => {
+    let a = document.createElement('a');
+
+    a.setAttribute('download', 'image.svg');
+    a.setAttribute('href', imgURI);
+    a.setAttribute('target', '_blank');
+
+    a.click();
+}
+
+let save = () => {
+    let styled_svg = svg.cloneNode(true);
+    styled_svg.querySelectorAll('#country-labels text').forEach(el => {
+        el.remove();
+    })
+    // let stop_font = window.getComputedStyle(styled_svg.querySelectorAll('.pointer-text')[0]).font;
+    let stop_font = window.getComputedStyle(document.querySelector(':root')).getPropertyValue('--bs-body-font-family');
+    styled_svg.querySelectorAll('.pointer-text').forEach(el => {
+        el.setAttribute('font-family', stop_font);
+    })
+    let data = (new XMLSerializer()).serializeToString(styled_svg);
+    let svgBlob = new Blob([data], {type: 'image/svg+xml;charset=utf-8'});
+    let url = URL.createObjectURL(svgBlob);
+
+    triggerDownload(url);
+}
+
+btn.addEventListener('click', save);
+
+
 let menu_instances = [];
 let map_content_width = 0;
 
