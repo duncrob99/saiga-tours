@@ -24,8 +24,10 @@
                 class="bi bi-zoom-out"></i></button>
         <button class="btn btn-primary accent hoverable-accent" type="button" id="map-zoom-reset"><i
                 class="bi bi-arrows-fullscreen"></i></button>
+        {% if request.user.is_staff %}
         <button class="btn btn-primary accent hoverable-accent" type="button" id="map-download"><i
                 class="bi bi-download"></i></button>
+        {% endif %}
     </div>
     {% include 'main/world_map.svg' %}
 </div>

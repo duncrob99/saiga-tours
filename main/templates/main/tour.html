@@ -220,7 +220,18 @@
     {% endif %}
 
     {% if request.user.is_staff %}
-        <script>let dated = "{{ tour.dated }}" === "True";</script>
+        <script>
+            let dated = "{{ tour.dated }}" === "True";
+        </script>
+        <script defer>
+            let font_file;
+            (async function () {
+                let response = await fetch("{% static 'fonts/Poppins-Regular.ttf' %}");
+                if (response.ok) {
+                    font_file = await response.blob();
+                }
+            })();
+        </script>
         <script src="https://cdn.jsdelivr.net/npm/litepicker/dist/litepicker.js"></script>
         <script src="https://cdn.ckeditor.com/4.16.2/standard-all/ckeditor.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/luxon@2/build/global/luxon.min.js"></script>

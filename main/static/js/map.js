@@ -1,34 +1,60 @@
+function getBase64(file, onLoadCallback) {
+    return new Promise(function (resolve, reject) {
+        let reader = new FileReader();
+        reader.onload = function () {
+            resolve(reader.result);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+}
+
 let btn = document.querySelector('#map-download');
-let svg = document.querySelector('.map svg');
+if (btn) {
+    let svg = document.querySelector('.map svg');
 
-let triggerDownload = (imgURI, fileName) => {
-    let a = document.createElement('a');
+    let triggerDownload = (imgURI, fileName) => {
+        let a = document.createElement('a');
 
-    a.setAttribute('download', 'image.svg');
-    a.setAttribute('href', imgURI);
-    a.setAttribute('target', '_blank');
+        a.setAttribute('download', 'image.svg');
+        a.setAttribute('href', imgURI);
+        a.setAttribute('target', '_blank');
 
-    a.click();
+        a.click();
+    }
+
+    let save = () => {
+        let styled_svg = svg.cloneNode(true);
+        styled_svg.querySelectorAll('#country-labels text').forEach(el => {
+            el.remove();
+        })
+        // let stop_font = window.getComputedStyle(styled_svg.querySelectorAll('.pointer-text')[0]).font;
+        let root_style = window.getComputedStyle(document.querySelector(':root'));
+        let stop_font = root_style.getPropertyValue('--bs-body-font-family');
+        styled_svg.querySelectorAll('.pointer-text').forEach(el => {
+            el.setAttribute('font-family', stop_font);
+        })
+        styled_svg.querySelectorAll('.mapsvg-region').forEach(el => {
+            if (destinations.map(dest => dest[0]).includes(el.getAttribute('title'))) {
+                el.style.fill = root_style.getPropertyValue('--accent-background');
+            }
+        })
+        getBase64(font_file).then(result => {
+            // let defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+            // let style = document.createElementNS('http://www.w3.org/2000/svg', 'style');
+            styled_svg.querySelector('defs').innerHTML = `<style>@font-face{font-family: "Poppin"; src:url("${result}") format("woff"); font-weight: normal; font-style: normal;}</style>`
+            // styled_svg.appendChild(defs);
+            // console.log(result);
+            let data = (new XMLSerializer()).serializeToString(styled_svg);
+            let svgBlob = new Blob([data], {type: 'image/svg+xml;charset=utf-8'});
+            let url = URL.createObjectURL(svgBlob);
+
+            triggerDownload(url);
+        });
+    }
+
+    btn.addEventListener('click', save);
 }
-
-let save = () => {
-    let styled_svg = svg.cloneNode(true);
-    styled_svg.querySelectorAll('#country-labels text').forEach(el => {
-        el.remove();
-    })
-    // let stop_font = window.getComputedStyle(styled_svg.querySelectorAll('.pointer-text')[0]).font;
-    let stop_font = window.getComputedStyle(document.querySelector(':root')).getPropertyValue('--bs-body-font-family');
-    styled_svg.querySelectorAll('.pointer-text').forEach(el => {
-        el.setAttribute('font-family', stop_font);
-    })
-    let data = (new XMLSerializer()).serializeToString(styled_svg);
-    let svgBlob = new Blob([data], {type: 'image/svg+xml;charset=utf-8'});
-    let url = URL.createObjectURL(svgBlob);
-
-    triggerDownload(url);
-}
-
-btn.addEventListener('click', save);
 
 
 let menu_instances = [];
