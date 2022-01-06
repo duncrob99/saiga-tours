@@ -317,7 +317,6 @@ function findCentroid(path) {
     return {com: com, area: area};
 }
 
-
 function createPoints(points) {
     let map_svg = document.querySelector('.map svg');
 
@@ -460,10 +459,12 @@ function updateStops(stops, editable) {
             point_el.id = `pointer-${i}`;
             point_el.classList.add('stop-pointer');
 
-            point_el.addEventListener('click', () => {
-                document.querySelector('#itinerary').scrollIntoView({behavior: 'smooth'});
-                currentSlide(stop.day);
-            });
+            if (!editable) {
+                point_el.addEventListener('click', () => {
+                    document.querySelector('#itinerary').scrollIntoView({behavior: 'smooth'});
+                    currentSlide(stop.day);
+                });
+            }
 
             point_el.addEventListener('mouseenter', () => {
                 SVG(point_el).animate({when: 'now'}).transform({
