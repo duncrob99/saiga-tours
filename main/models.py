@@ -239,6 +239,7 @@ class Article(DraftHistory):
 class Page(DraftHistory):
     slug = models.SlugField()
     title = models.CharField(max_length=40)
+    subtitle = models.CharField(max_length=200, default='')
     content = RichTextUploadingField(config_name='default')
     card_img = models.ImageField()
     banner_img = models.ImageField(null=True, blank=True)

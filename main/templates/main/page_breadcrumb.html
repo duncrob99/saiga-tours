@@ -1,0 +1,7 @@
+{% if page.parent %}
+    {% include 'main/page_breadcrumb.html' with page=page.parent %}
+    <a href="/{{ page.parent.full_path }}">{{ page.parent.title }}</a>
+{% else %}
+    <a href="{% url 'front-page' %}">Home</a>
+{% endif %}
+<i class="bi bi-dot"></i>
