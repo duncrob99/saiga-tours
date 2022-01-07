@@ -147,6 +147,11 @@ body * {
     transform: translateX(-50%);
 }
 
+.section-title > div.underline.underline-left {
+    left: 0;
+    transform: none;
+}
+
 .center-align-link {
     position: absolute;
     left: 50%;

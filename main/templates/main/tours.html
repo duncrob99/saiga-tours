@@ -61,6 +61,31 @@
             position: relative;
             padding-left: 24px;
         }
+
+        .header-subtitle {
+            margin-bottom: 12px;
+            color: #36bca1;
+            font-family: "Caveat", sans-serif;
+            font-weight: bold;
+            font-size: 20px;
+        }
+
+        .breadcrumb {
+            color: grey;
+        }
+
+        .breadcrumb a {
+            color: black;
+            text-decoration: none;
+        }
+
+        .breadcrumb a:hover {
+            color: var(--accent-hover-foreground);
+        }
+
+        #content-container {
+            padding-top: 1rem !important;
+        }
     </style>
 {% endblock %}
 
@@ -69,11 +94,17 @@
 {% endblock %}
 
 {% block content %}
-    <div class="heading d-flex justify-content-between align-items-center" id="header-content">
-        <h1 class="section-title">Pick Your Best Experience
-            <div class="underline"></div>
-        </h1>
-        <div>Tour Listings</div>
+    <div id="header-content" class="d-flex flex-column justify-content-between">
+        <div class="breadcrumb"><a href="{% url 'front-page' %}">Home</a> <i class="bi bi-dot"></i> Tours</div>
+        <div class="heading d-flex flex-column justify-content-center">
+            <div class="header-subtitle">Tour listing</div>
+            <div class="d-flex justify-content-between align-items-center">
+                <h1 class="section-title">Pick Your Best Experience
+                    <div class="underline underline-left"></div>
+                </h1>
+            </div>
+        </div>
+        <div></div>
     </div>
 
     <div class="row">
