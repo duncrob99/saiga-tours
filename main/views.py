@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from functools import reduce
 from os import path
-from typing import Optional, Dict, Tuple
+from typing import Optional, Dict, Tuple, List
 
 import ngram
 from django.conf import settings
@@ -75,12 +75,49 @@ def front_page(request):
     return render(request, 'main/front-page.html', context)
 
 
+@dataclass
+class FooterLink:
+    name: str
+    url: Optional[str] = None
+    children: Optional[List['FooterLink']] = None
+
+
 def global_context(request):
+    footer_links = [FooterLink(page.title, reverse('page', args=[page.slug]), [
+        FooterLink(subpage.title, reverse('page', args=[subpage.slug]))
+        for subpage in page.children.visible(request.user.is_staff)
+    ])
+                    for page in Page.visible(request.user.is_staff).filter(parent=None)]
+
+    footer_links += [FooterLink('tours', reverse('tours'), [
+        FooterLink(region.name, reverse('tours', args=[region.slug]), [
+            # FooterLink(country.name)
+            # for country in region.destinations.visible(request.user.is_staff)
+        ])
+        for region in Region.visible(request.user.is_staff)
+    ]),
+                     FooterLink('destination guides', reverse('destinations'), [
+                         FooterLink(region.name, reverse('tours', args=[region.slug]), [
+                             # FooterLink(country.name)
+                             # for country in region.destinations.visible(request.user.is_staff)
+                         ])
+                         for region in Region.visible(request.user.is_staff)
+                     ]),
+                     FooterLink('other', None, [
+                         FooterLink('Blog', reverse('blog')),
+                         FooterLink('News', reverse('news')),
+                         FooterLink('Contact', reverse('contact'))
+                     ])
+                     ]
+
+    print(footer_links)
+
     context = {
         'regions': Region.visible(request.user.is_staff),
         'pages': Page.visible(request.user.is_staff).filter(parent=None, in_navbar=True),
         'settings': Settings.load(),
         'subscription_form': SubscriptionForm(),
+        'footer_links': footer_links
     }
     return context
 
@@ -317,12 +354,14 @@ def subscribe(request, return_path: str = None):
     form = SubscriptionForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         try:
-            SubscriptionSubmission.objects.create(email_address=form.cleaned_data['email'])
+            SubscriptionSubmission.objects.create(email_address=form.cleaned_data['email'],
+                                                  name=form.cleaned_data['name'])
             messages.add_message(request, messages.SUCCESS, 'Successfully subscribed')
         except IntegrityError:
             messages.add_message(request, messages.WARNING, 'Already subscribed')
     else:
-        messages.add_message(request, messages.WARNING, 'Invalid attempt to subscribe')
+        errors = "; ".join([f'{field}: {", ".join(errors)}' for field, errors in form.errors.items()])
+        messages.add_message(request, messages.WARNING, f'Invalid attempt to subscribe: {errors}')
     if return_path is not None:
         return HttpResponseRedirect(return_path)
     else:

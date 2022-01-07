@@ -8,4 +8,5 @@ class ContactForm(forms.Form):
 
 
 class SubscriptionForm(forms.Form):
+    name = forms.CharField(required=True, max_length=500)
     email = forms.EmailField(required=True)

@@ -1,0 +1,12 @@
+<li>
+    {% if link.url %}
+        <a href="{{ link.url }}">{{ link.name }}</a>
+    {% else %}
+        {{ link.name }}
+    {% endif %}
+    <ul>
+        {% for link in link.children %}
+            {% include 'main/footer_link.html' %}
+        {% endfor %}
+    </ul>
+</li>

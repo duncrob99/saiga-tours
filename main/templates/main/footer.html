@@ -1,0 +1,211 @@
+{% load static %}
+<style>
+    .subscription {
+        width: 100%;
+        height: 328px;
+        background-color: #f2911f;
+        text-align: center;
+    }
+
+    .subscription img {
+        margin-top: 2.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .subscription p {
+        color: white;
+        font-size: 20px;
+        font-weight: 600;
+        margin-bottom: 24px;
+    }
+
+    .subscription input.form-control {
+        background-color: #cc7917;
+        border-radius: 200px;
+        color: rgba(255, 255, 255, 0.6);
+        border: none;
+        padding: 12px 24px;
+        outline: none;
+        box-shadow: none;
+        font-weight: 600;
+        margin-left: 15px;
+        margin-right: 15px;
+        margin-bottom: 32px;
+    }
+
+    .subscription input.form-control::placeholder {
+        color: rgba(255, 255, 255, 0.4);
+    }
+
+    .subscription button {
+        border-radius: 500px;
+        padding: 14px 66px;
+        transform: translateY(-5px);
+        box-shadow: 0 5px 0 lightgrey;
+        transition: all 0.5s;
+    }
+
+    .subscription button:hover {
+        transform: none;
+        box-shadow: 0 0 0 lightgrey;
+        background-color: var(--accent-background);
+        color: var(--accent-foreground);
+    }
+
+    .subscription button:before {
+        background-color: lightgrey;
+    }
+
+    .main-footer {
+        background-color: #441461;
+        color: white;
+    }
+
+    .main-footer .logo {
+        max-width: 70px;
+        max-height: 70px;
+    }
+
+    .main-footer a {
+        color: white;
+        text-decoration: none;
+    }
+
+    .main-footer .footer-col > ul {
+        list-style-type: none;
+        padding: 0;
+    }
+
+    .main-footer .col-title {
+        font-weight: bold;
+        font-size: 20px;
+        margin-bottom: 40px;
+    }
+
+    .main-footer ul {
+        margin-bottom: 24px;
+        font-size: 15px;
+        font-weight: 500;
+    }
+
+    .contact-footer {
+        color: rgba(255, 255, 255, 0.5);
+    }
+
+    .contact-footer a {
+        color: rgba(255, 255, 255, 0.9);
+    }
+
+    .footer-col {
+        --padding: 4rem;
+        padding-left: var(--padding);
+        padding-right: var(--padding);
+    }
+</style>
+
+<div class="footer">
+    <div class="subscription">
+        <div class="container px-5">
+            <img alt="send subscription request" src="{% static 'images/paper_airplane.svg' %}"/>
+            <p>Hot Deals. Awesome Chat. Straight to Your Inbox</p>
+            <form method="post" action="{% url 'subscribe' request.path %}">
+                {% csrf_token %}
+                <label for="{{ subscription_form.email.id_for_label }}" class="visually-hidden">Email address</label>
+                <label for="{{ subscription_form.name.id_for_label }}" class="visually-hidden">Name</label>
+                <div class="d-flex">
+                    <input id="{{ subscription_form.name.id_for_label }}" name="{{ subscription_form.name.name }}"
+                           type="text" class="form-control" placeholder="Your Name">
+                    <input id="{{ subscription_form.email.id_for_label }}" name="{{ subscription_form.email.name }}"
+                           type="text" class="form-control" placeholder="Your Email">
+                </div>
+                <button class="btn btn-primary accent hoverable-accent" type="submit" role="button">Subscribe
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="main-footer">
+        <div class="container p-5">
+            <div class="d-flex justify-content-start">
+                <div class="d-flex flex-column justify-content-around">
+                    <img alt="logo" src="{{ settings.logo.url }}" class="logo">
+                    <ul class="list-unstyled d-flex">
+                        {% if settings.twitter_link %}
+                            <li class="ms-3"><a href="{{ settings.twitter_link }}"><i
+                                    class="bi bi-twitter"></i></a></li>
+                        {% endif %}
+                        {% if settings.instagram_link %}
+                            <li class="ms-3"><a href="{{ settings.instagram_link }}"><i
+                                    class="bi bi-instagram"></i></a></li>
+                        {% endif %}
+                        {% if settings.facebook_link %}
+                            <li class="ms-3"><a href="{{ settings.facebook_link }}"><i
+                                    class="bi bi-facebook"></i></a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+                {% for column in footer_links %}
+                    <div class="footer-col">
+                        <div class="col-title">
+                            {% if column.url %}
+                                <a href="{{ column.url }}">{{ column.name|upper }}</a>
+                            {% else %}
+                                {{ column.name|upper }}
+                            {% endif %}
+                        </div>
+                        <ul>
+                            {% for link in column.children %}
+                                {% include 'main/footer_link.html' %}
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="row contact-footer">
+                <div class="col">
+                    Business Number: <a href="tel:+124322354">+ 12 43223354</a>
+                    <br>
+                    3131 Doctors Drive. Los Angeles, California
+                    <br>
+                    Complaints/Enquiries: (Email) <a href="mailto:solo@traveler.com">solo@traveler.com</a>
+                </div>
+                <div class="col d-flex justify-content-end">
+                    © 2020 Solo – Shinetheme
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="py-3 my-4" hidden>
+    <ul class="nav justify-content-center border-bottom pb-3 mb-3">
+        <li class="nav-item"><a href="{% url 'front-page' %}" class="nav-link px-2 text-muted">Home</a></li>
+        {% for page in pages %}
+            <li class="nav-item"><a href="{% url 'page' page.full_path %}"
+                                    class="nav-link px-2 text-muted">{{ page.title }}</a></li>
+        {% endfor %}
+        <li class="nav-item"><a href="{% url 'tours' %}" class="nav-link px-2 text-muted">Tours</a></li>
+        <li class="nav-item"><a href="{% url 'destinations' %}" class="nav-link px-2 text-muted">Destinations</a>
+        </li>
+        <li class="nav-item"><a href="{% url 'blog' %}" class="nav-link px-2 text-muted">Blog</a></li>
+        <li class="nav-item"><a href="{% url 'news' %}" class="nav-link px-2 text-muted">News</a></li>
+        <li class="nav-item"><a href="{% url 'contact' %}" class="nav-link px-2 text-muted">Contact</a></li>
+    </ul>
+    <div class="d-flex justify-content-between py-1 my-4">
+        <p class="text-muted">© 2021 Company, Inc. All rights reserved.</p>
+        <ul class="list-unstyled d-flex">
+            {% if settings.twitter_link %}
+                <li class="ms-3"><a class="link-dark" href="{{ settings.twitter_link }}"><i
+                        class="bi bi-twitter"></i></a></li>
+            {% endif %}
+            {% if settings.instagram_link %}
+                <li class="ms-3"><a class="link-dark" href="{{ settings.instagram_link }}"><i
+                        class="bi bi-instagram"></i></a></li>
+            {% endif %}
+            {% if settings.facebook_link %}
+                <li class="ms-3"><a class="link-dark" href="{{ settings.facebook_link }}"><i
+                        class="bi bi-facebook"></i></a></li>
+            {% endif %}
+        </ul>
+    </div>
+</footer>

@@ -113,8 +113,8 @@ class SettingsAdmin(DiffHistoryAdmin):
 
 
 class SubscriptionSubmissionAdmin(admin.ModelAdmin):
-    list_display = ('email_address', 'time')
-    readonly_fields = ('email_address', 'time')
+    list_display = ('name', 'email_address', 'time')
+    readonly_fields = ('name', 'email_address', 'time')
 
 
 class ContactSubmissionAdmin(admin.ModelAdmin):

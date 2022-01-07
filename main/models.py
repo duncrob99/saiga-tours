@@ -387,6 +387,7 @@ class ContactSubmission(models.Model):
 
 class SubscriptionSubmission(models.Model):
     email_address = models.EmailField(unique=True)
+    name = models.CharField(max_length=500, null=True)
     time = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
