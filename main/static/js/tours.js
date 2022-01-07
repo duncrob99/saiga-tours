@@ -8,14 +8,27 @@ HTMLElement.prototype.isInvisible = function () {
 // Filter form elements
 const start_picker = new Litepicker({
     element: document.getElementById('date-start-input'),
+    elementEnd: document.getElementById('date-end-input'),
     minDate: new Date(),
-    resetButton: true
+    resetButton: true,
+    singleMode: false,
+    showTooltip: false,
+    // allowRepick: true,
+    numberOfColumns: 2,
+    numberOfMonths: 2,
+    switchingMonths: 1,
+    dropdowns: {
+        "minYear": new Date().getFullYear(),
+        "maxYear": new Date().getFullYear() + 10,
+        "months": true,
+        "years": "asc"
+    }
 });
-const end_picker = new Litepicker({
-    element: document.getElementById('date-end-input'),
-    minDate: new Date(),
-    resetButton: true
-});
+// const end_picker = new Litepicker({
+//     element: document.getElementById('date-end-input'),
+//     minDate: new Date(),
+//     resetButton: true
+// });
 
 // Get min and max durations and prices of tours
 let slider_min_duration = 9e99;
@@ -108,9 +121,10 @@ duration_slider.on('update', setVisibleTours);
 price_slider.on('update', setVisibleTours);
 destination_checkboxes.forEach((cb) => cb.addEventListener('change', setVisibleTours))
 start_picker.on('selected', setVisibleTours);
-end_picker.on('selected', setVisibleTours);
+// end_picker.on('selected', setVisibleTours);
 start_picker.on('clear:selection', setVisibleTours);
-end_picker.on('clear:selection', setVisibleTours);
+
+// end_picker.on('clear:selection', setVisibleTours);
 
 function setVisibleTours() {
     let tour_cols = document.querySelectorAll('.tour-col');
@@ -313,3 +327,22 @@ function mergeTooltips(slider, threshold, separator, boundingElement) {
         });
     });
 }
+
+start_picker.on('show', el => {
+    let input_bottom = el.getBoundingClientRect().bottom + 8;
+    start_picker.ui.style.top = '0px';
+    let error = start_picker.ui.getBoundingClientRect().top - input_bottom;
+    start_picker.ui.style.top = -error + 'px';
+
+    let input_left = document.querySelector('#date-start-input').getBoundingClientRect().left;
+    start_picker.ui.style.left = '0px';
+    error = start_picker.ui.getBoundingClientRect().left - input_left;
+    start_picker.ui.style.left = -error + 'px';
+})
+
+// end_picker.on('show', el => {
+//     let input_bottom = el.getBoundingClientRect().bottom + 8;
+//     end_picker.ui.style.top = '0px';
+//     let error = end_picker.ui.getBoundingClientRect().top - input_bottom;
+//     end_picker.ui.style.top = -error + 'px';
+// })

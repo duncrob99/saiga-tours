@@ -1,3 +1,60 @@
 .tour-col {
     transition: all 0.5s;
 }
+
+#filter-form input[type="checkbox"] {
+    background-image: none;
+    border-radius: 50%;
+    border: 2px solid var(--accent-foreground);
+    margin-bottom: 1rem;
+    margin-right: 0.5rem;
+}
+
+#filter-form input[type="checkbox"]:focus {
+    border-color: var(--accent-hover-foreground);
+    box-shadow: 0 0 .1rem var(--accent-foreground);
+}
+
+#filter-form input[type="checkbox"]:checked {
+    /*background-color: var(--accent-hover-foreground);*/
+    background-image: radial-gradient(var(--accent-hover-foreground) 0, var(--accent-foreground) 50%, white 50%);
+}
+
+.litepicker .container__months {
+    border-radius: var(--border-radius);
+    padding: 30px;
+    font-size: 16px;
+}
+
+.litepicker {
+    --litepicker-is-start-color: var(--accent-hover-foreground);
+    --litepicker-is-start-color-bg: var(--accent-hover-background);
+    --litepicker-is-end-color: var(--accent-hover-foreground);
+    --litepicker-is-end-color-bg: var(--accent-hover-background);
+    --litepicker-is-in-range-color: var(--accent-background);
+    --litepicker-day-color-hover: var(--accent-foreground);
+}
+
+.litepicker select {
+    background: none;
+    border: none;
+}
+
+#filter-form .card-header * {
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+#date-start-input {
+    border-bottom-left-radius: 100px;
+    border-top-left-radius: 100px;
+}
+
+#date-end-input {
+    border-bottom-right-radius: 100px;
+    border-top-right-radius: 100px;
+}
+
+#filter-form * {
+    user-select: none;
+}
