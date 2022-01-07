@@ -441,8 +441,8 @@ function updateStops(stops, editable) {
         let text_el;
         if (stop.marked) {
             text_el = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-            text_el.setAttributeNS(null, 'x', `${stop.x}`);
-            text_el.setAttributeNS(null, 'y', `${stop.y - pointer_size * 20}`);
+            text_el.setAttributeNS(null, 'x', `${stop.x + stop.text_x}`);
+            text_el.setAttributeNS(null, 'y', `${stop.y + stop.text_y - pointer_size * 20}`);
             text_el.setAttributeNS(null, 'fill', 'black');
             text_el.setAttributeNS(null, 'stroke', 'none');
             text_el.setAttributeNS(null, 'style', `font-size: ${text_size}px;`);
@@ -496,7 +496,7 @@ function updateStops(stops, editable) {
             document.querySelector(`#id_stops-${stop.form_ix}-marked`).checked = stop.marked;
 
             point_el.addEventListener('mousedown', click_ev => {
-                let start = {x: stops[i].x, y: stops[i].y}
+                let start = {x: stops[i].x, y: stops[i].y};
 
                 function move_point(move_ev) {
                     move_ev.preventDefault();
@@ -512,7 +512,7 @@ function updateStops(stops, editable) {
                             tx: stop.x,
                             ty: stop.y
                         });
-                        SVG(text_el).font({anchor: 'middle'}).cx(stop.x).cy(stop.y - pointer_size * 20);
+                        SVG(text_el).font({anchor: 'middle'}).cx(stop.x + stop.text_x).cy(stop.y + stop.text_y - pointer_size * 20);
                     } else {
                         point_el.instance.animate({when: 'now', duration: 1}).cx(stop.x).cy(stop.y);
                     }
@@ -531,6 +531,37 @@ function updateStops(stops, editable) {
 
                 window.addEventListener('mouseup', stop_dragging);
             })
+
+            if (text_el) {
+                window.addEventListener('mousedown', click_ev => {
+                    let box = text_el.getBoundingClientRect();
+                    if (click_ev.x >= box.left && click_ev.x <= box.right && click_ev.y >= box.top && click_ev.y <= box.bottom) {
+                        let start = {x: stops[i].text_x, y: stops[i].text_y};
+
+                        function move_text(move_ev) {
+                            move_ev.preventDefault();
+                            stop.text_x = start.x + (move_ev.x - click_ev.x) / getScale(map_svg);
+                            stop.text_y = start.y + (move_ev.y - click_ev.y) / getScale(map_svg);
+                            stops[i] = stop;
+
+                            SVG(text_el).font({anchor: 'middle'}).cx(stop.x + stop.text_x).cy(stop.y + stop.text_y - pointer_size * 20);
+
+                            // Edit value in form
+                            document.getElementById(`id_stops-${stop.form_ix}-text_x`).value = stop.text_x;
+                            document.getElementById(`id_stops-${stop.form_ix}-text_y`).value = stop.text_y;
+                        }
+
+                        window.addEventListener('mousemove', move_text);
+
+                        function stop_dragging() {
+                            window.removeEventListener('mousemove', move_text);
+                            window.removeEventListener('mouseup', stop_dragging);
+                        }
+
+                        window.addEventListener('mouseup', stop_dragging);
+                    }
+                })
+            }
 
             menu_instances.push(new BootstrapMenu(`#pointer-${i}`, {
                 actionsGroups: [
