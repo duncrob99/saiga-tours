@@ -670,7 +670,9 @@ function updateStops(stops, editable) {
                         x: new_x,
                         y: new_y,
                         day: new_day,
-                        form_ix: new_ix
+                        form_ix: new_ix,
+                        text_x: 0,
+                        text_y: 0
                     })
                     let new_form = document.querySelector('#form-template').cloneNode(true);
                     new_form.id = "";
