@@ -2,9 +2,10 @@
 <style>
     .subscription {
         width: 100%;
-        height: 328px;
+        min-height: 328px;
         background-color: #f2911f;
         text-align: center;
+        padding-bottom: 2rem;
     }
 
     .subscription img {
@@ -144,7 +145,8 @@
                         {% endif %}
                     </ul>
                 </div>
-                {% for column in footer_links %}
+                <div class="d-flex flex-wrap">
+                    {% for column in footer_links %}
                     <div class="footer-col">
                         <div class="col-title">
                             {% if column.url %}
@@ -160,6 +162,7 @@
                         </ul>
                     </div>
                 {% endfor %}
+                </div>
             </div>
             <div class="row contact-footer">
                 <div class="col">
