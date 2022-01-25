@@ -417,6 +417,7 @@ class Stop(models.Model):
     day = models.PositiveSmallIntegerField()
     order = models.PositiveSmallIntegerField(null=True)
     marked = models.BooleanField(default=True)
+    arrow_break = models.BooleanField(default=True)
     text_x = models.FloatField(default=0)
     text_y = models.FloatField(default=0)
     prestrength = models.FloatField(default=1)

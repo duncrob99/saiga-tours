@@ -464,7 +464,7 @@ function updatePath(stops) {
     console.log(segment_lengths);
     let unmarked_ix = [];
     for (let i in stops) {
-        if (!stops[i].marked) {
+        if (!stops[i].arrow_break) {
             unmarked_ix.push(parseInt(i));
         }
     }
@@ -474,7 +474,7 @@ function updatePath(stops) {
     }
 
     let tot_len = segment_lengths[0] / 2;
-    for (let i = 0; i < segment_lengths.length - 1; i++) {
+    for (let i = 0; i < segment_lengths.length; i++) {
         let point = SVG(path_el).pointAt(tot_len);
         let after = SVG(path_el).pointAt(tot_len + 0.1);
         let before = SVG(path_el).pointAt(tot_len - 0.1);
@@ -567,6 +567,7 @@ function updateStops(stops, editable) {
         if (editable) {
             document.querySelector(`#id_stops-${stop.form_ix}-order`).value = i;
             document.querySelector(`#id_stops-${stop.form_ix}-marked`).checked = stop.marked;
+            document.querySelector(`#id_stops-${stop.form_ix}-arrow_break`).checked = stop.arrow_break;
 
             point_el.addEventListener('mousedown', click_ev => {
                 let start = {x: stops[i].x, y: stops[i].y};
@@ -638,7 +639,7 @@ function updateStops(stops, editable) {
 
             menu_instances.push(new BootstrapMenu(`#pointer-${i}`, {
                 actionsGroups: [
-                    ['deleteStop', 'renameStop', 'changeMarked'],
+                    ['deleteStop', 'renameStop', 'changeMarked', 'toggleArrow'],
                     ['moveForwards', 'moveBackwards'],
                     ['change prestrength', 'change poststrength']
                 ],
@@ -766,6 +767,13 @@ function updateStops(stops, editable) {
                             })
                             modal.show();
                             document.querySelector('#change-poststrength-modal').addEventListener('shown.bs.modal', () => input.focus());
+                        },
+                        classNames: ['dropdown-item', 'alt-context-menu']
+                    }, toggleArrow: {
+                        name: !stop.arrow_break ? 'Make arrow break' : 'Remove arrow break',
+                        onClick: () => {
+                            stops[i].arrow_break = !stop.arrow_break;
+                            updateStops(stops, true);
                         },
                         classNames: ['dropdown-item', 'alt-context-menu']
                     }
