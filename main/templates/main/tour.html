@@ -152,6 +152,47 @@
                 </div>
             </div>
         </div>
+        <div class="modal fade" data-bs-scroll="true" data-bs-backdrop="false" id="change-poststrength-modal"
+             tabindex="-1"
+             aria-labelledby="changePoststrengthModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="cahgnePoststrengthModalLabel">Change Poststrength</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input aria-label="Change Poststrength" type="number" id="change-poststrength-input"
+                               class="form-control">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" id="save-poststrength-change">Save changes
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" data-bs-scroll="true" data-bs-backdrop="false" id="change-prestrength-modal"
+             tabindex="-1"
+             aria-labelledby="changePrestrengthModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="cahgnePrestrengthModalLabel">Change Prestrength</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input aria-label="Change Prestrength" type="number" id="change-prestrength-input"
+                               class="form-control">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" id="save-prestrength-change">Save changes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="modal fade" data-bs-scroll="true" data-bs-backdrop="false" id="rename-modal" tabindex="-1"
              aria-labelledby="renameModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
@@ -215,7 +256,9 @@
                     marked: {{ stop.marked|lower }},
                     form_ix: {{ forloop.counter0 }},
                     text_x: {{ stop.text_x }},
-                    text_y: {{ stop.text_y }}
+                    text_y: {{ stop.text_y }},
+                    prestrength: {{ stop.prestrength }},
+                    poststrength: {{ stop.poststrength }}
                 });
             {% endfor %}
 

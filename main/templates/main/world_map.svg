@@ -26,8 +26,12 @@
             </cc:Work>
         </rdf:RDF>
     </metadata>
-    <defs
-            id="defs2683"/>
+    <defs id="defs2683">
+        <marker id='head' orient='auto' markerWidth='6' markerHeight='12'
+                refX='7' refY='4'>
+            <path d='M0,0 V8 L4,4 Z' fill='red'/>
+        </marker>
+    </defs>
     <sodipodi:namedview
             pagecolor="#ffffff"
             bordercolor="#666666"

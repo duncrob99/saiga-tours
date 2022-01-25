@@ -419,6 +419,8 @@ class Stop(models.Model):
     marked = models.BooleanField(default=True)
     text_x = models.FloatField(default=0)
     text_y = models.FloatField(default=0)
+    prestrength = models.FloatField(default=1)
+    poststrength = models.FloatField(default=1)
 
     def __str__(self):
         return f'Stop {self.name} in {self.tour}'

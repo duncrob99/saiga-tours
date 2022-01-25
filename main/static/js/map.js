@@ -59,6 +59,7 @@ if (btn) {
 
 let menu_instances = [];
 let map_content_width = 0;
+let arrow_instances = [];
 
 function minBBox(bbox1, bbox2) {
     let right1 = bbox1.x + bbox1.width;
@@ -348,7 +349,9 @@ function createPoints(points) {
         }).fill('black').stroke('none').transform({tx: point.x, ty: point.y}).opacity(0).css('pointer-events', 'none');
 
         let point_el = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        point_el.setAttributeNS(null, 'd', 'm0 0s6-5.686 6-10a6 6 0 00-12 0c0 4.314 6 10 6 10zm0-7a3 3 0 110-6 3 3 0 010 6z');
+        // point_el.setAttributeNS(null, 'd', 'm0 0s6-5.686 6-10a6 6 0 00-12 0c0 4.314 6 10 6 10zm0-7a3 3 0 110-6 3 3 0 010 6z');
+        let point_radius = 4;
+        point_el.setAttributeNS(null, 'd', `m0 0 m -${point_radius},0 a ${point_radius},${point_radius} 0 1,0 ${2 * point_radius},0 a ${point_radius},${point_radius} 0 1,0 ${-2 * point_radius},0`);
         point_el.setAttributeNS(null, 'style', 'fill: red;');
         point_el.setAttributeNS(null, 'transform', `translate(${point.x}, ${point.y}) scale(${0})`);
         point_el.id = `pointer-${i}`;
@@ -391,6 +394,33 @@ function createPoints(points) {
 
 }
 
+SVG.Path.prototype.segmentLengths = function () {
+    function get_endpoint(arr) {
+        return {
+            x: arr.slice(-2)[0],
+            y: arr.slice(-1)[0],
+            string: function () {
+                return `M${this.x} ${this.y}`
+            }
+        }
+    }
+
+    function get_string(arr) {
+        return arr[0] + arr.slice(1).join(' ');
+    }
+
+    let segments = [];
+    let last_point = get_endpoint(this.array()[0]);
+
+    this.array().slice(1).forEach((el, i) => {
+        let path_str = `${last_point.string()} ${get_string(el)}`;
+        segments.push(SVG().path(path_str).length());
+        last_point = get_endpoint(el);
+    })
+
+    return segments;
+}
+
 function updatePath(stops) {
     let map_svg = document.querySelector('.map svg');
 
@@ -398,25 +428,66 @@ function updatePath(stops) {
 
     let x = [];
     let y = [];
+    let prestrength = [];
+    let poststrength = [];
     for (let i = 0; i < stops.length; i++) {
         x.push(stops[i].x);
         y.push(stops[i].y - 0.2);
+        prestrength.push(stops[i].prestrength);
+        poststrength.push(stops[i].poststrength);
     }
 
-    let path_str = pathString(x, y);
+    let path_str = pathString(x, y, prestrength, poststrength);
 
+    let path_el;
     if (document.querySelector('#stop_path') === null) {
-        let path_el = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path_el = document.createElementNS('http://www.w3.org/2000/svg', 'path');
         path_el.id = 'stop_path';
         path_el.setAttributeNS(null, 'fill', 'none');
         path_el.setAttributeNS(null, 'stroke', '#106e2e');
         path_el.setAttributeNS(null, 'stroke-width', `${path_width}px`);
         path_el.setAttributeNS(null, 'd', path_str);
+        // path_el.setAttributeNS(null, 'marker-mid', 'url(#head)');
+        // path_el.setAttributeNS(null, 'marker-end', 'url(#head)');
         map_svg.appendChild(path_el);
     } else {
-        let path_el = document.querySelector('#stop_path');
+        path_el = document.querySelector('#stop_path');
         path_el.setAttributeNS(null, 'd', path_str);
     }
+
+    // Add arrows in the middle of each segment
+    arrow_instances.forEach(arrow => {
+        arrow.remove();
+    });
+
+    let segment_lengths = SVG(path_el).segmentLengths();
+    console.log(segment_lengths);
+    let unmarked_ix = [];
+    for (let i in stops) {
+        if (!stops[i].marked) {
+            unmarked_ix.push(parseInt(i));
+        }
+    }
+    for (let i of unmarked_ix.reverse()) {
+        segment_lengths[i - 1] += segment_lengths[i];
+        segment_lengths.splice(i, 1);
+    }
+
+    let tot_len = segment_lengths[0] / 2;
+    for (let i = 0; i < segment_lengths.length; i++) {
+        let point = SVG(path_el).pointAt(tot_len);
+        let after = SVG(path_el).pointAt(tot_len + 0.1);
+        let before = SVG(path_el).pointAt(tot_len - 0.1);
+        let angle = Math.atan2(after.y - before.y, after.x - before.x) * 180 / Math.PI - 90;
+        console.log(after, before, angle);
+        arrow_instances.push(SVG(map_svg).path('M-1 0 L0 1 L1 0').cx(point.x).cy(point.y).fill('none').stroke({
+            width: 0.3,
+            color: '#106e2e'
+        }).rotate(angle).scale(0.5));
+        tot_len += segment_lengths[i] / 2 + segment_lengths[i + 1] / 2;
+    }
+
+    console.log(segment_lengths);
 }
 
 function updateStops(stops, editable) {
@@ -453,7 +524,9 @@ function updateStops(stops, editable) {
             text_el.appendChild(text);
 
             point_el = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-            point_el.setAttributeNS(null, 'd', 'm0 0s6-5.686 6-10a6 6 0 00-12 0c0 4.314 6 10 6 10zm0-7a3 3 0 110-6 3 3 0 010 6z');
+            // point_el.setAttributeNS(null, 'd', 'm0 0s6-5.686 6-10a6 6 0 00-12 0c0 4.314 6 10 6 10zm0-7a3 3 0 110-6 3 3 0 010 6z');
+            let point_radius = 4;
+            point_el.setAttributeNS(null, 'd', `m0 0 m -${point_radius},0 a ${point_radius},${point_radius} 0 1,0 ${2 * point_radius},0 a ${point_radius},${point_radius} 0 1,0 ${-2 * point_radius},0`);
             point_el.setAttributeNS(null, 'style', 'fill: red;');
             point_el.setAttributeNS(null, 'transform', `translate(${stop.x}, ${stop.y}) scale(${pointer_size})`);
             point_el.id = `pointer-${i}`;
@@ -469,7 +542,7 @@ function updateStops(stops, editable) {
             point_el.addEventListener('mouseenter', () => {
                 SVG(point_el).animate({when: 'now'}).transform({
                     scale: pointer_size * 1.2,
-                    origin: 'center bottom',
+                    origin: 'center',
                     tx: stop.x,
                     ty: stop.y
                 });
@@ -478,7 +551,7 @@ function updateStops(stops, editable) {
             point_el.addEventListener('mouseleave', () => {
                 SVG(point_el).animate({when: 'now'}).transform({
                     scale: pointer_size,
-                    origin: 'center bottom',
+                    origin: 'center',
                     tx: stop.x,
                     ty: stop.y
                 });
@@ -508,7 +581,7 @@ function updateStops(stops, editable) {
                     if (stop.marked) {
                         SVG(point_el).animate({when: 'now', duration: 1}).transform({
                             scale: pointer_size,
-                            origin: 'center bottom',
+                            origin: 'center',
                             tx: stop.x,
                             ty: stop.y
                         });
@@ -566,7 +639,8 @@ function updateStops(stops, editable) {
             menu_instances.push(new BootstrapMenu(`#pointer-${i}`, {
                 actionsGroups: [
                     ['deleteStop', 'renameStop', 'changeMarked'],
-                    ['moveForwards', 'moveBackwards']
+                    ['moveForwards', 'moveBackwards'],
+                    ['change prestrength', 'change poststrength']
                 ],
                 actions: {
                     deleteStop: {
@@ -646,6 +720,52 @@ function updateStops(stops, editable) {
                         onClick: () => {
                             stops[i].marked = !stop.marked;
                             updateStops(stops, true);
+                        },
+                        classNames: ['dropdown-item', 'alt-context-menu']
+                    }, changePrestrength: {
+                        name: 'Change prestrength',
+                        onClick: () => {
+                            let modal = new bootstrap.Modal(document.querySelector('#change-prestrength-modal'));
+                            let input = document.querySelector('#change-prestrength-input');
+                            let button = document.querySelector('#save-prestrength-change');
+                            input.setAttribute('placeholder', stop.prestrength);
+                            input.value = "";
+                            button.onclick = function () {
+                                stops[i].prestrength = parseFloat(document.querySelector('#change-prestrength-input').value);
+                                document.querySelector(`#id_stops-${stop.form_ix}-prestrength`).value = stops[i].prestrength;
+                                modal.hide();
+                                updateStops(stops, true);
+                            }
+                            input.addEventListener('keyup', (ev) => {
+                                if (ev.keyCode === 13) {
+                                    button.click();
+                                }
+                            })
+                            modal.show();
+                            document.querySelector('#change-prestrength-modal').addEventListener('shown.bs.modal', () => input.focus());
+                        },
+                        classNames: ['dropdown-item', 'alt-context-menu']
+                    }, changePoststrength: {
+                        name: 'Chnage poststrength',
+                        onClick: () => {
+                            let modal = new bootstrap.Modal(document.querySelector('#change-poststrength-modal'));
+                            let input = document.querySelector('#change-poststrength-input');
+                            let button = document.querySelector('#save-poststrength-change');
+                            input.setAttribute('placeholder', stop.poststrength);
+                            input.value = "";
+                            button.onclick = function () {
+                                stops[i].poststrength = parseFloat(document.querySelector('#change-poststrength-input').value);
+                                document.querySelector(`#id_stops-${stop.form_ix}-poststrength`).value = stops[i].poststrength;
+                                modal.hide();
+                                updateStops(stops, true);
+                            }
+                            input.addEventListener('keyup', (ev) => {
+                                if (ev.keyCode === 13) {
+                                    button.click();
+                                }
+                            })
+                            modal.show();
+                            document.querySelector('#change-poststrength-modal').addEventListener('shown.bs.modal', () => input.focus());
                         },
                         classNames: ['dropdown-item', 'alt-context-menu']
                     }
@@ -747,14 +867,21 @@ function computeControlPoints(K) {
     return {p1: p1, p2: p2};
 }
 
-function pathString(x, y) {
+function pathString(x, y, prestrength, poststrength) {
     let str;
+    if (prestrength === undefined) {
+        prestrength = Array(x.length).fill(1);
+    }
+    if (poststrength === undefined) {
+        poststrength = Array(x.length).fill(1);
+    }
     if (x.length > 2) {
         let px = computeControlPoints(x);
         let py = computeControlPoints(y);
         str = `M${x[0]} ${y[0]}`;
+        let strength = 2;
         for (let i = 0; i < x.length - 1; i++) {
-            str += ` C${px.p1[i]} ${py.p1[i]} ${px.p2[i]} ${py.p2[i]} ${x[i + 1]} ${y[i + 1]}`;
+            str += ` C${(px.p1[i] - x[i]) * poststrength[i] + x[i]} ${(py.p1[i] - y[i]) * poststrength[i] + y[i]} ${(px.p2[i] - x[i + 1]) * prestrength[i + 1] + x[i + 1]} ${(py.p2[i] - y[i + 1]) * prestrength[i + 1] + y[i + 1]} ${x[i + 1]} ${y[i + 1]}`;
         }
     } else if (x.length === 2) {
         str = `M${x[0]} ${y[0]} L${x[1]} ${y[1]}`;
