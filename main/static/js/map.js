@@ -474,7 +474,7 @@ function updatePath(stops) {
     }
 
     let tot_len = segment_lengths[0] / 2;
-    for (let i = 0; i < segment_lengths.length; i++) {
+    for (let i = 0; i < segment_lengths.length - 1; i++) {
         let point = SVG(path_el).pointAt(tot_len);
         let after = SVG(path_el).pointAt(tot_len + 0.1);
         let before = SVG(path_el).pointAt(tot_len - 0.1);
