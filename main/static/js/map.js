@@ -483,7 +483,7 @@ function updatePath(stops) {
         arrow_instances.push(SVG(map_svg).path('M-1 0 L0 1 L1 0').cx(point.x).cy(point.y).fill('none').stroke({
             width: 0.3,
             color: '#106e2e'
-        }).rotate(angle).scale(0.5 * map_content_width / 18.5084228515625));
+        }).rotate(angle).scale(0.3 * map_content_width / 18.5084228515625));
         tot_len += segment_lengths[i] / 2 + segment_lengths[i + 1] / 2;
     }
 
