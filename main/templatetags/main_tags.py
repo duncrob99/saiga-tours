@@ -47,3 +47,8 @@ def pagination_end_buttons(page: Page):
                                   min(page.number + settings.pagination_middle_size + 1, page.paginator.num_pages + 1)),
                               page.paginator.num_pages + 1))
     }
+
+
+@register.filter()
+def convert_None(value, js_str='undefined'):
+    return js_str if value is None else value

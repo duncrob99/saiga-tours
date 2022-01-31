@@ -410,11 +410,11 @@ class BannerPhoto(models.Model):
 
 
 class Stop(models.Model):
-    x = models.FloatField()
-    y = models.FloatField()
+    x = models.FloatField(null=True, blank=True)
+    y = models.FloatField(null=True, blank=True)
     tour = models.ForeignKey(Tour, on_delete=models.CASCADE, related_name='stops')
     name = models.CharField(max_length=100)
-    day = models.PositiveSmallIntegerField()
+    day = models.PositiveSmallIntegerField(default=1)
     order = models.PositiveSmallIntegerField(null=True)
     marked = models.BooleanField(default=True)
     arrow_break = models.BooleanField(default=True)

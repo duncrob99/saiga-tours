@@ -59,6 +59,7 @@ if (btn) {
 
 let menu_instances = [];
 let map_content_width = 0;
+let map_centre;
 let arrow_instances = [];
 
 function minBBox(bbox1, bbox2) {
@@ -82,6 +83,24 @@ function make_map_work(destinations, width, height, hoverable, stops, editable, 
     resize_map(destinations, width, height, hoverable);
 
     if (stops !== undefined) {
+        // stops = stops.map(stop => {
+        //     if (stop.x !== undefined && stop.y !== undefined) {
+        //         return stop;
+        //     } else {
+        //         stop.x = map_centre.x;
+        //         stop.y = map_centre.y;
+        //         return stop;
+        //     }
+        // })
+        stops.forEach(stop => {
+            if (stop.x === undefined) {
+                stop.x = map_centre.x;
+            }
+            if (stop.y === undefined) {
+                stop.y = map_centre.y;
+            }
+        })
+
         updateStops(stops, points, editable);
     }
 
@@ -422,6 +441,7 @@ SVG.Path.prototype.segmentLengths = function () {
 }
 
 function updatePath(stops) {
+    if (stops.length < 2) return;
     let map_svg = document.querySelector('.map svg');
 
     let path_width = map_content_width * 0.006;
@@ -942,6 +962,7 @@ function resize_map(destinations, width, height, hoverable) {
     }
 
     map_content_width = min_bbox[2];
+    map_centre = {x: min_bbox[0] + min_bbox[2] / 2, y: min_bbox[1] + min_bbox[3] / 2};
     let margin_factor = 0.2;
     min_bbox = [min_bbox[0] - margin_factor / 2 * min_bbox[2], min_bbox[1] - margin_factor / 2 * min_bbox[3], min_bbox[2] * (1 + margin_factor), min_bbox[3] * (1 + margin_factor)];
     if (ar !== undefined) {

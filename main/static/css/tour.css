@@ -28,3 +28,9 @@
 .map svg {
     margin: 50px;
 }
+
+#create-map-button {
+    position: absolute;
+    right: 0;
+    margin: 10px;
+}

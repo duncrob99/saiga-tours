@@ -20,6 +20,8 @@ urlpatterns = [
     path('tours/<slug:region_slug>/<slug:country_slug>/', views.country_tours, name='tours'),
     path('tours/<slug:region_slug>/<slug:country_slug>/<slug:detail_slug>/', views.country_tours_info, name='tours'),
 
+    path('create_map/<slug:slug>/', views.create_map, name='create-map'),
+
     path('article/<slug:slug>', views.article, name='article'),
     path('news/', views.news, name='news'),
     path('blog/', views.blog, name='blog'),

@@ -460,3 +460,16 @@ def crop_to_ar(image: Image, ratio: float) -> Tuple[int, int, int, int]:
 
     return (
         (width - new_width) // 2, (height - new_height) // 2, (width + new_width) // 2, (height + new_height) // 2)
+
+
+def create_map(request, slug: str):
+    if request.user.is_staff:
+        tour_obj = get_object_or_404(Tour, slug=slug)
+        if tour_obj.stops.count() == 0:
+            tour_obj.stops.create(name='Initial stop')
+            messages.add_message(request, messages.SUCCESS, 'Created initial point')
+        else:
+            messages.add_message(request, messages.INFO, 'Map already exists')
+        return redirect('tour', slug)
+    else:
+        raise Http404
