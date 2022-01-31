@@ -800,7 +800,10 @@ function updateStops(stops, editable) {
                         day: new_day,
                         form_ix: new_ix,
                         text_x: 0,
-                        text_y: 0
+                        text_y: 0,
+                        prestrength: 1,
+                        poststrength: 1,
+                        arrow_break: true
                     })
                     let new_form = document.querySelector('#form-template').cloneNode(true);
                     new_form.id = "";
