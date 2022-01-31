@@ -248,6 +248,8 @@ class Page(DraftHistory):
     in_navbar = models.BooleanField(default=True)
     front_page_pos = models.IntegerField(null=True, blank=True)
     front_page_colour = ColorField(default='#FFFFFF')
+    banner_pos_x = models.FloatField(null=True, blank=True)
+    banner_pos_y = models.FloatField(null=True, blank=True)
 
     def __str__(self):
         return self.title

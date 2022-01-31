@@ -9,6 +9,38 @@ CKEDITOR.stylesSet.add('img_styles', [
     {name: 'Cool image', element: 'img', attributes: {'class': 'cool-img'}}
 ])
 
+function moveBannerImg(click_ev) {
+    let title_rect = document.getElementById('title').getBoundingClientRect();
+    if (click_ev.x >= title_rect.left && click_ev.x <= title_rect.right && click_ev.y >= title_rect.top && click_ev.y <= title_rect.bottom) return;
+
+    click_ev.preventDefault();
+    let banner = document.getElementById('header-banner');
+    let obj_pos = banner.style.objectPosition;
+    let init_pos = obj_pos ? {
+        left: parseFloat(obj_pos.split(' ')[0]),
+        top: parseFloat(obj_pos.split(' ')[1])
+    } : {left: 50, top: 50};
+    console.log(init_pos);
+
+    // init_pos = {left: parseInt(window.getComputedStyle(banner).left), top: parseInt(window.getComputedStyle(banner).top)};
+
+    function move_callback(move_ev) {
+        // banner.style.left = (move_ev.x - click_ev.x) + init_pos.left + 'px';
+        // banner.style.top = (move_ev.y - click_ev.y) + init_pos.top + 'px';
+        let left = (move_ev.x - click_ev.x) * 0.1 + init_pos.left;
+        let top = (move_ev.y - click_ev.y) * -0.1 + init_pos.top;
+        banner.style.objectPosition = `${left}% ${top}%`;
+        document.querySelector('[name="banner_pos_x"]').value = left;
+        document.querySelector('[name="banner_pos_y"]').value = top;
+    }
+
+    window.addEventListener('mousemove', move_callback);
+
+    window.addEventListener('mouseup', () => {
+        window.removeEventListener('mousemove', move_callback);
+    })
+}
+
 function activateEditor() {
     document.querySelector('#content').setAttribute('contenteditable', true);
 
@@ -42,6 +74,8 @@ function activateEditor() {
     title_input.addEventListener('input', () => {
         title_output.value = title_input.innerText;
     })
+
+    document.getElementById('header-content').addEventListener('mousedown', moveBannerImg);
 }
 
 function deactivateEditor() {
@@ -51,6 +85,7 @@ function deactivateEditor() {
     }
 
     document.querySelector('#title').setAttribute('contenteditable', false);
+    document.getElementById('header-content').removeEventListener('mousedown', moveBannerImg);
 }
 
 let editing = document.querySelector('#editing');

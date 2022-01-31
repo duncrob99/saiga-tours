@@ -81,6 +81,7 @@ small {
 
 .offcanvas {
     z-index: 9998;
+    overflow: scroll;
 }
 
 a.nice-link {

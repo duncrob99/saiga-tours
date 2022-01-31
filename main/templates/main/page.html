@@ -13,6 +13,7 @@
             position: absolute;
             z-index: -1;
             left: 0;
+            object-position: {{ page.banner_pos_x }}% {{ page.banner_pos_y }}%;
         }
 
         #header-content {
@@ -69,7 +70,7 @@
         <div class="heading d-flex flex-column justify-content-center">
             <div class="header-subtitle">{{ page.title }}</div>
             <div class="d-flex justify-content-between align-items-center">
-                <h1 class="section-title">{{ page.subtitle }}
+                <h1 id="title" class="section-title">{{ page.subtitle }}
                     <div class="underline underline-left"></div>
                 </h1>
             </div>
@@ -116,16 +117,4 @@
         <script src="https://cdn.ckeditor.com/4.16.2/standard-all/ckeditor.js"></script>
         <script src="{% static 'js/page_editing.js' %}"></script>
     {% endif %}
-    <script>
-        function resize_banner() {
-            let navbar_height = document.querySelector('.navbar').getBoundingClientRect().height;
-            let aspect_ratio = document.documentElement.clientWidth / (document.documentElement.clientHeight - navbar_height);
-
-            document.querySelector('.banner').style.top = navbar_height + "px";
-            document.querySelector('.banner').style.height = document.documentElement.clientHeight - navbar_height + "px";
-        }
-
-        window.addEventListener('load', resize_banner);
-        window.addEventListener('resize', resize_banner);
-    </script>
 {% endblock %}
