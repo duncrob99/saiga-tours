@@ -55,8 +55,8 @@ h5.card-title {
 }
 
 .img-card-contents {
-    border-bottom-left-radius: var(--border-radius);
-    border-bottom-right-radius: var(--border-radius);
+    border-bottom-left-radius: calc(var(--border-radius) - var(--card-border-width));
+    border-bottom-right-radius: calc(var(--border-radius) - var(--card-border-width));
     overflow: hidden;
 }
 
