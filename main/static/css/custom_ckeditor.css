@@ -69,3 +69,9 @@ img.bordered {
 p.block {
     padding: 60px;
 }
+
+#editor-toolbar {
+    position: sticky;
+    top: var(--navbar-height);
+    z-index: 9999;
+}
