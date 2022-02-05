@@ -25,9 +25,31 @@
         <button class="btn btn-primary accent hoverable-accent" type="button" id="map-zoom-reset"><i
                 class="bi bi-arrows-fullscreen"></i></button>
         {% if request.user.is_staff %}
-        <button class="btn btn-primary accent hoverable-accent" type="button" id="map-download"><i
-                class="bi bi-download"></i></button>
+            <button class="btn btn-primary accent hoverable-accent" type="button" id="map-download"><i
+                    class="bi bi-download"></i></button>
         {% endif %}
     </div>
     {% include 'main/world_map.svg' %}
 </div>
+
+{% if request.user.is_staff %}
+    <div class="modal fade" data-bs-scroll="true" data-bs-backdrop="false" id="save-modal" tabindex="-1"
+         aria-labelledby="saveModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="saveModalLabel">Select Resolution</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    {#                        <input aria-label="select resolution" type="text" id="resolution-input" class="form-control">#}
+                    <div id="resolution-input" class="mt-5"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="save-resolution">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endif %}

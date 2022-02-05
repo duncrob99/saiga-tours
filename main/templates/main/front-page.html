@@ -4,6 +4,9 @@
 {% block extrahead %}
     <link rel="stylesheet" href="{% static 'css/banner.css' %}">
     <link rel="stylesheet" href="{% static 'css/custom_ckeditor.css' %}">
+    {% if request.user.is_staff %}
+        <link rel="stylesheet" href="{% static 'nouislider/nouislider_asdlj.css' %}">
+    {% endif %}
     <style>
         .banner-img {
             transition: left {{ settings.banner_transition_time }}s;
@@ -168,6 +171,9 @@
     </script>
     <script src="{% static 'js/banner.js' %}"></script>
 
+    {% if request.user.is_staff %}
+        <script src="{% static 'nouislider/nouislider.js' %}"></script>
+    {% endif %}
     <script src="{% static 'js/map.js' %}"></script>
     <script>
         let destinations = [];
