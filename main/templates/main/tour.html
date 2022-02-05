@@ -8,6 +8,9 @@
     {% if tour.stops.count %}
         <link rel="stylesheet" href="{% static 'css/map.css' %}">
     {% endif %}
+    {% if request.user.is_staff %}
+        <link href="{% static 'nouislider/nouislider_asdlj.css' %}" rel="stylesheet">
+    {% endif %}
 {% endblock %}
 
 {% block banner %}
@@ -220,6 +223,25 @@
                 </div>
             </div>
         </div>
+        <div class="modal fade" data-bs-scroll="true" data-bs-backdrop="false" id="save-modal" tabindex="-1"
+             aria-labelledby="saveModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="saveModalLabel">Select Resolution</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        {#                        <input aria-label="select resolution" type="text" id="resolution-input" class="form-control">#}
+                        <div id="resolution-input" class="mt-5"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" id="save-resolution">Save changes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <div hidden id="form-template">
             <input hidden id="id_stops-%i-x" name="stops-%i-x" value="%x">
@@ -295,6 +317,7 @@
         <script src="https://cdn.jsdelivr.net/npm/litepicker/dist/litepicker.js"></script>
         <script src="https://cdn.ckeditor.com/4.16.2/standard-all/ckeditor.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/luxon@2/build/global/luxon.min.js"></script>
+        <script src="{% static 'nouislider/nouislider.js' %}"></script>
         <script src="{% static 'js/tour_editing.js' %}"></script>
     {% endif %}
 {% endblock %}

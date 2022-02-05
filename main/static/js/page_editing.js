@@ -5,8 +5,12 @@ document.querySelector('[name="title"]').parentElement.style.display = 'none';
 
 let csrf_token = document.querySelector('input[name="csrfmiddlewaretoken"]');
 
-CKEDITOR.stylesSet.add('img_styles', [
-    {name: 'Cool image', element: 'img', attributes: {'class': 'cool-img'}}
+CKEDITOR.stylesSet.add('styles', [
+    {name: 'Above', element: 'img', attributes: {'class': 'above-img'}},
+    {name: 'Below', element: 'img', attributes: {'class': 'below-img'}},
+    {name: 'Bordered', element: 'img', attributes: {'class': 'bordered'}},
+    {name: 'Underlined Title', element: 'h3', attributes: {'class': 'underlined-title'}},
+    {name: 'Faded', element: 'p', attributes: {'class': 'faded'}}
 ])
 
 function moveBannerImg(click_ev) {
@@ -46,7 +50,6 @@ function activateEditor() {
 
     let editor = CKEDITOR.inline('content', {
         extraPlugins: 'sourcedialog, uploadimage, sharedspace',
-        removePlugins: 'floatingspace, maximize, resize',
         filebrowserImageBrowseUrl: '/ckeditor/browse/?csrfmiddlewaretoken=' + csrf_token,
         filebrowserImageUploadUrl: "/ckeditor/upload/?csrfmiddlewaretoken=" + csrf_token,
         image: {
@@ -59,11 +62,13 @@ function activateEditor() {
                 }]
             }
         },
-        stylesSet: 'img_styles',
+        stylesSet: 'styles',
         sharedSpaces: {
             top: 'editor-toolbar'
         }
     });
+
+    customiseCK(editor);
 
     editor.on('saveSnapshot', () => document.querySelector('[name="content"]').value = document.querySelector('#content').innerHTML);
     document.querySelector('#content').addEventListener('input', () => document.querySelector('[name="content"]').value = document.querySelector('#content').innerHTML);

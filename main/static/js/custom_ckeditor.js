@@ -1,0 +1,39 @@
+(function () {
+    for (let instanceName in CKEDITOR.instances) {
+        customiseCK(CKEDITOR.instances[name]);
+    }
+})();
+
+function customiseCK(instance) {
+    instance.config.allowedContent = true;
+    instance.ui.addToolbarGroup('layout', 'insert');
+
+    instance.addCommand("split", {
+        exec: function (edt) {
+            edt.insertHtml(`
+                <div class="row">
+                    <div class="col-md-6 d-flex justify-content-center flex-column py-5"><p>left</p></div>
+                    <div class="col-md-6 d-flex justify-content-center flex-column py-5"><p>right</p></div>
+                </div>
+            `);
+        }
+    });
+    instance.ui.addButton('split', {
+        label: "split section",
+        command: "split",
+        toolbar: "layout",
+        icon: ckeditor_icon_urls.split
+    });
+
+    instance.addCommand('image_fan', {
+        exec: function (edt) {
+            edt.insertHtml(`<div><div class='image-fan'><img class="above-img" style="width: 300px; height: 200px;"/><img class="below-img" style="width: 300px; height: 200px;"/></div></div>`);
+        }
+    });
+    instance.ui.addButton('image_fan', {
+        label: 'image fan',
+        command: 'image_fan',
+        toolbar: 'layout',
+        icon: ckeditor_icon_urls.image_fan
+    });
+}
