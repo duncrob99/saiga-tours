@@ -65,3 +65,7 @@ img.bordered {
     border: 7px solid white;
     border-radius: var(--border-radius);
 }
+
+p.block {
+    padding: 60px;
+}

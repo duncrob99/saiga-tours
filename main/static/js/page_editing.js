@@ -10,7 +10,8 @@ CKEDITOR.stylesSet.add('styles', [
     {name: 'Below', element: 'img', attributes: {'class': 'below-img'}},
     {name: 'Bordered', element: 'img', attributes: {'class': 'bordered'}},
     {name: 'Underlined Title', element: 'h3', attributes: {'class': 'underlined-title'}},
-    {name: 'Faded', element: 'p', attributes: {'class': 'faded'}}
+    {name: 'Faded', element: 'p', attributes: {'class': 'faded'}},
+    {name: 'Text block', element: 'p', attributes: {'class': 'block'}}
 ])
 
 function moveBannerImg(click_ev) {
