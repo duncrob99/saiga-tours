@@ -98,7 +98,6 @@ if (btn) {
             modal.hide();
         }
         modal.show();
-        document.querySelector('#rename-modal').addEventListener('shown.bs.modal', () => resolution_slider.focus());
     });
 }
 

@@ -15,6 +15,15 @@
 <script src="{% static 'js/svg.min.js' %}"></script>
 <script src="{% static 'js/svg.panzoom.min.js' %}"></script>
 <script src="{% static 'js/svg.easing.min.js' %}"></script>
+<script defer>
+    let font_file;
+    (async function () {
+        let response = await fetch("{% static 'fonts/Poppins-Regular.ttf' %}");
+        if (response.ok) {
+            font_file = await response.blob();
+        }
+    })();
+</script>
 
 <div class="pre-load map">
     <div style="float: right; z-index: 5; margin-bottom: -100%; position: relative">
