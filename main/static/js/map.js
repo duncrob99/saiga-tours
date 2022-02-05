@@ -13,17 +13,34 @@ let btn = document.querySelector('#map-download');
 if (btn) {
     let svg = document.querySelector('.map svg');
 
-    let triggerDownload = (imgURI, fileName) => {
+    let resolution_slider;
+    window.addEventListener('load', () => {
+        resolution_slider = noUiSlider.create(document.getElementById('resolution-input'), {
+            start: 1,
+            range: {
+                min: 0.1,
+                max: 10
+            },
+            tooltips: true,
+            format: {
+                to: value => `${Math.round(value * 100) / 100}x`,
+                from: value => parseInt(value)
+            },
+            step: 0.01
+        });
+    })
+
+    let triggerDownload = (imgURI) => {
         let a = document.createElement('a');
 
-        a.setAttribute('download', 'image.svg');
+        a.setAttribute('download', 'map.png');
         a.setAttribute('href', imgURI);
         a.setAttribute('target', '_blank');
 
         a.click();
     }
 
-    let save = () => {
+    let save = (resolution) => {
         let styled_svg = svg.cloneNode(true);
         styled_svg.querySelectorAll('#country-labels text').forEach(el => {
             el.remove();
@@ -49,11 +66,40 @@ if (btn) {
             let svgBlob = new Blob([data], {type: 'image/svg+xml;charset=utf-8'});
             let url = URL.createObjectURL(svgBlob);
 
-            triggerDownload(url);
+            svgUrlToPng(url, resolution, triggerDownload);
         });
     }
 
-    btn.addEventListener('click', save);
+    function svgUrlToPng(svgUrl, resolution, callback) {
+        const svgImage = document.createElement('img');
+        // imgPreview.style.position = 'absolute';
+        // imgPreview.style.top = '-9999px';
+        document.body.appendChild(svgImage);
+        svgImage.onload = function () {
+            const canvas = document.createElement('canvas');
+            canvas.width = svgImage.clientWidth * resolution;
+            canvas.height = svgImage.clientHeight * resolution;
+            const canvasCtx = canvas.getContext('2d');
+            canvasCtx.drawImage(svgImage, 0, 0, canvas.width, canvas.height);
+            const imgData = canvas.toDataURL('image/png');
+            callback(imgData);
+            // document.body.removeChild(imgPreview);
+            svgImage.remove();
+        };
+        svgImage.src = svgUrl;
+    }
+
+    btn.addEventListener('click', () => {
+        let modal = new bootstrap.Modal(document.querySelector('#save-modal'));
+        let button = document.querySelector('#save-resolution');
+        resolution_slider.set(1);
+        button.onclick = function () {
+            save(resolution_slider.get(true));
+            modal.hide();
+        }
+        modal.show();
+        document.querySelector('#rename-modal').addEventListener('shown.bs.modal', () => resolution_slider.focus());
+    });
 }
 
 
