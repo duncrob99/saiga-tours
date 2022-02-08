@@ -36,4 +36,21 @@ function customiseCK(instance) {
     //     toolbar: 'layout',
     //     icon: ckeditor_icon_urls.image_fan
     // });
+    if (instance !== undefined) {
+        instance.on('instanceReady', () => {
+            document.querySelectorAll('.cke_combo_button').forEach(dropdown => {
+                let prev_onclick = dropdown.onclick;
+                dropdown.addEventListener('click', function () {
+                    let scroll_pos = document.body.scrollTop;
+
+                    function resetScroll() {
+                        document.body.scrollTop = scroll_pos;
+                        document.body.removeEventListener('scroll', resetScroll);
+                    }
+
+                    document.body.addEventListener('scroll', resetScroll);
+                });
+            })
+        });
+    }
 }

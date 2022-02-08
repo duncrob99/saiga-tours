@@ -74,6 +74,8 @@ function activateEditor() {
         }
     });
 
+    customiseCK(editor);
+
     editor.on('saveSnapshot', updateContentFormField);
     document.querySelector('#content').addEventListener('input', updateContentFormField);
 

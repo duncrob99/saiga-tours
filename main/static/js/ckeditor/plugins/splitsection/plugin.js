@@ -43,7 +43,6 @@ CKEDITOR.plugins.add('splitsection', {
                 if (left_col_classes.includes('justify-content-end'))
                     this.setData('align', 'end');
 
-                console.log(this.element.$);
                 if (this.element.$.querySelector('div.row').classList.contains('wide-bg')) {
                     this.setData('background', getComputedStyle(this.element.$.querySelector('div.row')).getPropertyValue('--background'));
                 }
@@ -51,7 +50,6 @@ CKEDITOR.plugins.add('splitsection', {
 
             data: function () {
                 let cols = this.element.$.querySelectorAll('div.row div.flex-column');
-                console.log(cols);
                 cols.forEach(col => {
                     col.classList.remove('justify-content-start');
                     col.classList.remove('justify-content-center');
