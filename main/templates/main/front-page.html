@@ -60,15 +60,18 @@
 
 {% block content %}
     {% for row in rows %}
-        <div class="front-page-row wide-bg">
+        <div class="front-page-row">
             {% if row.type == 'tours' %}
                 <h1 class="section-title">Tours
                     <div class="underline"></div>
                 </h1>
                 {% include 'main/tours_cards.html' %}
             {% elif row.type == 'section' %}
+                {% if not row.colour_before %}
+                    {% include 'main/separator.svg' with colour=row.colour pos="pre" %}
+                {% endif %}
                 {% with section=row.contents %}
-                    <div class="page-section {# wide-bg #} d-flex justify-content-center flex-column"
+                    <div class="page-section wide-bg d-flex justify-content-center flex-column"
                          style="--background: {{ section.front_page_colour }}"
                          id="page-section-{{ forloop.counter }}">
                         <h1 class="section-title">{{ section.title }}
@@ -77,6 +80,7 @@
                         {{ section.content | safe }}
                     </div>
                 {% endwith %}
+                {% include 'main/separator.svg' with colour=row.colour pos="post" %}
             {% elif row.type == 'map' %}
                 <div {# class="wide-bg" #} style='--background: #e1f8ff'>
                     {% include 'main/map.html' %}
@@ -156,9 +160,6 @@
         {% endif %}
         </div>
     {% endfor %}
-
-
-
 {% endblock %}
 
 {% block js %}

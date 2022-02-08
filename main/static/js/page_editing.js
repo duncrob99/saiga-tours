@@ -14,6 +14,10 @@ CKEDITOR.stylesSet.add('styles', [
     {name: 'Text block', element: 'p', attributes: {'class': 'block'}}
 ])
 
+function updateContentFormField() {
+    document.querySelector('[name="content"]').value = document.querySelector('#content').innerHTML;
+}
+
 function moveBannerImg(click_ev) {
     let title_rect = document.getElementById('title').getBoundingClientRect();
     if (click_ev.x >= title_rect.left && click_ev.x <= title_rect.right && click_ev.y >= title_rect.top && click_ev.y <= title_rect.bottom) return;
@@ -50,7 +54,8 @@ function activateEditor() {
     document.querySelector('#content').setAttribute('contenteditable', true);
 
     let editor = CKEDITOR.inline('content', {
-        extraPlugins: 'sourcedialog, uploadimage, sharedspace',
+        extraPlugins: 'sourcedialog, uploadimage, sharedspace, splitsection, imagefan',
+        removePlugins: 'exportpdf',
         filebrowserImageBrowseUrl: '/ckeditor/browse/?csrfmiddlewaretoken=' + csrf_token,
         filebrowserImageUploadUrl: "/ckeditor/upload/?csrfmiddlewaretoken=" + csrf_token,
         image: {
@@ -69,10 +74,8 @@ function activateEditor() {
         }
     });
 
-    customiseCK(editor);
-
-    editor.on('saveSnapshot', () => document.querySelector('[name="content"]').value = document.querySelector('#content').innerHTML);
-    document.querySelector('#content').addEventListener('input', () => document.querySelector('[name="content"]').value = document.querySelector('#content').innerHTML);
+    editor.on('saveSnapshot', updateContentFormField);
+    document.querySelector('#content').addEventListener('input', updateContentFormField);
 
     let title_input = document.querySelector('#title');
     let title_output = document.querySelector('[name="title"]');
@@ -105,4 +108,12 @@ function checkEditing() {
 }
 
 checkEditing();
+window.addEventListener('load', checkEditing);
 editing.addEventListener('change', checkEditing);
+
+window.addEventListener('load', () => {
+    document.getElementById('edit-page-form').addEventListener('submit', () => {
+        deactivateEditor();
+        updateContentFormField();
+    });
+})

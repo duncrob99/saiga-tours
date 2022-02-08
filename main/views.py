@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from functools import reduce
 from os import path
-from typing import Optional, Dict, Tuple, List
+from typing import Optional, Dict, Tuple, List, Any
 
 import ngram
 from django.conf import settings
@@ -29,9 +29,12 @@ def assert_visible(request, model: DraftHistory):
 class FrontPageRow:
     pos: int
     type: str
-    contents: Optional = None
+    contents: Optional[Any] = None
     title: Optional[str] = None
     link: Optional[str] = None
+    colour_before: Optional[str] = None
+    colour: Optional[str] = None
+    colour_after: Optional[str] = None
 
 
 # Create your views here.
@@ -44,7 +47,7 @@ def front_page(request):
                          reverse('blog')), FrontPageRow(settings.frontpage_news_pos, 'articles',
                                                         Article.visible(request.user.is_staff).filter(
                                                             type=Article.NEWS)[:3], 'News', reverse('news'))] + [
-               FrontPageRow(pg.front_page_pos, 'section', pg) for pg in
+               FrontPageRow(pg.front_page_pos, 'section', pg, colour=pg.front_page_colour) for pg in
                Page.visible(request.user.is_staff).filter(front_page_pos__isnull=False).order_by('front_page_pos')]
 
     highlight_rows: Dict[int, list] = {}
@@ -59,8 +62,11 @@ def front_page(request):
         rows.append(FrontPageRow(row_num, 'highlight', highlight_row))
 
     rows.sort(key=lambda row: row.pos)
-    print(rows)
-    print(rows[0].pos)
+
+    for i, row in enumerate(rows[1:]):
+        if row.type == 'section' and rows[i].type == 'section':
+            row.colour_before = rows[i].colour
+            rows[i].colour_after = row.colour
 
     context = {
                   'tours': Tour.visible(request.user.is_staff).filter(display=True),

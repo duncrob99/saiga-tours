@@ -100,7 +100,7 @@ body * {
 }
 
 .wide-bg {
-    height: calc(100% + 5rem);
+    height: 100%;
     position: relative;
     padding-bottom: 10rem;
     padding-top: 10rem;
@@ -112,11 +112,10 @@ body * {
 
 .wide-bg:before {
     content: "";
-    background-image: var(--both-transition);
-    background-size: auto 100%;
+    background: var(--background);
     position: absolute;
     top: 0;
-    height: calc(100% + 0.5rem);
+    height: inherit;
     width: 4000px;
     left: -2000px;
     z-index: -1;
@@ -159,6 +158,22 @@ body * {
     margin-bottom: 100rem;
 }
 
-.front-page-row {
-    padding-top: 10rem;
+.front-page-row > h1 {
+    /*margin-bottom: 32px;*/
+    padding-top: 100px;
+}
+
+.separator {
+    width: 100%;
+    position: absolute;
+    left: 0;
+}
+
+/*.post-separator {*/
+/*     transform: translateY(5rem);*/
+/* }*/
+
+.pre-separator {
+    transform-origin: top;
+    transform: rotateX(180deg);
 }

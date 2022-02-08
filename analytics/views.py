@@ -85,7 +85,7 @@ def close_view(request):
 
     page_view = PageView.objects.get(session=session, page=page, complete=False)
     page_view.duration = timezone.now() - page_view.time
-    page_view.time_visible += datetime.timedelta(milliseconds=request.POST.get('time_visible'))
+    page_view.time_visible += datetime.timedelta(milliseconds=float(request.POST.get('time_visible')))
     page_view.complete = True
     page_view.save()
 

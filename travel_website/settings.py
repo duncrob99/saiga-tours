@@ -165,7 +165,7 @@ CKEDITOR_IMAGE_BACKEND = "pillow"
 CKEDITOR_CONFIGS = {
     'default': {
         'toolbar': None,
-        'extraPlugins': 'codesnippet',
+        'extraPlugins': 'codesnippet, splitsection',
         'skin': 'moono'
     },
 }

@@ -5,6 +5,9 @@
 {% block extrahead %}
     <link rel="stylesheet" href="{% static 'css/banner.css' %}">
     <link rel="stylesheet" href="{% static 'css/custom_ckeditor.css' %}">
+    {% if request.user.is_staff %}
+        <script src="https://cdn.jsdelivr.net/npm/@svgdotjs/svg.js@3.0/dist/svg.min.js"></script>
+    {% endif %}
     <style>
         #header-banner {
             width: 100%;
@@ -45,6 +48,10 @@
 
         #content-container {
             padding-top: 1rem !important;
+        }
+
+        #content {
+            position: unset !important;
         }
     </style>
 {% endblock %}
@@ -96,7 +103,7 @@
 
     {% if request.user.is_staff %}
         <div class="offcanvas offcanvas-start" tabindex="-1" id="editor-offcanvas">
-            <form style="margin: 20px;" method="post" enctype="multipart/form-data">
+            <form style="margin: 20px;" method="post" enctype="multipart/form-data" id="edit-page-form">
                 {% bootstrap_form_errors form %}
                 {% csrf_token %}
                 <div class="form-check">
@@ -106,7 +113,9 @@
                     </label>
                 </div>
                 {% bootstrap_form form %}
-                <button class="btn btn-primary accent hoverable-accent">Submit Changes</button>
+                <button type="submit" id="edit-page-submit" class="btn btn-primary accent hoverable-accent">Submit
+                    Changes
+                </button>
             </form>
         </div>
     {% endif %}
@@ -115,14 +124,8 @@
 {% block js %}
     {% if request.user.is_staff %}
         {#        <script src="https://cdn.ckeditor.com/4.16.2/standard-all/ckeditor.js"></script>#}
+        <script src="{% static 'js/jscolor.min.js' %}"></script>
         <script src="{% static 'js/ckeditor/ckeditor.js' %}"></script>
-        <script>
-            let ckeditor_icon_urls = {
-                split: "{% static 'images/CKeditor icons/layout-split.svg' %}",
-                image_fan: "{% static 'images/CKeditor icons/layout-split.svg' %}"
-            };
-        </script>
-        <script src="{% static 'js/custom_ckeditor.js' %}"></script>
         <script src="{% static 'js/page_editing.js' %}"></script>
     {% endif %}
 {% endblock %}
