@@ -38,8 +38,10 @@ function customiseCK(instance) {
     // });
     if (instance !== undefined) {
         instance.on('instanceReady', () => {
-            document.querySelectorAll('.cke_combo_button').forEach(dropdown => {
-                let prev_onclick = dropdown.onclick;
+            document.querySelectorAll('.cke_combo_button').forEach(fixScroll);
+            document.querySelectorAll('.cke_button_expandable').forEach(fixScroll);
+
+            function fixScroll(dropdown) {
                 dropdown.addEventListener('click', function () {
                     let scroll_pos = document.body.scrollTop;
 
@@ -50,7 +52,7 @@ function customiseCK(instance) {
 
                     document.body.addEventListener('scroll', resetScroll);
                 });
-            })
+            }
         });
     }
 }
