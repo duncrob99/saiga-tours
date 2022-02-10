@@ -103,3 +103,7 @@ p.block {
 .jscolor-picker-wrap {
     z-index: 10010 !important;
 }
+
+li p {
+    margin-bottom: 0;
+}
