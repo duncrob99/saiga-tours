@@ -24,6 +24,7 @@
                 'referer': "{{ request.META.HTTP_REFERER }}"
             },
             success: data => {
+                console.log('success data: ', data);
 
                 Visibility.change((ev, state) => {
                     if (state === 'visible') {
@@ -33,7 +34,7 @@
                     }
                 })
 
-                if (data.new_user) {
+                if (!data.accepted_cookies) {
                     document.querySelector('#cookie-banner').classList.remove('hidden');
                 }
 

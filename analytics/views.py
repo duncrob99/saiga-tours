@@ -28,12 +28,12 @@ def ip_location(ip: str):
 def view(request):
     if 'userID' not in request.COOKIES:
         user = UserCookie.objects.create(staff=request.user.is_staff, user_agent=request.META['HTTP_USER_AGENT'])
-        response = JsonResponse({'new_user': True})
+        response = JsonResponse({'new_user': True, 'accepted_cookies': user.accepted_cookies})
         response.set_cookie('userID', user.uuid, samesite='Lax')
     else:
         try:
             user = UserCookie.objects.get(uuid=request.COOKIES['userID'])
-            response = JsonResponse({'new_user': False})
+            response = JsonResponse({'new_user': False, 'accepted_cookies': user.accepted_cookies})
             if request.user.is_staff and not user.staff:
                 user.staff = True
                 user.save()
@@ -41,7 +41,7 @@ def view(request):
                 user.user_agent = request.META['HTTP_USER_AGENT']
         except ValidationError:
             user = UserCookie.objects.create(staff=request.user.is_staff, user_agent=request.META['HTTP_USER_AGENT'])
-            response = JsonResponse({'new_user': True})
+            response = JsonResponse({'new_user': True, 'accepted_cookies': user.accepted_cookies})
             response.set_cookie('userID', user.uuid, samesite='Lax')
 
     if 'session_id' in request.session:
@@ -62,6 +62,14 @@ def view(request):
         page_view.save()
 
     return response
+
+
+def accept_cookies(request):
+    user = UserCookie.objects.get(uuid=request.COOKIES['userID'])
+    user.accepted_cookies = True
+    user.save()
+
+    return JsonResponse({'success': True})
 
 
 def heartbeat(request):

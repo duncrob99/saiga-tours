@@ -13,6 +13,7 @@ class UserCookie(models.Model):
     staff = models.BooleanField(default=False)
     user_agent = models.CharField(max_length=200)
     user_agent_info = models.JSONField(null=True, blank=True)
+    accepted_cookies = models.BooleanField(default=False)
 
     @classmethod
     def calc_uas(cls):

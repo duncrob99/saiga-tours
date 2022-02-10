@@ -1,11 +1,12 @@
 <style>
     #cookie-banner {
-        width: 30vw;
+        width: 100%;
         position: absolute;
-        bottom: 30px;
-        left: 30px;
+        bottom: 0;
+        left: 0;
         z-index: 999999;
         transition: all 2s;
+        background-color: lightblue;
     }
 
     #cookie-banner.hidden {
@@ -27,15 +28,15 @@
     .cookie-banner-container {
         position: -webkit-sticky;
         position: sticky;
-        bottom: 20px;
-        left: 30px;
+        bottom: 0;
+        left: 0;
         z-index: 999999;
     }
 </style>
 <div class="cookie-banner-container">
-    <div class="card hidden" id="cookie-banner">
-        <div class="card-body d-flex">
-            <div>
+    <div class="hidden" id="cookie-banner">
+        <div class="card-body d-flex justify-content-between">
+            <div class="d-flex flex-column justify-content-center">
                 By continuing, you accept to allowing cookies on your computer. Just don't get crumbs in your
                 keyboard!
             </div>
@@ -46,6 +47,19 @@
 
 <script>
     document.getElementById('cookie-banner-button').addEventListener('click', () => {
+        let cookie = document.cookie;
+        let csrfToken = cookie.substring(cookie.indexOf('csrftoken=') + 'csrftoken='.length).split(';')[0];
+
         document.getElementById('cookie-banner').classList.add('hidden');
-    })
+        $.ajax({
+            type: "POST",
+            url: "{% url 'accept-cookies' %}",
+            error: () => {
+                console.log("Failed at accepting cookies");
+            },
+            headers: {
+                'X-CSRFToken': csrfToken
+            }
+        });
+    });
 </script>
