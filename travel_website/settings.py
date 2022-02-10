@@ -166,7 +166,8 @@ CKEDITOR_CONFIGS = {
     'default': {
         'toolbar': None,
         'extraPlugins': 'codesnippet, splitsection',
-        'skin': 'moono'
+        'skin': 'moono-lisa',
+        'removePlugins': 'exportpdf'
     },
 }
 

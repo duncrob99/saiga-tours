@@ -29,6 +29,9 @@ CKEDITOR.plugins.add('imagefan', {
             upcast: function (element) {
                 return element.name === 'div' && element.hasClass('image-fan');
             }
-        })
+        });
+
+        let pluginDir = this.path;
+        editor.addContentsCss(`${pluginDir}/styles/imagefan.css`);
     }
 })

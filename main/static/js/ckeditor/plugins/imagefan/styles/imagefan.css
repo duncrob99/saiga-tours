@@ -1,0 +1,47 @@
+.image-fan {
+    overflow: visible;
+    height: min-content;
+    width: min-content;
+    margin: 10%;
+}
+
+div:has(.image-fan) {
+    margin: 10%;
+}
+
+.image-fan img {
+    border-radius: var(--border-radius);
+    box-shadow: 10px 10px 30px rgba(0, 0, 0, 0.2);
+    border: 7px solid white;
+}
+
+.image-fan div {
+    transition: 0.5s transform;
+}
+
+.image-fan div:empty {
+    width: 200px;
+    height: 100px;
+}
+
+.above-img {
+    position: absolute;
+    transform-origin: bottom left;
+    transform: rotate(-10deg);
+    z-index: 1;
+}
+
+.below-img {
+    transform-origin: bottom left;
+    --trans: translate(10%, -10%) scale(0.9);
+    transform: var(--trans) rotate(10deg);
+    z-index: -1;
+}
+
+.image-fan:hover .above-img {
+    transform: rotate(-11deg);
+}
+
+.image-fan:hover .below-img {
+    transform: var(--trans) rotate(11deg);
+}

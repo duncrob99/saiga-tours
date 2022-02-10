@@ -1,5 +1,6 @@
 from datetime import timedelta
 from io import BytesIO
+from typing import Tuple
 
 from PIL import Image
 from ckeditor_uploader.fields import RichTextUploadingField
@@ -10,8 +11,24 @@ from django.db import models
 from django.db.models import F
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.templatetags.static import static
 from django.utils.functional import classproperty
 from simple_history.models import HistoricalRecords
+
+
+def RichTextWithPlugins(*args, **kwargs):
+    def plugin_path(name: str) -> str:
+        return static(f'js/ckeditor/plugins/{name}/')
+
+    def plugin_def(name: str) -> Tuple[str, str, str]:
+        return name, plugin_path(name), 'plugin.js'
+
+    field = RichTextUploadingField(external_plugin_resources=[
+        plugin_def('splitsection'),
+        plugin_def('imagefan')
+    ], extra_plugins=['splitsection', 'imagefan'], *args, **kwargs)
+
+    return field
 
 
 class DraftHistoryManager(models.Manager):
@@ -42,7 +59,7 @@ class DraftHistory(models.Model):
 class Region(DraftHistory):
     name = models.CharField(max_length=40)
     slug = models.SlugField(primary_key=True)
-    tour_blurb = RichTextUploadingField(config_name='default')
+    tour_blurb = RichTextWithPlugins(config_name='default')
 
     def __str__(self):
         return self.name
@@ -53,8 +70,8 @@ class Destination(DraftHistory):
     card_img = models.ImageField()
     slug = models.SlugField()
     region = models.ForeignKey(Region, on_delete=models.CASCADE, null=True, related_name='destinations')
-    description = RichTextUploadingField(config_name='default')
-    tour_blurb = RichTextUploadingField(config_name='default')
+    description = RichTextWithPlugins(config_name='default')
+    tour_blurb = RichTextWithPlugins(config_name='default')
     map_colour = ColorField(null=True, blank=True)
 
     def __str__(self):
@@ -83,7 +100,7 @@ class DestinationDetails(DraftHistory):
 
     title = models.CharField(max_length=100)
     slug = models.SlugField()
-    content = RichTextUploadingField(config_name='default')
+    content = RichTextWithPlugins(config_name='default')
     order = models.IntegerField()
     destination = models.ForeignKey(Destination, on_delete=models.CASCADE, related_name='details')
     type = models.CharField(max_length=1, choices=TYPE_CHOICES)
@@ -123,7 +140,7 @@ class Tour(DraftHistory):
     destinations = models.ManyToManyField(Destination, related_name='tours')
     start_date = models.DateField(null=True, blank=True)
     duration = models.IntegerField(null=True)
-    description = RichTextUploadingField()
+    description = RichTextWithPlugins()
     excerpt = models.TextField()
     card_img = models.ImageField()
     price = models.DecimalField(max_digits=8, decimal_places=2)
@@ -165,7 +182,7 @@ class ItineraryDay(models.Model):
     tour = models.ForeignKey(Tour, on_delete=models.CASCADE, related_name='itinerary')
     title = models.CharField(max_length=100)
     day = models.IntegerField()
-    body = RichTextUploadingField()
+    body = RichTextWithPlugins()
     history = HistoricalRecords()
 
     class Meta:
@@ -201,7 +218,7 @@ class Tag(models.Model):
 class Author(DraftHistory):
     name = models.CharField(max_length=100)
     picture = models.ImageField()
-    blurb = RichTextUploadingField(config_name='default')
+    blurb = RichTextWithPlugins(config_name='default')
 
     def __str__(self):
         return self.name
@@ -218,7 +235,7 @@ class Article(DraftHistory):
     slug = models.SlugField(primary_key=True)
     title = models.CharField(max_length=40)
     creation = models.DateTimeField(auto_now_add=True)
-    content = RichTextUploadingField(config_name='default')
+    content = RichTextWithPlugins(config_name='default')
     excerpt = models.TextField(null=True, blank=True)
     type = models.CharField(max_length=1, choices=TYPE_CHOICES, default=NEWS)
     card_img = models.ImageField(null=True)
@@ -240,7 +257,7 @@ class Page(DraftHistory):
     slug = models.SlugField()
     title = models.CharField(max_length=40)
     subtitle = models.CharField(max_length=200, default='')
-    content = RichTextUploadingField(config_name='default')
+    content = RichTextWithPlugins(config_name='default')
     card_img = models.ImageField()
     banner_img = models.ImageField(null=True, blank=True)
     parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='children')
@@ -445,7 +462,7 @@ class MapPoint(models.Model):
 
 class HightlightBox(DraftHistory):
     title = models.CharField(max_length=100, blank=True, null=True)
-    content = RichTextUploadingField(blank=True, null=True)
+    content = RichTextWithPlugins(blank=True, null=True)
     background_colour = ColorField(default='#FFFFFF')
     border_colour = ColorField(default='#FFFFFF')
     row = models.PositiveSmallIntegerField(default=1)
