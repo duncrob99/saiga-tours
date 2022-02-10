@@ -7,6 +7,3 @@ class ContactForm(forms.Form):
     message = forms.CharField(widget=forms.Textarea, required=True)
 
 
-class SubscriptionForm(forms.Form):
-    name = forms.CharField(required=True, max_length=500)
-    email = forms.EmailField(required=True)

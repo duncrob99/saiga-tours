@@ -38,6 +38,11 @@
                     document.querySelector('#cookie-banner').classList.remove('hidden');
                 }
 
+                if (data.show_subscription) {
+                    let sub_modal = new bootstrap.Modal(document.getElementById('subscription-request'));
+                    sub_modal.show();
+                }
+
                 setInterval(() => {
                     if (!Visibility.hidden()) {
                         time_visible += new Date().getTime() - became_visible;

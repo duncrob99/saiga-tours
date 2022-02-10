@@ -4,16 +4,40 @@ from enum import Enum
 
 from django.db import models
 from django.db.models import Max, Min, Sum, Count
+from django.utils import timezone
 from ua_parser import user_agent_parser
 
 
 # Create your models here.
+class SubscriptionSubmission(models.Model):
+    email_address = models.EmailField(unique=True)
+    name = models.CharField(max_length=500, null=True, blank=True)
+    time = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.email_address
+
+    def save(self, *args, **kwargs):
+        if self.pk is None:
+            super(SubscriptionSubmission, self).save(*args, **kwargs)
+
+
 class UserCookie(models.Model):
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4)
     staff = models.BooleanField(default=False)
     user_agent = models.CharField(max_length=200)
     user_agent_info = models.JSONField(null=True, blank=True)
     accepted_cookies = models.BooleanField(default=False)
+    subscription = models.OneToOneField(SubscriptionSubmission, on_delete=models.SET_NULL, null=True, blank=True)
+    last_subscription_request = models.DateTimeField(null=True, blank=True)
+
+    subscription_reset = datetime.timedelta(minutes=10)
+
+    @property
+    def should_request_subscription(self):
+        return self.subscription is None and \
+               (self.last_subscription_request is None or
+                timezone.now() - self.last_subscription_request >= self.subscription_reset)
 
     @classmethod
     def calc_uas(cls):

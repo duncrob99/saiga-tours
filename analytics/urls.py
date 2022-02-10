@@ -32,5 +32,7 @@ urlpatterns = [
     path('heartbeat/', views.heartbeat, name='heartbeat'),
     path('close/', views.close_view, name='close'),
     path('mouse-action/', views.mouse_action, name='mouse-action'),
-    path('accept-cookies/', views.accept_cookies, name='accept-cookies')
+    path('accept-cookies/', views.accept_cookies, name='accept-cookies'),
+    path('subscribe/', views.subscribe, name='subscribe'),
+    path('subscribe/<path:return_path>/', views.subscribe, name='subscribe'),
 ]

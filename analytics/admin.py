@@ -23,9 +23,15 @@ class MouseActionAdmin(ReadOnlyAdmin):
         return MouseAction.Button(obj.clicked).name if obj.clicked is not None else None
 
 
+class SubscriptionSubmissionAdmin(ReadOnlyAdmin):
+    list_display = ('name', 'email_address', 'time')
+    readonly_fields = ('name', 'email_address', 'time')
+
+
 # Register your models here.
 admin.site.register(UserCookie, ReadOnlyAdmin)
 admin.site.register(Session, ReadOnlyAdmin)
 admin.site.register(Page, ReadOnlyAdmin)
 admin.site.register(PageView, ReadOnlyAdmin)
 admin.site.register(MouseAction, MouseActionAdmin)
+admin.site.register(SubscriptionSubmission, SubscriptionSubmissionAdmin)

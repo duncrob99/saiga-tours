@@ -112,11 +112,6 @@ class SettingsAdmin(DiffHistoryAdmin):
     list_editable = ('active',)
 
 
-class SubscriptionSubmissionAdmin(admin.ModelAdmin):
-    list_display = ('name', 'email_address', 'time')
-    readonly_fields = ('name', 'email_address', 'time')
-
-
 class ContactSubmissionAdmin(admin.ModelAdmin):
     list_display = ('from_email', 'time', 'subject', 'success')
     readonly_fields = ('from_email', 'time', 'subject', 'success', 'message')
@@ -139,7 +134,6 @@ admin.site.register(Page, PageAdmin)
 admin.site.register(State, StateAdmin)
 admin.site.register(ItineraryDay, ItineraryDayAdmin)
 admin.site.register(Settings, SettingsAdmin)
-admin.site.register(SubscriptionSubmission, SubscriptionSubmissionAdmin)
 admin.site.register(ContactSubmission, ContactSubmissionAdmin)
 admin.site.register(BannerPhoto, BannerPhotoAdmin)
 admin.site.register(Tag)

@@ -82,34 +82,7 @@
 
 {% include 'main/footer.html' %}
 {% cookie_banner %}
-<!-- Modal -->
-{% if not request.COOKIES.userID %}
-    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="false">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Subscribe to our mailing list!</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    Be the first to hear about new tours, deals and promotions from Saiga Tours
-                    <form class="my-3" method="post" action="{% url 'subscribe' request.path %}">
-                        {% csrf_token %}
-                        <div class="d-flex w-100 gap-2">
-                            <label for="newsletter1" class="visually-hidden">Email address</label>
-                            <input id="{{ subscription_form.email.id_for_label }}"
-                                   name="{{ subscription_form.email.name }}"
-                                   type="text" class="form-control" placeholder="Email address">
-                            <button class="btn btn-primary accent hoverable-accent" type="submit" role="button">
-                                Subscribe
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-{% endif %}
+{% sub_request %}
 
 </body>
 {#<script src="https://unpkg.com/@popperjs/core@2"></script>#}
@@ -119,14 +92,6 @@
         crossorigin="anonymous"></script>
 <script src="{% static 'js/navbar.js' %}"></script>
 {% analytics_script %}
-{% if not request.COOKIES.userID %}
-    <script>
-        (function () {
-            let myModal = new bootstrap.Modal(document.getElementById('exampleModal'));
-            myModal.show();
-        })();
-    </script>
-{% endif %}
 {% block js %}
 {% endblock %}
 

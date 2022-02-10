@@ -404,19 +404,6 @@ class ContactSubmission(models.Model):
         pass
 
 
-class SubscriptionSubmission(models.Model):
-    email_address = models.EmailField(unique=True)
-    name = models.CharField(max_length=500, null=True)
-    time = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return self.email_address
-
-    def save(self, *args, **kwargs):
-        if self.pk is None:
-            super(SubscriptionSubmission, self).save(*args, **kwargs)
-
-
 class BannerPhoto(models.Model):
     img = models.ImageField()
     min_AR = models.FloatField()

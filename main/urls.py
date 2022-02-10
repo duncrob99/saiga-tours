@@ -5,8 +5,6 @@ from . import views
 urlpatterns = [
     path('', views.front_page, name='front-page'),
     path('contact/', views.contact, name='contact'),
-    path('subscribe/', views.subscribe, name='subscribe'),
-    path('subscribe/<path:return_path>', views.subscribe, name='subscribe'),
 
     path('destinations/', views.destinations, name='destinations'),
     path('region/<slug:slug>', views.region, name='region'),

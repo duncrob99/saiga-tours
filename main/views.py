@@ -2,20 +2,20 @@ from dataclasses import dataclass
 from datetime import datetime
 from functools import reduce
 from os import path
-from typing import Optional, Dict, Tuple, List, Any
+from typing import Optional, Dict, List, Any
 
 import ngram
 from django.conf import settings
 from django.contrib import messages
 from django.core.mail import send_mail, BadHeaderError
 from django.core.paginator import Paginator
-from django.db import IntegrityError
 from django.db.models import Q
 from django.forms import modelform_factory, inlineformset_factory
 from django.http import Http404, HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 
+import analytics
 from .forms import *
 from .models import *
 
@@ -116,15 +116,12 @@ def global_context(request):
                      ])
                      ]
 
-    print(footer_links)
-
     context = {
-        'regions': Region.visible(request.user.is_staff),
-        'pages': Page.visible(request.user.is_staff).filter(parent=None, in_navbar=True),
-        'settings': Settings.load(),
-        'subscription_form': SubscriptionForm(),
-        'footer_links': footer_links
-    }
+                  'regions': Region.visible(request.user.is_staff),
+                  'pages': Page.visible(request.user.is_staff).filter(parent=None, in_navbar=True),
+                  'settings': Settings.load(),
+                  'footer_links': footer_links,
+              } | analytics.analytics_context(request)
     return context
 
 
@@ -354,24 +351,6 @@ def contact(request):
     elif request.method == 'GET':
         form.fields['subject'].initial = request.GET.get('subject')
     return render(request, 'main/contact.html', {'form': form} | global_context(request))
-
-
-def subscribe(request, return_path: str = None):
-    form = SubscriptionForm(request.POST or None)
-    if request.method == "POST" and form.is_valid():
-        try:
-            SubscriptionSubmission.objects.create(email_address=form.cleaned_data['email'],
-                                                  name=form.cleaned_data['name'])
-            messages.add_message(request, messages.SUCCESS, 'Successfully subscribed')
-        except IntegrityError:
-            messages.add_message(request, messages.WARNING, 'Already subscribed')
-    else:
-        errors = "; ".join([f'{field}: {", ".join(errors)}' for field, errors in form.errors.items()])
-        messages.add_message(request, messages.WARNING, f'Invalid attempt to subscribe: {errors}')
-    if return_path is not None:
-        return HttpResponseRedirect(return_path)
-    else:
-        return redirect('front-page')
 
 
 def destinations(request):
