@@ -4,3 +4,4 @@
 /assets/
 /travel_website/.env
 /analytics/migrations/
+*__pycache__*

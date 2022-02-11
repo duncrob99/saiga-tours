@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'main.apps.MainConfig',
+    "django_unused_media",
     'ckeditor',
     'ckeditor_uploader',
     'django_bootstrap5',
@@ -49,7 +50,6 @@ INSTALLED_APPS = [
     'simple_history',
     'colorfield',
     'analytics',
-    "django-unused-media",
 ]
 
 MIDDLEWARE = [
