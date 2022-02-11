@@ -1,5 +1,5 @@
 let slideIndex = 1;
-showSlides(slideIndex);
+showSlides(slideIndex, false, true);
 
 // Next/previous controls
 function plusSlides(n) {
@@ -23,7 +23,7 @@ function get_max_height() {
     return max_height
 }
 
-function showSlides(n, shouldScrollToTop) {
+function showSlides(n, shouldScrollToTop, dontScroll) {
     let i;
     let slides = document.getElementsByClassName("mySlides");
     let dots = document.getElementsByClassName("dot");
@@ -45,7 +45,9 @@ function showSlides(n, shouldScrollToTop) {
         slides[slideIndex - 1].classList.add('active');
         dots[slideIndex - 1].className += " active";
 
-        scrollToView(slides[slideIndex - 1], shouldScrollToTop);
+        if (!dontScroll) {
+            scrollToView(slides[slideIndex - 1], shouldScrollToTop);
+        }
     }
 }
 
