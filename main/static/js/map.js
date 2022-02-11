@@ -243,7 +243,7 @@ function setCountryNames(destinations) {
             // let text_el = SVG('.map svg').text(country[0]).cx(path_el.cx()).cy(path_el.cy());
             // let point_array = [for (let path of path_el.array()) if (path.length === 3) path.slice(1)]
             let {com, area} = findCentroid(path_el, country[0]);
-            text_els.push(svg_map.text(country[0]).font('size', 5).cx(com.x).cy(com.y).css('pointer-events', 'none').fill('black').stroke('none'));
+            text_els.push(svg_map.text(country[0].toUpperCase()).font('size', 5).cx(com.x).cy(com.y).css('pointer-events', 'none').fill('black').stroke('none'));
             // svg_map.circle(1).fill('red').cx(com.x).cy(com.y);
         }
     }
