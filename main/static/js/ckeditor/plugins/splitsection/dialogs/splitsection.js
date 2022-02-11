@@ -72,6 +72,30 @@ CKEDITOR.dialog.add('splitsection', function (editor) {
 
                             widget.setData('background', val);
                         }
+                    },
+                    {
+                        id: 'link',
+                        type: 'text',
+                        label: 'link',
+                        width: '300px',
+                        setup: function (widget) {
+                            this.setValue(widget.data.link);
+                        },
+                        commit: function (widget) {
+                            widget.setData('link', this.getValue());
+                        }
+                    },
+                    {
+                        id: 'id',
+                        type: 'text',
+                        label: 'id',
+                        width: '300px',
+                        setup: function (widget) {
+                            this.setValue(widget.data.id);
+                        },
+                        commit: function (widget) {
+                            widget.setData('id', this.getValue());
+                        }
                     }
                 ]
             }

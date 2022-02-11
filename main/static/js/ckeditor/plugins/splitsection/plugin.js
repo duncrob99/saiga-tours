@@ -22,7 +22,7 @@ CKEDITOR.plugins.add('splitsection', {
                 }
             },
 
-            allowedContent: 'div(!row); div(!left-col,!col-md-6,!d-flex,justify-content-center,align-content-start,align-content-end,!flex-column,!py-5); p; svg[*]{*}(*); path[d]',
+            allowedContent: 'div(!row); div(!left-col,!col-md-6,!d-flex,justify-content-center,align-content-start,align-content-end,!flex-column,!py-5); p; svg[*]{*}(*); path[d]; *[onclick]; *[id]',
 
             upcast: function (element) {
                 return element.name === 'div' && element.hasClass('split-section');
@@ -45,6 +45,12 @@ CKEDITOR.plugins.add('splitsection', {
 
                 if (this.element.$.querySelector('div.row').classList.contains('wide-bg')) {
                     this.setData('background', getComputedStyle(this.element.$.querySelector('div.row')).getPropertyValue('--background'));
+                }
+
+                this.setData('id', this.element.$.id);
+                let onclick = this.element.$.getAttribute('data-cke-pa-onclick');
+                if (onclick) {
+                    this.setData('link', onclick.split("'")[1]);
                 }
             },
 
@@ -101,6 +107,9 @@ CKEDITOR.plugins.add('splitsection', {
                 } else {
                     this.element.$.querySelector('div.row').classList.remove('wide-bg');
                 }
+
+                this.element.$.id = this.data.id;
+                this.element.$.setAttribute('data-cke-pa-onclick', `document.getElementById('${this.data.link}').scrollIntoView({behavior: 'smooth'});`)
             }
         })
 
