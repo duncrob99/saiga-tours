@@ -7,8 +7,8 @@ function plusSlides(n) {
 }
 
 // Thumbnail image controls
-function currentSlide(n) {
-    showSlides(slideIndex = n);
+function currentSlide(n, shouldScrollToTop) {
+    showSlides(slideIndex = n, shouldScrollToTop);
 }
 
 function get_max_height() {
@@ -23,7 +23,7 @@ function get_max_height() {
     return max_height
 }
 
-function showSlides(n) {
+function showSlides(n, shouldScrollToTop) {
     let i;
     let slides = document.getElementsByClassName("mySlides");
     let dots = document.getElementsByClassName("dot");
@@ -44,6 +44,37 @@ function showSlides(n) {
         slides[slideIndex - 1].style.display = "block";
         slides[slideIndex - 1].classList.add('active');
         dots[slideIndex - 1].className += " active";
+
+        scrollToView(slides[slideIndex - 1], shouldScrollToTop);
+    }
+}
+
+function scrollToView(elem, shouldScrollToTop, margin) {
+    if (margin === undefined) {
+        margin = 20;
+    }
+
+    function scrollTo(x, y) {
+        document.body.scroll({left: x, top: y, behavior: 'smooth'});
+    }
+
+    let bbox = elem.getBoundingClientRect();
+    let windowBox = {
+        top: document.body.scrollTop,
+        bottom: document.body.scrollTop + window.innerHeight,
+        left: document.body.scrollLeft,
+        right: document.body.scrollLeft + window.innerWidth,
+        navbar: parseInt(getComputedStyle(document.documentElement).getPropertyValue('--navbar-height'))
+    }
+
+    if (bbox.top <= windowBox.navbar + margin && bbox.bottom <= window.innerHeight - margin) {
+        if (shouldScrollToTop) {
+            scrollTo(windowBox.left, windowBox.top + bbox.top - windowBox.navbar - margin);
+        } else {
+            scrollTo(windowBox.left, windowBox.top + (bbox.top + bbox.height - window.innerHeight + margin));
+        }
+    } else if (bbox.top + bbox.height >= window.innerHeight - margin && bbox.top >= windowBox.navbar + margin) {
+        scrollTo(windowBox.left, windowBox.top + bbox.top - windowBox.navbar - margin);
     }
 }
 
