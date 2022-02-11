@@ -43,6 +43,8 @@
                     sub_modal.show();
                 }
 
+                let view_id = data.pageview;
+
                 setInterval(() => {
                     if (!Visibility.hidden()) {
                         time_visible += new Date().getTime() - became_visible;
@@ -54,7 +56,8 @@
                         data: {
                             'path': window.location.pathname,
                             'interval': reportInterval,
-                            'time_visible': time_visible
+                            'time_visible': time_visible,
+                            'pageview': view_id
                         },
                         success: function () {
                             time_visible = 0;
@@ -78,7 +81,8 @@
                         url: "{% url 'close' %}",
                         data: {
                             'path': window.location.pathname,
-                            'time_visible': time_visible
+                            'time_visible': time_visible,
+                            'pageview': view_id
                         },
                         success: function () {
                             console.log("You're still being tracked");
@@ -104,6 +108,7 @@
                                 'path': window.location.pathname,
                                 'x': ev.x,
                                 'y': ev.y,
+                                'pageview': view_id
                             },
                             success: function () {
                             },
@@ -124,7 +129,8 @@
                             'path': window.location.pathname,
                             'x': ev.x,
                             'y': ev.y,
-                            'clicked': ev.button
+                            'clicked': ev.button,
+                            'pageview': view_id
                         },
                         success: function () {
                         },

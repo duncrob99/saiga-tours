@@ -32,20 +32,19 @@ def view(request):
     if 'userID' not in request.COOKIES:
         user = UserCookie.objects.create(staff=request.user.is_staff, user_agent=request.META['HTTP_USER_AGENT'])
 
-        response = JsonResponse({
+        response_content = {
             'new_user': True,
             'accepted_cookies': user.accepted_cookies,
             'show_subscription': user.should_request_subscription
-        })
-        response.set_cookie('userID', user.uuid, samesite='Lax')
+        }
     else:
         try:
             user = UserCookie.objects.get(uuid=request.COOKIES['userID'])
-            response = JsonResponse({
+            response_content = {
                 'new_user': False,
                 'accepted_cookies': user.accepted_cookies,
                 'show_subscription': user.should_request_subscription
-            })
+            }
             if request.user.is_staff and not user.staff:
                 user.staff = True
                 user.save()
@@ -53,12 +52,11 @@ def view(request):
                 user.user_agent = request.META['HTTP_USER_AGENT']
         except ValidationError:
             user = UserCookie.objects.create(staff=request.user.is_staff, user_agent=request.META['HTTP_USER_AGENT'])
-            response = JsonResponse({
+            response_content = {
                 'new_user': True,
                 'accepted_cookies': user.accepted_cookies,
                 'show_subscription': user.should_request_subscription
-            })
-            response.set_cookie('userID', user.uuid, samesite='Lax')
+            }
 
     if 'session_id' in request.session:
         session, _ = Session.objects.get_or_create(session_id=request.session['session_id'], user=user)
@@ -73,10 +71,14 @@ def view(request):
     print(user.should_request_subscription, user.last_subscription_request, timezone.now())
 
     page, _ = Page.objects.get_or_create(path=request.POST.get('path'))
-    PageView.objects.filter(session=session).update(complete=True)
     page_view = PageView.objects.create(session=session, page=page)
     page_view.duration = datetime.timedelta(milliseconds=int(request.POST.get('interval')) / 2)
     page_view.referer = request.META['HTTP_REFERER']
+
+    response_content = response_content | {'pageview': page_view.uuid}
+    response = JsonResponse(response_content)
+    if response_content['new_user']:
+        response.set_cookie('userID', user.uuid, samesite='Lax')
 
     client_ip, is_routable = get_client_ip(request)
     if client_ip is not None:
@@ -106,14 +108,27 @@ def heartbeat(request):
     user = UserCookie.objects.get(uuid=request.COOKIES['userID'])
     session = Session.objects.get(session_id=request.session['session_id'], user=user)
     page = Page.objects.get(path=request.POST.get('path'))
+    page_view = PageView.objects.get(uuid=request.POST.get('pageview'))
 
-    page_view = PageView.objects.get(session=session, page=page, complete=False)
-    page_view.duration = timezone.now() - page_view.time + datetime.timedelta(
-        milliseconds=int(request.POST.get('interval')) / 2)
-    page_view.time_visible += datetime.timedelta(milliseconds=int(request.POST.get('time_visible')))
-    page_view.save()
+    try:
+        # page_view, new_view = PageView.objects.get_or_create(session=session, page=page, complete=False)
+        page_view.duration = timezone.now() - page_view.time + datetime.timedelta(
+            milliseconds=int(request.POST.get('interval')) / 2)
+        page_view.time_visible += datetime.timedelta(milliseconds=int(request.POST.get('time_visible')))
+        page_view.save()
 
-    return JsonResponse({'success': True})
+        return JsonResponse({'success': True})
+    except Exception as e:
+        print('Error with heartbeat')
+        print(request.session['session_id'])
+        print(request.COOKIES['userID'])
+        print(request.POST.get('path'))
+        print(request.POST.get('interval'))
+        print(timezone.now())
+        print(page)
+        print(session)
+
+        raise e
 
 
 def close_view(request):
@@ -121,7 +136,7 @@ def close_view(request):
     session = Session.objects.get(session_id=request.session['session_id'], user=user)
     page = Page.objects.get(path=request.POST.get('path'))
 
-    page_view = PageView.objects.get(session=session, page=page, complete=False)
+    page_view = PageView.objects.get(uuid=request.POST.get('pageview'))
     page_view.duration = timezone.now() - page_view.time
     page_view.time_visible += datetime.timedelta(milliseconds=float(request.POST.get('time_visible')))
     page_view.complete = True
@@ -134,7 +149,7 @@ def mouse_action(request):
     user = UserCookie.objects.get(uuid=request.COOKIES['userID'])
     session = Session.objects.get(session_id=request.session['session_id'], user=user)
     page = Page.objects.get(path=request.POST.get('path'))
-    page_view = PageView.objects.get(session=session, page=page, complete=False)
+    page_view = PageView.objects.get(uuid=request.POST.get('pageview'))
     clicked = int(request.POST.get('clicked')) + 1 if request.POST.get('clicked') is not None else None
     new_action = MouseAction.objects.create(view=page_view,
                                             x=int(request.POST.get('x')),

@@ -71,6 +71,7 @@ class Page(models.Model):
 
 
 class PageView(models.Model):
+    uuid = models.UUIDField(default=uuid.uuid4)
     session = models.ForeignKey(Session, on_delete=models.CASCADE, editable=False)
     referer = models.URLField(null=True, blank=True)
 
