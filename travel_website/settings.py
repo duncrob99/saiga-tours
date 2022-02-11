@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'simple_history',
     'colorfield',
     'analytics',
+    "django-unused-media",
 ]
 
 MIDDLEWARE = [
