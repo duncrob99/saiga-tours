@@ -20,6 +20,35 @@
   width: 80%;
 }
 
+.mySlides.compact {
+  max-height: 80vh;
+}
+
+.mySlides.compact .card-body {
+  mask-image: linear-gradient(to bottom, transparent 0%, transparent calc(80vh - 2em), white 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 0%, black 0%, transparent calc(80vh - 100px - 1em), transparent 100%);
+}
+
+.mySlides.compact .expand-itinerary, .contract-itinerary {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 10px;
+}
+
+.mySlides:not(.compact) .expand-itinerary {
+  display: none;
+}
+
+.mySlides:not(.expanded) .contract-itinerary {
+  display: none;
+}
+
+.mySlides:is(.compact, .expanded) {
+  padding-bottom: 3em;
+}
+
 :root {
   --slider-button-width: 15%;
 }

@@ -18,6 +18,10 @@
                 <div id="day-{{ forloop.counter }}-body" class="card-body">
                     {{ day.body | safe }}
                 </div>
+                <a id="day-{{ forloop.counter }}-expand" onclick="expandSlide({{ forloop.counter }})"
+                   class="expand-itinerary nice-link">read more</a>
+                <a id="day-{{ forloop.counter }}-contract" onclick="contractSlide({{ forloop.counter }})"
+                   class="contract-itinerary nice-link">read less</a>
             </div>
         {% endfor %}
     </div>
