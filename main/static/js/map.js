@@ -125,7 +125,11 @@ function minBBox(bbox1, bbox2) {
 let map_settings;
 
 function make_map_work(destinations, width, height, hoverable, stops, editable, points) {
-    resize_map(destinations, width, height, hoverable);
+    if (stops === undefined) {
+        resize_map_to_countries(destinations, width, height, hoverable);
+    } else {
+        resize_map_to_stops(stops, width, height);
+    }
 
     if (stops !== undefined) {
         // stops = stops.map(stop => {
@@ -159,10 +163,15 @@ function make_map_work(destinations, width, height, hoverable, stops, editable, 
         setCountryNames(destinations);
     }
 
-    window.addEventListener('resize', () => {
-        resize_map(destinations, width, height, hoverable);
-        //setCountryNames(destinations);
-    })
+    if (stops === undefined) {
+        window.addEventListener('resize', () => {
+            resize_map_to_countries(destinations, width, height, hoverable);
+        })
+    } else {
+        window.addEventListener('resize', () => {
+            resize_map_to_content(stops, width, height);
+        })
+    }
 
     map_settings = {
         destinations: destinations,
@@ -175,6 +184,12 @@ function make_map_work(destinations, width, height, hoverable, stops, editable, 
     }
 
     setMapZooming(true);
+
+    if (stops !== undefined) {
+        window.addEventListener('load', () => {
+            resize_map_to_content(stops, width, height);
+        });
+    }
 }
 
 function setMapZooming(en) {
@@ -189,7 +204,7 @@ function setMapZooming(en) {
     }
 
     function resetZoom() {
-        resize_map(map_settings.destinations, map_settings.width, map_settings.height, map_settings.hoverable);
+        resize_map_to_countries(map_settings.destinations, map_settings.width, map_settings.height, map_settings.hoverable);
     }
 
     let map_svg = SVG(document.querySelector('.map svg'))
@@ -965,7 +980,7 @@ function pathString(x, y, prestrength, poststrength) {
     return str;
 }
 
-function resize_map(destinations, width, height, hoverable) {
+function resize_map_to_countries(destinations, width, height, hoverable) {
     if (width === undefined) {
         width = document.querySelector('#content-container').getBoundingClientRect().width;
     }
@@ -1005,6 +1020,120 @@ function resize_map(destinations, width, height, hoverable) {
             min_bbox = minBBox(dest_path.getBBox(), min_bbox);
         }
     }
+
+    map_content_width = min_bbox[2];
+    map_centre = {x: min_bbox[0] + min_bbox[2] / 2, y: min_bbox[1] + min_bbox[3] / 2};
+    let margin_factor = 0.2;
+    min_bbox = [min_bbox[0] - margin_factor / 2 * min_bbox[2], min_bbox[1] - margin_factor / 2 * min_bbox[3], min_bbox[2] * (1 + margin_factor), min_bbox[3] * (1 + margin_factor)];
+    if (ar !== undefined) {
+        let cur_ar = min_bbox[2] / min_bbox[3];
+        if (cur_ar > ar) {
+            min_bbox[1] -= min_bbox[3] * (cur_ar / ar - 1) / 2;
+            min_bbox[3] *= (cur_ar / ar);
+        } else {
+            min_bbox[0] -= min_bbox[2] * (ar / cur_ar - 1) / 2;
+            min_bbox[2] *= (ar / cur_ar);
+        }
+    }
+    //document.querySelector('svg').setAttribute('viewBox', `${min_bbox[0]} ${min_bbox[1]} ${min_bbox[2]} ${min_bbox[3]}`);
+    Visibility.onVisible(() => {
+        SVG('.map svg').animate({
+            when: 'now',
+            duration: 2000
+        }).ease('quartInOut').viewbox(`${min_bbox[0]} ${min_bbox[1]} ${min_bbox[2]} ${min_bbox[3]}`);
+    })
+}
+
+function resize_map_to_stops(stops, width, height) {
+    if (width === undefined) {
+        width = document.querySelector('#content-container').getBoundingClientRect().width;
+    }
+    if (height === undefined) {
+        let navbar_height = document.querySelector('.navbar').getBoundingClientRect().height;
+        height = document.documentElement.clientHeight - navbar_height;
+    }
+
+    let ar = width / height;
+
+    let min_space = {left: 9e10, right: -9e10, top: 9e10, bottom: -9e10};
+    for (stop of stops) {
+        if (stop.x < min_space.left) {
+            min_space.left = stop.x;
+        }
+        if (stop.y < min_space.top) {
+            min_space.top = stop.y;
+        }
+        if (stop.x > min_space.right) {
+            min_space.right = stop.x;
+        }
+        if (stop.y > min_space.bottom) {
+            min_space.bottom = stop.y;
+        }
+    }
+
+    let min_bbox = [min_space.left, min_space.top, min_space.right - min_space.left, min_space.bottom - min_space.top];
+
+    map_content_width = min_bbox[2];
+    map_centre = {x: min_bbox[0] + min_bbox[2] / 2, y: min_bbox[1] + min_bbox[3] / 2};
+    let margin_factor = 0.2;
+    min_bbox = [min_bbox[0] - margin_factor / 2 * min_bbox[2], min_bbox[1] - margin_factor / 2 * min_bbox[3], min_bbox[2] * (1 + margin_factor), min_bbox[3] * (1 + margin_factor)];
+    if (ar !== undefined) {
+        let cur_ar = min_bbox[2] / min_bbox[3];
+        if (cur_ar > ar) {
+            min_bbox[1] -= min_bbox[3] * (cur_ar / ar - 1) / 2;
+            min_bbox[3] *= (cur_ar / ar);
+        } else {
+            min_bbox[0] -= min_bbox[2] * (ar / cur_ar - 1) / 2;
+            min_bbox[2] *= (ar / cur_ar);
+        }
+    }
+    //document.querySelector('svg').setAttribute('viewBox', `${min_bbox[0]} ${min_bbox[1]} ${min_bbox[2]} ${min_bbox[3]}`);
+    Visibility.onVisible(() => {
+        SVG('.map svg').animate({
+            when: 'now',
+            duration: 2000
+        }).ease('quartInOut').viewbox(`${min_bbox[0]} ${min_bbox[1]} ${min_bbox[2]} ${min_bbox[3]}`);
+    })
+}
+
+function resize_map_to_content(stops, width, height) {
+    if (width === undefined) {
+        width = document.querySelector('#content-container').getBoundingClientRect().width;
+    }
+    if (height === undefined) {
+        let navbar_height = document.querySelector('.navbar').getBoundingClientRect().height;
+        height = document.documentElement.clientHeight - navbar_height;
+    }
+
+    let ar = width / height;
+
+    let min_space = {left: 9e10, right: -9e10, top: 9e10, bottom: -9e10};
+    for (let stop of stops) {
+        if (stop.x < min_space.left) {
+            min_space.left = stop.x;
+        }
+        if (stop.y < min_space.top) {
+            min_space.top = stop.y;
+        }
+        if (stop.x > min_space.right) {
+            min_space.right = stop.x;
+        }
+        if (stop.y > min_space.bottom) {
+            min_space.bottom = stop.y;
+        }
+    }
+    let min_bbox = [min_space.left, min_space.top, min_space.right - min_space.left, min_space.bottom - min_space.top];
+
+    for (let pointer_text of document.querySelectorAll('.pointer-text')) {
+        min_bbox = minBBox(pointer_text.getBBox(), min_bbox);
+        console.log(pointer_text);
+        console.log(pointer_text.getBBox());
+        console.log('min_bbox after pointer_text: ', min_bbox);
+    }
+
+    let stop_path = document.querySelector('#stop_path').getBBox();
+    min_bbox = minBBox(stop_path, min_bbox);
+    console.log('min_bbox after stop path: ', min_bbox);
 
     map_content_width = min_bbox[2];
     map_centre = {x: min_bbox[0] + min_bbox[2] / 2, y: min_bbox[1] + min_bbox[3] / 2};
