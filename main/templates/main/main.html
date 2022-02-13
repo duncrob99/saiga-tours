@@ -68,19 +68,21 @@
     {% endblock %}
 </head>
 <body>
-{#<body style="background-image: url('{% static "images/background_a.jpg" %}');">#}
-{% include 'main/navbar.html' %}
-{% bootstrap_messages %}
-{% block banner %}
-{% endblock %}
-<div class="container p-5" id="content-container">
-    <div id="contents">
-        {% block content %}
-        {% endblock %}
+<div class="all-content">
+    {#<body style="background-image: url('{% static "images/background_a.jpg" %}');">#}
+    {% include 'main/navbar.html' %}
+    {% bootstrap_messages %}
+    {% block banner %}
+    {% endblock %}
+    <div class="container p-5" id="content-container">
+        <div id="contents">
+            {% block content %}
+            {% endblock %}
+        </div>
     </div>
-</div>
 
-{% include 'main/footer.html' %}
+    {% include 'main/footer.html' %}
+</div>
 {% cookie_banner %}
 {% sub_request %}
 

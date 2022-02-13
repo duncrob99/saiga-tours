@@ -3,18 +3,17 @@ let banner_width = 10;
 let banner_height = 10;
 
 function resize() {
-    let navbar_height = document.querySelector('.navbar').getBoundingClientRect().height;
-    let aspect_ratio = document.documentElement.clientWidth / (document.documentElement.clientHeight - navbar_height);
+    let aspect_ratio = document.documentElement.clientWidth / (document.documentElement.clientHeight);
     let bottom_margin = 50;
 
     banner_width = Math.max(Math.round(document.documentElement.clientWidth * window.devicePixelRatio), banner_width);
-    banner_height = Math.max(Math.round(document.documentElement.clientHeight - navbar_height - bottom_margin * window.devicePixelRatio), banner_height);
+    banner_height = Math.max(Math.round(document.documentElement.clientHeight - bottom_margin * window.devicePixelRatio), banner_height);
 
     let banner_imgs = document.querySelectorAll('#banner-slideshow img');
 
     banner_imgs.forEach(el => {
-        el.style.top = navbar_height + "px";
-        el.style.height = document.documentElement.clientHeight - navbar_height - bottom_margin + 'px';
+        el.style.top = '0';
+        el.style.height = document.documentElement.clientHeight - bottom_margin + 'px';
         let min_ar = parseFloat(el.getAttribute('min_ar'));
         let max_ar = parseFloat(el.getAttribute('max_ar'));
         if (min_ar < aspect_ratio && aspect_ratio < max_ar) {
@@ -30,8 +29,8 @@ function resize() {
         }
     });
 
-    document.querySelector('.banner').style.top = navbar_height + "px";
-    document.querySelector('.banner').style.height = document.documentElement.clientHeight - navbar_height - bottom_margin + "px";
+    document.querySelector('.banner').style.top = "0";
+    document.querySelector('.banner').style.height = document.documentElement.clientHeight - bottom_margin + "px";
 }
 
 function setVisible() {

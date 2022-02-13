@@ -12,7 +12,20 @@ h5.card-title {
     position: relative;
     border-radius: var(--border-radius);
     /*box-shadow: 5px 5px 8px rgba(0, 0, 0, 0.3);*/
-    box-shadow: 0 15px 30px 0 rgba(0, 0, 0, 0.08);
+    /*box-shadow: 0 15px 30px 0 rgba(0, 0, 0, 0.08);*/
+    backdrop-filter: blur(10px) saturate(180%);
+    /*background-color: rgba(0, 0, 0, 0.3);*/
+    background-color: rgba(255, 255, 255, 0.5);
+    color: black;
+}
+
+.card-footer table {
+    color: black;
+}
+
+.card-footer {
+    background: unset;
+    border: unset;
 }
 
 .card:not(.allow-overflow) {
@@ -26,16 +39,17 @@ h5.card-title {
 .img-title-card {
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
-    border: solid white;
-    border-width: var(--card-border-width) var(--card-border-width) 0 var(--card-border-width);
+    /*border: solid white;*/
+    padding: var(--card-border-width) var(--card-border-width) 0 var(--card-border-width);
+    border-bottom: 1px solid transparent;
 }
 
 .text-card {
     border-top-left-radius: 0;
     border-top-right-radius: 0;
-    border: solid white;
-    border-width: 0 var(--card-border-width) var(--card-border-width) var(--card-border-width);
-    z-index: 1;
+    /*border: solid white;*/
+    padding: 0 var(--card-border-width) var(--card-border-width) var(--card-border-width);
+    border-top: 1px solid transparent;
 }
 
 /*
@@ -55,13 +69,13 @@ h5.card-title {
 }
 
 .img-card-contents {
-    border-bottom-left-radius: calc(var(--border-radius) - var(--card-border-width));
-    border-bottom-right-radius: calc(var(--border-radius) - var(--card-border-width));
     overflow: hidden;
+    border-radius: var(--border-radius);
 }
 
 .img-card img {
     transition: transform .5s, filter 0.5s ease-in-out;
+    border-radius: var(--border-radius);
 }
 
 .text-card:hover ~ .img-card img, .img-card:hover img {
@@ -98,7 +112,6 @@ h5.card-title {
 
 .text-card .card-body .tour-excerpt {
     font-size: 0.875rem;
-    color: darkgrey;
 }
 
 .card .table, .card hr {
@@ -109,11 +122,20 @@ h5.card-title {
     white-space: nowrap;
 }
 
-.card:hover .btn {
+.card .btn:hover {
     background-color: var(--accent-hover-background);
     color: var(--accent-hover-foreground);
 }
 
 .card .btn {
     border-radius: 100px;
+}
+
+.card.img-title-card.bordered {
+    border-width: var(--card-border-width) var(--card-border-width) 0 var(--card-border-width);
+}
+
+.card.text-card.bordered {
+    border-width: 0 var(--card-border-width) var(--card-border-width) var(--card-border-width);
+    padding: 0;
 }
