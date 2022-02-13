@@ -93,7 +93,7 @@ p.block {
 }
 
 .split-section * {
-    min-width: min-content;
+    /*min-width: min-content;*/
 }
 
 .cke_widget_wrapper {

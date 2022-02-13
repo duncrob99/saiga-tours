@@ -25,7 +25,7 @@ html, body {
 .banner-text {
     position: absolute;
     z-index: 1;
-    top: 50%;
+    top: 50vh;
     left: 50%;
     transform: translate(-50%, -50%);
     text-align: center;
@@ -178,4 +178,24 @@ body * {
 .pre-separator {
     transform-origin: top;
     transform: rotateX(180deg);
+}
+
+/* width */
+::-webkit-scrollbar {
+    width: 15px;
+}
+
+::-webkit-scrollbar-track {
+    /*background: #f1f1f1;*/
+    background: var(--accent-background);
+}
+
+::-webkit-scrollbar-thumb {
+    /*background: #888;*/
+    background: var(--accent-foreground);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    /*background: #555;*/
+    background: var(--accent-hover-foreground);
 }

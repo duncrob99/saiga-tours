@@ -107,8 +107,8 @@
             </h1>
             <div class="row mb-5 article-section">
                 {% for article in row.contents %}
-                    <div class="d-flex flex-column col-xl-4 col-lg-6 col-md-12 g-0">
-                        <div class="card order-2 text-card flex-grow-1 mx-4">
+                    <div class="d-flex flex-column col-xl-4 col-lg-6 col-md-12 g-4">
+                        <div class="card order-2 text-card flex-grow-1">
                             <div class="card-body">
                                 {{ article.excerpt | default:"Introductory info" }}
                             </div>
@@ -130,10 +130,12 @@
                                href="{% url 'article' article.slug %}"></a>
                         </div>
 
-                        <div class="card order-1 img-title-card img-card mt-4 mx-4">
-                            <img data-filename="{{ article.card_img.name }}" class="card-img" alt="{{ article }}">
-                            <div class="card-img-overlay">
-                                <h5 class="card-title">{{ article }}</h5>
+                        <div class="card order-1 img-title-card img-card mt-4">
+                            <div class="img-card-contents">
+                                <img data-filename="{{ article.card_img.name }}" class="card-img" alt="{{ article }}">
+                                <div class="card-img-overlay">
+                                    <h5 class="card-title">{{ article }}</h5>
+                                </div>
                             </div>
                             <a class="stretched-link"
                                href="{% url 'article' article.slug %}"></a>
@@ -141,9 +143,9 @@
                     </div>
                 {% endfor %}
             </div>
-            <div class="d-flex justify-content-center mb-5">
-                <a href="{{ row.link }}">
-                    {#                    <button id="filter-button"#}
+                <div class="d-flex justify-content-center mb-5">
+                    <a href="{{ row.link }}">
+                        {#                    <button id="filter-button"#}
                     {#                            class="btn btn-outline-secondary d-inline-flex align-items-center accent hoverable-accent"#}
                     {#                            data-bs-toggle="offcanvas" href="{{ row.link }}"#}
                     {#                            data-bs-target="#filter-sidebar" aria-controls="filter-sidebar" role="button"#}
