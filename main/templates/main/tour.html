@@ -279,6 +279,8 @@
                 });
             {% endfor %}
 
+            let tour_scale = {{ tour.map_scale }};
+
             make_map_work(destinations, undefined, 500, false, stops);
         </script>
     {% endif %}

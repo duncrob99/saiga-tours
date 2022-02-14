@@ -125,9 +125,8 @@ function minBBox(bbox1, bbox2) {
 let map_settings;
 
 function make_map_work(destinations, width, height, hoverable, stops, editable, points) {
-    if (stops === undefined) {
-        resize_map_to_countries(destinations, width, height, hoverable);
-    } else {
+    resize_map_to_countries(destinations, width, height, hoverable);
+    if (stops !== undefined) {
         resize_map_to_stops(stops, width, height);
     }
 
@@ -150,7 +149,7 @@ function make_map_work(destinations, width, height, hoverable, stops, editable, 
             }
         })
 
-        updateStops(stops, points, editable);
+        updateStops(stops, editable);
     }
 
     if (points !== undefined) {
@@ -170,6 +169,7 @@ function make_map_work(destinations, width, height, hoverable, stops, editable, 
     } else {
         window.addEventListener('resize', () => {
             resize_map_to_content(stops, width, height);
+            updateStops(stops, editable);
         })
     }
 
@@ -187,6 +187,7 @@ function make_map_work(destinations, width, height, hoverable, stops, editable, 
 
     if (stops !== undefined) {
         window.addEventListener('load', () => {
+            updateStops(stops, editable);
             resize_map_to_content(stops, width, height);
         });
     }
@@ -209,7 +210,6 @@ function setMapZooming(en) {
 
     let map_svg = SVG(document.querySelector('.map svg'))
     if (en) {
-        console.log('zooming');
         map_svg.panZoom({
             zoomMax: 20,
             zoomMin: 1,
@@ -220,7 +220,6 @@ function setMapZooming(en) {
         document.querySelector('#map-zoom-out').addEventListener('click', zoomOut);
         document.querySelector('#map-zoom-reset').addEventListener('click', resetZoom);
     } else {
-        console.log('no zooming');
         map_svg.panZoom(false);
     }
 }
@@ -403,9 +402,9 @@ function createPoints(points) {
     for (let i = 0; i < points.length; i++) {
         let point = points[i];
 
-        let text_size = map_content_width * 0.01 * point.size;
+        let text_size = tour_scale * map_content_width * 0.01 * point.size;
         text_size = text_size - text_size % 1;
-        let pointer_size = map_content_width * 0.001 * point.size;
+        let pointer_size = tour_scale * map_content_width * 0.001 * point.size;
         let default_pointer_scale = 1;
 
         // let text_el = document.createElementNS('http://www.w3.org/2000/svg', 'text');
@@ -504,7 +503,7 @@ function updatePath(stops) {
     if (stops.length < 2) return;
     let map_svg = document.querySelector('.map svg');
 
-    let path_width = map_content_width * 0.006;
+    let path_width = tour_scale * map_content_width * 0.006;
 
     let x = [];
     let y = [];
@@ -512,7 +511,7 @@ function updatePath(stops) {
     let poststrength = [];
     for (let i = 0; i < stops.length; i++) {
         x.push(stops[i].x);
-        y.push(stops[i].y - 0.2);
+        y.push(stops[i].y);
         prestrength.push(stops[i].prestrength);
         poststrength.push(stops[i].poststrength);
     }
@@ -527,12 +526,11 @@ function updatePath(stops) {
         path_el.setAttributeNS(null, 'stroke', '#106e2e');
         path_el.setAttributeNS(null, 'stroke-width', `${path_width}px`);
         path_el.setAttributeNS(null, 'd', path_str);
-        // path_el.setAttributeNS(null, 'marker-mid', 'url(#head)');
-        // path_el.setAttributeNS(null, 'marker-end', 'url(#head)');
         map_svg.appendChild(path_el);
     } else {
         path_el = document.querySelector('#stop_path');
         path_el.setAttributeNS(null, 'd', path_str);
+        path_el.setAttributeNS(null, 'stroke-width', `${path_width}px`);
     }
 
     // Add arrows in the middle of each segment
@@ -541,7 +539,6 @@ function updatePath(stops) {
     });
 
     let segment_lengths = SVG(path_el).segmentLengths();
-    console.log(segment_lengths);
     let unmarked_ix = [];
     for (let i in stops) {
         if (!stops[i].arrow_break) {
@@ -559,22 +556,19 @@ function updatePath(stops) {
         let after = SVG(path_el).pointAt(tot_len + 0.1);
         let before = SVG(path_el).pointAt(tot_len - 0.1);
         let angle = Math.atan2(after.y - before.y, after.x - before.x) * 180 / Math.PI - 90;
-        console.log(after, before, angle);
         arrow_instances.push(SVG(map_svg).path('M-1 0 L0 1 L1 0').cx(point.x).cy(point.y).fill('none').stroke({
             width: 0.3,
             color: '#106e2e'
-        }).rotate(angle).scale(0.3 * map_content_width / 18.5084228515625));
+        }).rotate(angle).scale(0.3 * tour_scale * map_content_width / 18.5084228515625));
         tot_len += segment_lengths[i] / 2 + segment_lengths[i + 1] / 2;
     }
-
-    console.log(segment_lengths);
 }
 
 function updateStops(stops, editable) {
     let map_svg = document.querySelector('.map svg');
 
-    let text_size = map_content_width * 0.04;
-    let pointer_size = map_content_width * 0.004;
+    let text_size = tour_scale * map_content_width * 0.04;
+    let pointer_size = tour_scale * map_content_width * 0.004;
 
     updatePath(stops);
 
@@ -588,20 +582,22 @@ function updateStops(stops, editable) {
         let i = parseInt(strIx);
         let stop = stops[i];
 
-        let point_el;
-        let text_el;
+        let point_el, text_el;
         if (stop.marked) {
-            text_el = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-            text_el.setAttributeNS(null, 'x', `${stop.x + stop.text_x}`);
-            text_el.setAttributeNS(null, 'y', `${stop.y + stop.text_y - pointer_size * 20}`);
-            text_el.setAttributeNS(null, 'fill', 'black');
-            text_el.setAttributeNS(null, 'stroke', 'none');
-            text_el.setAttributeNS(null, 'style', `font-size: ${text_size}px;`);
-            text_el.setAttributeNS(null, 'text-anchor', 'middle');
-            text_el.classList.add('pointer-text');
-            text_el.id = `pointer-text-${i}`;
-            let text = document.createTextNode(stop.name);
-            text_el.appendChild(text);
+            text_el = SVG(map_svg).text(stop.name)
+                .font({anchor: 'middle'})
+                .fill('black')
+                .stroke('none')
+                .font({size: `${text_size}px`})
+                .cx(stop.x + stop.text_x)
+                .cy(stop.y + stop.text_y - pointer_size * 20)
+                .addClass('pointer-text')
+                .attr('id', `pointer-text-${i}`);
+
+            if (stop.name === 'Something different') {
+                console.log("Something different at", text_el.cx(), text_el.cy());
+                console.log("Should be at: ", stop.x + stop.text_x, stop.y + stop.text_y - pointer_size * 20);
+            }
 
             point_el = document.createElementNS('http://www.w3.org/2000/svg', 'path');
             // point_el.setAttributeNS(null, 'd', 'm0 0s6-5.686 6-10a6 6 0 00-12 0c0 4.314 6 10 6 10zm0-7a3 3 0 110-6 3 3 0 010 6z');
@@ -637,7 +633,6 @@ function updateStops(stops, editable) {
                 });
                 document.body.style.cursor = "auto";
             });
-            map_svg.appendChild(text_el);
             map_svg.appendChild(point_el);
         } else if (editable) {
             point_el = SVG(map_svg).circle(1).cx(stop.x).cy(stop.y).addClass('stop-pointer').node;
@@ -650,6 +645,7 @@ function updateStops(stops, editable) {
             document.querySelector(`#id_stops-${stop.form_ix}-arrow_break`).checked = stop.arrow_break;
 
             point_el.addEventListener('mousedown', click_ev => {
+                setMapZooming(false);
                 let start = {x: stops[i].x, y: stops[i].y};
 
                 function move_point(move_ev) {
@@ -666,7 +662,7 @@ function updateStops(stops, editable) {
                             tx: stop.x,
                             ty: stop.y
                         });
-                        SVG(text_el).font({anchor: 'middle'}).cx(stop.x + stop.text_x).cy(stop.y + stop.text_y - pointer_size * 20);
+                        text_el.font({anchor: 'middle'}).cx(stop.x + stop.text_x).cy(stop.y + stop.text_y - pointer_size * 20);
                     } else {
                         point_el.instance.animate({when: 'now', duration: 1}).cx(stop.x).cy(stop.y);
                     }
@@ -681,6 +677,7 @@ function updateStops(stops, editable) {
                 function stop_dragging() {
                     window.removeEventListener('mousemove', move_point);
                     window.removeEventListener('mouseup', stop_dragging);
+                    setMapZooming(true);
                 }
 
                 window.addEventListener('mouseup', stop_dragging);
@@ -688,8 +685,8 @@ function updateStops(stops, editable) {
 
             if (text_el) {
                 window.addEventListener('mousedown', click_ev => {
-                    let box = text_el.getBoundingClientRect();
-                    if (click_ev.x >= box.left && click_ev.x <= box.right && click_ev.y >= box.top && click_ev.y <= box.bottom) {
+                    let box = text_el.rbox();
+                    if (click_ev.x >= box.x && click_ev.x <= box.x2 && click_ev.y >= box.y && click_ev.y <= box.y2) {
                         let start = {x: stops[i].text_x, y: stops[i].text_y};
 
                         function move_text(move_ev) {
@@ -698,7 +695,14 @@ function updateStops(stops, editable) {
                             stop.text_y = start.y + (move_ev.y - click_ev.y) / getScale(map_svg);
                             stops[i] = stop;
 
-                            SVG(text_el).font({anchor: 'middle'}).cx(stop.x + stop.text_x).cy(stop.y + stop.text_y - pointer_size * 20);
+                            text_el.font({anchor: 'middle'})
+                                .cx(stop.x + stop.text_x)
+                                .cy(stop.y + stop.text_y - pointer_size * 20);
+
+                            if (stop.name === 'Something different') {
+                                console.log("Something different at", text_el.cx(), text_el.cy());
+                                console.log("Should be at: ", stop.x + stop.text_x, stop.y + stop.text_y - pointer_size * 20);
+                            }
 
                             // Edit value in form
                             document.getElementById(`id_stops-${stop.form_ix}-text_x`).value = stop.text_x;
@@ -904,7 +908,7 @@ function updateStops(stops, editable) {
 }
 
 function getScale(svg_el) {
-    return svg_el.getBoundingClientRect().height / parseFloat(svg_el.getAttribute('viewBox').split(' ')[3])
+    return svg_el.getBoundingClientRect().height / parseFloat(svg_el.getAttribute('viewBox').split(' ')[3]);
 }
 
 function computeControlPoints(K) {
@@ -1042,6 +1046,7 @@ function resize_map_to_countries(destinations, width, height, hoverable) {
             duration: 2000
         }).ease('quartInOut').viewbox(`${min_bbox[0]} ${min_bbox[1]} ${min_bbox[2]} ${min_bbox[3]}`);
     })
+    SVG('.map svg').viewbox(`${min_bbox[0]} ${min_bbox[1]} ${min_bbox[2]} ${min_bbox[3]}`);
 }
 
 function resize_map_to_stops(stops, width, height) {
@@ -1073,8 +1078,6 @@ function resize_map_to_stops(stops, width, height) {
 
     let min_bbox = [min_space.left, min_space.top, min_space.right - min_space.left, min_space.bottom - min_space.top];
 
-    map_content_width = min_bbox[2];
-    map_centre = {x: min_bbox[0] + min_bbox[2] / 2, y: min_bbox[1] + min_bbox[3] / 2};
     let margin_factor = 0.2;
     min_bbox = [min_bbox[0] - margin_factor / 2 * min_bbox[2], min_bbox[1] - margin_factor / 2 * min_bbox[3], min_bbox[2] * (1 + margin_factor), min_bbox[3] * (1 + margin_factor)];
     if (ar !== undefined) {
@@ -1126,16 +1129,14 @@ function resize_map_to_content(stops, width, height) {
 
     for (let pointer_text of document.querySelectorAll('.pointer-text')) {
         min_bbox = minBBox(pointer_text.getBBox(), min_bbox);
-        console.log(pointer_text);
-        console.log(pointer_text.getBBox());
-        console.log('min_bbox after pointer_text: ', min_bbox);
     }
 
+    // let bbox_svg = SVG(document.querySelector('.map svg')).path(`M${min_bbox[0]} ${min_bbox[1]} v ${min_bbox[3]} h ${min_bbox[2]} v ${-1*min_bbox[3]} Z`).stroke({width: 0.3, color: 'blue'}).fill('none');
     let stop_path = document.querySelector('#stop_path').getBBox();
     min_bbox = minBBox(stop_path, min_bbox);
-    console.log('min_bbox after stop path: ', min_bbox);
+    // bbox_svg.plot(`M${min_bbox[0]} ${min_bbox[1]} v ${min_bbox[3]} h ${min_bbox[2]} v ${-1*min_bbox[3]} Z`);
 
-    map_content_width = min_bbox[2];
+    // map_content_width = min_bbox[2];
     map_centre = {x: min_bbox[0] + min_bbox[2] / 2, y: min_bbox[1] + min_bbox[3] / 2};
     let margin_factor = 0.2;
     min_bbox = [min_bbox[0] - margin_factor / 2 * min_bbox[2], min_bbox[1] - margin_factor / 2 * min_bbox[3], min_bbox[2] * (1 + margin_factor), min_bbox[3] * (1 + margin_factor)];

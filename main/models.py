@@ -148,6 +148,8 @@ class Tour(DraftHistory):
     extensions = models.ManyToManyField('self', blank=True, symmetrical=False)
     display = models.BooleanField(default=True)
 
+    map_scale = models.FloatField(default=1)
+
     start_location = models.CharField(max_length=100, null=True, blank=True)
     end_location = models.CharField(max_length=100, null=True, blank=True)
 
