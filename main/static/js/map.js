@@ -402,9 +402,9 @@ function createPoints(points) {
     for (let i = 0; i < points.length; i++) {
         let point = points[i];
 
-        let text_size = tour_scale * map_content_width * 0.01 * point.size;
+        let text_size = map_content_width * 0.01 * point.size;
         text_size = text_size - text_size % 1;
-        let pointer_size = tour_scale * map_content_width * 0.001 * point.size;
+        let pointer_size = map_content_width * 0.001 * point.size;
         let default_pointer_scale = 1;
 
         // let text_el = document.createElementNS('http://www.w3.org/2000/svg', 'text');
