@@ -21,7 +21,7 @@
 }
 
 .mySlides.compact {
-  max-height: 80vh;
+  max-height: 30em;
 }
 
 .mySlides.compact .card-body {
