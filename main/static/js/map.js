@@ -1055,17 +1055,16 @@ function resize_map_to_countries(destinations, width, height, hoverable) {
             min_bbox[2] *= (ar / cur_ar);
         }
     }
-    //document.querySelector('svg').setAttribute('viewBox', `${min_bbox[0]} ${min_bbox[1]} ${min_bbox[2]} ${min_bbox[3]}`);
     Visibility.onVisible(() => {
         SVG('.map svg').animate({
             when: 'now',
             duration: 2000
         }).ease('quartInOut').viewbox(`${min_bbox[0]} ${min_bbox[1]} ${min_bbox[2]} ${min_bbox[3]}`);
     })
-    SVG('.map svg').viewbox(`${min_bbox[0]} ${min_bbox[1]} ${min_bbox[2]} ${min_bbox[3]}`);
 }
 
 function resize_map_to_stops(stops, width, height) {
+    if (stops.length < 2 || stops.reduce((prev_undefined, stop) => prev_undefined || stop.x === undefined || stop.y === undefined, false)) return;
     if (width === undefined) {
         width = document.querySelector('#content-container').getBoundingClientRect().width;
     }
@@ -1106,7 +1105,6 @@ function resize_map_to_stops(stops, width, height) {
             min_bbox[2] *= (ar / cur_ar);
         }
     }
-    //document.querySelector('svg').setAttribute('viewBox', `${min_bbox[0]} ${min_bbox[1]} ${min_bbox[2]} ${min_bbox[3]}`);
     Visibility.onVisible(() => {
         SVG('.map svg').animate({
             when: 'now',
@@ -1116,6 +1114,7 @@ function resize_map_to_stops(stops, width, height) {
 }
 
 function resize_map_to_content(stops, width, height) {
+    if (stops.length < 2 || stops.reduce((prev_undefined, stop) => prev_undefined || stop.x === undefined || stop.y === undefined, false)) return;
     if (width === undefined) {
         width = document.querySelector('#content-container').getBoundingClientRect().width;
     }
@@ -1147,12 +1146,11 @@ function resize_map_to_content(stops, width, height) {
         min_bbox = minBBox(pointer_text.getBBox(), min_bbox);
     }
 
-    // let bbox_svg = SVG(document.querySelector('.map svg')).path(`M${min_bbox[0]} ${min_bbox[1]} v ${min_bbox[3]} h ${min_bbox[2]} v ${-1*min_bbox[3]} Z`).stroke({width: 0.3, color: 'blue'}).fill('none');
-    let stop_path = document.querySelector('#stop_path').getBBox();
-    min_bbox = minBBox(stop_path, min_bbox);
-    // bbox_svg.plot(`M${min_bbox[0]} ${min_bbox[1]} v ${min_bbox[3]} h ${min_bbox[2]} v ${-1*min_bbox[3]} Z`);
+    let stop_path = document.querySelector('#stop_path');
+    if (stop_path) {
+        min_bbox = minBBox(stop_path.getBBox(), min_bbox);
+    }
 
-    // map_content_width = min_bbox[2];
     map_centre = {x: min_bbox[0] + min_bbox[2] / 2, y: min_bbox[1] + min_bbox[3] / 2};
     let margin_factor = 0.2;
     min_bbox = [min_bbox[0] - margin_factor / 2 * min_bbox[2], min_bbox[1] - margin_factor / 2 * min_bbox[3], min_bbox[2] * (1 + margin_factor), min_bbox[3] * (1 + margin_factor)];
@@ -1166,7 +1164,6 @@ function resize_map_to_content(stops, width, height) {
             min_bbox[2] *= (ar / cur_ar);
         }
     }
-    //document.querySelector('svg').setAttribute('viewBox', `${min_bbox[0]} ${min_bbox[1]} ${min_bbox[2]} ${min_bbox[3]}`);
     Visibility.onVisible(() => {
         SVG('.map svg').animate({
             when: 'now',
