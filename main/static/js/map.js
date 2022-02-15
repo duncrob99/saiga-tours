@@ -424,12 +424,12 @@ function createPoints(points) {
         let text_svg = SVG(map_svg).text(point.name).font({
             size: text_size,
             anchor: 'middle'
-        }).fill('black').stroke('none').transform({tx: point.x, ty: point.y}).opacity(0).css('pointer-events', 'none');
+        }).fill('black').stroke('none').cx(point.x).y(point.y - text_size).opacity(0).css('pointer-events', 'none');
 
         let point_el = document.createElementNS('http://www.w3.org/2000/svg', 'path');
         // point_el.setAttributeNS(null, 'd', 'm0 0s6-5.686 6-10a6 6 0 00-12 0c0 4.314 6 10 6 10zm0-7a3 3 0 110-6 3 3 0 010 6z');
-        let point_radius = 4;
-        point_el.setAttributeNS(null, 'd', `m0 0 m -${point_radius},0 a ${point_radius},${point_radius} 0 1,0 ${2 * point_radius},0 a ${point_radius},${point_radius} 0 1,0 ${-2 * point_radius},0`);
+        point_el.setAttributeNS(null, 'd', 'm0 0s6-5.686 6-10a6 6 0 00-12 0c0 4.314 6 10 6 10zm0-7a3 3 0 110-6 3 3 0 010 6z');
+        // point_el.setAttributeNS(null, 'd', `m0 0 m -${point_radius},0 a ${point_radius},${point_radius} 0 1,0 ${2 * point_radius},0 a ${point_radius},${point_radius} 0 1,0 ${-2 * point_radius},0`);
         point_el.setAttributeNS(null, 'style', 'fill: red;');
         point_el.setAttributeNS(null, 'transform', `translate(${point.x}, ${point.y}) scale(${0})`);
         point_el.id = `pointer-${i}`;
@@ -444,29 +444,45 @@ function createPoints(points) {
             let mouse = SVG(map_svg).point(ev.pageX, ev.pageY);
             let cur_scale = SVG(point_el).transform().scaleX;
             SVG(point_el).transform({scale: cur_scale, tx: point.x, ty: point.y, origin: 'bottom center'});
+            if (text_svg.text() === 'Mary') {
+                // console.log(text_svg.transform().translateX - point.x, text_svg.transform().translateY - point.y);
+                console.log(text_svg.cx() - point.x, text_svg.y() - point.y);
+                console.log(text_svg.font('size'));
+            }
             if (activation_circle.inside(mouse.x, mouse.y)) {
-                SVG(point_el).animate({when: 'now'}).ease('bounce').transform({
+                SVG(point_el).animate({when: 'now'}).ease('>').transform({
                     scale: pointer_size,
                     tx: point.x,
                     ty: point.y,
                     origin: 'bottom center'
                 });
-                text_svg.opacity(1);
-                text_svg.animate({when: 'now'}).ease('bounce').transform({
-                    scale: 1,
-                    ty: point.y - pointer_size * 20,
-                    tx: point.x
-                });
+                text_svg
+                    .animate({when: 'now'})
+                    .ease('>')
+                    .transform({
+                        scale: 1,
+                        ty: -20 * pointer_size
+                        // ty: point.y - pointer_size * 20,
+                        // tx: point.x,
+                    })
+                    .opacity(1);
             } else {
                 SVG(point_el).animate({when: 'now'}).transform({
-                    scale: 2 ** -20,
+                    scale: 2 ** -10,
                     tx: point.x,
                     ty: point.y,
                     origin: 'bottom center'
                 });
-                text_svg.animate({when: 'now'}).transform({scale: 2 ** -20, tx: point.x, ty: point.y});
+                text_svg
+                    .animate({when: 'now'})
+                    .transform({
+                        scale: 2 ** -3,
+                        // tx: point.x,
+                        // ty: point.y,
+                    })
+                    .opacity(0);
             }
-            text_svg.rebuild();
+            // text_svg.rebuild();
         })
     }
 
