@@ -4,7 +4,7 @@ import six.moves
 from django.conf import settings
 from django.core.management.base import BaseCommand
 
-from ._utils import get_unused_media, remove_empty_dirs
+from ._utils import get_unused_media, remove_empty_dirs, bytes2human
 
 
 class Command(BaseCommand):
@@ -60,10 +60,13 @@ class Command(BaseCommand):
     def _show_files_to_delete(self, unused_media):
         self.debug('Files to remove:')
 
+        tot_size = 0
         for f in unused_media:
-            self.debug(f)
+            size = os.path.getsize(f)
+            self.debug(f'{bytes2human(tot_size)} - {f}')
+            tot_size += size
 
-        self.info('Total files will be removed: {}'.format(len(unused_media)))
+        self.info('Total files will be removed: {}, clearing {}'.format(len(unused_media), bytes2human(tot_size)))
 
     def handle(self, *args, **options):
 
