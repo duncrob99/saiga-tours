@@ -63,7 +63,7 @@ class Command(BaseCommand):
         tot_size = 0
         for f in unused_media:
             size = os.path.getsize(f)
-            self.debug(f'{bytes2human(tot_size)} - {f}')
+            self.debug(f'{bytes2human(size)} - {f}')
             tot_size += size
 
         self.info('Total files will be removed: {}, clearing {}'.format(len(unused_media), bytes2human(tot_size)))
