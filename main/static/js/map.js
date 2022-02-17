@@ -647,7 +647,7 @@ function updateStops(stops, editable) {
             });
             map_svg.appendChild(point_el);
         } else if (editable) {
-            point_el = SVG(map_svg).circle(1).cx(stop.x).cy(stop.y).addClass('stop-pointer').node;
+            point_el = SVG(map_svg).circle(tour_scale * map_content_width / 55).cx(stop.x).cy(stop.y).addClass('stop-pointer').node;
             point_el.id = `pointer-${i}`;
         }
 
