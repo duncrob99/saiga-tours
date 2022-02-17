@@ -218,7 +218,8 @@ def tour(request, slug):
                   'stop_forms': stops_formset,
                   'other_extensions': other_extensions,
                   'parent': parent,
-                  'extensions': extensions
+                  'extensions': extensions,
+                  'position_templates': PositionTemplate.objects.all()
               } | global_context(request)
     return render(request, 'main/tour.html', context)
 

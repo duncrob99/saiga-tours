@@ -269,7 +269,7 @@
                 stops.push(["{{ stop.name }}", {{ stop.x }}, {{ stop.y }}, {{ stop.day }}, {{ forloop.counter0 }}])
                 {% endcomment %}
                 stops.push({
-                    name: "{{ stop.name }}",
+                    name: {{ stop.name|js_str }},
                     x: {{ stop.x|convert_None }},
                     y: {{ stop.y|convert_None }},
                     day: {{ stop.day }},
@@ -279,9 +279,23 @@
                     text_y: {{ stop.text_y }},
                     prestrength: {{ stop.prestrength }},
                     poststrength: {{ stop.poststrength }},
-                    arrow_break: {{ stop.arrow_break|lower }}
+                    arrow_break: {{ stop.arrow_break|lower }},
+                    {% if stop.template is not None %}
+                        template: {{ stop.template.pk }}
+                    {% endif %}
                 });
             {% endfor %}
+
+            {% if request.user.is_staff %}
+                let position_templates = {};
+                {% for template in position_templates %}
+                    position_templates[{{ template.pk }}] = {
+                        x: {{ template.x }},
+                        y: {{ template.y }},
+                        name: {{ template.name|js_str }}
+                    };
+                {% endfor %}
+            {% endif %}
 
             let tour_scale = {{ tour.map_scale }};
 
