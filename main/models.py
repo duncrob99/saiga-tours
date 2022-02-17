@@ -12,6 +12,7 @@ from django.db.models import F
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.templatetags.static import static
+from django.urls import reverse
 from django.utils.functional import classproperty
 from simple_history.models import HistoricalRecords
 
@@ -459,3 +460,15 @@ class HightlightBox(DraftHistory):
 
     def __str__(self):
         return self.title
+
+
+class FileUpload(models.Model):
+    name = models.CharField(max_length=200)
+    file = models.FileField()
+    slug = models.SlugField(unique=True)
+
+    def __str__(self):
+        return self.name
+
+    def get_absolute_url(self):
+        return reverse('view-doc', args=[self.slug])

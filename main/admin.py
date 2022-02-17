@@ -1,5 +1,6 @@
 from django.contrib import admin, messages
 from django.utils.html import format_html
+from django.utils.safestring import mark_safe
 from django.utils.translation import ngettext
 from simple_history.admin import SimpleHistoryAdmin
 
@@ -124,6 +125,20 @@ class BannerPhotoAdmin(DiffHistoryAdmin):
         return obj.img.name
 
 
+class FileUploadAdmin(admin.ModelAdmin):
+    list_display = ('name', 'slug', 'view_document', 'edit')
+    list_display_links = ('edit',)
+
+    def edit(self, obj):
+        return 'Edit'
+
+    def view_document(self, obj):
+        return mark_safe(u"<a href='%s'>%s</a>" % (obj.get_absolute_url(), obj.file))
+
+    view_document.allow_tags = True
+    view_document.short_description = u"File"
+
+
 # Register your models here.
 admin.site.register(Destination, DestinationAdmin)
 admin.site.register(DestinationDetails, DestinationDetailsAdmin)
@@ -141,3 +156,4 @@ admin.site.register(Stop)
 admin.site.register(MapPoint)
 admin.site.register(Author, DiffHistoryAdmin)
 admin.site.register(HightlightBox, DiffHistoryAdmin)
+admin.site.register(FileUpload, FileUploadAdmin)
