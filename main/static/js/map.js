@@ -106,6 +106,7 @@ let menu_instances = [];
 let map_content_width = 0;
 let map_centre;
 let arrow_instances = [];
+const zoom_transition = 2000;
 
 function minBBox(bbox1, bbox2) {
     let right1 = bbox1.x + bbox1.width;
@@ -167,10 +168,17 @@ function make_map_work(destinations, width, height, hoverable, stops, editable, 
             resize_map_to_countries(destinations, width, height, hoverable);
         })
     } else {
+        window.addEventListener('load', () => {
+            updateStops(stops, editable);
+            resize_map_to_content(stops, width, height);
+        });
         window.addEventListener('resize', () => {
             resize_map_to_content(stops, width, height);
             updateStops(stops, editable);
         })
+        setTimeout(() => {
+            updateStops(stops, editable);
+        }, zoom_transition * 1.1);
     }
 
     map_settings = {
@@ -184,13 +192,6 @@ function make_map_work(destinations, width, height, hoverable, stops, editable, 
     }
 
     setMapZooming(true);
-
-    if (stops !== undefined) {
-        window.addEventListener('load', () => {
-            updateStops(stops, editable);
-            resize_map_to_content(stops, width, height);
-        });
-    }
 }
 
 function setMapZooming(en) {
@@ -609,11 +610,6 @@ function updateStops(stops, editable) {
                 .cy(stop.y + stop.text_y - pointer_size * 20)
                 .addClass('pointer-text')
                 .attr('id', `pointer-text-${i}`);
-
-            if (stop.name === 'Something different') {
-                console.log("Something different at", text_el.cx(), text_el.cy());
-                console.log("Should be at: ", stop.x + stop.text_x, stop.y + stop.text_y - pointer_size * 20);
-            }
 
             point_el = document.createElementNS('http://www.w3.org/2000/svg', 'path');
             // point_el.setAttributeNS(null, 'd', 'm0 0s6-5.686 6-10a6 6 0 00-12 0c0 4.314 6 10 6 10zm0-7a3 3 0 110-6 3 3 0 010 6z');
@@ -1058,7 +1054,7 @@ function resize_map_to_countries(destinations, width, height, hoverable) {
     Visibility.onVisible(() => {
         SVG('.map svg').animate({
             when: 'now',
-            duration: 2000
+            duration: zoom_transition
         }).ease('quartInOut').viewbox(`${min_bbox[0]} ${min_bbox[1]} ${min_bbox[2]} ${min_bbox[3]}`);
     })
 }
@@ -1108,7 +1104,7 @@ function resize_map_to_stops(stops, width, height) {
     Visibility.onVisible(() => {
         SVG('.map svg').animate({
             when: 'now',
-            duration: 2000
+            duration: zoom_transition
         }).ease('quartInOut').viewbox(`${min_bbox[0]} ${min_bbox[1]} ${min_bbox[2]} ${min_bbox[3]}`);
     })
 }
@@ -1167,7 +1163,7 @@ function resize_map_to_content(stops, width, height) {
     Visibility.onVisible(() => {
         SVG('.map svg').animate({
             when: 'now',
-            duration: 2000
+            duration: zoom_transition
         }).ease('quartInOut').viewbox(`${min_bbox[0]} ${min_bbox[1]} ${min_bbox[2]} ${min_bbox[3]}`);
     })
 }
