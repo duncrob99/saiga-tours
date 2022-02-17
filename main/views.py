@@ -11,9 +11,8 @@ from django.core.mail import send_mail, BadHeaderError
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.forms import modelform_factory, inlineformset_factory
-from django.http import Http404, HttpResponseRedirect, HttpResponse
+from django.http import Http404, HttpResponseRedirect, HttpResponse, FileResponse
 from django.shortcuts import render, get_object_or_404, redirect
-from django.urls import reverse
 
 import analytics
 from .forms import *
@@ -458,3 +457,8 @@ def create_map(request, slug: str):
         return redirect('tour', slug)
     else:
         raise Http404
+
+
+def view_document(request, slug: str):
+    file = get_object_or_404(FileUpload, slug=slug)
+    return FileResponse(file.file)
