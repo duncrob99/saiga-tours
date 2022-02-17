@@ -31,7 +31,7 @@ class UserCookie(models.Model):
     subscription = models.OneToOneField(SubscriptionSubmission, on_delete=models.SET_NULL, null=True, blank=True)
     last_subscription_request = models.DateTimeField(null=True, blank=True)
 
-    subscription_reset = datetime.timedelta(minutes=10)
+    subscription_reset = datetime.timedelta(days=1)
 
     @property
     def should_request_subscription(self):

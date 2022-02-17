@@ -421,7 +421,7 @@ class Stop(models.Model):
     x = models.FloatField(null=True, blank=True)
     y = models.FloatField(null=True, blank=True)
     tour = models.ForeignKey(Tour, on_delete=models.CASCADE, related_name='stops')
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, null=True)
     day = models.PositiveSmallIntegerField(default=1)
     order = models.PositiveSmallIntegerField(null=True)
     marked = models.BooleanField(default=True)
