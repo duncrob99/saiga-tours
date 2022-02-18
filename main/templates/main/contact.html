@@ -1,6 +1,10 @@
 {% extends 'main/main.html' %}
 {% load django_bootstrap5 %}
 
+{% block title %}
+    Contact Us
+{% endblock %}
+
 {% block content %}
     <form method="POST">
         {% csrf_token %}

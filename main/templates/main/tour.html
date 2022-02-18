@@ -3,6 +3,10 @@
 {% load static %}
 {% load main_tags %}
 
+{% block title %}
+    {{ tour }}
+{% endblock %}
+
 {% block extrahead %}
     <link rel="stylesheet" href="{% static 'css/tour.css' %}">
     <link rel="stylesheet" href="{% static 'css/custom_ckeditor.css' %}">

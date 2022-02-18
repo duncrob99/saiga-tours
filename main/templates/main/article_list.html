@@ -2,6 +2,10 @@
 {% load static %}
 {% load main_tags %}
 
+{% block title %}
+    {{ title }}
+{% endblock %}
+
 {% block extrahead %}
     <link rel="stylesheet" href="{% static 'css/article_list.css' %}">
     <link rel="stylesheet" href="{% static 'css/filters.css' %}">

@@ -1,6 +1,10 @@
 {% extends 'main/main.html' %}
 {% load static %}
 
+{% block title %}
+    {{ region.name }} Tours
+{% endblock %}
+
 {% block extrahead %}
     <link rel="stylesheet" href="{% static 'css/map.css' %}">
 {% endblock %}

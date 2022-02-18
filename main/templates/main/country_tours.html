@@ -1,6 +1,10 @@
 {% extends 'main/main.html' %}
 {% load static %}
 
+{% block title %}
+    {{ destination.name }} Tours
+{% endblock %}
+
 {% block content %}
     <h1 class="display-1">{{ destination.name }}</h1>
     <hr>

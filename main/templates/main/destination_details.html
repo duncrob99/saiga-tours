@@ -2,6 +2,10 @@
 {% load static %}
 {% load django_bootstrap5 %}
 
+{% block title %}
+    {{ details.title }} | {{ details.destination}}
+{% endblock %}
+
 {% block extrahead %}
     <link rel="stylesheet" href="{% static 'css/custom_ckeditor.css' %}">
 {% endblock %}
