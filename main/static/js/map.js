@@ -623,7 +623,7 @@ function updateStops(stops, editable) {
             }
         }
 
-        let point_el, text_el;
+        let point_el, text_el, point_svg;
         if (stop.marked) {
             text_el = SVG(map_svg).text(stop.name)
                 .font({anchor: 'middle'})
@@ -635,14 +635,15 @@ function updateStops(stops, editable) {
                 .addClass('pointer-text')
                 .attr('id', `pointer-text-${stop.form_ix}`);
 
-            point_el = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-            // point_el.setAttributeNS(null, 'd', 'm0 0s6-5.686 6-10a6 6 0 00-12 0c0 4.314 6 10 6 10zm0-7a3 3 0 110-6 3 3 0 010 6z');
-            let point_radius = 4;
-            point_el.setAttributeNS(null, 'd', `m0 0 m -${point_radius},0 a ${point_radius},${point_radius} 0 1,0 ${2 * point_radius},0 a ${point_radius},${point_radius} 0 1,0 ${-2 * point_radius},0`);
-            point_el.setAttributeNS(null, 'style', `fill: ${stop.template && editable ? 'blue' : 'red'};`);
-            point_el.setAttributeNS(null, 'transform', `translate(${stop.x}, ${stop.y}) scale(${pointer_size})`);
-            point_el.id = `pointer-${stop.form_ix}`;
-            point_el.classList.add('stop-pointer');
+            point_svg = SVG(map_svg).circle(8*pointer_size)
+                .cx(stop.x)
+                .cy(stop.y)
+                .fill(stop.template && editable ? 'blue' : 'red')
+                .stroke('green')
+                .id(`pointer-${stop.form_ix}`)
+                .addClass('stop-pointer');
+
+            point_el = point_svg.node;
 
             if (!editable) {
                 point_el.addEventListener('click', () => {
@@ -653,31 +654,28 @@ function updateStops(stops, editable) {
 
             point_el.addEventListener('mouseenter', () => {
                 SVG(point_el).animate({when: 'now'}).transform({
-                    scale: pointer_size * 1.2,
+                    scale: 1.2,
                     origin: 'center',
-                    tx: stop.x,
-                    ty: stop.y
                 });
                 document.body.style.cursor = "pointer";
             });
             point_el.addEventListener('mouseleave', () => {
                 SVG(point_el).animate({when: 'now'}).transform({
-                    scale: pointer_size,
+                    scale: 1,
                     origin: 'center',
-                    tx: stop.x,
-                    ty: stop.y
                 });
                 document.body.style.cursor = "auto";
             });
-            map_svg.appendChild(point_el);
         } else if (editable) {
-            point_el = SVG(map_svg)
+            point_svg = SVG(map_svg)
                 .circle(tour_scale * map_content_width / 55)
                 .cx(stop.x)
                 .cy(stop.y)
                 .fill(stop.template ? 'green' : 'grey')
-                .addClass('stop-pointer').node;
-            point_el.id = `pointer-${i}`;
+                .addClass('stop-pointer')
+                .id(`pointer-${i}`);
+
+            point_el = point_svg.node;
         }
 
         if (editable) {
@@ -696,16 +694,12 @@ function updateStops(stops, editable) {
                     stops[i] = stop;
                     updatePath(stops);
 
+                    point_svg.animate({when: 'now', duration: 1})
+                        .cx(stop.x)
+                        .cy(stop.y);
+
                     if (stop.marked) {
-                        SVG(point_el).animate({when: 'now', duration: 1}).transform({
-                            scale: pointer_size,
-                            origin: 'center',
-                            tx: stop.x,
-                            ty: stop.y
-                        });
                         text_el.font({anchor: 'middle'}).cx(stop.x + stop.text_x).cy(stop.y + stop.text_y - pointer_size * 20);
-                    } else {
-                        point_el.instance.animate({when: 'now', duration: 1}).cx(stop.x).cy(stop.y);
                     }
 
                     // Edit value in form
