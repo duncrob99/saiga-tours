@@ -490,31 +490,7 @@ function createPoints(points) {
 }
 
 SVG.Path.prototype.segmentLengths = function () {
-    function get_endpoint(arr) {
-        return {
-            x: arr.slice(-2)[0],
-            y: arr.slice(-1)[0],
-            string: function () {
-                console.log('this: ', this);
-                return `M${this.x} ${this.y}`
-            }
-        }
-    }
-
-    function get_string(arr) {
-        return arr[0] + arr.slice(1).join(' ');
-    }
-
-    let segments = [];
-    let last_point = get_endpoint(this.getArray()[0]);
-
-    this.getArray().slice(1).forEach((el, i) => {
-        let path_str = `${last_point.string()} ${get_string(el)}`;
-        segments.push(SVG().path(path_str).length());
-        last_point = get_endpoint(el);
-    })
-
-    return segments;
+    return this.segments().map(seg => SVG().path(seg).length());
 }
 
 SVG.Path.prototype.getArray = function () {
@@ -597,44 +573,29 @@ function updatePath(stops) {
         arrow.remove();
     });
 
-    let segment_lengths = SVG(path_el).segmentLengths();
-    let unmarked_ix = [];
-    for (let i in stops) {
-        if (!stops[i].arrow_break) {
-            unmarked_ix.push(parseInt(i));
+    let all_segment_lengths = SVG(path_el).segmentLengths();
+
+    let broken_segment_lengths = [];
+    for (let i=0; i < stops.length-1; i++) {
+        if (i === 0 || stops[i].arrow_break) {
+            broken_segment_lengths.push(all_segment_lengths[i]);
+        } else {
+            broken_segment_lengths[broken_segment_lengths.length-1] += all_segment_lengths[i];
         }
     }
-    for (let i of unmarked_ix.reverse()) {
-        segment_lengths[i - 1] += segment_lengths[i];
-        segment_lengths.splice(i, 1);
-    }
 
-    // let tot_len = segment_lengths[0] / 2;
-    // // let tot_len = 0;
-    // for (let i = 0; i < segment_lengths.length; i++) {
-    //     let point = SVG(path_el).pointAt(tot_len);
-    //     let after = SVG(path_el).pointAt(tot_len + 0.1);
-    //     let before = SVG(path_el).pointAt(tot_len - 0.1);
-    //     let angle = Math.atan2(after.y - before.y, after.x - before.x) * 180 / Math.PI - 90;
-    //     arrow_instances.push(SVG(map_svg).path('M-1 0 L0 1 L1 0').cx(point.x).cy(point.y).fill('none').stroke({
-    //         width: 0.3,
-    //         color: '#106e2e'
-    //     }).rotate(angle).scale(0.3 * tour_scale * map_content_width / 18.5084228515625));
-    //     tot_len += segment_lengths[i] / 2 + segment_lengths[i + 1] / 2;
-    // }
-    document.querySelectorAll('.path-segment').forEach(seg => seg.remove());
-    let segments = SVG(path_el).segments().map(seg => SVG(map_svg).path(seg).fill('none').addClass('path-segment'));
-
-    segments.forEach(seg => {
-        let point = seg.pointAt(seg.length()/2);
-        let after = seg.pointAt(seg.length()/2 + 0.001);
-        let before = seg.pointAt(seg.length()/2 - 0.001);
+    let tot_len = broken_segment_lengths[0] / 2;
+    for (let i = 0; i < broken_segment_lengths.length; i++) {
+        let point = SVG(path_el).pointAt(tot_len);
+        let after = SVG(path_el).pointAt(tot_len + 0.1);
+        let before = SVG(path_el).pointAt(tot_len - 0.1);
         let angle = Math.atan2(after.y - before.y, after.x - before.x) * 180 / Math.PI - 90;
         arrow_instances.push(SVG(map_svg).path('M-1 0 L0 1 L1 0').cx(point.x).cy(point.y).fill('none').stroke({
             width: 0.3,
             color: '#106e2e'
         }).rotate(angle).scale(0.3 * tour_scale * map_content_width / 18.5084228515625));
-    })
+        tot_len += broken_segment_lengths[i] / 2 + broken_segment_lengths[i + 1] / 2;
+    }
 }
 
 function updateStops(stops, editable) {
