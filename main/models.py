@@ -106,7 +106,7 @@ class DestinationDetails(DraftHistory):
     destination = models.ForeignKey(Destination, on_delete=models.CASCADE, related_name='details')
     type = models.CharField(max_length=1, choices=TYPE_CHOICES)
     card_img = models.ImageField()
-    linked_tours = models.ManyToManyField('Tour')
+    linked_tours = models.ManyToManyField('Tour', blank=True)
 
     class Meta:
         verbose_name_plural = 'Destination details'

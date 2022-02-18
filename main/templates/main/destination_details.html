@@ -1,11 +1,62 @@
 {% extends 'main/main.html' %}
+{% load static %}
+{% load django_bootstrap5 %}
+
+{% block extrahead %}
+    <link rel="stylesheet" href="{% static 'css/custom_ckeditor.css' %}">
+{% endblock %}
+
+{% block js %}
+    <script src="{% static 'js/jscolor.min.js' %}"></script>
+    <script src="{% static 'js/ckeditor/ckeditor.js' %}"></script>
+    <script src="{% static 'js/custom_ckeditor.js' %}"></script>
+    <script src="{% static 'js/destination_detail_editing.js' %}"></script>
+{% endblock %}
+
+{% block banner %}
+    {% if request.user.is_staff %}
+        <button id="editor-button" class="btn btn-outline-secondary d-inline-flex align-items-center"
+                data-bs-toggle="offcanvas"
+                data-bs-target="#editor-offcanvas" aria-controls="editor-offcanvas" role="button"
+                style="float: left; position: sticky; margin: 50px; top: 200px;">
+            <span class="bi bi-pencil" style="font-size: 1.5rem"></span> <span style="margin-left: 4px;">Edit</span>
+        </button>
+    {% endif %}
+{% endblock %}
 
 {% block content %}
     <div class="container-fluid">
-        <h1 class="display-1">{{ details.title }}
+        <h1 class="display-1"><span id="title">{{ details.title }}</span>
             <a href="{% url 'destination' details.destination.region.slug details.destination.slug %}"><small
                     class="text-muted">{{ details.destination }}</small></a>
         </h1>
-        {{ details.content | safe }}
+        <div id="content">
+            {{ details.content | safe }}
+        </div>
     </div>
+
+    {% if request.user.is_staff %}
+        <div class="offcanvas offcanvas-start" tabindex="-1" id="editor-offcanvas">
+            <form style="margin: 20px;" method="post" enctype="multipart/form-data" id="edit-page-form">
+                {% bootstrap_form_errors form %}
+                {% csrf_token %}
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="" id="editing">
+                    <label class="form-check-label" for="editing">
+                        In-place editing
+                    </label>
+                </div>
+                {% bootstrap_form form %}
+                <button type="submit" id="edit-page-submit" class="btn btn-primary accent hoverable-accent">Submit
+                    Changes
+                </button>
+            </form>
+        </div>
+    {% endif %}
+
+    {% if details.linked_tours.count > 0 %}
+        <hr>
+        <h4 class="display-4">Example Tours</h4>
+        {% include 'main/tours_cards.html' with tours=details.linked_tours.all %}
+    {% endif %}
 {% endblock %}

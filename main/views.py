@@ -141,16 +141,29 @@ def destination_overview(request, region_slug, country_slug):
 
 
 def destination_details(request, region_slug, country_slug, detail_slug):
+    return details_page(request, region_slug, country_slug, detail_slug, DestinationDetails.GUIDE)
+
+
+def details_page(request, region_slug, country_slug, detail_slug, detail_type):
     details = get_object_or_404(DestinationDetails,
                                 destination__region__slug=region_slug,
                                 destination__slug=country_slug,
-                                slug=detail_slug, type=DestinationDetails.GUIDE)
+                                slug=detail_slug, type=detail_type)
 
     assert_visible(request, details)
 
-    context = {
-                  'details': details
-              } | global_context(request)
+    if request.user.is_staff:
+        form_factory = modelform_factory(DestinationDetails, exclude=())
+        form = form_factory(request.POST or None, request.FILES or None, instance=details)
+        if request.method == 'POST' and form.is_valid():
+            instance = form.save()
+            if 'parent' in form.changed_data or 'slug' in form.changed_data:
+                return redirect('page', instance.full_path)
+    else:
+        form = None
+
+    context = {'details': details,
+               'form': form} | global_context(request)
 
     return render(request, 'main/destination_details.html', context)
 
@@ -397,18 +410,19 @@ def region_tours(request, region_slug):
 
 
 def country_tours_info(request, region_slug, country_slug, detail_slug):
-    details = get_object_or_404(DestinationDetails,
-                                destination__region__slug=region_slug,
-                                destination__slug=country_slug,
-                                slug=detail_slug, type=DestinationDetails.TOURS)
-
-    assert_visible(request, details)
-
-    context = {
-                  'details': details
-              } | global_context(request)
-
-    return render(request, 'main/tour_info.html', context)
+    return details_page(request, region_slug, country_slug, detail_slug, DestinationDetails.TOURS)
+    # details = get_object_or_404(DestinationDetails,
+    #                             destination__region__slug=region_slug,
+    #                             destination__slug=country_slug,
+    #                             slug=detail_slug, type=DestinationDetails.TOURS)
+    #
+    # assert_visible(request, details)
+    #
+    # context = {
+    #               'details': details
+    #           } | global_context(request)
+    #
+    # return render(request, 'main/tour_info.html', context)
 
 
 def resized_imaged(request, filename: str, width: int = None, height: int = None):
