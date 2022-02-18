@@ -1,5 +1,9 @@
 {% extends 'main/main.html' %}
 
+{% block title %}
+    {{ details.title }} | {{ details.destination }}
+{% endblock %}
+
 {% block content %}
     <div class="container-fluid">
         <h1 class="display-1">{{ details.title }}

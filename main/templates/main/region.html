@@ -1,6 +1,10 @@
 {% extends 'main/main.html' %}
 {% load static %}
 
+{% block title %}
+    {{ region.name }} Guides
+{% endblock %}
+
 {% block content %}
     <h1 class="display-1">{{ region.name }}</h1>
     {% if destinations.count > 0 %}
