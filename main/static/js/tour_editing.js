@@ -76,8 +76,13 @@ function deactivateEditor() {
 }
 
 function activateEditor() {
-    for (let editor_name in rich_field_map) {
+    rich_fields: for (let editor_name in rich_field_map) {
         document.querySelector(`#${editor_name}`).setAttribute('contenteditable', true);
+        for (let instance in CKEDITOR.instances) {
+            if (instance === editor_name) {
+                continue rich_fields;
+            }
+        }
         let editor = CKEDITOR.inline(editor_name, {
             extraPlugins: 'sourcedialog, uploadimage, sharedspace',
             removePlugins: 'floatingspace, maximize, resize',
@@ -149,20 +154,18 @@ function activateEditor() {
 
 // Set editing iff editing checkbox checked
 let editing = document.querySelector('#editing');
-if (!editing.checked) {
-    deactivateEditor();
-} else {
-    activateEditor();
+
+function checkEditing() {
+    if (!editing.checked) {
+        deactivateEditor();
+    } else {
+        activateEditor();
+    }
 }
 
-editing.addEventListener('change', () => {
-    if (editing.checked) {
-        activateEditor();
-    } else {
-        deactivateEditor();
-    }
-})
-
+editing.addEventListener('change', checkEditing);
+window.addEventListener('resize', checkEditing);
+checkEditing();
 
 desc.addEventListener('input', editorChange);
 

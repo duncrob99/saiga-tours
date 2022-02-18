@@ -61,7 +61,6 @@ if (btn) {
             // let style = document.createElementNS('http://www.w3.org/2000/svg', 'style');
             styled_svg.querySelector('defs').innerHTML = `<style>@font-face{font-family: "Poppin"; src:url("${result}") format("woff"); font-weight: normal; font-style: normal;}</style>`
             // styled_svg.appendChild(defs);
-            // console.log(result);
             let data = (new XMLSerializer()).serializeToString(styled_svg);
             let svgBlob = new Blob([data], {type: 'image/svg+xml;charset=utf-8'});
             let url = URL.createObjectURL(svgBlob);
@@ -279,7 +278,6 @@ function setCountryNames(destinations) {
         for (let text_el of text_els) {
             let other_els = text_els.filter(el => el !== text_el);
             for (let other_el of other_els) {
-                //console.log(rect_distance(text_el.bbox(), other_el.bbox()));
                 if (text_el.bbox().x < other_el.bbox().x2 + x_margin && text_el.bbox().x2 + x_margin > other_el.bbox().x && (text_el.bbox().y < other_el.bbox().y2 + y_margin && text_el.bbox().y2 + y_margin > other_el.bbox().y)) {
                     // if (rect_distance(text_el.bbox(), other_el.bbox()) <= margin) {
                     let direction = {
@@ -304,7 +302,6 @@ function setCountryNames(destinations) {
     // SVG('.map svg').rect(text_el.bbox().width + margin, text_el.bbox().height + margin).cx(text_el.cx()).cy(text_el.cy()).stroke('red').fill('none');
     // SVG('.map svg').rect(text_el.bbox().width + x_margin, text_el.bbox().height + y_margin).cx(text_el.cx()).cy(text_el.cy()).stroke('red').fill('none');
     // SVG('.map svg').rect(text_el.bbox().width, text_el.bbox().height).cx(text_el.cx()).cy(text_el.cy()).stroke('blue').fill('none');
-    // console.log(text_el.moved());
     // }
 }
 
@@ -445,11 +442,6 @@ function createPoints(points) {
             let mouse = SVG(map_svg).point(ev.pageX, ev.pageY);
             let cur_scale = SVG(point_el).transform().scaleX;
             SVG(point_el).transform({scale: cur_scale, tx: point.x, ty: point.y, origin: 'bottom center'});
-            if (text_svg.text() === 'Mary') {
-                // console.log(text_svg.transform().translateX - point.x, text_svg.transform().translateY - point.y);
-                console.log(text_svg.cx() - point.x, text_svg.y() - point.y);
-                console.log(text_svg.font('size'));
-            }
             if (activation_circle.inside(mouse.x, mouse.y)) {
                 SVG(point_el).animate({when: 'now'}).ease('>').transform({
                     scale: pointer_size,
@@ -495,11 +487,11 @@ SVG.Path.prototype.segmentLengths = function () {
 
 SVG.Path.prototype.getArray = function () {
     let path_str = this.node.getAttribute('d');
-    let commaed_strs = path_str.replaceAll(" C", ",C");
+    let commaed_strs = path_str.replaceAll(/\s*C/g, ",C");
     let command_strs = commaed_strs.split(',');
     let command_arrs = command_strs.map(cmd => {
         let cmd_arr = [cmd[0]];
-        cmd.substring(1).split(' ').forEach(val => {
+        cmd.substring(1).trim().split(' ').forEach(val => {
             cmd_arr.push(parseFloat(val));
         })
         return cmd_arr;
@@ -536,7 +528,7 @@ SVG.Path.prototype.segments = function () {
 
 function updatePath(stops) {
     if (stops.length < 2) return;
-    let map_svg = document.querySelector('.map svg');
+    let map_svg = SVG(document.querySelector('.map svg'));
 
     let path_width = tour_scale * map_content_width * 0.006;
 
@@ -553,19 +545,28 @@ function updatePath(stops) {
 
     let path_str = pathString(x, y, prestrength, poststrength);
 
-    let path_el;
+    let path_svg;
     if (document.querySelector('#stop_path') === null) {
-        path_el = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        path_el.id = 'stop_path';
-        path_el.setAttributeNS(null, 'fill', 'none');
-        path_el.setAttributeNS(null, 'stroke', '#106e2e');
-        path_el.setAttributeNS(null, 'stroke-width', `${path_width}px`);
-        path_el.setAttributeNS(null, 'd', path_str);
-        map_svg.appendChild(path_el);
+        path_svg = map_svg.path(path_str)
+            .fill('none')
+            .stroke({color: '#106e2e', width: path_width})
+            .id('stop_path');
+
+        // path_el = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        // path_el.id = 'stop_path';
+        // path_el.setAttributeNS(null, 'fill', 'none');
+        // path_el.setAttributeNS(null, 'stroke', '#106e2e');
+        // path_el.setAttributeNS(null, 'stroke-width', `${path_width}px`);
+        // path_el.setAttributeNS(null, 'd', path_str);
+        // map_svg.appendChild(path_el);
     } else {
-        path_el = document.querySelector('#stop_path');
-        path_el.setAttributeNS(null, 'd', path_str);
-        path_el.setAttributeNS(null, 'stroke-width', `${path_width}px`);
+        path_svg = SVG('#stop_path');
+        path_svg.animate({when: 'now', duration: 1})
+            .plot(path_str);
+
+        // path_el = document.querySelector('#stop_path');
+        // path_el.setAttributeNS(null, 'd', path_str);
+        // path_el.setAttributeNS(null, 'stroke-width', `${path_width}px`);
     }
 
     // Add arrows in the middle of each segment
@@ -573,7 +574,7 @@ function updatePath(stops) {
         arrow.remove();
     });
 
-    let all_segment_lengths = SVG(path_el).segmentLengths();
+    let all_segment_lengths = path_svg.segmentLengths();
 
     let broken_segment_lengths = [];
     for (let i=0; i < stops.length-1; i++) {
@@ -586,11 +587,11 @@ function updatePath(stops) {
 
     let tot_len = broken_segment_lengths[0] / 2;
     for (let i = 0; i < broken_segment_lengths.length; i++) {
-        let point = SVG(path_el).pointAt(tot_len);
-        let after = SVG(path_el).pointAt(tot_len + 0.1);
-        let before = SVG(path_el).pointAt(tot_len - 0.1);
+        let point = path_svg.pointAt(tot_len);
+        let after = path_svg.pointAt(tot_len + 0.1);
+        let before = path_svg.pointAt(tot_len - 0.1);
         let angle = Math.atan2(after.y - before.y, after.x - before.x) * 180 / Math.PI - 90;
-        arrow_instances.push(SVG(map_svg).path('M-1 0 L0 1 L1 0').cx(point.x).cy(point.y).fill('none').stroke({
+        arrow_instances.push(map_svg.path('M-1 0 L0 1 L1 0').cx(point.x).cy(point.y).fill('none').stroke({
             width: 0.3,
             color: '#106e2e'
         }).rotate(angle).scale(0.3 * tour_scale * map_content_width / 18.5084228515625));
@@ -759,11 +760,6 @@ function updateStops(stops, editable) {
                                 text_el.font({anchor: 'middle'})
                                     .cx(stop.x + stop.text_x)
                                     .cy(stop.y + stop.text_y - pointer_size * 20);
-
-                                if (stop.name === 'Something different') {
-                                    console.log("Something different at", text_el.cx(), text_el.cy());
-                                    console.log("Should be at: ", stop.x + stop.text_x, stop.y + stop.text_y - pointer_size * 20);
-                                }
 
                                 // Edit value in form
                                 document.getElementById(`id_stops-${stop.form_ix}-text_x`).value = stop.text_x;
@@ -954,7 +950,6 @@ function updateStops(stops, editable) {
                                     // modal.hide();
                                     // updateStops(stops, true);
                                     stops[i].template = select.value;
-                                    console.log(stops);
                                     document.querySelector(`#id_stops-${stop.form_ix}-template`).value = stops[i].template;
                                     modal.hide();
                                     updateStops(stops, editable);
@@ -964,7 +959,6 @@ function updateStops(stops, editable) {
                                 document.querySelector('#change-poststrength-modal').addEventListener('shown.bs.modal', () => select.focus());
                             }
                             // point_el.setAttributeNS(null, 'style', `fill: ${stop.template && editable ? 'blue' : 'red'};`);
-                            console.log(stops);
                         },
                         classNames: ['dropdown-item', 'alt-context-menu']
                     }
@@ -1118,7 +1112,6 @@ function resize_map_to_countries(destinations, width, height, hoverable) {
                     start_ev = ev
                 })
                 dest_path.addEventListener('mouseup', (end_ev) => {
-                    console.log(start_ev, end_ev);
                     if (start_ev !== undefined) {
                         if ((start_ev.x - end_ev.x) ** 2 + (start_ev.y - end_ev.y) ** 2 < 10 ** 2) {
                             window.location.href = destinations[i][1];
