@@ -256,7 +256,7 @@ function setCountryNames(destinations) {
         let path_el = SVG(`[title="${country[0]}"]`);
         if (path_el !== null) {
             // let text_el = SVG('.map svg').text(country[0]).cx(path_el.cx()).cy(path_el.cy());
-            // let point_array = [for (let path of path_el.array()) if (path.length === 3) path.slice(1)]
+            // let point_array = [for (let path of path_el.getArray()) if (path.length === 3) path.slice(1)]
             let {com, area} = findCentroid(path_el, country[0]);
             text_els.push(svg_map.text(country[0].toUpperCase()).font('size', 5).cx(com.x).cy(com.y).css('pointer-events', 'none').fill('black').stroke('none'));
             // svg_map.circle(1).fill('red').cx(com.x).cy(com.y);
@@ -348,7 +348,7 @@ function dist(x1, y1, x2, y2) {
 }
 
 function findCentroid(path) {
-    let polygons = path.array().reduce((polygons, path) => {
+    let polygons = path.getArray().reduce((polygons, path) => {
         if (path[0] === 'M') {
             polygons.push([{x: path[1], y: path[2]}]);
         } else if (path[0] === 'L') {
@@ -495,6 +495,7 @@ SVG.Path.prototype.segmentLengths = function () {
             x: arr.slice(-2)[0],
             y: arr.slice(-1)[0],
             string: function () {
+                console.log('this: ', this);
                 return `M${this.x} ${this.y}`
             }
         }
@@ -505,11 +506,52 @@ SVG.Path.prototype.segmentLengths = function () {
     }
 
     let segments = [];
-    let last_point = get_endpoint(this.array()[0]);
+    let last_point = get_endpoint(this.getArray()[0]);
 
-    this.array().slice(1).forEach((el, i) => {
+    this.getArray().slice(1).forEach((el, i) => {
         let path_str = `${last_point.string()} ${get_string(el)}`;
         segments.push(SVG().path(path_str).length());
+        last_point = get_endpoint(el);
+    })
+
+    return segments;
+}
+
+SVG.Path.prototype.getArray = function () {
+    let path_str = this.node.getAttribute('d');
+    let commaed_strs = path_str.replaceAll(" C", ",C");
+    let command_strs = commaed_strs.split(',');
+    let command_arrs = command_strs.map(cmd => {
+        let cmd_arr = [cmd[0]];
+        cmd.substring(1).split(' ').forEach(val => {
+            cmd_arr.push(parseFloat(val));
+        })
+        return cmd_arr;
+    })
+    return command_arrs;
+}
+
+SVG.Path.prototype.segments = function () {
+    function get_endpoint(arr) {
+        return {
+            x: arr.slice(-2)[0],
+            y: arr.slice(-1)[0],
+            string: function () {
+                return `M${this.x} ${this.y}`
+            }
+        }
+    }
+
+    function get_string(arr) {
+        return arr[0] + arr.slice(1).join(' ');
+    }
+
+    let segments = [];
+    let last_point = get_endpoint(this.getArray()[0]);
+
+    this.getArray().slice(1).forEach((el, i) => {
+        let path_str = `${last_point.string()} ${get_string(el)}`;
+        segments.push(path_str);
         last_point = get_endpoint(el);
     })
 
@@ -567,18 +609,32 @@ function updatePath(stops) {
         segment_lengths.splice(i, 1);
     }
 
-    let tot_len = segment_lengths[0] / 2;
-    for (let i = 0; i < segment_lengths.length; i++) {
-        let point = SVG(path_el).pointAt(tot_len);
-        let after = SVG(path_el).pointAt(tot_len + 0.1);
-        let before = SVG(path_el).pointAt(tot_len - 0.1);
+    // let tot_len = segment_lengths[0] / 2;
+    // // let tot_len = 0;
+    // for (let i = 0; i < segment_lengths.length; i++) {
+    //     let point = SVG(path_el).pointAt(tot_len);
+    //     let after = SVG(path_el).pointAt(tot_len + 0.1);
+    //     let before = SVG(path_el).pointAt(tot_len - 0.1);
+    //     let angle = Math.atan2(after.y - before.y, after.x - before.x) * 180 / Math.PI - 90;
+    //     arrow_instances.push(SVG(map_svg).path('M-1 0 L0 1 L1 0').cx(point.x).cy(point.y).fill('none').stroke({
+    //         width: 0.3,
+    //         color: '#106e2e'
+    //     }).rotate(angle).scale(0.3 * tour_scale * map_content_width / 18.5084228515625));
+    //     tot_len += segment_lengths[i] / 2 + segment_lengths[i + 1] / 2;
+    // }
+    document.querySelectorAll('.path-segment').forEach(seg => seg.remove());
+    let segments = SVG(path_el).segments().map(seg => SVG(map_svg).path(seg).fill('none').addClass('path-segment'));
+
+    segments.forEach(seg => {
+        let point = seg.pointAt(seg.length()/2);
+        let after = seg.pointAt(seg.length()/2 + 0.001);
+        let before = seg.pointAt(seg.length()/2 - 0.001);
         let angle = Math.atan2(after.y - before.y, after.x - before.x) * 180 / Math.PI - 90;
         arrow_instances.push(SVG(map_svg).path('M-1 0 L0 1 L1 0').cx(point.x).cy(point.y).fill('none').stroke({
             width: 0.3,
             color: '#106e2e'
         }).rotate(angle).scale(0.3 * tour_scale * map_content_width / 18.5084228515625));
-        tot_len += segment_lengths[i] / 2 + segment_lengths[i + 1] / 2;
-    }
+    })
 }
 
 function updateStops(stops, editable) {
@@ -616,15 +672,15 @@ function updateStops(stops, editable) {
                 .cx(stop.x + stop.text_x)
                 .cy(stop.y + stop.text_y - pointer_size * 20)
                 .addClass('pointer-text')
-                .attr('id', `pointer-text-${i}`);
+                .attr('id', `pointer-text-${stop.form_ix}`);
 
             point_el = document.createElementNS('http://www.w3.org/2000/svg', 'path');
             // point_el.setAttributeNS(null, 'd', 'm0 0s6-5.686 6-10a6 6 0 00-12 0c0 4.314 6 10 6 10zm0-7a3 3 0 110-6 3 3 0 010 6z');
             let point_radius = 4;
             point_el.setAttributeNS(null, 'd', `m0 0 m -${point_radius},0 a ${point_radius},${point_radius} 0 1,0 ${2 * point_radius},0 a ${point_radius},${point_radius} 0 1,0 ${-2 * point_radius},0`);
-            point_el.setAttributeNS(null, 'style', 'fill: red;');
+            point_el.setAttributeNS(null, 'style', `fill: ${stop.template && editable ? 'blue' : 'red'};`);
             point_el.setAttributeNS(null, 'transform', `translate(${stop.x}, ${stop.y}) scale(${pointer_size})`);
-            point_el.id = `pointer-${i}`;
+            point_el.id = `pointer-${stop.form_ix}`;
             point_el.classList.add('stop-pointer');
 
             if (!editable) {
@@ -654,7 +710,12 @@ function updateStops(stops, editable) {
             });
             map_svg.appendChild(point_el);
         } else if (editable) {
-            point_el = SVG(map_svg).circle(tour_scale * map_content_width / 55).cx(stop.x).cy(stop.y).addClass('stop-pointer').node;
+            point_el = SVG(map_svg)
+                .circle(tour_scale * map_content_width / 55)
+                .cx(stop.x)
+                .cy(stop.y)
+                .fill(stop.template ? 'green' : 'grey')
+                .addClass('stop-pointer').node;
             point_el.id = `pointer-${i}`;
         }
 
@@ -689,6 +750,31 @@ function updateStops(stops, editable) {
                     // Edit value in form
                     document.getElementById(`id_stops-${stop.form_ix}-x`).value = stop.x;
                     document.getElementById(`id_stops-${stop.form_ix}-y`).value = stop.y;
+
+                    // Move template
+                    if (stop.template !== undefined) {
+                        edit_position_template(stop.template, {x: stop.x, y: stop.y});
+                        for (let other_stop of stops) {
+                            if (stop.form_ix === other_stop.form_ix || other_stop.template !== stop.template) continue;
+                            other_stop.x = stop.x;
+                            other_stop.y = stop.y;
+
+                            if (other_stop.marked) {
+                                SVG(document.querySelector(`#pointer-${other_stop.form_ix}`)).animate({when: 'now', duration: 1}).transform({
+                                    scale: pointer_size,
+                                    origin: 'center',
+                                    tx: stop.x,
+                                    ty: stop.y
+                                });
+                                SVG(document.querySelector(`#pointer-text-${other_stop.form_ix}`))
+                                    .font({anchor: 'middle'})
+                                    .cx(stop.x + other_stop.text_x)
+                                    .cy(stop.y + other_stop.text_y - pointer_size * 20);
+                            } else {
+                                SVG(document.querySelector(`#pointer-${other_stop.form_ix}`)).animate({when: 'now', duration: 1}).cx(stop.x).cy(stop.y);
+                            }
+                        }
+                    }
                 }
 
                 window.addEventListener('mousemove', move_point);
@@ -742,7 +828,7 @@ function updateStops(stops, editable) {
                 })
             }
 
-            menu_instances.push(new BootstrapMenu(`#pointer-${i}`, {
+            menu_instances.push(new BootstrapMenu(`#pointer-${stop.form_ix}`, {
                 actionsGroups: [
                     ['deleteStop', 'renameStop', 'changeMarked', 'toggleArrow'],
                     ['moveForwards', 'moveBackwards'],
@@ -886,11 +972,13 @@ function updateStops(stops, editable) {
                         onClick: () => {
                             if (stop.template) {
                                 stop.template = undefined;
-                                document.querySelector(`#id_stops-${stop.form_ix}-template [selected]`).removeAttribute('selected');
+                                document.querySelector(`#id_stops-${stop.form_ix}-template`).value = '';
+                                updateStops(stops, editable);
                             } else {
                                 let modal = new bootstrap.Modal(document.querySelector('#bind-template-modal'));
                                 let select= document.querySelector('#select-template');
                                 let button = document.querySelector('#save-template-selection');
+                                select.querySelectorAll('option').forEach(opt => opt.remove());
                                 let opt = document.createElement('option');
                                 opt.value = '';
                                 opt.innerHTML = '-----';
@@ -900,19 +988,28 @@ function updateStops(stops, editable) {
                                     opt.value = templateId;
                                     opt.innerHTML = position_templates[templateId].name;
                                     if (templateId === stop.template) {
-                                        opt.selected = '';
+                                        opt.selected = true;
                                     }
                                     select.appendChild(opt);
                                 }
+                                select.value = stop.template;
                                 button.onclick = function () {
                                     // stops[i].poststrength = parseFloat(document.querySelector('#change-poststrength-input').value);
                                     // document.querySelector(`#id_stops-${stop.form_ix}-poststrength`).value = stops[i].poststrength;
                                     // modal.hide();
                                     // updateStops(stops, true);
+                                    stops[i].template = select.value;
+                                    console.log(stops);
+                                    document.querySelector(`#id_stops-${stop.form_ix}-template`).value = stops[i].template;
+                                    modal.hide();
+                                    updateStops(stops, editable);
+                                    updatePath(stops);
                                 }
                                 modal.show();
                                 document.querySelector('#change-poststrength-modal').addEventListener('shown.bs.modal', () => select.focus());
                             }
+                            // point_el.setAttributeNS(null, 'style', `fill: ${stop.template && editable ? 'blue' : 'red'};`);
+                            console.log(stops);
                         },
                         classNames: ['dropdown-item', 'alt-context-menu']
                     }
