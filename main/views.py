@@ -11,7 +11,7 @@ from django.core.mail import send_mail, BadHeaderError
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.forms import modelform_factory, inlineformset_factory
-from django.http import Http404, HttpResponseRedirect, HttpResponse, FileResponse
+from django.http import Http404, HttpResponseRedirect, HttpResponse, FileResponse, JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 
 import analytics
@@ -477,3 +477,22 @@ def create_map(request, slug: str):
 def view_document(request, slug: str):
     file = get_object_or_404(FileUpload, slug=slug)
     return FileResponse(file.file)
+
+
+def modify_position_template(request, pk):
+    if not request.user.is_staff or not request.method == 'POST':
+        return Http404
+
+    position_template = get_object_or_404(PositionTemplate, pk=pk)
+    print(request.POST)
+
+    if 'x' in request.POST.keys():
+        position_template.x = request.POST.get('x')
+    if 'y' in request.POST.keys():
+        position_template.y = request.POST.get('y')
+    if 'name' in request.POST.keys():
+        position_template.name = request.POST.get('name')
+
+    position_template.save()
+
+    return JsonResponse({'success': True})

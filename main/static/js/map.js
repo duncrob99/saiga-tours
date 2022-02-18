@@ -601,8 +601,8 @@ function updateStops(stops, editable) {
         if (stop.template !== undefined) {
             stop.x = position_templates[stop.template].x;
             stop.y = position_templates[stop.template].y;
-            if (stop.name === undefined) {
-                stop.name = position_templates[stop.templates].name;
+            if (stop.name === undefined || stop.name === '') {
+                stop.name = position_templates[stop.template].name;
             }
         }
 
@@ -704,39 +704,41 @@ function updateStops(stops, editable) {
 
             if (text_el) {
                 window.addEventListener('mousedown', click_ev => {
-                    let box = text_el.rbox();
-                    if (click_ev.x >= box.x && click_ev.x <= box.x2 && click_ev.y >= box.y && click_ev.y <= box.y2) {
-                        let start = {x: stops[i].text_x, y: stops[i].text_y};
+                    try {
+                        let box = text_el.rbox();
+                        if (click_ev.x >= box.x && click_ev.x <= box.x2 && click_ev.y >= box.y && click_ev.y <= box.y2) {
+                            let start = {x: stops[i].text_x, y: stops[i].text_y};
 
-                        function move_text(move_ev) {
-                            move_ev.preventDefault();
-                            stop.text_x = start.x + (move_ev.x - click_ev.x) / getScale(map_svg);
-                            stop.text_y = start.y + (move_ev.y - click_ev.y) / getScale(map_svg);
-                            stops[i] = stop;
+                            function move_text(move_ev) {
+                                move_ev.preventDefault();
+                                stop.text_x = start.x + (move_ev.x - click_ev.x) / getScale(map_svg);
+                                stop.text_y = start.y + (move_ev.y - click_ev.y) / getScale(map_svg);
+                                stops[i] = stop;
 
-                            text_el.font({anchor: 'middle'})
-                                .cx(stop.x + stop.text_x)
-                                .cy(stop.y + stop.text_y - pointer_size * 20);
+                                text_el.font({anchor: 'middle'})
+                                    .cx(stop.x + stop.text_x)
+                                    .cy(stop.y + stop.text_y - pointer_size * 20);
 
-                            if (stop.name === 'Something different') {
-                                console.log("Something different at", text_el.cx(), text_el.cy());
-                                console.log("Should be at: ", stop.x + stop.text_x, stop.y + stop.text_y - pointer_size * 20);
+                                if (stop.name === 'Something different') {
+                                    console.log("Something different at", text_el.cx(), text_el.cy());
+                                    console.log("Should be at: ", stop.x + stop.text_x, stop.y + stop.text_y - pointer_size * 20);
+                                }
+
+                                // Edit value in form
+                                document.getElementById(`id_stops-${stop.form_ix}-text_x`).value = stop.text_x;
+                                document.getElementById(`id_stops-${stop.form_ix}-text_y`).value = stop.text_y;
                             }
 
-                            // Edit value in form
-                            document.getElementById(`id_stops-${stop.form_ix}-text_x`).value = stop.text_x;
-                            document.getElementById(`id_stops-${stop.form_ix}-text_y`).value = stop.text_y;
+                            window.addEventListener('mousemove', move_text);
+
+                            function stop_dragging() {
+                                window.removeEventListener('mousemove', move_text);
+                                window.removeEventListener('mouseup', stop_dragging);
+                            }
+
+                            window.addEventListener('mouseup', stop_dragging);
                         }
-
-                        window.addEventListener('mousemove', move_text);
-
-                        function stop_dragging() {
-                            window.removeEventListener('mousemove', move_text);
-                            window.removeEventListener('mouseup', stop_dragging);
-                        }
-
-                        window.addEventListener('mouseup', stop_dragging);
-                    }
+                    } catch {}
                 })
             }
 
@@ -761,8 +763,8 @@ function updateStops(stops, editable) {
                             let modal = new bootstrap.Modal(document.querySelector('#rename-modal'));
                             let input = document.querySelector('#rename-stop-input');
                             let button = document.querySelector('#save-stop-rename');
-                            input.setAttribute('placeholder', stop.name);
-                            input.value = "";
+                            input.setAttribute('placeholder', stop.template ? position_templates[stop.template].name : stop.name);
+                            input.value = stop.template && stop.name === position_templates[stop.template].name ? '' : stop.name;
                             button.onclick = function () {
                                 stops[i].name = document.querySelector('#rename-stop-input').value;
                                 document.querySelector(`#id_stops-${stop.form_ix}-name`).value = stops[i].name;
@@ -877,6 +879,40 @@ function updateStops(stops, editable) {
                         onClick: () => {
                             stops[i].arrow_break = !stop.arrow_break;
                             updateStops(stops, true);
+                        },
+                        classNames: ['dropdown-item', 'alt-context-menu']
+                    }, bindTemplate: {
+                        name: stop.template ? 'Unbind template' : 'Bind template',
+                        onClick: () => {
+                            if (stop.template) {
+                                stop.template = undefined;
+                                document.querySelector(`#id_stops-${stop.form_ix}-template [selected]`).removeAttribute('selected');
+                            } else {
+                                let modal = new bootstrap.Modal(document.querySelector('#bind-template-modal'));
+                                let select= document.querySelector('#select-template');
+                                let button = document.querySelector('#save-template-selection');
+                                let opt = document.createElement('option');
+                                opt.value = '';
+                                opt.innerHTML = '-----';
+                                select.appendChild(opt);
+                                for (let [templateId, templateData] of Object.entries(position_templates)) {
+                                    let opt = document.createElement('option');
+                                    opt.value = templateId;
+                                    opt.innerHTML = position_templates[templateId].name;
+                                    if (templateId === stop.template) {
+                                        opt.selected = '';
+                                    }
+                                    select.appendChild(opt);
+                                }
+                                button.onclick = function () {
+                                    // stops[i].poststrength = parseFloat(document.querySelector('#change-poststrength-input').value);
+                                    // document.querySelector(`#id_stops-${stop.form_ix}-poststrength`).value = stops[i].poststrength;
+                                    // modal.hide();
+                                    // updateStops(stops, true);
+                                }
+                                modal.show();
+                                document.querySelector('#change-poststrength-modal').addEventListener('shown.bs.modal', () => select.focus());
+                            }
                         },
                         classNames: ['dropdown-item', 'alt-context-menu']
                     }
@@ -1172,5 +1208,23 @@ function resize_map_to_content(stops, width, height) {
             when: 'now',
             duration: zoom_transition
         }).ease('quartInOut').viewbox(`${min_bbox[0]} ${min_bbox[1]} ${min_bbox[2]} ${min_bbox[3]}`);
+    })
+}
+
+function edit_position_template(pk, data) {
+    let csrfToken = document.cookie.substring(document.cookie.indexOf('csrftoken=') + 'csrftoken='.length).split(';')[0];
+    $.ajax({
+        type: "POST",
+        url: `/edit/position_template/${pk}/`,
+        data: data,
+        success: data => {
+            console.log(`Changed position template ${pk} with response: `, data);
+        },
+        error: data => {
+            console.log(`Error response trying to change position template: ${data}`);
+        },
+        headers: {
+            'X-CSRFToken': csrfToken
+        }
     })
 }

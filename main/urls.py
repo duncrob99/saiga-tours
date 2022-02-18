@@ -29,5 +29,7 @@ urlpatterns = [
 
     path('doc/<slug:slug>/', views.view_document, name='view-doc'),
 
+    path('edit/position_template/<int:pk>/', views.modify_position_template, name='edit-position-template'),
+
     path('<path:path>', views.page, name='page')
 ]
