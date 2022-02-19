@@ -62,4 +62,4 @@ def js_str(value):
 
 @register.filter()
 def lazyload_html(value: str):
-    return mark_safe(value.replace('src=', 'data-src='))
+    return mark_safe(value.replace('src=', 'full-size-src='))
