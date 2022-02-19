@@ -71,9 +71,10 @@
                 </div>
                 <div class="modal-body">
                     <div class="d-flex">
-                            <select aria-label="Select Template" id="select-template" class="form-select flex-grow-1">
-                            </select>
-                            <button style="width: min-content; white-space: nowrap;" aria-label="Create New Template" id="new-template-button" class="form-control flex-shrink-1 btn btn-success">Create New</button>
+                            <select aria-label="Select Template" id="select-template" class="form-select flex-grow-1 mx-1"></select>
+                            <input hidden placeholder="Template Name" aria-label="New Template Name" id="new-template-input" class="form-control flex-grow-1 mx-1"/>
+                            <button style="width: min-content; white-space: nowrap;" aria-label="Create New Template" id="new-template-button" class="form-control flex-shrink-1 mx-1 btn btn-success">Create New</button>
+                            <button hidden style="width: min-content; white-space: nowrap;" aria-label="Use Existing Template" id="use-existing-template-button" class="form-control mx-1 flex-shrink-1 btn btn-success">Use Existing</button>
                     </div>
                 </div>
                 <div class="modal-footer">

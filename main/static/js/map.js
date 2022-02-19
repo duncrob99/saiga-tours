@@ -551,22 +551,10 @@ function updatePath(stops) {
             .fill('none')
             .stroke({color: '#106e2e', width: path_width})
             .id('stop_path');
-
-        // path_el = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        // path_el.id = 'stop_path';
-        // path_el.setAttributeNS(null, 'fill', 'none');
-        // path_el.setAttributeNS(null, 'stroke', '#106e2e');
-        // path_el.setAttributeNS(null, 'stroke-width', `${path_width}px`);
-        // path_el.setAttributeNS(null, 'd', path_str);
-        // map_svg.appendChild(path_el);
     } else {
         path_svg = SVG('#stop_path');
-        path_svg.animate({when: 'now', duration: 1})
+        path_svg
             .plot(path_str);
-
-        // path_el = document.querySelector('#stop_path');
-        // path_el.setAttributeNS(null, 'd', path_str);
-        // path_el.setAttributeNS(null, 'stroke-width', `${path_width}px`);
     }
 
     // Add arrows in the middle of each segment
@@ -695,7 +683,7 @@ function updateStops(stops, editable) {
                     stops[i] = stop;
                     updatePath(stops);
 
-                    point_svg.animate({when: 'now', duration: 1})
+                    point_svg
                         .cx(stop.x)
                         .cy(stop.y);
 
@@ -927,8 +915,15 @@ function updateStops(stops, editable) {
                                 updateStops(stops, editable);
                             } else {
                                 let modal = new bootstrap.Modal(document.querySelector('#bind-template-modal'));
-                                let select= document.querySelector('#select-template');
-                                let button = document.querySelector('#save-template-selection');
+                                let submitButton = document.querySelector('#save-template-selection');
+                                let creating_new = false;
+
+                                let select = document.querySelector('#select-template');
+                                let input = document.querySelector('#new-template-input');
+
+                                let newButton = document.querySelector('#new-template-button');
+                                let existingButton = document.querySelector('#use-existing-template-button');
+
                                 select.querySelectorAll('option').forEach(opt => opt.remove());
                                 let opt = document.createElement('option');
                                 opt.value = '';
@@ -944,17 +939,54 @@ function updateStops(stops, editable) {
                                     select.appendChild(opt);
                                 }
                                 select.value = stop.template;
-                                button.onclick = function () {
-                                    // stops[i].poststrength = parseFloat(document.querySelector('#change-poststrength-input').value);
-                                    // document.querySelector(`#id_stops-${stop.form_ix}-poststrength`).value = stops[i].poststrength;
-                                    // modal.hide();
-                                    // updateStops(stops, true);
-                                    stops[i].template = select.value;
-                                    document.querySelector(`#id_stops-${stop.form_ix}-template`).value = stops[i].template;
-                                    modal.hide();
-                                    updateStops(stops, editable);
-                                    updatePath(stops);
+
+                                submitButton.onclick = function () {
+                                    if (creating_new) {
+                                        create_position_template({
+                                            data: {
+                                                x: stop.x,
+                                                y: stop.y,
+                                                name: input.value,
+                                            },
+                                            success: (data) => {
+                                                console.log(data);
+                                                stops[i].template = data.pk;
+                                                position_templates[data.pk] = {x: parseFloat(data.x), y: parseFloat(data.y), name: data.name};
+                                                document.querySelector(`#id_stops-${stop.form_ix}-template`).value = data.pk;
+                                                modal.hide();
+                                                updateStops(stops, editable);
+                                                updatePath(stops);
+                                            },
+                                            error: (data) => {
+                                                console.warn(`Error adding position template, data: ${data}`);
+                                                modal.hide();
+                                            }
+                                        });
+                                    } else {
+                                        stops[i].template = select.value;
+                                        document.querySelector(`#id_stops-${stop.form_ix}-template`).value = stops[i].template;
+                                        modal.hide();
+                                        updateStops(stops, editable);
+                                        updatePath(stops);
+                                    }
                                 }
+
+                                newButton.onclick = function () {
+                                    select.setAttribute('hidden', true);
+                                    input.removeAttribute('hidden');
+                                    newButton.setAttribute('hidden', true);
+                                    existingButton.removeAttribute('hidden');
+                                    creating_new = true;
+                                }
+
+                                existingButton.onclick = function () {
+                                    input.setAttribute('hidden', true);
+                                    select.removeAttribute('hidden');
+                                    existingButton.setAttribute('hidden', true);
+                                    newButton.removeAttribute('hidden');
+                                    creating_new = false;
+                                }
+
                                 modal.show();
                                 document.querySelector('#change-poststrength-modal').addEventListener('shown.bs.modal', () => select.focus());
                             }
@@ -1268,6 +1300,20 @@ function edit_position_template(pk, data) {
         error: data => {
             console.log(`Error response trying to change position template: ${data}`);
         },
+        headers: {
+            'X-CSRFToken': csrfToken
+        }
+    })
+}
+
+function create_position_template(input) {
+    let csrfToken = document.cookie.substring(document.cookie.indexOf('csrftoken=') + 'csrftoken='.length).split(';')[0];
+    $.ajax({
+        type: "POST",
+        url: `/create/position_template/`,
+        data: input.data,
+        success: input.success,
+        error: input.error,
         headers: {
             'X-CSRFToken': csrfToken
         }

@@ -496,3 +496,18 @@ def modify_position_template(request, pk):
     position_template.save()
 
     return JsonResponse({'success': True})
+
+
+def create_position_template(request):
+    if not request.user.is_staff or not request.method == 'POST':
+        return Http404
+
+    position_template = PositionTemplate.objects.create(x=request.POST.get('x'), y=request.POST.get('y'), name=request.POST.get('name'))
+    position_template.save()
+
+    return JsonResponse({
+        'pk': position_template.pk,
+        'x': position_template.x,
+        'y': position_template.y,
+        'name': position_template.name
+    })
