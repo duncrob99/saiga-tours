@@ -98,7 +98,7 @@ function setVerticalHeight() {
 
 function minimiseSlides() {
     let slides = document.getElementsByClassName('mySlides');
-    let max_height = window.innerHeight * 0.8;
+    let max_height = 450;
     console.log('minimising')
     for (let i = 0; i < slides.length; i++) {
         let slide = slides[i];
@@ -126,8 +126,15 @@ function contractSlide(day) {
     scrollToView(slide);
 }
 
+function loadImages() {
+    document.querySelectorAll('.slideshow-container img').forEach(img => {
+        img.setAttribute('src', img.getAttribute('data-src'));
+    });
+}
+
 window.addEventListener('resize', setVerticalHeight);
 window.addEventListener('load', () => {
+    loadImages();
     minimiseSlides();
     setVerticalHeight();
 });

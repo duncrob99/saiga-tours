@@ -21,12 +21,12 @@
 }
 
 .mySlides.compact {
-  max-height: 30em;
+  max-height: 450px;
 }
 
 .mySlides.compact .card-body {
   mask-image: linear-gradient(to bottom, transparent 0%, transparent calc(80vh - 2em), white 100%);
-  -webkit-mask-image: linear-gradient(to bottom, black 0%, black calc(80vh - 100px - 20em), transparent calc(80vh - 100px - 4em), transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 0%, black calc(450px - 100px - 20em), transparent calc(450px - 100px - 4em), transparent 100%);
 }
 
 .mySlides.compact .expand-itinerary, .contract-itinerary {

@@ -58,3 +58,8 @@ def convert_None(value, js_str='undefined'):
 @register.filter()
 def js_str(value):
     return 'undefined' if value is None else mark_safe(f'"{value}"')
+
+
+@register.filter()
+def lazyload_html(value: str):
+    return mark_safe(value.replace('src=', 'data-src='))
