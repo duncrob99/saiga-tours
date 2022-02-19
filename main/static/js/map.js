@@ -167,6 +167,8 @@ function make_map_work(destinations, width, height, hoverable, stops, editable, 
             resize_map_to_countries(destinations, width, height, hoverable);
         })
     } else {
+        updateStops(stops, editable);
+        resize_map_to_content(stops, width, height);
         window.addEventListener('load', () => {
             updateStops(stops, editable);
             resize_map_to_content(stops, width, height);
