@@ -487,7 +487,7 @@ SVG.Path.prototype.segmentLengths = function () {
 
 SVG.Path.prototype.getArray = function () {
     let path_str = this.node.getAttribute('d');
-    let commaed_strs = path_str.replaceAll(/\s*C/g, ",C");
+    let commaed_strs = path_str.replaceAll(/\s*([CL])/gi, ",$1");
     let command_strs = commaed_strs.split(',');
     let command_arrs = command_strs.map(cmd => {
         let cmd_arr = [cmd[0]];
@@ -942,28 +942,42 @@ function updateStops(stops, editable) {
 
                                 submitButton.onclick = function () {
                                     if (creating_new) {
-                                        create_position_template({
-                                            data: {
-                                                x: stop.x,
-                                                y: stop.y,
-                                                name: input.value,
-                                            },
-                                            success: (data) => {
-                                                console.log(data);
-                                                stops[i].template = data.pk;
-                                                position_templates[data.pk] = {x: parseFloat(data.x), y: parseFloat(data.y), name: data.name};
-                                                document.querySelector(`#id_stops-${stop.form_ix}-template`).value = data.pk;
-                                                modal.hide();
-                                                updateStops(stops, editable);
-                                                updatePath(stops);
-                                            },
-                                            error: (data) => {
-                                                console.warn(`Error adding position template, data: ${data}`);
-                                                modal.hide();
-                                            }
-                                        });
+                                        if (!Object.values(position_templates).map(temp => temp.name).includes(input.value)) {
+                                            create_position_template({
+                                                data: {
+                                                    x: stop.x,
+                                                    y: stop.y,
+                                                    name: input.value,
+                                                },
+                                                success: (data) => {
+                                                    stops[i].template = parseInt(data.pk);
+                                                    position_templates[parseInt(data.pk)] = {
+                                                        x: parseFloat(data.x),
+                                                        y: parseFloat(data.y),
+                                                        name: data.name
+                                                    };
+
+                                                    let opt = document.createElement('option');
+                                                    opt.value = parseInt(data.pk);
+                                                    opt.text = data.name;
+                                                    document.querySelector(`#id_stops-${stop.form_ix}-template`).appendChild(opt);
+
+                                                    document.querySelector(`#id_stops-${stop.form_ix}-template`).value = parseInt(data.pk);
+                                                    modal.hide();
+                                                    updateStops(stops, editable);
+                                                    updatePath(stops);
+                                                },
+                                                error: (data) => {
+                                                    console.warn(`Error adding position template, data: ${data}`);
+                                                    modal.hide();
+                                                }
+                                            });
+                                        } else {
+                                            console.log('Duplicate template name');
+                                            input.classList.add('is-invalid');
+                                        }
                                     } else {
-                                        stops[i].template = select.value;
+                                        stops[i].template = parseInt(select.value);
                                         document.querySelector(`#id_stops-${stop.form_ix}-template`).value = stops[i].template;
                                         modal.hide();
                                         updateStops(stops, editable);
@@ -1023,6 +1037,7 @@ function updateStops(stops, editable) {
                         arrow_break: true
                     })
                     let new_form = document.querySelector('#form-template').cloneNode(true);
+
                     new_form.id = "";
                     new_form.innerHTML = new_form.innerHTML.replaceAll('%i', new_ix).replaceAll("%x", new_x)
                         .replaceAll('%y', new_y).replaceAll('%name', new_name)
@@ -1032,6 +1047,19 @@ function updateStops(stops, editable) {
                         document.querySelector('#editor-form').appendChild(new_form.childNodes[i].cloneNode(true));
                     }
                     document.querySelector('#id_stops-TOTAL_FORMS').value = new_ix + 1;
+
+                    let opt = document.createElement('option');
+                    opt.value = '';
+                    opt.text = '---------';
+                    opt.selected = true;
+                    document.querySelector(`select#id_stops-${new_ix}-template`).appendChild(opt);
+                    for (let template in position_templates) {
+                        let opt = document.createElement('option');
+                        opt.value = template;
+                        opt.text = position_templates[template].name;
+                        document.querySelector(`select#id_stops-${new_ix}-template`).appendChild(opt);
+                    }
+
                     updateStops(stops, true);
                 },
                 classNames: ['dropdown-item', 'alt-context-menu']

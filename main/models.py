@@ -421,7 +421,7 @@ class BannerPhoto(models.Model):
 class PositionTemplate(models.Model):
     x = models.FloatField(null=True, blank=True)
     y = models.FloatField(null=True, blank=True)
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, unique=True)
 
     def __str__(self):
         return self.name

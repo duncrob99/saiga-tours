@@ -484,7 +484,6 @@ def modify_position_template(request, pk):
         return Http404
 
     position_template = get_object_or_404(PositionTemplate, pk=pk)
-    print(request.POST)
 
     if 'x' in request.POST.keys():
         position_template.x = request.POST.get('x')
@@ -494,6 +493,15 @@ def modify_position_template(request, pk):
         position_template.name = request.POST.get('name')
 
     position_template.save()
+
+    for stop in Stop.objects.filter(template=position_template):
+        if 'x' in request.POST.keys():
+            stop.x = position_template.x
+        if 'y' in request.POST.keys():
+            stop.y = position_template.y
+        if 'name' in request.POST.keys() and stop.name is None:
+            stop.name = position_template.name
+        stop.save()
 
     return JsonResponse({'success': True})
 
