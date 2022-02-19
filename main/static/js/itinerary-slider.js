@@ -133,11 +133,10 @@ function loadImages() {
 }
 
 window.addEventListener('resize', setVerticalHeight);
-window.addEventListener('load', () => {
-    loadImages();
-    minimiseSlides();
-    setVerticalHeight();
-});
+
+minimiseSlides();
+setVerticalHeight();
+
 document.querySelectorAll('.dot').forEach((el, index) => {
     el.addEventListener('click', () => {
         currentSlide(index + 1);

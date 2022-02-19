@@ -17,7 +17,7 @@
                     <h5 id="day-{{ forloop.counter }}-title">{{ day.title }}</h5>
                 </div>
                 <div id="day-{{ forloop.counter }}-body" class="card-body">
-                    {{ day.body | lazyload_html }}
+                    {{ day.body | safe }}
                 </div>
                 <a id="day-{{ forloop.counter }}-expand" onclick="expandSlide({{ forloop.counter }})"
                    class="expand-itinerary nice-link">read more</a>
