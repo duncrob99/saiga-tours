@@ -58,7 +58,7 @@ class DraftHistory(models.Model):
 
 
 class Region(DraftHistory):
-    name = models.CharField(max_length=40)
+    name = models.CharField(max_length=400)
     slug = models.SlugField(primary_key=True)
     tour_blurb = RichTextWithPlugins(config_name='default')
 
@@ -67,7 +67,7 @@ class Region(DraftHistory):
 
 
 class Destination(DraftHistory):
-    name = models.CharField(max_length=40)
+    name = models.CharField(max_length=400)
     card_img = models.ImageField()
     slug = models.SlugField()
     region = models.ForeignKey(Region, on_delete=models.CASCADE, null=True, related_name='destinations')
@@ -136,7 +136,7 @@ class State(models.Model):
 
 
 class Tour(DraftHistory):
-    name = models.CharField(max_length=40)
+    name = models.CharField(max_length=400)
     slug = models.SlugField(unique=True)
     destinations = models.ManyToManyField(Destination, related_name='tours')
     start_date = models.DateField(null=True, blank=True)
@@ -236,7 +236,7 @@ class Article(DraftHistory):
     ]
 
     slug = models.SlugField(primary_key=True)
-    title = models.CharField(max_length=40)
+    title = models.CharField(max_length=400)
     creation = models.DateTimeField(auto_now_add=True)
     content = RichTextWithPlugins(config_name='default')
     excerpt = models.TextField(null=True, blank=True)
@@ -258,7 +258,7 @@ class Article(DraftHistory):
 
 class Page(DraftHistory):
     slug = models.SlugField()
-    title = models.CharField(max_length=40)
+    title = models.CharField(max_length=400)
     subtitle = models.CharField(max_length=200, default='')
     content = RichTextWithPlugins(config_name='default')
     card_img = models.ImageField()
@@ -340,8 +340,8 @@ class Settings(models.Model):
     accent_foreground = ColorField(default='#000000')
     accent_hover_background = ColorField(default='#87cefa')
     accent_hover_foreground = ColorField(default='#000000')
-    site_title = models.CharField(max_length=50, default='Crowley Tours')
-    catchphrase = models.CharField(max_length=50, default='We do cool tours')
+    site_title = models.CharField(max_length=500, default='Crowley Tours')
+    catchphrase = models.CharField(max_length=500, default='We do cool tours')
     logo = models.ImageField(null=True, blank=True)
     twitter_link = models.URLField(blank=True, null=True)
     instagram_link = models.URLField(blank=True, null=True)
@@ -391,7 +391,7 @@ class Settings(models.Model):
 
 class ContactSubmission(models.Model):
     from_email = models.EmailField()
-    subject = models.CharField(max_length=100)
+    subject = models.CharField(max_length=400)
     message = models.TextField()
     time = models.DateTimeField(auto_now_add=True)
     success = models.BooleanField(default=True)
