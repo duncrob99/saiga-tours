@@ -1,5 +1,6 @@
 from django import template
 from django.core.paginator import Page
+from django.utils.safestring import mark_safe
 
 from main.models import Settings
 
@@ -52,3 +53,8 @@ def pagination_end_buttons(page: Page):
 @register.filter()
 def convert_None(value, js_str='undefined'):
     return js_str if value is None else value
+
+
+@register.filter()
+def js_str(value):
+    return 'undefined' if value is None else mark_safe(f'"{value}"')

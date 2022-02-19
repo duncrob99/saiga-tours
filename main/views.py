@@ -11,7 +11,7 @@ from django.core.mail import send_mail, BadHeaderError
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.forms import modelform_factory, inlineformset_factory
-from django.http import Http404, HttpResponseRedirect, HttpResponse, FileResponse
+from django.http import Http404, HttpResponseRedirect, HttpResponse, FileResponse, JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 
 import analytics
@@ -218,7 +218,8 @@ def tour(request, slug):
                   'stop_forms': stops_formset,
                   'other_extensions': other_extensions,
                   'parent': parent,
-                  'extensions': extensions
+                  'extensions': extensions,
+                  'position_templates': PositionTemplate.objects.all()
               } | global_context(request)
     return render(request, 'main/tour.html', context)
 
@@ -476,3 +477,45 @@ def create_map(request, slug: str):
 def view_document(request, slug: str):
     file = get_object_or_404(FileUpload, slug=slug)
     return FileResponse(file.file)
+
+
+def modify_position_template(request, pk):
+    if not request.user.is_staff or not request.method == 'POST':
+        return Http404
+
+    position_template = get_object_or_404(PositionTemplate, pk=pk)
+
+    if 'x' in request.POST.keys():
+        position_template.x = request.POST.get('x')
+    if 'y' in request.POST.keys():
+        position_template.y = request.POST.get('y')
+    if 'name' in request.POST.keys():
+        position_template.name = request.POST.get('name')
+
+    position_template.save()
+
+    for stop in Stop.objects.filter(template=position_template):
+        if 'x' in request.POST.keys():
+            stop.x = position_template.x
+        if 'y' in request.POST.keys():
+            stop.y = position_template.y
+        if 'name' in request.POST.keys() and stop.name is None:
+            stop.name = position_template.name
+        stop.save()
+
+    return JsonResponse({'success': True})
+
+
+def create_position_template(request):
+    if not request.user.is_staff or not request.method == 'POST':
+        return Http404
+
+    position_template = PositionTemplate.objects.create(x=request.POST.get('x'), y=request.POST.get('y'), name=request.POST.get('name'))
+    position_template.save()
+
+    return JsonResponse({
+        'pk': position_template.pk,
+        'x': position_template.x,
+        'y': position_template.y,
+        'name': position_template.name
+    })

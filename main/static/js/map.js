@@ -61,7 +61,6 @@ if (btn) {
             // let style = document.createElementNS('http://www.w3.org/2000/svg', 'style');
             styled_svg.querySelector('defs').innerHTML = `<style>@font-face{font-family: "Poppin"; src:url("${result}") format("woff"); font-weight: normal; font-style: normal;}</style>`
             // styled_svg.appendChild(defs);
-            // console.log(result);
             let data = (new XMLSerializer()).serializeToString(styled_svg);
             let svgBlob = new Blob([data], {type: 'image/svg+xml;charset=utf-8'});
             let url = URL.createObjectURL(svgBlob);
@@ -256,7 +255,7 @@ function setCountryNames(destinations) {
         let path_el = SVG(`[title="${country[0]}"]`);
         if (path_el !== null) {
             // let text_el = SVG('.map svg').text(country[0]).cx(path_el.cx()).cy(path_el.cy());
-            // let point_array = [for (let path of path_el.array()) if (path.length === 3) path.slice(1)]
+            // let point_array = [for (let path of path_el.getArray()) if (path.length === 3) path.slice(1)]
             let {com, area} = findCentroid(path_el, country[0]);
             text_els.push(svg_map.text(country[0].toUpperCase()).font('size', 5).cx(com.x).cy(com.y).css('pointer-events', 'none').fill('black').stroke('none'));
             // svg_map.circle(1).fill('red').cx(com.x).cy(com.y);
@@ -279,7 +278,6 @@ function setCountryNames(destinations) {
         for (let text_el of text_els) {
             let other_els = text_els.filter(el => el !== text_el);
             for (let other_el of other_els) {
-                //console.log(rect_distance(text_el.bbox(), other_el.bbox()));
                 if (text_el.bbox().x < other_el.bbox().x2 + x_margin && text_el.bbox().x2 + x_margin > other_el.bbox().x && (text_el.bbox().y < other_el.bbox().y2 + y_margin && text_el.bbox().y2 + y_margin > other_el.bbox().y)) {
                     // if (rect_distance(text_el.bbox(), other_el.bbox()) <= margin) {
                     let direction = {
@@ -304,7 +302,6 @@ function setCountryNames(destinations) {
     // SVG('.map svg').rect(text_el.bbox().width + margin, text_el.bbox().height + margin).cx(text_el.cx()).cy(text_el.cy()).stroke('red').fill('none');
     // SVG('.map svg').rect(text_el.bbox().width + x_margin, text_el.bbox().height + y_margin).cx(text_el.cx()).cy(text_el.cy()).stroke('red').fill('none');
     // SVG('.map svg').rect(text_el.bbox().width, text_el.bbox().height).cx(text_el.cx()).cy(text_el.cy()).stroke('blue').fill('none');
-    // console.log(text_el.moved());
     // }
 }
 
@@ -348,7 +345,7 @@ function dist(x1, y1, x2, y2) {
 }
 
 function findCentroid(path) {
-    let polygons = path.array().reduce((polygons, path) => {
+    let polygons = path.getArray().reduce((polygons, path) => {
         if (path[0] === 'M') {
             polygons.push([{x: path[1], y: path[2]}]);
         } else if (path[0] === 'L') {
@@ -445,11 +442,6 @@ function createPoints(points) {
             let mouse = SVG(map_svg).point(ev.pageX, ev.pageY);
             let cur_scale = SVG(point_el).transform().scaleX;
             SVG(point_el).transform({scale: cur_scale, tx: point.x, ty: point.y, origin: 'bottom center'});
-            if (text_svg.text() === 'Mary') {
-                // console.log(text_svg.transform().translateX - point.x, text_svg.transform().translateY - point.y);
-                console.log(text_svg.cx() - point.x, text_svg.y() - point.y);
-                console.log(text_svg.font('size'));
-            }
             if (activation_circle.inside(mouse.x, mouse.y)) {
                 SVG(point_el).animate({when: 'now'}).ease('>').transform({
                     scale: pointer_size,
@@ -490,6 +482,24 @@ function createPoints(points) {
 }
 
 SVG.Path.prototype.segmentLengths = function () {
+    return this.segments().map(seg => SVG().path(seg).length());
+}
+
+SVG.Path.prototype.getArray = function () {
+    let path_str = this.node.getAttribute('d');
+    let commaed_strs = path_str.replaceAll(/\s*([CL])/gi, ",$1");
+    let command_strs = commaed_strs.split(',');
+    let command_arrs = command_strs.map(cmd => {
+        let cmd_arr = [cmd[0]];
+        cmd.substring(1).trim().split(' ').forEach(val => {
+            cmd_arr.push(parseFloat(val));
+        })
+        return cmd_arr;
+    })
+    return command_arrs;
+}
+
+SVG.Path.prototype.segments = function () {
     function get_endpoint(arr) {
         return {
             x: arr.slice(-2)[0],
@@ -505,11 +515,11 @@ SVG.Path.prototype.segmentLengths = function () {
     }
 
     let segments = [];
-    let last_point = get_endpoint(this.array()[0]);
+    let last_point = get_endpoint(this.getArray()[0]);
 
-    this.array().slice(1).forEach((el, i) => {
+    this.getArray().slice(1).forEach((el, i) => {
         let path_str = `${last_point.string()} ${get_string(el)}`;
-        segments.push(SVG().path(path_str).length());
+        segments.push(path_str);
         last_point = get_endpoint(el);
     })
 
@@ -518,7 +528,7 @@ SVG.Path.prototype.segmentLengths = function () {
 
 function updatePath(stops) {
     if (stops.length < 2) return;
-    let map_svg = document.querySelector('.map svg');
+    let map_svg = SVG(document.querySelector('.map svg'));
 
     let path_width = tour_scale * map_content_width * 0.006;
 
@@ -535,19 +545,16 @@ function updatePath(stops) {
 
     let path_str = pathString(x, y, prestrength, poststrength);
 
-    let path_el;
+    let path_svg;
     if (document.querySelector('#stop_path') === null) {
-        path_el = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        path_el.id = 'stop_path';
-        path_el.setAttributeNS(null, 'fill', 'none');
-        path_el.setAttributeNS(null, 'stroke', '#106e2e');
-        path_el.setAttributeNS(null, 'stroke-width', `${path_width}px`);
-        path_el.setAttributeNS(null, 'd', path_str);
-        map_svg.appendChild(path_el);
+        path_svg = map_svg.path(path_str)
+            .fill('none')
+            .stroke({color: '#106e2e', width: path_width})
+            .id('stop_path');
     } else {
-        path_el = document.querySelector('#stop_path');
-        path_el.setAttributeNS(null, 'd', path_str);
-        path_el.setAttributeNS(null, 'stroke-width', `${path_width}px`);
+        path_svg = SVG('#stop_path');
+        path_svg
+            .plot(path_str);
     }
 
     // Add arrows in the middle of each segment
@@ -555,29 +562,28 @@ function updatePath(stops) {
         arrow.remove();
     });
 
-    let segment_lengths = SVG(path_el).segmentLengths();
-    let unmarked_ix = [];
-    for (let i in stops) {
-        if (!stops[i].arrow_break) {
-            unmarked_ix.push(parseInt(i));
+    let all_segment_lengths = path_svg.segmentLengths();
+
+    let broken_segment_lengths = [];
+    for (let i=0; i < stops.length-1; i++) {
+        if (i === 0 || stops[i].arrow_break) {
+            broken_segment_lengths.push(all_segment_lengths[i]);
+        } else {
+            broken_segment_lengths[broken_segment_lengths.length-1] += all_segment_lengths[i];
         }
     }
-    for (let i of unmarked_ix.reverse()) {
-        segment_lengths[i - 1] += segment_lengths[i];
-        segment_lengths.splice(i, 1);
-    }
 
-    let tot_len = segment_lengths[0] / 2;
-    for (let i = 0; i < segment_lengths.length; i++) {
-        let point = SVG(path_el).pointAt(tot_len);
-        let after = SVG(path_el).pointAt(tot_len + 0.1);
-        let before = SVG(path_el).pointAt(tot_len - 0.1);
+    let tot_len = broken_segment_lengths[0] / 2;
+    for (let i = 0; i < broken_segment_lengths.length; i++) {
+        let point = path_svg.pointAt(tot_len);
+        let after = path_svg.pointAt(tot_len + 0.1);
+        let before = path_svg.pointAt(tot_len - 0.1);
         let angle = Math.atan2(after.y - before.y, after.x - before.x) * 180 / Math.PI - 90;
-        arrow_instances.push(SVG(map_svg).path('M-1 0 L0 1 L1 0').cx(point.x).cy(point.y).fill('none').stroke({
+        arrow_instances.push(map_svg.path('M-1 0 L0 1 L1 0').cx(point.x).cy(point.y).fill('none').stroke({
             width: 0.3,
             color: '#106e2e'
         }).rotate(angle).scale(0.3 * tour_scale * map_content_width / 18.5084228515625));
-        tot_len += segment_lengths[i] / 2 + segment_lengths[i + 1] / 2;
+        tot_len += broken_segment_lengths[i] / 2 + broken_segment_lengths[i + 1] / 2;
     }
 }
 
@@ -598,8 +604,15 @@ function updateStops(stops, editable) {
     for (let strIx in stops) {
         let i = parseInt(strIx);
         let stop = stops[i];
+        if (stop.template !== undefined) {
+            stop.x = position_templates[stop.template].x;
+            stop.y = position_templates[stop.template].y;
+            if (stop.name === undefined || stop.name === '') {
+                stop.name = position_templates[stop.template].name;
+            }
+        }
 
-        let point_el, text_el;
+        let point_el, text_el, point_svg;
         if (stop.marked) {
             text_el = SVG(map_svg).text(stop.name)
                 .font({anchor: 'middle'})
@@ -609,16 +622,17 @@ function updateStops(stops, editable) {
                 .cx(stop.x + stop.text_x)
                 .cy(stop.y + stop.text_y - pointer_size * 20)
                 .addClass('pointer-text')
-                .attr('id', `pointer-text-${i}`);
+                .attr('id', `pointer-text-${stop.form_ix}`);
 
-            point_el = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-            // point_el.setAttributeNS(null, 'd', 'm0 0s6-5.686 6-10a6 6 0 00-12 0c0 4.314 6 10 6 10zm0-7a3 3 0 110-6 3 3 0 010 6z');
-            let point_radius = 4;
-            point_el.setAttributeNS(null, 'd', `m0 0 m -${point_radius},0 a ${point_radius},${point_radius} 0 1,0 ${2 * point_radius},0 a ${point_radius},${point_radius} 0 1,0 ${-2 * point_radius},0`);
-            point_el.setAttributeNS(null, 'style', 'fill: red;');
-            point_el.setAttributeNS(null, 'transform', `translate(${stop.x}, ${stop.y}) scale(${pointer_size})`);
-            point_el.id = `pointer-${i}`;
-            point_el.classList.add('stop-pointer');
+            point_svg = SVG(map_svg).circle(8*pointer_size)
+                .cx(stop.x)
+                .cy(stop.y)
+                .fill(stop.template && editable ? 'blue' : 'red')
+                .stroke('green')
+                .id(`pointer-${stop.form_ix}`)
+                .addClass('stop-pointer');
+
+            point_el = point_svg.node;
 
             if (!editable) {
                 point_el.addEventListener('click', () => {
@@ -629,26 +643,28 @@ function updateStops(stops, editable) {
 
             point_el.addEventListener('mouseenter', () => {
                 SVG(point_el).animate({when: 'now'}).transform({
-                    scale: pointer_size * 1.2,
+                    scale: 1.2,
                     origin: 'center',
-                    tx: stop.x,
-                    ty: stop.y
                 });
                 document.body.style.cursor = "pointer";
             });
             point_el.addEventListener('mouseleave', () => {
                 SVG(point_el).animate({when: 'now'}).transform({
-                    scale: pointer_size,
+                    scale: 1,
                     origin: 'center',
-                    tx: stop.x,
-                    ty: stop.y
                 });
                 document.body.style.cursor = "auto";
             });
-            map_svg.appendChild(point_el);
         } else if (editable) {
-            point_el = SVG(map_svg).circle(tour_scale * map_content_width / 55).cx(stop.x).cy(stop.y).addClass('stop-pointer').node;
-            point_el.id = `pointer-${i}`;
+            point_svg = SVG(map_svg)
+                .circle(tour_scale * map_content_width / 55)
+                .cx(stop.x)
+                .cy(stop.y)
+                .fill(stop.template ? 'green' : 'grey')
+                .addClass('stop-pointer')
+                .id(`pointer-${i}`);
+
+            point_el = point_svg.node;
         }
 
         if (editable) {
@@ -667,21 +683,42 @@ function updateStops(stops, editable) {
                     stops[i] = stop;
                     updatePath(stops);
 
+                    point_svg
+                        .cx(stop.x)
+                        .cy(stop.y);
+
                     if (stop.marked) {
-                        SVG(point_el).animate({when: 'now', duration: 1}).transform({
-                            scale: pointer_size,
-                            origin: 'center',
-                            tx: stop.x,
-                            ty: stop.y
-                        });
                         text_el.font({anchor: 'middle'}).cx(stop.x + stop.text_x).cy(stop.y + stop.text_y - pointer_size * 20);
-                    } else {
-                        point_el.instance.animate({when: 'now', duration: 1}).cx(stop.x).cy(stop.y);
                     }
 
                     // Edit value in form
                     document.getElementById(`id_stops-${stop.form_ix}-x`).value = stop.x;
                     document.getElementById(`id_stops-${stop.form_ix}-y`).value = stop.y;
+
+                    // Move template
+                    if (stop.template !== undefined) {
+                        edit_position_template(stop.template, {x: stop.x, y: stop.y});
+                        for (let other_stop of stops) {
+                            if (stop.form_ix === other_stop.form_ix || other_stop.template !== stop.template) continue;
+                            other_stop.x = stop.x;
+                            other_stop.y = stop.y;
+
+                            if (other_stop.marked) {
+                                SVG(document.querySelector(`#pointer-${other_stop.form_ix}`)).animate({when: 'now', duration: 1}).transform({
+                                    scale: pointer_size,
+                                    origin: 'center',
+                                    tx: stop.x,
+                                    ty: stop.y
+                                });
+                                SVG(document.querySelector(`#pointer-text-${other_stop.form_ix}`))
+                                    .font({anchor: 'middle'})
+                                    .cx(stop.x + other_stop.text_x)
+                                    .cy(stop.y + other_stop.text_y - pointer_size * 20);
+                            } else {
+                                SVG(document.querySelector(`#pointer-${other_stop.form_ix}`)).animate({when: 'now', duration: 1}).cx(stop.x).cy(stop.y);
+                            }
+                        }
+                    }
                 }
 
                 window.addEventListener('mousemove', move_point);
@@ -697,43 +734,40 @@ function updateStops(stops, editable) {
 
             if (text_el) {
                 window.addEventListener('mousedown', click_ev => {
-                    let box = text_el.rbox();
-                    if (click_ev.x >= box.x && click_ev.x <= box.x2 && click_ev.y >= box.y && click_ev.y <= box.y2) {
-                        let start = {x: stops[i].text_x, y: stops[i].text_y};
+                    try {
+                        let box = text_el.rbox();
+                        if (click_ev.x >= box.x && click_ev.x <= box.x2 && click_ev.y >= box.y && click_ev.y <= box.y2) {
+                            let start = {x: stops[i].text_x, y: stops[i].text_y};
 
-                        function move_text(move_ev) {
-                            move_ev.preventDefault();
-                            stop.text_x = start.x + (move_ev.x - click_ev.x) / getScale(map_svg);
-                            stop.text_y = start.y + (move_ev.y - click_ev.y) / getScale(map_svg);
-                            stops[i] = stop;
+                            function move_text(move_ev) {
+                                move_ev.preventDefault();
+                                stop.text_x = start.x + (move_ev.x - click_ev.x) / getScale(map_svg);
+                                stop.text_y = start.y + (move_ev.y - click_ev.y) / getScale(map_svg);
+                                stops[i] = stop;
 
-                            text_el.font({anchor: 'middle'})
-                                .cx(stop.x + stop.text_x)
-                                .cy(stop.y + stop.text_y - pointer_size * 20);
+                                text_el.font({anchor: 'middle'})
+                                    .cx(stop.x + stop.text_x)
+                                    .cy(stop.y + stop.text_y - pointer_size * 20);
 
-                            if (stop.name === 'Something different') {
-                                console.log("Something different at", text_el.cx(), text_el.cy());
-                                console.log("Should be at: ", stop.x + stop.text_x, stop.y + stop.text_y - pointer_size * 20);
+                                // Edit value in form
+                                document.getElementById(`id_stops-${stop.form_ix}-text_x`).value = stop.text_x;
+                                document.getElementById(`id_stops-${stop.form_ix}-text_y`).value = stop.text_y;
                             }
 
-                            // Edit value in form
-                            document.getElementById(`id_stops-${stop.form_ix}-text_x`).value = stop.text_x;
-                            document.getElementById(`id_stops-${stop.form_ix}-text_y`).value = stop.text_y;
+                            window.addEventListener('mousemove', move_text);
+
+                            function stop_dragging() {
+                                window.removeEventListener('mousemove', move_text);
+                                window.removeEventListener('mouseup', stop_dragging);
+                            }
+
+                            window.addEventListener('mouseup', stop_dragging);
                         }
-
-                        window.addEventListener('mousemove', move_text);
-
-                        function stop_dragging() {
-                            window.removeEventListener('mousemove', move_text);
-                            window.removeEventListener('mouseup', stop_dragging);
-                        }
-
-                        window.addEventListener('mouseup', stop_dragging);
-                    }
+                    } catch {}
                 })
             }
 
-            menu_instances.push(new BootstrapMenu(`#pointer-${i}`, {
+            menu_instances.push(new BootstrapMenu(`#pointer-${stop.form_ix}`, {
                 actionsGroups: [
                     ['deleteStop', 'renameStop', 'changeMarked', 'toggleArrow'],
                     ['moveForwards', 'moveBackwards'],
@@ -754,8 +788,8 @@ function updateStops(stops, editable) {
                             let modal = new bootstrap.Modal(document.querySelector('#rename-modal'));
                             let input = document.querySelector('#rename-stop-input');
                             let button = document.querySelector('#save-stop-rename');
-                            input.setAttribute('placeholder', stop.name);
-                            input.value = "";
+                            input.setAttribute('placeholder', stop.template ? position_templates[stop.template].name : stop.name);
+                            input.value = stop.template && stop.name === position_templates[stop.template].name ? '' : stop.name;
                             button.onclick = function () {
                                 stops[i].name = document.querySelector('#rename-stop-input').value;
                                 document.querySelector(`#id_stops-${stop.form_ix}-name`).value = stops[i].name;
@@ -872,6 +906,107 @@ function updateStops(stops, editable) {
                             updateStops(stops, true);
                         },
                         classNames: ['dropdown-item', 'alt-context-menu']
+                    }, bindTemplate: {
+                        name: stop.template ? 'Unbind template' : 'Bind template',
+                        onClick: () => {
+                            if (stop.template) {
+                                stop.template = undefined;
+                                document.querySelector(`#id_stops-${stop.form_ix}-template`).value = '';
+                                updateStops(stops, editable);
+                            } else {
+                                let modal = new bootstrap.Modal(document.querySelector('#bind-template-modal'));
+                                let submitButton = document.querySelector('#save-template-selection');
+                                let creating_new = false;
+
+                                let select = document.querySelector('#select-template');
+                                let input = document.querySelector('#new-template-input');
+
+                                let newButton = document.querySelector('#new-template-button');
+                                let existingButton = document.querySelector('#use-existing-template-button');
+
+                                select.querySelectorAll('option').forEach(opt => opt.remove());
+                                let opt = document.createElement('option');
+                                opt.value = '';
+                                opt.innerHTML = '-----';
+                                select.appendChild(opt);
+                                for (let [templateId, templateData] of Object.entries(position_templates)) {
+                                    let opt = document.createElement('option');
+                                    opt.value = templateId;
+                                    opt.innerHTML = position_templates[templateId].name;
+                                    if (templateId === stop.template) {
+                                        opt.selected = true;
+                                    }
+                                    select.appendChild(opt);
+                                }
+                                select.value = stop.template;
+
+                                submitButton.onclick = function () {
+                                    if (creating_new) {
+                                        if (!Object.values(position_templates).map(temp => temp.name).includes(input.value)) {
+                                            create_position_template({
+                                                data: {
+                                                    x: stop.x,
+                                                    y: stop.y,
+                                                    name: input.value,
+                                                },
+                                                success: (data) => {
+                                                    stops[i].template = parseInt(data.pk);
+                                                    position_templates[parseInt(data.pk)] = {
+                                                        x: parseFloat(data.x),
+                                                        y: parseFloat(data.y),
+                                                        name: data.name
+                                                    };
+
+                                                    let opt = document.createElement('option');
+                                                    opt.value = parseInt(data.pk);
+                                                    opt.text = data.name;
+                                                    document.querySelector(`#id_stops-${stop.form_ix}-template`).appendChild(opt);
+
+                                                    document.querySelector(`#id_stops-${stop.form_ix}-template`).value = parseInt(data.pk);
+                                                    modal.hide();
+                                                    updateStops(stops, editable);
+                                                    updatePath(stops);
+                                                },
+                                                error: (data) => {
+                                                    console.warn(`Error adding position template, data: ${data}`);
+                                                    modal.hide();
+                                                }
+                                            });
+                                        } else {
+                                            console.log('Duplicate template name');
+                                            input.classList.add('is-invalid');
+                                        }
+                                    } else {
+                                        stops[i].template = parseInt(select.value);
+                                        document.querySelector(`#id_stops-${stop.form_ix}-template`).value = stops[i].template;
+                                        modal.hide();
+                                        updateStops(stops, editable);
+                                        updatePath(stops);
+                                    }
+                                }
+
+                                newButton.onclick = function () {
+                                    select.setAttribute('hidden', true);
+                                    input.removeAttribute('hidden');
+                                    newButton.setAttribute('hidden', true);
+                                    existingButton.removeAttribute('hidden');
+                                    creating_new = true;
+                                }
+
+                                existingButton.onclick = function () {
+                                    input.setAttribute('hidden', true);
+                                    select.removeAttribute('hidden');
+                                    existingButton.setAttribute('hidden', true);
+                                    newButton.removeAttribute('hidden');
+                                    creating_new = false;
+                                }
+
+                                modal.show();
+                                document.querySelector('#change-poststrength-modal').addEventListener('shown.bs.modal', () => select.focus());
+                            }
+                            // point_el.setAttributeNS(null, 'style', `fill: ${stop.template && editable ? 'blue' : 'red'};`);
+                        },
+                        classNames: ['dropdown-item', 'alt-context-menu']
                     }
                 }
             }))
@@ -902,6 +1037,7 @@ function updateStops(stops, editable) {
                         arrow_break: true
                     })
                     let new_form = document.querySelector('#form-template').cloneNode(true);
+
                     new_form.id = "";
                     new_form.innerHTML = new_form.innerHTML.replaceAll('%i', new_ix).replaceAll("%x", new_x)
                         .replaceAll('%y', new_y).replaceAll('%name', new_name)
@@ -911,6 +1047,19 @@ function updateStops(stops, editable) {
                         document.querySelector('#editor-form').appendChild(new_form.childNodes[i].cloneNode(true));
                     }
                     document.querySelector('#id_stops-TOTAL_FORMS').value = new_ix + 1;
+
+                    let opt = document.createElement('option');
+                    opt.value = '';
+                    opt.text = '---------';
+                    opt.selected = true;
+                    document.querySelector(`select#id_stops-${new_ix}-template`).appendChild(opt);
+                    for (let template in position_templates) {
+                        let opt = document.createElement('option');
+                        opt.value = template;
+                        opt.text = position_templates[template].name;
+                        document.querySelector(`select#id_stops-${new_ix}-template`).appendChild(opt);
+                    }
+
                     updateStops(stops, true);
                 },
                 classNames: ['dropdown-item', 'alt-context-menu']
@@ -1023,7 +1172,6 @@ function resize_map_to_countries(destinations, width, height, hoverable) {
                     start_ev = ev
                 })
                 dest_path.addEventListener('mouseup', (end_ev) => {
-                    console.log(start_ev, end_ev);
                     if (start_ev !== undefined) {
                         if ((start_ev.x - end_ev.x) ** 2 + (start_ev.y - end_ev.y) ** 2 < 10 ** 2) {
                             window.location.href = destinations[i][1];
@@ -1165,5 +1313,37 @@ function resize_map_to_content(stops, width, height) {
             when: 'now',
             duration: zoom_transition
         }).ease('quartInOut').viewbox(`${min_bbox[0]} ${min_bbox[1]} ${min_bbox[2]} ${min_bbox[3]}`);
+    })
+}
+
+function edit_position_template(pk, data) {
+    let csrfToken = document.cookie.substring(document.cookie.indexOf('csrftoken=') + 'csrftoken='.length).split(';')[0];
+    $.ajax({
+        type: "POST",
+        url: `/edit/position_template/${pk}/`,
+        data: data,
+        success: data => {
+            console.log(`Changed position template ${pk} with response: `, data);
+        },
+        error: data => {
+            console.log(`Error response trying to change position template: ${data}`);
+        },
+        headers: {
+            'X-CSRFToken': csrfToken
+        }
+    })
+}
+
+function create_position_template(input) {
+    let csrfToken = document.cookie.substring(document.cookie.indexOf('csrftoken=') + 'csrftoken='.length).split(';')[0];
+    $.ajax({
+        type: "POST",
+        url: `/create/position_template/`,
+        data: input.data,
+        success: input.success,
+        error: input.error,
+        headers: {
+            'X-CSRFToken': csrfToken
+        }
     })
 }

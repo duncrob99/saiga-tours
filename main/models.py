@@ -418,11 +418,20 @@ class BannerPhoto(models.Model):
         return self.img.name
 
 
+class PositionTemplate(models.Model):
+    x = models.FloatField(null=True, blank=True)
+    y = models.FloatField(null=True, blank=True)
+    name = models.CharField(max_length=100, unique=True)
+
+    def __str__(self):
+        return self.name
+
+
 class Stop(models.Model):
     x = models.FloatField(null=True, blank=True)
     y = models.FloatField(null=True, blank=True)
     tour = models.ForeignKey(Tour, on_delete=models.CASCADE, related_name='stops')
-    name = models.CharField(max_length=100, null=True)
+    name = models.CharField(max_length=100, null=True, blank=True)
     day = models.PositiveSmallIntegerField(default=1)
     order = models.PositiveSmallIntegerField(null=True)
     marked = models.BooleanField(default=True)
@@ -431,6 +440,7 @@ class Stop(models.Model):
     text_y = models.FloatField(default=0)
     prestrength = models.FloatField(default=1)
     poststrength = models.FloatField(default=1)
+    template = models.ForeignKey(PositionTemplate, on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
         return f'Stop {self.name} in {self.tour}'
@@ -445,6 +455,7 @@ class MapPoint(models.Model):
     name = models.CharField(max_length=100)
     activation_radius = models.FloatField(default=1)
     size = models.FloatField(default=1)
+    template = models.ForeignKey(PositionTemplate, on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
         return self.name
