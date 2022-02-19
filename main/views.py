@@ -1,3 +1,4 @@
+import os
 from dataclasses import dataclass
 from datetime import datetime
 from functools import reduce
@@ -427,7 +428,7 @@ def country_tours_info(request, region_slug, country_slug, detail_slug):
 
 
 def resized_imaged(request, filename: str, width: int = None, height: int = None):
-    image = Image.open(path.join(settings.MEDIA_ROOT, filename), mode='r')
+    image = Image.open(path.join(settings.MEDIA_ROOT, filename.removeprefix('media').removeprefix('/media/')), mode='r')
     if width is not None or height is not None:
         (old_width, old_height) = image.size
 

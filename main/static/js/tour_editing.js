@@ -76,6 +76,8 @@ function deactivateEditor() {
 }
 
 function activateEditor() {
+    make_images_fullsize();
+
     rich_fields: for (let editor_name in rich_field_map) {
         document.querySelector(`#${editor_name}`).setAttribute('contenteditable', true);
         for (let instance in CKEDITOR.instances) {
@@ -149,6 +151,16 @@ function activateEditor() {
 
     if (typeof updateStops === 'function') {
         updateStops(stops, true);
+    }
+}
+
+function make_images_fullsize() {
+    for (let editor_name in rich_field_map) {
+        document.querySelectorAll(`#${editor_name} img`).forEach(img => {
+            if (img.hasAttribute('full-size-src')) {
+                img.setAttribute('src', img.getAttribute('full-size-src'));
+            }
+        });
     }
 }
 
