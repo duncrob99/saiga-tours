@@ -8,7 +8,7 @@ from colorfield.fields import ColorField
 from django.core.exceptions import ValidationError
 from django.core.files import File
 from django.db import models
-from django.db.models import F
+from django.db.models import F, Q
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.templatetags.static import static
@@ -181,16 +181,30 @@ class Tour(DraftHistory):
         ordering = [F('state').asc(nulls_last=True), 'start_date', 'price']
 
 
-class ItineraryDay(models.Model):
-    tour = models.ForeignKey(Tour, on_delete=models.CASCADE, related_name='itinerary')
+class ItineraryTemplate(models.Model):
     title = models.CharField(max_length=100)
-    day = models.IntegerField()
     body = RichTextWithPlugins()
     history = HistoricalRecords()
+
+    def __str__(self):
+        return self.title
+
+
+class ItineraryDay(models.Model):
+    tour = models.ForeignKey(Tour, on_delete=models.CASCADE, related_name='itinerary')
+    title = models.CharField(max_length=100, null=True, blank=True)
+    day = models.IntegerField()
+    body = RichTextWithPlugins(null=True, blank=True)
+    history = HistoricalRecords()
+    template = models.ForeignKey(ItineraryTemplate, on_delete=models.SET_NULL, null=True, blank=True)
 
     class Meta:
         unique_together = [['tour', 'day']]
         ordering = [F('tour'), 'day']
+        constraints = [models.CheckConstraint(
+            check=Q(title__isnull=False, body__isnull=False) | Q(template__isnull=False),
+            name='template_or_content'
+        )]
 
     @property
     def date(self):
