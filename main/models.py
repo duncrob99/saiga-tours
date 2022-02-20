@@ -201,10 +201,10 @@ class ItineraryDay(models.Model):
     class Meta:
         unique_together = [['tour', 'day']]
         ordering = [F('tour'), 'day']
-        constraints = [models.CheckConstraint(
-            check=Q(title__isnull=False, body__isnull=False) | Q(template__isnull=False),
-            name='template_or_content'
-        )]
+        # constraints = [models.CheckConstraint(
+        #     check=Q(title__isnull=False, body__isnull=False) | Q(template__isnull=False),
+        #     name='template_or_content'
+        # )]
 
     @property
     def date(self):
