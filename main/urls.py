@@ -32,6 +32,7 @@ urlpatterns = [
 
     path('edit/position_template/<int:pk>/', views.modify_position_template, name='edit-position-template'),
     path('create/position_template/', views.create_position_template, name='create-position-template'),
+    path('create/itinerary_template/', views.create_itinerary_template, name='create-itinerary-template'),
 
     path('<path:path>', views.page, name='page')
 ]

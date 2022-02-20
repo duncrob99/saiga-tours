@@ -109,7 +109,7 @@ h5.card-title {
     white-space: nowrap;
 }
 
-.card:hover .btn {
+.btn.hoverable-accent:hover {
     background-color: var(--accent-hover-background);
     color: var(--accent-hover-foreground);
 }

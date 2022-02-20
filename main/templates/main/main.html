@@ -80,11 +80,19 @@
     </div>
 </div>
 
+<div class="loader">
+    <div class="spinner">
+        <div class="lds-ripple"><div></div><div></div></div>
+    </div>
+    <div class="fade-backdrop"></div>
+</div>
+
 {% include 'main/footer.html' %}
 {% cookie_banner %}
 {% sub_request %}
 
 </body>
+<script src="{% static 'js/spinner.js' %}"></script>
 {#<script src="https://unpkg.com/@popperjs/core@2"></script>#}
 {#<script src="https://unpkg.com/tippy.js@6"></script>#}
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"

@@ -12,12 +12,23 @@
         {% for day in itinerary %}
             <div id="day-{{ forloop.counter }}"
                  class="mySlides fade show card{% if forloop.counter == 1 %} active{% endif %}">
-                <div class="card-header">
-                    <h6 class="display-6">Day <span id="day-{{ forloop.counter }}-day">{{ day.day }}</span></h6>
-                    <h5 id="day-{{ forloop.counter }}-title">{{ day.title }}</h5>
-                </div>
+                {% if request.user.is_staff %}
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="display-6">Day <span id="day-{{ forloop.counter }}-day">{{ day.day }}</span></h6>
+                            <h5 id="day-{{ forloop.counter }}-title">{% if day.template is None or day.title is not None %}{{ day.title }}{% else %}{{ day.template.title }}{% endif %}</h5>
+                        </div>
+                        <button class="btn btn-success bind-itinerary-template-button"
+                                id="bind-itinerary-template-{{ forloop.counter }}" data-model-pk="{{ day.pk }}" data-model-day="{{ day.day }}" data-day-counter="{{ forloop.counter }}" style="height: min-content; padding: 10px;">{% if day.template %}Unb{% else %}B{% endif %}ind Template</button>
+                    </div>
+                {% else %}
+                    <div class="card-header">
+                        <h6 class="display-6">Day <span id="day-{{ forloop.counter }}-day">{{ day.day }}</span></h6>
+                        <h5 id="day-{{ forloop.counter }}-title">{% if day.template is None or day.title is not None %}{{ day.title }}{% else %}{{ day.template.title }}{% endif %}</h5>
+                    </div>
+                {% endif %}
                 <div id="day-{{ forloop.counter }}-body" class="card-body">
-                    {% if itinerary.template is None %}
+                    {% if day.template is None %}
                         {{ day.body | lazyload_html }}
                     {% else %}
                         {{ day.template.body | lazyload_html }}
@@ -48,6 +59,57 @@
 </div>
 <br>
 
+<div class="modal fade" data-bs-scroll="true" data-bs-backdrop="false" id="bind-itinerary-template-modal" tabindex="-1"
+     aria-labelledby="bindTemplateLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="bindTemplateLabel">Select Template</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="d-flex">
+                    <select aria-label="Select Template" id="select-itinerary-template" class="form-select flex-grow-1 mx-1"></select>
+                    <div class="input-group has-validation">
+                        <input hidden placeholder="Template Name" aria-label="New Template Name" id="new-itinerary-template-input" class="form-control flex-grow-1 mx-1"/>
+                        <div class="invalid-feedback">
+                            Duplicate Name
+                        </div>
+                    </div>
+                    <button style="width: min-content; white-space: nowrap;" aria-label="Create New Template" id="new-itinerary-template-button" class="form-control flex-shrink-1 mx-1 btn btn-success">Create New</button>
+                    <button hidden style="width: min-content; white-space: nowrap;" aria-label="Use Existing Template" id="use-existing-itinerary-template-button" class="form-control mx-1 flex-shrink-1 btn btn-success">Use Existing</button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="save-itinerary-template-selection">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% block js %}
+    <script>
+        let days = {};
+        {% for day in itinerary %}
+            days[{{ day.pk }}] = {
+                day: {{ day.day }},
+                position: {{ forloop.counter0 }},
+                {% if day.template %}
+                    template: {{ day.template.pk }},
+                {% endif %}
+                title: {{ day.title | js_str }},
+                body: {{ day.body | js_html_str }}
+            };
+        {% endfor %}
+
+        let itinerary_templates = {};
+        {% for template in itinerary_templates %}
+            itinerary_templates[{{ template.pk }}] = {
+                title: {{ template.title | js_str }},
+                body: {{ template.body | js_html_str }}
+            };
+        {% endfor %}
+    </script>
     <script src="{% static 'js/itinerary-slider.js' %}"></script>
 {% endblock %}

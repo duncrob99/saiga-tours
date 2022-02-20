@@ -199,3 +199,61 @@ body * {
     /*background: #555;*/
     background: var(--accent-hover-foreground);
 }
+
+.spinner {
+    position: fixed;
+    z-index: 999999999999999999999999999999;
+    left: 50vw;
+    transform: translate(-50%, -50%);
+    top: 50vh;
+    height: 80px;
+    width: 80px;
+}
+
+.spinner .lds-ripple {
+  display: inline-block;
+  position: relative;
+  width: 80px;
+  height: 80px;
+}
+.spinner .lds-ripple div {
+  position: absolute;
+  border: 4px solid #ffffff;
+  opacity: 1;
+  border-radius: 50%;
+  animation: lds-ripple 1s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+}
+.spinner .lds-ripple div:nth-child(2) {
+  animation-delay: -0.5s;
+}
+@keyframes lds-ripple {
+  0% {
+    top: 36px;
+    left: 36px;
+    width: 0;
+    height: 0;
+    opacity: 1;
+  }
+  100% {
+    top: 0px;
+    left: 0px;
+    width: 72px;
+    height: 72px;
+    opacity: 0;
+  }
+}
+
+.fade-backdrop {
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+}
+
+.loader:not(.active) {
+    visibility: hidden;
+    pointer-events: none;
+}

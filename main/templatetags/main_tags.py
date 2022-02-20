@@ -60,6 +60,14 @@ def js_str(value):
     return 'undefined' if value is None else mark_safe(f'"{value}"')
 
 
+def escape_quotes(string: str):
+    return string.replace('`', '\\`')
+
+@register.filter()
+def js_html_str(value):
+    return 'undefined' if value is None else mark_safe(f'`{escape_quotes(value)}`')
+
+
 @register.filter()
 def lazyload_html(value: str):
     return mark_safe(value.replace('src=', 'full-size-src='))

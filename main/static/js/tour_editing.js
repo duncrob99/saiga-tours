@@ -194,3 +194,128 @@ document.querySelectorAll('textarea').forEach(el => {
         el.style.height = `${el.scrollHeight + parseInt(getComputedStyle(el).lineHeight) / 2}px`;
     })
 })
+
+// Initialise buttons to bind itinerary day templates
+document.querySelectorAll('.bind-itinerary-template-button').forEach(btn => {
+    btn.addEventListener('click', () => {
+        let day = days[parseInt(btn.getAttribute('data-model-pk'))];
+        if (day.template) {
+            day.template = undefined;
+            document.querySelector(`#id_itinerary-${day.position}-template`).value = '';
+            console.log('Removed bind');
+            btn.innerText = 'Bind Template';
+        } else {
+            let modal = new bootstrap.Modal(document.querySelector('#bind-itinerary-template-modal'));
+            let submitButton = document.querySelector('#save-itinerary-template-selection');
+            let creating_new = false;
+
+            let select = document.querySelector('#select-itinerary-template');
+            let input = document.querySelector('#new-itinerary-template-input');
+
+            let newButton = document.querySelector('#new-itinerary-template-button');
+            let existingButton = document.querySelector('#use-existing-itinerary-template-button');
+
+            select.querySelectorAll('option').forEach(opt => opt.remove());
+            let opt = document.createElement('option');
+            opt.value = '';
+            opt.innerHTML = '-----';
+            select.appendChild(opt);
+            for (let [templateId, templateData] of Object.entries(itinerary_templates)) {
+                let opt = document.createElement('option');
+                opt.value = templateId;
+                opt.innerHTML = templateData.title;
+                if (templateId === day.template) {
+                    opt.selected = true;
+                }
+                select.appendChild(opt);
+            }
+            select.value = day.template;
+
+            submitButton.onclick = function () {
+                if (creating_new) {
+                    if (!Object.values(itinerary_templates).map(temp => temp.title).includes(input.value)) {
+                        show_spinner();
+                        create_itinerary_template({
+                            data: {
+                                title: input.value,
+                                body: document.querySelector(`#day-${day.position + 1}-body`).innerHTML
+                            },
+                            success: (data) => {
+                                day.template = parseInt(data.pk);
+                                itinerary_templates[parseInt(data.pk)] = {
+                                    title: data.title,
+                                    body: data.body
+                                };
+
+                                let opt = document.createElement('option');
+                                opt.value = parseInt(data.pk);
+                                opt.text = input.value;
+                                document.querySelector(`#id_itinerary-${day.position}-template`).appendChild(opt);
+
+                                document.querySelector(`#id_itinerary-${day.position}-template`).value = parseInt(data.pk);
+                                modal.hide();
+                                btn.textContent = 'Unbind Template';
+                                hide_spinner();
+                            },
+                            error: (data) => {
+                                console.warn(`Error adding itinerary template, data: ${data}`);
+                                modal.hide();
+                                hide_spinner();
+                            }
+                        });
+                    } else {
+                        console.log('Duplicate template name');
+                        input.classList.add('is-invalid');
+                    }
+                } else {
+                    day.template = parseInt(select.value);
+                    day.body = itinerary_templates[day.template].body;
+                    if (!day.title) {
+                        day.title = itinerary_templates[day.template].title;
+                    }
+                    document.querySelector(`#id_itinerary-${day.position}-template`).value = day.template;
+                    document.querySelector(`#id_itinerary-${day.position}-body`).value = day.body;
+                    document.querySelector(`#id_itinerary-${day.position}-title`).value = day.title;
+                    document.querySelector(`#day-${day.position + 1}-body`).innerHTML = day.body;
+                    document.querySelector(`#day-${day.position + 1}-title`).innerHTML = day.title;
+                    modal.hide();
+                    btn.textContent = 'Unbind Template';
+                }
+            }
+
+            newButton.onclick = function () {
+                select.setAttribute('hidden', true);
+                input.removeAttribute('hidden');
+                newButton.setAttribute('hidden', true);
+                existingButton.removeAttribute('hidden');
+                creating_new = true;
+            }
+
+            existingButton.onclick = function () {
+                input.setAttribute('hidden', true);
+                select.removeAttribute('hidden');
+                existingButton.setAttribute('hidden', true);
+                newButton.removeAttribute('hidden');
+                creating_new = false;
+            }
+
+            modal.show();
+            document.querySelector('#bind-itinerary-template-modal').addEventListener('shown.bs.modal', () => select.focus());
+        }
+        // point_el.setAttributeNS(null, 'style', `fill: ${stop.template && editable ? 'blue' : 'red'};`);
+    })
+})
+
+function create_itinerary_template(input) {
+    let csrfToken = document.cookie.substring(document.cookie.indexOf('csrftoken=') + 'csrftoken='.length).split(';')[0];
+    $.ajax({
+        type: "POST",
+        url: `/create/itinerary_template/`,
+        data: input.data,
+        success: input.success,
+        error: input.error,
+        headers: {
+            'X-CSRFToken': csrfToken
+        }
+    })
+}

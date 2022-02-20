@@ -1347,5 +1347,5 @@ function create_position_template(input) {
         headers: {
             'X-CSRFToken': csrfToken
         }
-    })
+    });
 }

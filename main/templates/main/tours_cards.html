@@ -41,12 +41,12 @@
                             <th class="table-icon"><i class="bi bi-coin"></i></th>
                             <td class="table-value">{{ settings.price_prefix }}{{ tour.price }}</td>
                             <th colspan="2">
-                                <button class="btn accent hoverable-accent">BOOK NOW</button>
+                                <a href="{% url 'tour' tour.slug %}{% if parent %}?parent={{ parent }}{% endif %}" class="btn accent hoverable-accent">BOOK NOW</a>
                             </th>
                         </tr>
                     </table>
-                    <a class="stretched-link"
-                       href="{% url 'tour' tour.slug %}{% if parent %}?parent={{ parent }}{% endif %}"></a>
+{#                    <a class="stretched-link"#}
+{#                       href="{% url 'tour' tour.slug %}{% if parent %}?parent={{ parent }}{% endif %}"></a>#}
                 </div>
             </div>
 

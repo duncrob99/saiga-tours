@@ -10,7 +10,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.core.mail import send_mail, BadHeaderError
 from django.core.paginator import Paginator
-from django.db.models import Q
+from django.db.models import Q, QuerySet
 from django.forms import modelform_factory, inlineformset_factory
 from django.http import Http404, HttpResponseRedirect, HttpResponse, FileResponse, JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
@@ -194,14 +194,26 @@ def tour(request, slug):
     if request.user.is_staff:
         form_factory = modelform_factory(Tour, exclude=())
         form = form_factory(request.POST or None, request.FILES or None, instance=tour_obj)
+
         itinerary_formset_factory = inlineformset_factory(Tour, ItineraryDay, exclude=('tour',), extra=0)
         itinerary_formset = itinerary_formset_factory(request.POST or None, request.FILES or None, instance=tour_obj)
+
         stops_formset_factory = inlineformset_factory(Tour, Stop, exclude=('tour',), extra=0)
         stops_formset = stops_formset_factory(request.POST or None, instance=tour_obj)
+
         if request.method == 'POST' and form.is_valid() and itinerary_formset.is_valid() and stops_formset.is_valid():
             form.save()
-            itinerary_formset.save()
             stops_formset.save()
+            days: QuerySet[ItineraryDay] = itinerary_formset.save()
+
+            for day in days:
+                if day.template:
+                    day.template.body = day.body
+                    day.template.save()
+                    for bound_day in day.template.itineraryday_set.all():
+                        bound_day.body = day.body
+                        bound_day.save()
+
             stops_formset = stops_formset_factory(None, instance=tour_obj)
             itinerary_formset = itinerary_formset_factory(None, request.FILES or None,
                                                           instance=tour_obj)
@@ -220,7 +232,8 @@ def tour(request, slug):
                   'other_extensions': other_extensions,
                   'parent': parent,
                   'extensions': extensions,
-                  'position_templates': PositionTemplate.objects.all()
+                  'position_templates': PositionTemplate.objects.all(),
+                  'itinerary_templates': ItineraryTemplate.objects.all()
               } | global_context(request)
     return render(request, 'main/tour.html', context)
 
@@ -430,7 +443,8 @@ def country_tours_info(request, region_slug, country_slug, detail_slug):
 def resized_imaged(request, filename: str, width: int = None, height: int = None):
     media_root = settings.MEDIA_ROOT
     removed_prefix = filename.removeprefix('media/').removeprefix('/media/')
-    image = Image.open(path.join(settings.MEDIA_ROOT, filename.removeprefix('media/').removeprefix('/media/')), mode='r')
+    image = Image.open(path.join(settings.MEDIA_ROOT, filename.removeprefix('media/').removeprefix('/media/')),
+                       mode='r')
     if width is not None or height is not None:
         (old_width, old_height) = image.size
 
@@ -513,7 +527,8 @@ def create_position_template(request):
     if not request.user.is_staff or not request.method == 'POST':
         return Http404
 
-    position_template = PositionTemplate.objects.create(x=request.POST.get('x'), y=request.POST.get('y'), name=request.POST.get('name'))
+    position_template = PositionTemplate.objects.create(x=request.POST.get('x'), y=request.POST.get('y'),
+                                                        name=request.POST.get('name'))
     position_template.save()
 
     return JsonResponse({
@@ -521,4 +536,17 @@ def create_position_template(request):
         'x': position_template.x,
         'y': position_template.y,
         'name': position_template.name
+    })
+
+
+def create_itinerary_template(request):
+    if not request.user.is_staff or not request.method == 'POST':
+        return Http404
+
+    template = ItineraryTemplate.objects.create(title=request.POST.get('title'),
+                                                body=request.POST.get('body'))
+    template.save()
+
+    return JsonResponse({
+        'pk': template.pk
     })
