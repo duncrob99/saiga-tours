@@ -67,6 +67,7 @@ def view(request):
     print(user.should_request_subscription, user.last_subscription_request, timezone.now())
     if user.should_request_subscription:
         user.last_subscription_request = timezone.now()
+        user.sub_dismissal_count += 1
         user.save()
     print(user.should_request_subscription, user.last_subscription_request, timezone.now())
 

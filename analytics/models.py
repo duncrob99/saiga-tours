@@ -1,4 +1,5 @@
 import datetime
+from datetime import timedelta
 import uuid
 from enum import Enum
 
@@ -30,14 +31,19 @@ class UserCookie(models.Model):
     accepted_cookies = models.BooleanField(default=False)
     subscription = models.OneToOneField(SubscriptionSubmission, on_delete=models.SET_NULL, null=True, blank=True)
     last_subscription_request = models.DateTimeField(null=True, blank=True)
+    sub_dismissal_count = models.SmallIntegerField(default=0)
 
-    subscription_reset = datetime.timedelta(days=1)
+    subscription_delays = [timedelta(minutes=20),
+                           timedelta(hours=1),
+                           timedelta(days=1),
+                           timedelta(days=3),
+                           timedelta(weeks=1)]
 
     @property
     def should_request_subscription(self):
         return self.subscription is None and \
                (self.last_subscription_request is None or
-                timezone.now() - self.last_subscription_request >= self.subscription_reset)
+                timezone.now() - self.last_subscription_request >= self.subscription_delays[min(len(self.subscription_delays), self.sub_dismissal_count)])
 
     @classmethod
     def calc_uas(cls):
