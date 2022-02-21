@@ -674,6 +674,22 @@ function updateStops(stops, editable) {
             document.querySelector(`#id_stops-${stop.form_ix}-marked`).checked = stop.marked;
             document.querySelector(`#id_stops-${stop.form_ix}-arrow_break`).checked = stop.arrow_break;
 
+            point_el.addEventListener('click', click_ev => {
+                if (click_ev.ctrlKey) {
+                    click_ev.preventDefault();
+                    if (i > 0) {
+                        stops.splice(i - 1, 0, stops.splice(i, 1)[0])
+                        updateStops(stops, true);
+                    }
+                } else if (click_ev.shiftKey) {
+                    click_ev.preventDefault();
+                    if (i < stops.length) {
+                        stops.splice(i + 1, 0, stops.splice(i, 1)[0])
+                        updateStops(stops, true);
+                    }
+                }
+            })
+
             point_el.addEventListener('mousedown', click_ev => {
                 setMapZooming(false);
                 let start = {x: stops[i].x, y: stops[i].y};
