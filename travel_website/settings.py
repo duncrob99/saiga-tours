@@ -29,7 +29,7 @@ SECRET_KEY = env("SECRET_KEY", default='django-insecure-+c1*+&n&%r5=)lirl@$3s415
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["coolwebsite.pythonanywhere.com", "127.0.0.1"]
+ALLOWED_HOSTS = ["coolwebsite.pythonanywhere.com", "127.0.0.1", "www.saigatours.com", "saigatours.com"]
 
 # Application definition
 
