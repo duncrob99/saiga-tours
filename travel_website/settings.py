@@ -98,7 +98,10 @@ DATABASES = {
         'NAME': env("DATABASE_NAME"),
         'HOST': env("DATABASE_HOST"),
         'USER': env("DATABASE_USER"),
-        'PASSWORD': env("DATABASE_PASSWORD")
+        'PASSWORD': env("DATABASE_PASSWORD"),
+        'OPTIONS': {
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
+        }
     }
 }
 
