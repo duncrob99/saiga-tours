@@ -383,6 +383,12 @@ class Settings(models.Model):
     frontpage_blog_pos = models.PositiveSmallIntegerField(default=4)
     frontpage_news_pos = models.PositiveSmallIntegerField(default=5)
 
+    # Footer info
+    contact_number = models.CharField(max_length=50, null=True, blank=True)
+    address = models.TextField(null=True, blank=True)
+    footer_email = models.CharField(max_length=200, null=True, blank=True)
+    copyright = models.CharField(max_length=200, null=True, blank=True)
+
     history = HistoricalRecords(excluded_fields=('active',))
 
     def save(self, *args, **kwargs):

@@ -167,15 +167,23 @@
             </div>
             <div class="row contact-footer">
                 <div class="col">
-                    Business Number: <a href="tel:+124322354">+ 12 43223354</a>
+                    {% if settings.contact_number %}
+                    Phone number: <a href="tel:{{ settings.contact_number }}">{{ settings.contact_number }}</a>
                     <br>
-                    3131 Doctors Drive. Los Angeles, California
+                    {% endif %}
+                    {% if settings.address %}
+                        Address: <a href="https://www.google.com/maps/search/?api=1&query={{ settings.address | urlencode }}">{{ settings.address }}</a>
                     <br>
-                    Complaints/Enquiries: (Email) <a href="mailto:solo@traveler.com">solo@traveler.com</a>
+                    {% endif %}
+                    {% if settings.footer_email %}
+                    Email address: <a href="mailto:{{ settings.footer_email }}">{{ settings.footer_email }}</a>
+                    {% endif %}
                 </div>
+                {% if settings.copyright %}
                 <div class="col d-flex justify-content-end">
-                    © 2020 Solo – Shinetheme
+                    © {{ settings.copyright }}
                 </div>
+                {% endif %}
             </div>
         </div>
     </div>
