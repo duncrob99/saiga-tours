@@ -11,7 +11,7 @@ from django.contrib import messages
 from django.core.mail import send_mail, BadHeaderError
 from django.core.paginator import Paginator
 from django.db.models import Q, QuerySet
-from django.forms import modelform_factory, inlineformset_factory
+from django.forms import modelform_factory, inlineformset_factory, modelformset_factory
 from django.http import Http404, HttpResponseRedirect, HttpResponse, FileResponse, JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 
@@ -381,9 +381,24 @@ def contact(request):
 
 
 def destinations(request):
+    if request.user.is_staff:
+        DestinationFormsetFactory = modelformset_factory(Destination, fields=('title_x', 'title_y', 'title_scale', 'title_rotation', 'title_curve'), extra=0)
+        destination_formset = DestinationFormsetFactory(request.POST or None, prefix='countries')
+        PointFormsetFactory = modelformset_factory(MapPoint, exclude=(), extra=0)
+        point_formset = PointFormsetFactory(request.POST or None, prefix='points')
+        form_context = {
+            'country_forms': destination_formset,
+            'point_forms': point_formset
+        }
+        if request.method == 'POST' and destination_formset.is_valid() and point_formset.is_valid():
+            destination_formset.save()
+            point_formset.save()
+    else:
+        form_context = {}
+
     context = {'destinations': Destination.visible(request.user.is_staff),
-               'points': MapPoint.objects.all()
-               } | global_context(request)
+               'points': MapPoint.objects.all(),
+               } | form_context | global_context(request)
     return render(request, 'main/destinations.html', context)
 
 

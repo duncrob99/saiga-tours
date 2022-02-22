@@ -52,7 +52,7 @@ if (btn) {
             el.setAttribute('font-family', stop_font);
         })
         styled_svg.querySelectorAll('.mapsvg-region').forEach(el => {
-            if (destinations.map(dest => dest[0]).includes(el.getAttribute('title'))) {
+            if (Object.entries(destinations).map(([pk, dest]) => dest.name).includes(el.getAttribute('title'))) {
                 el.style.fill = root_style.getPropertyValue('--accent-background');
             }
         })
@@ -125,6 +125,16 @@ function minBBox(bbox1, bbox2) {
 let map_settings;
 
 function make_map_work(destinations, width, height, hoverable, stops, editable, points) {
+    map_settings = {
+        destinations: destinations,
+        width: width,
+        height: height,
+        hoverable: hoverable,
+        stops: stops,
+        editable: editable,
+        points: points
+    }
+
     resize_map_to_countries(destinations, width, height, hoverable);
     if (stops !== undefined) {
         resize_map_to_stops(stops, width, height);
@@ -159,7 +169,10 @@ function make_map_work(destinations, width, height, hoverable, stops, editable, 
     document.querySelectorAll('.pre-load').forEach((el) => el.classList.remove('pre-load'));
 
     if (stops === undefined || stops.length === 0) {
-        setCountryNames(destinations);
+        setTimeout(() => {
+            setCountryNames(destinations, editable);
+        }, zoom_transition * 1.1);
+        // setCountryNames(destinations, editable);
     }
 
     if (stops === undefined) {
@@ -182,16 +195,6 @@ function make_map_work(destinations, width, height, hoverable, stops, editable, 
         }, zoom_transition * 1.1);
     }
 
-    map_settings = {
-        destinations: destinations,
-        width: width,
-        height: height,
-        hoverable: hoverable,
-        stops: stops,
-        editable: editable,
-        points: points
-    }
-
     setMapZooming(true);
 }
 
@@ -207,10 +210,14 @@ function setMapZooming(en) {
     }
 
     function resetZoom() {
-        resize_map_to_countries(map_settings.destinations, map_settings.width, map_settings.height, map_settings.hoverable);
+        if (map_settings.stops === undefined) {
+            resize_map_to_countries(map_settings.destinations, map_settings.width, map_settings.height, map_settings.hoverable);
+        } else {
+            resize_map_to_content(map_settings.stops, map_settings.width, map_settings.height);
+        }
     }
 
-    let map_svg = SVG(document.querySelector('.map svg'))
+    let map_svg = SVG('.map svg');
     if (en) {
         map_svg.panZoom({
             zoomMax: 20,
@@ -226,79 +233,284 @@ function setMapZooming(en) {
     }
 }
 
-function setCountryNames(destinations) {
+function setCountryNames(destinations, editable) {
     let svg_map = SVG('.map svg');
-    let text_els = [];
 
-    for (let country of destinations) {
-        //let text_el = new Array(svg_map.querySelectorAll('#country-labels text')).filter(el => el.innerText === country[0]);
-        // let text_els = Array.from(svg_map.querySelectorAll('#country-labels text tspan')).filter(el => el.textContent === country[0]);
-        // if (text_els.length > 0) {
-        //     let text_el = SVG(text_els[0]);
-        //     text_el.css('display', 'initial');
-        //
-        //     let path_el = document.querySelector(`[title="${country[0]}"]`);
-        //
-        //     path_el.addEventListener('mouseenter', () => {
-        //         //text_el.attr('fill', '#3a8f9e');
-        //         text_el.parent().animate({
-        //             swing: true,
-        //             when: 'now',
-        //         }).ease('bounce').scale(1.2);
-        //     })
-        //     path_el.addEventListener('mouseleave', () => {
-        //         //text_el.attr('fill', null);
-        //         text_el.parent().animate({
-        //             swing: true,
-        //             when: 'now',
-        //         }).scale(1 / 1.2);
-        //     })
-        // }
-        let path_el = SVG(`[title="${country[0]}"]`);
+    document.querySelectorAll('.map svg .country-name').forEach(txt => txt.remove());
+
+    for (let [pk, country] of Object.entries(destinations)) {
+        let path_el = SVG(`[title="${country.name}"]`);
         if (path_el !== null) {
-            // let text_el = SVG('.map svg').text(country[0]).cx(path_el.cx()).cy(path_el.cy());
-            // let point_array = [for (let path of path_el.getArray()) if (path.length === 3) path.slice(1)]
-            let {com, area} = findCentroid(path_el, country[0]);
-            text_els.push(svg_map.text(country[0].toUpperCase()).font('size', 5).cx(com.x).cy(com.y).css('pointer-events', 'none').fill('black').stroke('none'));
-            // svg_map.circle(1).fill('red').cx(com.x).cy(com.y);
+            let {com, area} = findCentroid(path_el, country.name);
+
+            destinations[pk].moveTo = function(x, y) {
+                country.curve_length = country.curve_length ?? destinations[pk].text_el.bbox().width;
+                let curve_height = country.title_pos.curve ?? 0;
+                let cos = Math.cos(Math.PI * (country.title_pos.rotation ?? 0)/180);
+                let sin = Math.sin(Math.PI * (country.title_pos.rotation ?? 0)/180);
+                destinations[pk].text_path.plot(`M${(x ?? com.x) - cos*country.curve_length/2} ${(y ?? com.y) - sin*country.curve_length/2} s ${cos*country.curve_length/2 + sin*curve_height} ${sin*country.curve_length/2 - curve_height * cos} ${cos*country.curve_length} ${sin * country.curve_length}`)
+            }
+
+            destinations[pk].draw = function() {
+                if (destinations[pk].text_el) destinations[pk].text_el.remove();
+                // if (destinations[pk].text_path) destinations[pk].text_path.remove();
+                destinations[pk].text_el = svg_map.text(country.name.toUpperCase())
+                    .font('size', 5*(country.title_pos.scale ?? 1))
+                    .cx(country.title_pos.x ?? com.x)
+                    .cy(country.title_pos.y ?? com.y)
+                    .transform({
+                        rotate: country.title_pos.rotation
+                    })
+                    .css('pointer-events', 'none')
+                    .fill('black')
+                    .stroke('none')
+                    .addClass('country-name');
+                // country.curve_length = country.curve_length ?? destinations[pk].text_el.bbox().width;
+                // if (country.name === 'Kazakhstan') console.log('curve length: ', country.curve_length);
+                // let curve_height = country.title_pos.curve ?? 0;
+                // let curve_height = 0;
+                // let cos = Math.cos(Math.PI * (country.title_pos.rotation ?? 0)/180);
+                // let sin = Math.sin(Math.PI * (country.title_pos.rotation ?? 0)/180);
+                // destinations[pk].text_path = destinations[pk].text_el.path(`M${(country.title_pos.x ?? com.x) - cos*country.curve_length/2} ${(country.title_pos.y ?? com.y) - sin*country.curve_length/2} s ${cos*country.curve_length/2 + sin*curve_height} ${sin*country.curve_length/2 - curve_height * cos} ${cos*country.curve_length} ${sin * country.curve_length}`)
+                //     .font('size', 5*(country.title_pos.scale ?? 1))
+                //     .transform({
+                //         rotate: country.title_pos.rotation
+                //     })
+                //     .css('pointer-events', 'none')
+                //     .fill('black')
+                //     .stroke('none')
+                //     .addClass('country-name');
+            }
+
+            country.draw();
+
+            // country.determine_length = function (accuracy) {
+            //     country.curve_length = undefined;
+            //     country.draw();
+            //     let prev_length = 0;
+            //     let changed = true;
+            //     let text_length = destinations[pk].text_el.length();
+            //     while (changed) {
+            //         let startpoint = destinations[pk].text_path.track().pointAt(0)
+            //         let endpoint = destinations[pk].text_path.track().pointAt(text_length);
+            //         country.curve_length = Math.sqrt((endpoint.x - startpoint.x) ** 2 + (endpoint.y - startpoint.y) ** 2);
+            //         changed = Math.abs(country.curve_length - prev_length) > (accuracy ?? 1e-1);
+            //         prev_length = country.curve_length;
+            //         destinations[pk].draw();
+            //     }
+            //     destinations[pk].draw();
+            // }
+            //
+            // country.determine_length();
         }
     }
 
-    text_els.forEach(el => {
-        el.remember('orig_x', el.cx());
-        el.remember('orig_y', el.cy());
+    let selected_country;
+    for (let [pk, country] of Object.entries(destinations)) {
+        let text_el = country.text_el;
+        if (editable) {
+            let handle_size = 0.3;
+            let bbox = SVG('.map svg').rect(text_el.bbox().width, text_el.bbox().height)
+                .cx(text_el.cx())
+                .cy(text_el.cy())
+                .rotate(country.title_pos.rotation)
+                .stroke('blue')
+                .fill('rgba(0, 0, 0, 0.0001)');
+            let resize_rect = svg_map.rect(handle_size * text_el.bbox().height, handle_size * text_el.bbox().height)
+                .center(text_el.cx(), text_el.cy())
+                .rotate(country.title_pos.rotation)
+                .cx(text_el.cx() + text_el.bbox().width/2)
+                .cy(text_el.cy()).stroke('none')
+                .fill('rgba(0, 0, 0, 0.0001)');
+            let rotate_rect = svg_map.rect(handle_size * text_el.bbox().height, handle_size * text_el.bbox().height)
+                .center(text_el.cx(), text_el.cy())
+                .rotate(country.title_pos.rotation)
+                .cx(text_el.cx() + text_el.bbox().width/2)
+                .cy(text_el.cy() - text_el.bbox().height/2)
+                .stroke('none').fill('rgba(0, 0, 0, 0.0001)');
+            // let curve_rect = svg_map.rect(2, 2).cx(text_el.cx()).cy(text_el.cy() - text_el.bbox().height/2).stroke('none').fill('rgba(0, 0, 0, 0.0001)');
 
-        el.moved = () => dist(el.cx(), el.cy(), el.remember('orig_x'), el.remember('orig_y'));
-    });
+            let current_angle = country.title_pos.rotation;
+            country.redraw_controls = function () {
+                bbox.rotate(-current_angle)
+                    .cx(country.text_el.cx())
+                    .cy(country.text_el.cy())
+                    .rotate(country.title_pos.rotation)
+                    .width(country.text_el.bbox().width)
+                    .height(country.text_el.bbox().height);
+                resize_rect
+                    .center(country.text_el.cx(), country.text_el.cy())
+                    .rotate(-current_angle)
+                    .rotate(country.title_pos.rotation)
+                    .cx(country.text_el.cx() + country.text_el.bbox().width/2)
+                    .cy(country.text_el.cy());
+                rotate_rect
+                    .center(country.text_el.cx(), country.text_el.cy())
+                    .rotate(-current_angle)
+                    .rotate(country.title_pos.rotation)
+                    .cx(country.text_el.cx() + country.text_el.bbox().width/2)
+                    .cy(country.text_el.cy() - country.text_el.bbox().height/2);
+                current_angle = country.title_pos.rotation;
+                // curve_rect.cx(country.text_el.cx())
+                //     .cy(country.text_el.cy() - country.text_el.bbox().height/2);
+            }
 
-    let change = true;
-    let x_margin = 5;
-    let y_margin = 1;
-    let margin = 5;
-    while (change) {
-        change = false;
-        for (let text_el of text_els) {
-            let other_els = text_els.filter(el => el !== text_el);
-            for (let other_el of other_els) {
-                if (text_el.bbox().x < other_el.bbox().x2 + x_margin && text_el.bbox().x2 + x_margin > other_el.bbox().x && (text_el.bbox().y < other_el.bbox().y2 + y_margin && text_el.bbox().y2 + y_margin > other_el.bbox().y)) {
-                    // if (rect_distance(text_el.bbox(), other_el.bbox()) <= margin) {
-                    let direction = {
-                        x: text_el.bbox().cx - other_el.bbox().cx,
-                        y: text_el.bbox().cy - other_el.bbox().cy
-                    };
-                    let mag = Math.sqrt(direction.x ** 2 + direction.y ** 2);
-                    direction = {x: direction.x / mag, y: direction.y / mag};
+            country.hide_controls = function () {
+                bbox.stroke({color: 'blue', width: 0.1});
+                resize_rect.stroke('none');
+                rotate_rect.stroke('none');
+                // curve_rect.stroke('none');
+            }
 
-                    if (text_el.moved() <= other_el.moved()) {
-                        text_el.dmove(direction.x, direction.y);
+            country.start_editing = function () {
+                if (selected_country) selected_country.stop_editing();
+                selected_country = country;
+                setMapZooming(false);
+                bbox.stroke({color: 'red', width: 0.5});
+                for (let [_, country] of Object.entries(destinations)) {
+                    country.text_el.node.removeEventListener('click', country.text_el.start_editing);
+                }
+                setTimeout(() => window.addEventListener('mousedown', country.second_click), 100);
+
+                resize_rect.stroke('red');
+                rotate_rect.stroke('red');
+                // curve_rect.stroke('red');
+            }
+
+            country.stop_editing = function (click) {
+                if (selected_country === country) {
+                    selected_country = undefined;
+                }
+                window.removeEventListener('click', country.second_click);
+                bbox.stroke({color: 'blue', width: 0.1});
+                country.hide_controls();
+                setMapZooming(true);
+            }
+
+            country.second_click = function (click) {
+                click.preventDefault();
+                let {x: click_x, y: click_y} = bbox.point(click.pageX, click.pageY);
+
+                if (resize_rect.inside(click_x, click_y)) {
+                    let init_scale = country.title_pos.scale ?? 1;
+                    let init_width = country.text_el.bbox().width;
+
+                    function resize_move(move) {
+                        let {x: move_x, y: move_y} = bbox.point(move.pageX, move.pageY);
+                        let change = 1 + (move_x - click_x) / init_width;
+                        country.title_pos.scale = change * init_scale;
+                        // country.title_pos.scale = ;
+                        document.querySelector(`[name=countries-${country.form_ix}-title_scale]`).value = country.title_pos.scale;
+                        bbox.cx(country.text_el.cx())
+                            .cy(country.text_el.cy());
+                        resize_rect.cx(country.text_el.cx() + country.text_el.bbox().width / 2)
+                            .cy(country.text_el.cy())
+                        country.draw();
+                        country.redraw_controls();
                     }
-                    other_el.dmove(-direction.x, -direction.y);
 
-                    change = true;
+                    function stop_resize() {
+                        svg_map.off('mousemove', resize_move);
+                        svg_map.off('mouseup', stop_resize);
+                    }
+
+                    svg_map.on('mousemove', resize_move);
+                    svg_map.on('mouseup', stop_resize);
+                } else if (rotate_rect.inside(click_x, click_y)) {
+                    function rotate_move(move) {
+                        move.preventDefault();
+                        let {x: move_x, y: move_y} = svg_map.point(move.pageX, move.pageY);
+                        let angle = Math.atan2(move_y - country.text_el.cy(), move_x - country.text_el.cx()) * 180/Math.PI;
+                        angle += Math.tan(country.text_el.bbox().height/country.text_el.bbox().width) * 180/Math.PI;
+                        country.title_pos.rotation = angle;
+                        document.querySelector(`[name=countries-${country.form_ix}-title_rotation]`).value = country.title_pos.rotation;
+                        country.draw();
+                        country.redraw_controls();
+                    }
+
+                    function stop_rotate() {
+                        svg_map.off('mousemove', rotate_move);
+                        svg_map.off('mouseup', stop_rotate);
+                    }
+
+                    svg_map.on('mousemove', rotate_move);
+                    svg_map.on('mouseup', stop_rotate);
+                } else if (bbox.inside(click_x, click_y)) {
+                    let start_x = country.text_el.cx();
+                    let start_y = country.text_el.cy();
+                    let rel_x = click_x - start_x;
+                    let rel_y = click_y - start_y;
+                    console.log(rel_x, rel_y);
+
+                    function mousemove(move) {
+                        move.preventDefault();
+                        let {x: move_x, y: move_y} = bbox.point(move.pageX, move.pageY);
+                        let svg_scale = (svg_map.point(5, 0).x - svg_map.point(0, 0).x)/5;
+                        country.title_pos.x = start_x + (move.pageX - click.pageX) * svg_scale;
+                        country.title_pos.y = start_y + (move.pageY - click.pageY) * svg_scale;
+
+                        // country.title_pos.x = move_x - rel_x;
+                        // country.title_pos.y = move_y - rel_y;
+                        country.draw();
+                        country.redraw_controls();
+
+                        document.querySelector(`[name=countries-${country.form_ix}-title_x]`).value = country.title_pos.x;
+                        document.querySelector(`[name=countries-${country.form_ix}-title_y]`).value = country.title_pos.y;
+                    }
+
+                    function mouseup() {
+                        svg_map.off('mousemove', mousemove);
+                        svg_map.off('mouseup', mouseup);
+                    }
+
+                    svg_map.on('mousemove', mousemove);
+                    svg_map.on('mouseup', mouseup);
+                } else {
+                    country.stop_editing();
                 }
             }
+
+            // text_el.node.addEventListener('click', start_editing);
+            bbox.click(country.start_editing);
         }
     }
+
+    // text_els.forEach(el => {
+    //     el.remember('orig_x', el.cx());
+    //     el.remember('orig_y', el.cy());
+    //
+    //     el.moved = () => dist(el.cx(), el.cy(), el.remember('orig_x'), el.remember('orig_y'));
+    //
+    // });
+    //
+    // let change = true;
+    // let x_margin = 5;
+    // let y_margin = 1;
+    // let margin = 5;
+    // while (change) {
+    //     change = false;
+    //     for (let text_el of text_els) {
+    //         let other_els = text_els.filter(el => el !== text_el);
+    //         for (let other_el of other_els) {
+    //             if (text_el.bbox().x < other_el.bbox().x2 + x_margin && text_el.bbox().x2 + x_margin > other_el.bbox().x && (text_el.bbox().y < other_el.bbox().y2 + y_margin && text_el.bbox().y2 + y_margin > other_el.bbox().y)) {
+    //                 // if (rect_distance(text_el.bbox(), other_el.bbox()) <= margin) {
+    //                 let direction = {
+    //                     x: text_el.bbox().cx - other_el.bbox().cx,
+    //                     y: text_el.bbox().cy - other_el.bbox().cy
+    //                 };
+    //                 let mag = Math.sqrt(direction.x ** 2 + direction.y ** 2);
+    //                 direction = {x: direction.x / mag, y: direction.y / mag};
+    //
+    //                 if (text_el.moved() <= other_el.moved()) {
+    //                     text_el.dmove(direction.x, direction.y);
+    //                 }
+    //                 other_el.dmove(-direction.x, -direction.y);
+    //
+    //                 change = true;
+    //             }
+    //         }
+    //     }
+    // }
 
     // for (let text_el of text_els) {
     // SVG('.map svg').rect(text_el.bbox().width + margin, text_el.bbox().height + margin).cx(text_el.cx()).cy(text_el.cy()).stroke('red').fill('none');
@@ -347,7 +559,7 @@ function dist(x1, y1, x2, y2) {
 }
 
 function findCentroid(path) {
-    let polygons = path.getArray().reduce((polygons, path) => {
+    let polygons = path.array().reduce((polygons, path) => {
         if (path[0] === 'M') {
             polygons.push([{x: path[1], y: path[2]}]);
         } else if (path[0] === 'L') {
@@ -388,7 +600,7 @@ function findCentroid(path) {
         coms.push(com);
         areas.push(Math.abs(twicearea / 2));
     }
-    let area = areas.reduce((sum, value) => sum + value);
+    let area = areas.reduce((sum, value) => sum + value, 0);
     let com = coms.reduce((sum, value, ix) => {
         return {x: sum.x + value.x * areas[ix] / area, y: sum.y + value.y * areas[ix] / area};
     }, {x: 0, y: 0});
@@ -397,7 +609,7 @@ function findCentroid(path) {
 }
 
 function createPoints(points) {
-    let map_svg = document.querySelector('.map svg');
+    let map_svg = SVG('.map svg');
 
     for (let i = 0; i < points.length; i++) {
         let point = points[i];
@@ -407,45 +619,27 @@ function createPoints(points) {
         let pointer_size = map_content_width * 0.001 * point.size;
         let default_pointer_scale = 1;
 
-        // let text_el = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-        // text_el.setAttributeNS(null, 'x', `${point.x}`);
-        // text_el.setAttributeNS(null, 'y', `${point.y}`);
-        // text_el.setAttributeNS(null, 'fill', 'black');
-        // text_el.setAttributeNS(null, 'stroke', 'none');
-        // text_el.setAttributeNS(null, 'style', `font-size: ${text_size}px;`);
-        // text_el.setAttributeNS(null, 'text-anchor', 'middle');
-        // text_el.setAttributeNS(null, 'transform', `scale(0.001)`);
-        // text_el.classList.add('pointer-text');
-        // text_el.id = `pointer-text-${i}`;
-        // let text = document.createTextNode(point.name);
-        // text_el.appendChild(text);
-        //SVG(text_el).path('m0 0q3-1 6 0');
-
-        let text_svg = SVG(map_svg).text(point.name).font({
+        let text_svg = map_svg.text(point.name).font({
             size: text_size,
             anchor: 'middle'
         }).fill('black').stroke('none').cx(point.x).y(point.y - text_size).opacity(0).css('pointer-events', 'none');
 
-        let point_el = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        // point_el.setAttributeNS(null, 'd', 'm0 0s6-5.686 6-10a6 6 0 00-12 0c0 4.314 6 10 6 10zm0-7a3 3 0 110-6 3 3 0 010 6z');
-        point_el.setAttributeNS(null, 'd', 'm0 0s6-5.686 6-10a6 6 0 00-12 0c0 4.314 6 10 6 10zm0-7a3 3 0 110-6 3 3 0 010 6z');
-        // point_el.setAttributeNS(null, 'd', `m0 0 m -${point_radius},0 a ${point_radius},${point_radius} 0 1,0 ${2 * point_radius},0 a ${point_radius},${point_radius} 0 1,0 ${-2 * point_radius},0`);
-        point_el.setAttributeNS(null, 'style', 'fill: red;');
-        point_el.setAttributeNS(null, 'transform', `translate(${point.x}, ${point.y}) scale(${0})`);
-        point_el.id = `pointer-${i}`;
-        point_el.classList.add('pointer');
+        let point_svg = map_svg.path('m0 0s6-5.686 6-10a6 6 0 00-12 0c0 4.314 6 10 6 10zm0-7a3 3 0 110-6 3 3 0 010 6z')
+            .fill('red')
+            .transform({
+                tx: point.x,
+                ty: point.y,
+                scale: 0
+            })
 
-        // map_svg.appendChild(text_el);
-        map_svg.appendChild(point_el);
-
-        let activation_circle = SVG(map_svg).circle(point.radius * 2 * 10).cx(point.x).cy(point.y).fill('#0000').stroke('#0000').css('pointer-events', 'none');
+        let activation_circle = map_svg.circle(point.radius * 2 * 10).cx(point.x).cy(point.y).fill('#0000').stroke('#0000').css('pointer-events', 'none');
         // text_svg.animate({when: 'now'}).transform({scale: 0.001, origin: 'center center'});
-        map_svg.addEventListener('mousemove', ev => {
-            let mouse = SVG(map_svg).point(ev.pageX, ev.pageY);
-            let cur_scale = SVG(point_el).transform().scaleX;
-            SVG(point_el).transform({scale: cur_scale, tx: point.x, ty: point.y, origin: 'bottom center'});
+        map_svg.node.addEventListener('mousemove', ev => {
+            let mouse = map_svg.point(ev.pageX, ev.pageY);
+            let cur_scale = point_svg.transform().scaleX;
+            point_svg.transform({scale: cur_scale, tx: point.x, ty: point.y, origin: 'bottom center'});
             if (activation_circle.inside(mouse.x, mouse.y)) {
-                SVG(point_el).animate({when: 'now'}).ease('>').transform({
+                point_svg.animate({when: 'now'}).ease('>').transform({
                     scale: pointer_size,
                     tx: point.x,
                     ty: point.y,
@@ -457,12 +651,10 @@ function createPoints(points) {
                     .transform({
                         scale: 1,
                         ty: -20 * pointer_size
-                        // ty: point.y - pointer_size * 20,
-                        // tx: point.x,
                     })
                     .opacity(1);
             } else {
-                SVG(point_el).animate({when: 'now'}).transform({
+                point_svg.animate({when: 'now'}).transform({
                     scale: 2 ** -10,
                     tx: point.x,
                     ty: point.y,
@@ -472,12 +664,9 @@ function createPoints(points) {
                     .animate({when: 'now'})
                     .transform({
                         scale: 2 ** -3,
-                        // tx: point.x,
-                        // ty: point.y,
                     })
                     .opacity(0);
             }
-            // text_svg.rebuild();
         })
     }
 
@@ -991,7 +1180,6 @@ function updateStops(stops, editable) {
                                                 }
                                             });
                                         } else {
-                                            console.log('Duplicate template name');
                                             input.classList.add('is-invalid');
                                         }
                                     } else {
@@ -1179,9 +1367,9 @@ function resize_map_to_countries(destinations, width, height, hoverable) {
 
     let dest_path;
     let min_bbox = [999999, 999999, -999999, -999999];
-    for (let i = 0; i < destinations.length; i++) {
+    for (let [pk, data] of Object.entries(destinations)) {
         //dest_path = document.querySelector('#' + destinations[i][0]);
-        dest_path = document.querySelector(`[title="${destinations[i][0]}"]`);
+        dest_path = document.querySelector(`[title="${data.name}"]`);
         if (dest_path !== null) {
             if (hoverable) {
                 dest_path.classList.add('available')
@@ -1190,9 +1378,9 @@ function resize_map_to_countries(destinations, width, height, hoverable) {
                     start_ev = ev
                 })
                 dest_path.addEventListener('mouseup', (end_ev) => {
-                    if (start_ev !== undefined) {
+                    if (start_ev !== undefined && !map_settings.editable) {
                         if ((start_ev.x - end_ev.x) ** 2 + (start_ev.y - end_ev.y) ** 2 < 10 ** 2) {
-                            window.location.href = destinations[i][1];
+                            window.location.href = data.url;
                         }
                         start_ev = undefined;
                     }

@@ -136,6 +136,7 @@
             <form style="margin: 20px;" method="post" enctype="multipart/form-data" id="editor-form">
                 {% bootstrap_form_errors form %}
                 {% bootstrap_formset_errors itinerary_forms %}
+                {% bootstrap_formset_errors stop_forms %}
                 {% csrf_token %}
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" value="" id="editing">
@@ -259,9 +260,12 @@
         {% endif %}
 
         <script>
-            let destinations = [];
+            let destinations = {};
             {% for destination in tour.destinations.all %}
-                destinations.push(["{{ destination.name }}", "{% url 'destination' destination.region.slug destination.slug %}"]);
+                destinations[{{ destination.pk }}] = {
+                    name: {{ destination.name | js_str }},
+                    url: "{% url 'destination' destination.region.slug destination.slug %}",
+                };
             {% endfor %}
 
             let stops = [];

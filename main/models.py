@@ -75,6 +75,12 @@ class Destination(DraftHistory):
     tour_blurb = RichTextWithPlugins(config_name='default')
     map_colour = ColorField(null=True, blank=True)
 
+    title_x = models.FloatField(null=True, blank=True)
+    title_y = models.FloatField(null=True, blank=True)
+    title_scale = models.FloatField(null=True, blank=True)
+    title_rotation = models.FloatField(null=True, blank=True)
+    title_curve = models.FloatField(null=True, blank=True)
+
     def __str__(self):
         return self.name
 

@@ -64,12 +64,10 @@ def view(request):
         session = Session.objects.create(user=user)
         request.session['session_id'] = str(session.session_id)
 
-    print(user.should_request_subscription, user.last_subscription_request, timezone.now())
     if user.should_request_subscription:
         user.last_subscription_request = timezone.now()
         user.sub_dismissal_count += 1
         user.save()
-    print(user.should_request_subscription, user.last_subscription_request, timezone.now())
 
     page, _ = Page.objects.get_or_create(path=request.POST.get('path'))
     page_view = PageView.objects.create(session=session, page=page)

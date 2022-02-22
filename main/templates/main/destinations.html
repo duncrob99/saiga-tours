@@ -1,4 +1,6 @@
 {% extends 'main/main.html' %}
+{% load django_bootstrap5 %}
+{% load main_tags %}
 {% load static %}
 
 {% block title %}
@@ -7,18 +9,104 @@
 
 {% block extrahead %}
     <link rel="stylesheet" href="{% static 'css/map.css' %}">
+    {% if request.user.is_staff %}
+        <link rel="stylesheet" href="{% static 'nouislider/nouislider_asdlj.css' %}">
+    {% endif %}
+{% endblock %}
+
+{% block banner %}
+    {% if request.user.is_staff %}
+        <button id="editor-button"
+                class="btn btn-outline-secondary d-inline-flex align-items-center accent hoverable-accent"
+                data-bs-toggle="offcanvas"
+                data-bs-target="#editor-offcanvas" aria-controls="editor-offcanvas" role="button"
+                style="float: left; position: sticky; margin: 50px; top: 200px;">
+            <span class="bi bi-pencil" style="font-size: 1.5rem"></span> <span style="margin-left: 4px;">Edit</span>
+        </button>
+    {% endif %}
 {% endblock %}
 
 {% block content %}
     {% include 'main/map.html' %}
+
+    {% if request.user.is_staff %}
+        <div class="offcanvas offcanvas-start" tabindex="-1" id="editor-offcanvas">
+            <a href="" id="create-map-button" class="btn accent hoverable-accent">
+                <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor"
+                     class="bi bi-plus" viewBox="0 0 16 16">
+                    <path d="M 15.817 0.113 A 0.5 0.5 0 0 1 16 0.5 v 14 a 0.5 0.5 0 0 1 -0.402 0.49 l -5 1 a 0.502 0.502 0 0 1 -0.196 0 L 5.5 15.01 l -4.902 0.98 A 0.5 0.5 0 0 1 0 15.5 v -14 a 0.5 0.5 0 0 1 0.402 -0.49 l 5 -1 a 0.5 0.5 0 0 1 0.196 0 L 10.5 0.99 l 4.902 -0.98 a 0.5 0.5 0 0 1 0.415 0.103 z M 10 1.91 l -4 -0.8 v 12.98 l 4 0.8 V 1.91 z m 1 12.98 l 4 -0.8 V 1.11 l -4 0.8 v 12.98 z m -6 -0.8 V 1.11 l -4 0.8 v 12.98 l 4 -0.8 z M 13 8 a 0.5 0.5 0 0 1 1 0 v 3 h 3 a 0.5 0.5 0 0 1 0 1 h -3 v 3 a 0.5 0.5 0 0 1 -1 0 v -3 h -3 a 0.5 0.5 0 0 1 0 -1 h 3 v -3 a 0.5 0.5 0 0 1 0.5 -0.5 z"></path>
+                </svg>
+            </a>
+            <form style="margin: 20px;" method="post" enctype="multipart/form-data" id="editor-form">
+                {% bootstrap_formset_errors point_forms %}
+                {% bootstrap_formset_errors country_forms %}
+                {% csrf_token %}
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="" id="editing">
+                    <label class="form-check-label" for="editing">
+                        In-place editing
+                    </label>
+                </div>
+                <div hidden>
+                    {% bootstrap_formset point_forms %}
+                    {% bootstrap_formset country_forms %}
+                </div>
+                <button class="btn btn-primary accent hoverable-accent">Submit Changes</button>
+            </form>
+        </div>
+
+        <div class="modal fade" data-bs-scroll="true" data-bs-backdrop="false" id="rename-modal" tabindex="-1"
+             aria-labelledby="renameModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Rename Stop</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input aria-label="Rename stop" type="text" id="rename-stop-input" class="form-control">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" id="save-stop-rename">Save changes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div hidden id="point-template">
+            <input hidden id="id_point-%i-x" name="point-%i-x" value="%x">
+            <input hidden id="id_point-%i-y" name="point-%i-y" value="%y">
+            <input hidden id="id_point-%i-name" name="point-%i-name" value="%name">
+            <input hidden id="id_activation_radius-%i-day" name="point-%i-activation_radius" value="%activation_radius">
+            <input hidden id="id_point-%i-size" name="point-%i-size" value="%size">
+            <input hidden id="id_point-%i-id" name="point-%i-id">
+            <select hidden id="id_point-%i-template" name="point-%i-template"></select>
+            <input hidden id="id_stops-%i-DELETE" name="point-%i-DELETE" type="checkbox">
+        </div>
+    {% endif %}
 {% endblock %}
 
 {% block js %}
+    {% if request.user.is_staff %}
+        <script src="{% static 'nouislider/nouislider.js' %}"></script>
+    {% endif %}
     <script src="{% static 'js/map.js' %}"></script>
     <script>
-        let destinations = [];
+        let destinations = {};
         {% for destination in destinations %}
-            destinations.push(["{{ destination.name }}", "{% url 'destination' destination.region.slug destination.slug %}"]);
+            destinations[{{ destination.pk }}] = {
+                name: {{ destination.name | js_str }},
+                url: "{% url 'destination' destination.region.slug destination.slug %}",
+                form_ix: {{ forloop.counter0 }},
+                title_pos: {
+                    x: {{ destination.title_x | convert_None }},
+                    y: {{ destination.title_y | convert_None }},
+                    scale: {{ destination.title_scale | convert_None }},
+                    rotation: {{ destination.title_rotation | convert_None }},
+                    curve: {{ destination.title_curve | convert_None }}
+                }
+            };
         {% endfor %}
 
         let points = [];
@@ -33,4 +121,5 @@
         {% endfor %}
         make_map_work(destinations, undefined, undefined, undefined, undefined, undefined, points);
     </script>
+    <script src="{% static 'js/destinations_editing.js' %}"></script>
 {% endblock %}
