@@ -121,5 +121,7 @@
         {% endfor %}
         make_map_work(destinations, undefined, undefined, undefined, undefined, undefined, points);
     </script>
-    <script src="{% static 'js/destinations_editing.js' %}"></script>
+    {% if request.user.is_staff %}
+        <script src="{% static 'js/destinations_editing.js' %}"></script>
+    {% endif %}
 {% endblock %}
