@@ -1,4 +1,5 @@
 {% extends 'main/main.html' %}
+{% load main_tags %}
 {% load static %}
 
 {% block title %}
@@ -183,16 +184,27 @@ Home
     {% endif %}
     <script src="{% static 'js/map.js' %}"></script>
     <script>
-        let destinations = [];
+        let destinations = {};
         {% for destination in destinations %}
-            destinations.push(["{{ destination.name }}", "{% url 'destination' destination.region.slug destination.slug %}"]);
+            destinations[{{ destination.pk }}] = {
+                name: {{ destination.name | js_str }},
+                url: "{% url 'destination' destination.region.slug destination.slug %}",
+                form_ix: {{ forloop.counter0 }},
+                title_pos: {
+                    x: {{ destination.title_x | convert_None }},
+                    y: {{ destination.title_y | convert_None }},
+                    scale: {{ destination.title_scale | convert_None }},
+                    rotation: {{ destination.title_rotation | convert_None }},
+                    curve: {{ destination.title_curve | convert_None }}
+                }
+            };
         {% endfor %}
 
         let points = [];
         {% for point in points %}
             points.push({
-                x: {{ point.x }},
-                y: {{ point.y }},
+                x: {% if point.template %}{{ point.template.x }}{% else %}{{ point.x }}{% endif %},
+                y: {% if point.template %}{{ point.template.y }}{% else %}{{ point.y }}{% endif %},
                 name: "{{ point.name }}",
                 radius: {{ point.activation_radius }},
                 size: {{ point.size }}
