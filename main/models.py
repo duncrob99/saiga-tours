@@ -214,7 +214,7 @@ class ItineraryDay(models.Model):
 
     @property
     def date(self):
-        return self.tour.start_date + timedelta(self.day - 1)
+        return self.tour.start_date + timedelta(days=self.day - 1)
 
     def __str__(self):
         return f'{self.tour} day {self.day}'
