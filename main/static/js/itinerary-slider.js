@@ -129,7 +129,7 @@ function contractSlide(day) {
 function loadImages() {
     document.querySelectorAll('.slideshow-container img').forEach(img => {
         let img_src = img.getAttribute('full-size-src');
-        let img_size = `${parseInt(getComputedStyle(img).width) * window.devicePixelRatio}x${parseInt(getComputedStyle(img).height) * window.devicePixelRatio}`;
+        let img_size = `${Math.ceil(parseInt(getComputedStyle(img).width) * window.devicePixelRatio)}x${Math.ceil(parseInt(getComputedStyle(img).height) * window.devicePixelRatio)}`;
         img_src = img_src.replace(/^\/media\//, '');
         img.setAttribute('src', `/resized-image/${img_src}/${img_size}/`);
     });
