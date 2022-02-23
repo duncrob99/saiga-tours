@@ -86,12 +86,12 @@
                                         {% for country in region.destinations.all_published %}
                                             <li>
                                                 <a class="dropdown-item d-flex justify-content-between"
-                                                   href="{% url 'destination' region.slug country.slug %}">{{ country.name }}
+                                                   href="{% url 'tours' region.slug country.slug %}">{{ country.name }}
                                                     <i class="bi bi-chevron-right"></i></a>
                                                 <ul class="dropdown-menu dropdown-submenu">
-                                                    {% for detail in country.details.all_published %}
+                                                    {% for detail in country.tour_info %}
                                                         <li><a class="dropdown-item d-flex justify-content-between"
-                                                               href="{% url 'destination-details' region.slug country.slug detail.slug %}">{{ detail.title }}</a>
+                                                               href="{% url 'tours' region.slug country.slug detail.slug %}">{{ detail.title }}</a>
                                                         </li>
                                                     {% endfor %}
                                                 </ul>
