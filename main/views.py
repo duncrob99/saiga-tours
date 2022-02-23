@@ -93,7 +93,7 @@ def global_context(request):
         FooterLink(subpage.title, reverse('page', args=[subpage.slug]))
         for subpage in page.children.visible(request.user.is_staff)
     ])
-                    for page in Page.visible(request.user.is_staff).filter(parent=None)]
+                    for page in Page.visible(request.user.is_staff).filter(parent=None, in_navbar=True)]
 
     footer_links += [FooterLink('tours', reverse('tours'), [
         FooterLink(region.name, reverse('tours', args=[region.slug]), [
