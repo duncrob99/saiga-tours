@@ -227,4 +227,11 @@ Home
             window.addEventListener('resize', size_images);
         })();
     </script>
+    <script>
+        (function() {
+            document.querySelectorAll('.separator path').forEach(sep => {
+                sep.style.transform = `translateX(-${Math.random()*50}px)`;
+            })
+        })();
+    </script>
 {% endblock %}
