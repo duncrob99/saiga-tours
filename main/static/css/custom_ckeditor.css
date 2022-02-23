@@ -107,3 +107,25 @@ p.block {
 li p {
     margin-bottom: 0;
 }
+
+img.shadow {
+    box-shadow: 5px 5px 7px rgba(0, 0, 0, 0.5);
+    border-radius: var(--border-radius);
+}
+
+img.saiga-border {
+    border-radius: var(--border-radius);
+    border-color: var(--accent-foreground);
+    border-width: 7px;
+    border-style: solid;
+}
+
+img.angle-left {
+    border-radius: var(--border-radius);
+    transform: rotate(-10deg);
+}
+
+img.angle-right {
+    border-radius: var(--border-radius);
+    transform: rotate(10deg);
+}

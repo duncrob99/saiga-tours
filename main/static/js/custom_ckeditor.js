@@ -9,9 +9,13 @@
         {name: 'Above', element: 'img', attributes: {'class': 'above-img'}},
         {name: 'Below', element: 'img', attributes: {'class': 'below-img'}},
         {name: 'Bordered', element: 'img', attributes: {'class': 'bordered'}},
+        {name: 'Shadow', element: 'img', attributes: {'class': 'shadow'}},
+        {name: 'Saiga Border', element: 'img', attributes: {'class': 'saiga-border'}},
+        {name: 'Angle Right', element: 'img', attributes: {'class': 'angle-right'}},
+        {name: 'Angle Left', element: 'img', attributes: {'class': 'angle-left'}},
         {name: 'Underlined Title', element: 'h3', attributes: {'class': 'underlined-title'}},
         {name: 'Faded', element: 'p', attributes: {'class': 'faded'}},
-        {name: 'Text block', element: 'p', attributes: {'class': 'block'}}
+        {name: 'Text block', element: 'p', attributes: {'class': 'block'}},
     ])
 })();
 
