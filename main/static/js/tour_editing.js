@@ -8,7 +8,6 @@ if (dated) {
 
 let initial_slider_button_width = document.querySelector(':root').style.getPropertyValue('--slider-button-width');
 
-CKEDITOR.disableAutoInline = true;
 let desc = document.querySelector('#tour-desc');
 desc.setAttribute('contenteditable', true);
 
@@ -25,10 +24,6 @@ if (dated) {
 }
 
 let csrf_token = document.querySelector('input[name="csrfmiddlewaretoken"]');
-
-CKEDITOR.stylesSet.add('img_styles', [
-    {name: 'Cool image', element: 'img', attributes: {'class': 'cool-img'}}
-])
 
 let rich_field_map = {
     'tour-desc': document.querySelector('textarea[name="description"]'),
@@ -85,26 +80,7 @@ function activateEditor() {
                 continue rich_fields;
             }
         }
-        let editor = CKEDITOR.inline(editor_name, {
-            extraPlugins: 'sourcedialog, uploadimage, sharedspace',
-            removePlugins: 'floatingspace, maximize, resize',
-            filebrowserImageBrowseUrl: '/ckeditor/browse/?csrfmiddlewaretoken=' + csrf_token,
-            filebrowserImageUploadUrl: "/ckeditor/upload/?csrfmiddlewaretoken=" + csrf_token,
-            image: {
-                styles: {
-                    options: [{
-                        name: 'cool',
-                        title: 'Cool image',
-                        className: 'cool-img',
-                        modelElements: ['imageInline']
-                    }]
-                }
-            },
-            stylesSet: 'img_styles',
-            sharedSpaces: {
-                top: 'editor-toolbar'
-            }
-        });
+        let editor = createEditor(editor_name);
         editor.on('saveSnapshot', () => rich_field_map[editor_name].value = document.querySelector(`#${editor_name}`).innerHTML);
         document.querySelector(`#${editor_name}`).addEventListener('input', () => rich_field_map[editor_name].value = document.querySelector(`#${editor_name}`).innerHTML);
     }

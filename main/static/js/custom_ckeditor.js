@@ -2,7 +2,50 @@
     for (let instanceName in CKEDITOR.instances) {
         customiseCK(CKEDITOR.instances[name]);
     }
+
+    CKEDITOR.disableAutoInline = true;
+
+    CKEDITOR.stylesSet.add('styles', [
+        {name: 'Above', element: 'img', attributes: {'class': 'above-img'}},
+        {name: 'Below', element: 'img', attributes: {'class': 'below-img'}},
+        {name: 'Bordered', element: 'img', attributes: {'class': 'bordered'}},
+        {name: 'Underlined Title', element: 'h3', attributes: {'class': 'underlined-title'}},
+        {name: 'Faded', element: 'p', attributes: {'class': 'faded'}},
+        {name: 'Text block', element: 'p', attributes: {'class': 'block'}}
+    ])
 })();
+
+function createEditor(id, config) {
+    let default_config = {
+        extraPlugins: 'sourcedialog, uploadimage, sharedspace, splitsection, imagefan',
+        removePlugins: 'exportpdf',
+        filebrowserImageBrowseUrl: '/ckeditor/browse/?csrfmiddlewaretoken=' + csrf_token,
+        filebrowserImageUploadUrl: "/ckeditor/upload/?csrfmiddlewaretoken=" + csrf_token,
+        image: {
+            styles: {
+                options: [{
+                    name: 'cool',
+                    title: 'Cool image',
+                    className: 'cool-img',
+                    modelElements: ['imageInline']
+                }]
+            }
+        },
+        stylesSet: 'styles',
+        sharedSpaces: {
+            top: 'editor-toolbar'
+        }
+    }
+    config = {
+        ...default_config,
+        ...config
+    }
+
+    let editor = CKEDITOR.inline(id, config);
+    customiseCK(editor);
+
+    return editor;
+}
 
 function customiseCK(instance) {
     // instance.config.allowedContent = true;

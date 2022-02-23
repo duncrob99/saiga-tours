@@ -29,6 +29,7 @@
 {% endblock %}
 
 {% block content %}
+    <div id="editor-toolbar"></div>
     <div class="container-fluid">
         <h1 class="display-1"><span id="title">{{ details.title }}</span>
             <a href="{% url 'destination' details.destination.region.slug details.destination.slug %}"><small

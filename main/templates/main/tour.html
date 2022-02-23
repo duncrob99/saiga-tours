@@ -313,8 +313,11 @@
             let dated = "{{ tour.dated }}" === "True";
         </script>
         <script src="https://cdn.jsdelivr.net/npm/litepicker/dist/litepicker.js"></script>
-        <script src="https://cdn.ckeditor.com/4.16.2/standard-all/ckeditor.js"></script>
+{#        <script src="https://cdn.ckeditor.com/4.16.2/standard-all/ckeditor.js"></script>#}
         <script src="https://cdn.jsdelivr.net/npm/luxon@2/build/global/luxon.min.js"></script>
+        <script src="{% static 'js/jscolor.min.js' %}"></script>
+        <script src="{% static 'js/ckeditor/ckeditor.js' %}"></script>
+        <script src="{% static 'js/custom_ckeditor.js' %}"></script>
         <script src="{% static 'nouislider/nouislider.js' %}"></script>
         <script src="{% static 'js/tour_editing.js' %}"></script>
     {% endif %}
