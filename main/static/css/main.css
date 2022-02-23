@@ -125,33 +125,35 @@ body * {
 }
 
 .display-1, .navbar-brand {
-    font-family: 'Caveat', sans-serif;
+    font-family: 'Burford Rustic Book', sans-serif;
+    color: var(--accent-foreground);
     font-weight: 700 !important;
 }
 
 .section-title {
-    font-family: 'Poppin', sans-serif;
+    font-family: 'Burford Rustic Book', sans-serif;
     font-weight: bold;
     text-align: center;
     line-height: 2rem;
     /*margin-top: 10rem;*/
-    font-size: 2.2rem;
+    font-size: 4rem;
+    color: var(--accent-foreground);
 }
 
-.section-title > div.underline {
-    content: var(--underline);
-    text-align: center;
-    position: relative;
-    left: 50%;
-    top: 0.8em;
-    margin-bottom: 5rem;
-    transform: translateX(-50%);
-}
+/*.section-title > div.underline {*/
+/*    content: var(--underline);*/
+/*    text-align: center;*/
+/*    position: relative;*/
+/*    left: 50%;*/
+/*    top: 0.8em;*/
+/*    margin-bottom: 5rem;*/
+/*    transform: translateX(-50%);*/
+/*}*/
 
-.section-title > div.underline.underline-left {
-    left: 0;
-    transform: none;
-}
+/*.section-title > div.underline.underline-left {*/
+/*    left: 0;*/
+/*    transform: none;*/
+/*}*/
 
 .center-align-link {
     position: absolute;
