@@ -1,4 +1,5 @@
 {% extends 'main/main.html' %}
+{% load main_tags %}
 {% load static %}
 
 {% block title %}
@@ -20,21 +21,34 @@
 {% block js %}
     <script src="{% static 'js/map.js' %}"></script>
     <script>
-        let destinations = [];
-        {% for country in countries %}
-            destinations.push(["{{ country.name }}", "{% url 'tours' country.region.slug country.slug %}"]);
+        let destinations = {};
+        {% for destination in countries %}
+            destinations[{{ destination.pk }}] = {
+                name: {{ destination.name | js_str }},
+                url: "{% url 'destination' destination.region.slug destination.slug %}",
+                form_ix: {{ forloop.counter0 }},
+                title_pos: {
+                    x: {{ destination.title_x | convert_None }},
+                    y: {{ destination.title_y | convert_None }},
+                    scale: {{ destination.title_scale | convert_None }},
+                    rotation: {{ destination.title_rotation | convert_None }},
+                    curve: {{ destination.title_curve | convert_None }}
+                }
+            };
         {% endfor %}
 
         let points = [];
         {% for point in points %}
             points.push({
-                x: {{ point.x }},
-                y: {{ point.y }},
+                x: {% if point.template %}{{ point.template.x }}{% else %}{{ point.x }}{% endif %},
+                y: {% if point.template %}{{ point.template.y }}{% else %}{{ point.y }}{% endif %},
                 name: "{{ point.name }}",
                 radius: {{ point.activation_radius }},
                 size: {{ point.size }}
             })
         {% endfor %}
-        make_map_work(destinations, undefined, undefined, undefined, undefined, undefined, points);
+        let navbar_height = document.querySelector('.navbar').getBoundingClientRect().height;
+        height = 0.8 * (document.documentElement.clientHeight - navbar_height);
+        make_map_work(destinations, undefined, height, undefined, undefined, undefined, points);
     </script>
 {% endblock %}
