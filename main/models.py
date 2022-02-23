@@ -60,7 +60,7 @@ class DraftHistory(models.Model):
 class Region(DraftHistory):
     name = models.CharField(max_length=400)
     slug = models.SlugField(primary_key=True)
-    tour_blurb = RichTextWithPlugins(config_name='default')
+    tour_blurb = RichTextWithPlugins(config_name='default', null=True, blank=True)
 
     def __str__(self):
         return self.name
