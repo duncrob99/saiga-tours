@@ -36,13 +36,13 @@ html, body {
 .banner-text > h1 {
     margin-bottom: 2rem;
     line-height: 0.8;
-    --outline-width: 2px;
+    --outline-width: 3px;
     --outline-opacity: 0.2;
-    /*text-outline: var(--outline-width) rgba(0, 0, 0, var(--outline-opacity));*/
-    /*-webkit-text-stroke: var(--outline-width) rgba(0, 0, 0, var(--outline-opacity));*/
-    text-outline: var(--outline-width) rgba(255, 255, 255, var(--outline-opacity));
-    -webkit-text-stroke: var(--outline-width) rgba(255, 255, 255, var(--outline-opacity));
-    font-size: 5rem;
+    text-outline: var(--outline-width) rgba(0, 0, 0, var(--outline-opacity));
+    -webkit-text-stroke: var(--outline-width) rgba(0, 0, 0, var(--outline-opacity));
+    /*text-outline: var(--outline-width) rgba(255, 255, 255, var(--outline-opacity));*/
+    /*-webkit-text-stroke: var(--outline-width) rgba(255, 255, 255, var(--outline-opacity));*/
+    font-size: 7rem;
 }
 
 #content-container {
