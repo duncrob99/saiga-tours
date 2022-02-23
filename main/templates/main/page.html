@@ -77,8 +77,8 @@
 
 {% block content %}
     <div id="header-content" class="d-flex flex-column justify-content-between">
+        <div class="breadcrumb">{% include 'main/page_breadcrumb.html' %}{{ page.title }}</div>
         <div class="heading d-flex flex-column justify-content-center">
-            <div class="header-subtitle">{{ page.title }}</div>
             <div class="d-flex justify-content-between align-items-center">
                 <h1 id="title" class="section-title">{{ page.title }}
                     <div class="underline underline-left"></div>
