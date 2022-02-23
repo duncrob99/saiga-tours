@@ -134,18 +134,6 @@
   transition: left 1s;
 }
 
-.mySlides * img {
-  border-radius: 20px;
-  border: 3px solid white;
-  box-shadow: 3px 3px 8px lightgrey;
-  transform: rotate(3deg);
-  transition: all 1s;
-}
-
-.mySlides * img:hover {
-  filter: grayscale(0.5);
-}
-
 .dot-container {
   text-align: center;
   margin: 20px;
