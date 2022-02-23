@@ -154,6 +154,7 @@ class Tour(DraftHistory):
     state = models.ForeignKey(State, on_delete=models.CASCADE, null=True, blank=True)
     extensions = models.ManyToManyField('self', blank=True, symmetrical=False)
     display = models.BooleanField(default=True)
+    keywords = models.TextField(null=True, blank=True)
 
     map_scale = models.FloatField(default=1)
 

@@ -11,6 +11,7 @@
                  end_date="{{ tour.end_date|date:'Y-m-d' }}"
                  price="{{ tour.price }}"
                  duration="{{ tour.duration }}"
+                 keywords="{{ tour.keywords }}"
                  destinations="{% for destination in tour.destinations.all %}
                         {% if forloop.counter > 1 %} {% endif %}{{ destination.slug }}{% endfor %}"
                  hidden class="tour-data">
