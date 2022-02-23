@@ -14,22 +14,72 @@
             background-color: {{ settings.accent_background }};
             color: {{ settings.accent_foreground }}
         }
+
+        #header-banner {
+            width: 100%;
+            height: 356px;
+            object-fit: cover;
+            position: absolute;
+            z-index: -1;
+        }
+
+        #header-banner.blog-banner {
+            object-position: 50% 50%;
+        }
+
+        #header-banner.news-banner {
+            object-position: 50% 70%;
+        }
+
+        #header-content {
+            height: 356px;
+            position: relative;
+            padding-left: 24px;
+        }
+
+        .breadcrumb {
+            color: var(--accent-hover-foreground);
+            width: max-content;
+            white-space: nowrap;
+        }
+
+        .breadcrumb a {
+            color: black;
+            text-decoration: none;
+        }
+
+        .breadcrumb a:hover {
+            color: var(--accent-hover-foreground);
+        }
+
+        #content-container {
+            padding-top: 1rem !important;
+        }
     </style>
 {% endblock %}
 
-{% block content %}
-    <div class="container">
-        <div class="heading d-flex justify-content-between align-items-center">
-            <h1 class="display-1">{{ title }}</h1>
-            <button id="filter-button" class="btn btn-outline-secondary d-inline-flex align-items-center"
-                    data-bs-toggle="offcanvas"
-                    data-bs-target="#filter-sidebar" aria-controls="filter-sidebar" role="button" style="float: right">
-                <span class="bi bi-search" style="font-size: 1.5rem"></span> <span
-                    style="margin-left: 4px;">Search</span>
-            </button>
-        </div>
-        <hr>
+{% block banner %}
+    {% if title == 'Blog Posts' %}
+        <img src="{% static 'images/blog_banner.jpg' %}" class="blog-banner" id="header-banner"/>
+    {% else %}
+        <img src="{% static 'images/news_banner.jfif' %}" class="news-banner" id="header-banner"/>
+    {% endif %}
+{% endblock %}
 
+{% block content %}
+    <div id="header-content" class="d-flex flex-column justify-content-between">
+        <div class="breadcrumb"><a href="{% url 'front-page' %}">Home</a> <i class="bi bi-dot"></i> Tours</div>
+        <div class="heading d-flex flex-column justify-content-center">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1 class="section-title">{{ title }}
+                    <div class="underline underline-left"></div>
+                </h1>
+            </div>
+        </div>
+        <div></div>
+    </div>
+
+    <div class="container">
         {% for article in page_obj %}
             <div class="row m-4">
                 <div class="card g-0 article-card">
