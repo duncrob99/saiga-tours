@@ -88,7 +88,7 @@ Home
                 {% include 'main/separator.svg' with colour=row.colour pos="post" %}
             {% elif row.type == 'map' %}
                 <div {# class="wide-bg" #} style='--background: #e1f8ff'>
-                    {% include 'main/map.html' %}
+                    {% include 'main/map.html' with no_controls=True %}
                 </div>
             {% elif row.type == 'highlight' %}
                 <div class="row m-5 d-flex align-items-stretch">
