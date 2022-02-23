@@ -16,12 +16,13 @@
         {name: 'Underlined Title', element: 'h3', attributes: {'class': 'underlined-title'}},
         {name: 'Faded', element: 'p', attributes: {'class': 'faded'}},
         {name: 'Text block', element: 'p', attributes: {'class': 'block'}},
+        {name: 'Styled table', element: 'table', attributes: {'class': 'styled-table'}}
     ])
 })();
 
 function createEditor(id, config) {
     let default_config = {
-        extraPlugins: 'sourcedialog, uploadimage, sharedspace, splitsection, imagefan',
+        extraPlugins: 'sourcedialog, uploadimage, sharedspace, splitsection, imagefan, tableresize',
         removePlugins: 'exportpdf',
         filebrowserImageBrowseUrl: '/ckeditor/browse/?csrfmiddlewaretoken=' + csrf_token,
         filebrowserImageUploadUrl: "/ckeditor/upload/?csrfmiddlewaretoken=" + csrf_token,
