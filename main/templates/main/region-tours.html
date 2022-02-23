@@ -12,7 +12,9 @@
 
 {% block content %}
     {% include 'main/map.html' with destinations=countries %}
+    {% if region.tour_blurb %}
     <hr>
+    {% endif %}
     {{ region.tour_blurb | safe }}
     <hr>
     {% include 'main/tours_cards.html' %}
