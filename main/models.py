@@ -392,6 +392,7 @@ class Settings(models.Model):
     history = HistoricalRecords(excluded_fields=('active',))
 
     def save(self, *args, **kwargs):
+        print(self.logo.url)
         if not self.pk:
             if self.title == '':
                 num_defaults = Settings.objects.filter(title__startswith='Default').count()

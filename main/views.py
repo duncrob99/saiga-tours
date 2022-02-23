@@ -338,7 +338,10 @@ def region(request, slug):
 
 
 def page(request, path):
-    page_obj = Page.reverse_path(path)
+    try:
+        page_obj = Page.reverse_path(path)
+    except:
+        raise Http404
     assert_visible(request, page_obj)
 
     if request.user.is_staff:
@@ -565,3 +568,7 @@ def create_itinerary_template(request):
     return JsonResponse({
         'pk': template.pk
     })
+
+
+def error_404(request, exception):
+    return render(request, '404.html', global_context(request))

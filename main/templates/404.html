@@ -1,0 +1,51 @@
+{% extends 'main/main.html' %}
+
+{% block title %}
+    Error 404
+{% endblock %}
+
+{% block extrahead %}
+    <style>
+        .whole-height {
+            height: 50vh;
+            display: grid;
+            grid-template-rows: 1fr min-content 1fr;
+            grid-template-areas:
+             "."
+             "content"
+             "."
+        }
+
+        .whole-height .error-content {
+            grid-area: content;
+        }
+
+        .error-content h1 {
+            margin-bottom: 30px;
+        }
+
+        .error-content button {
+            margin: 10px;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="whole-height">
+        <div class="error-content">
+            <h1>
+                Page not found
+            </h1>
+            <div>
+                Whoops! We don't have a page by that name.
+            </div>
+            <div>
+                Either go back, or have a look at one of the pages we do have.
+            </div>
+            <div>
+                <a href="javascript:history.back()" class="btn accent hoverable-accent">Go Back</a>
+                <a href="{% url 'front-page' %}" class="btn accent hoverable-accent">Go Home</a>
+            </div>
+        </div>
+    </div>
+{% endblock %}
