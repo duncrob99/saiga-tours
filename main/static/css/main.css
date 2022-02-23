@@ -35,8 +35,13 @@ html, body {
 
 .banner-text > h1 {
     margin-bottom: 2rem;
-    line-height: 0.9;
-    letter-spacing: -2px;
+    line-height: 0.8;
+    --outline-width: 2px;
+    --outline-opacity: 0.2;
+    /*text-outline: var(--outline-width) rgba(0, 0, 0, var(--outline-opacity));*/
+    /*-webkit-text-stroke: var(--outline-width) rgba(0, 0, 0, var(--outline-opacity));*/
+    text-outline: var(--outline-width) rgba(255, 255, 255, var(--outline-opacity));
+    -webkit-text-stroke: var(--outline-width) rgba(255, 255, 255, var(--outline-opacity));
     font-size: 5rem;
 }
 
@@ -127,12 +132,13 @@ body * {
 .display-1, .navbar-brand {
     font-family: 'Burford Rustic Book', sans-serif;
     color: var(--accent-foreground);
-    font-weight: 700 !important;
+    letter-spacing: -10px;
+    /*font-weight: 700 !important;*/
 }
 
 .section-title {
-    font-family: 'Burford Rustic Book', sans-serif;
-    font-weight: bold;
+    font-family: 'Burford Base', sans-serif;
+    /*font-weight: bold;*/
     text-align: center;
     line-height: 2rem;
     /*margin-top: 10rem;*/

@@ -72,3 +72,8 @@ li.alt-context-menu:hover {
 .pointer, .pointer-text {
     pointer-events: none;
 }
+
+.country-name {
+    font-family: "Burford Rustic Book", sans-serif;
+    /*fill: var(--accent-foreground);*/
+}

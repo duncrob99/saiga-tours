@@ -69,6 +69,18 @@
             font-family: "Burford Rustic Inline";
             src: url("{% static 'fonts/Burford Rustic/Burford Rustic Inline Light.woff' %}");
         }
+
+        @font-face {
+            font-family: "Burford Base";
+            src: url("{% static 'fonts/Burford Base/webfonts/BurfordBase.eot' %}");
+            src: url("{% static 'fonts/Burford Base/webfonts/BurfordBase.eot?#iefix' %}") format('embedded-opentype'),
+                 url("{% static 'fonts/Burford Base/webfonts/BurfordBase.woff' %}") format('woff'),
+                 url("{% static 'fonts/Burford Base/webfonts/BurfordBase.ttf' %}") format('truetype'),
+                 url("{% static 'fonts/Burford Base/webfonts/BurfordBase.svg#BurfordBase' %}") format('svg');
+            font-style: normal;
+            font-weight: normal;
+        }
+
     </style>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
