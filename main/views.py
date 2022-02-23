@@ -89,8 +89,8 @@ class FooterLink:
 
 
 def global_context(request):
-    footer_links = [FooterLink(page.title, reverse('page', args=[page.slug]), [
-        FooterLink(subpage.title, reverse('page', args=[subpage.slug]))
+    footer_links = [FooterLink(page.title, page.full_path, [
+        FooterLink(subpage.title, '/' + subpage.full_path)
         for subpage in page.children.visible(request.user.is_staff)
     ])
                     for page in Page.visible(request.user.is_staff).filter(parent=None, in_navbar=True)]
