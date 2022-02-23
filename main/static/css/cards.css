@@ -6,6 +6,8 @@ h5.card-title {
     bottom: 4%;
     left: 6%;
     width: 88%;
+    text-outline: 2px rgba(0, 0, 0, 0.2);
+    -webkit-text-stroke: 2px rgba(0, 0, 0, 0.2);
 }
 
 .card {
