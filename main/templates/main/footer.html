@@ -109,7 +109,7 @@
     <div class="subscription">
         <div class="container px-5">
             <img alt="send subscription request" src="{% static 'images/paper_airplane.svg' %}"/>
-            <p>Hot Deals. Awesome Chat. Straight to Your Inbox</p>
+            <p>SAIGA Tours. Straight to Your Inbox.</p>
             <form method="post" action="{% url 'subscribe' request.path %}">
                 {% csrf_token %}
                 <label for="{{ subscription_form.email.id_for_label }}" class="visually-hidden">Email address</label>
