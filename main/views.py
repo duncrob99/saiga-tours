@@ -461,8 +461,8 @@ def country_tours_info(request, region_slug, country_slug, detail_slug):
 
 def resized_imaged(request, filename: str, width: int = None, height: int = None):
     media_root = settings.MEDIA_ROOT
-    removed_prefix = filename.removeprefix('media/').removeprefix('/media/')
-    image = Image.open(path.join(settings.MEDIA_ROOT, filename.removeprefix('media/').removeprefix('/media/')),
+    removed_prefix = filename
+    image = Image.open(path.join(settings.MEDIA_ROOT, removed_prefix),
                        mode='r')
     if width is not None or height is not None:
         (old_width, old_height) = image.size
