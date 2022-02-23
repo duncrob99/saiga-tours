@@ -614,9 +614,9 @@ function createPoints(points) {
     for (let i = 0; i < points.length; i++) {
         let point = points[i];
 
-        let text_size = map_content_width * 0.01 * point.size;
-        text_size = text_size - text_size % 1;
-        let pointer_size = map_content_width * 0.001 * point.size;
+        let text_size = (0.006546921228906 * map_content_width + 0.506010715095527) * point.size;
+        //text_size = text_size - text_size % 1;
+        let pointer_size = 0.1*(0.006546921228906 * map_content_width + 0.506010715095527)* point.size;
         let default_pointer_scale = 1;
 
         let text_svg = map_svg.text(point.name).font({
