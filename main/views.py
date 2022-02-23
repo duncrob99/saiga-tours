@@ -429,7 +429,7 @@ def country_tours(request, region_slug, country_slug):
 def region_tours(request, region_slug):
     region_obj = get_object_or_404(Region, slug=region_slug)
     countries = region_obj.destinations.visible(request.user.is_staff)
-    tours = Tour.objects.visible(request.user.is_staff).filter(display=True)
+    tours = Tour.objects.visible(request.user.is_staff).filter(display=True, destinations__region=region_obj).distinct()
     points = MapPoint.objects.all()
 
     assert_visible(request, region_obj)
