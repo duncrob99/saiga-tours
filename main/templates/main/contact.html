@@ -1,11 +1,74 @@
 {% extends 'main/main.html' %}
 {% load django_bootstrap5 %}
+{% load static %}
 
 {% block title %}
     Contact Us
 {% endblock %}
 
+{% block extrahead %}
+
+    <style>
+        #header-banner {
+            width: 100%;
+            height: 356px;
+            object-fit: cover;
+            position: absolute;
+            object-position: 50% 50%;
+            z-index: -1;
+        }
+
+        #header-content {
+            height: 356px;
+            position: relative;
+            padding-left: 24px;
+        }
+
+        .header-subtitle {
+            margin-bottom: 12px;
+            color: #36bca1;
+            font-family: "Caveat", sans-serif;
+            font-weight: bold;
+            font-size: 20px;
+        }
+
+        .breadcrumb {
+            color: grey;
+            width: max-content;
+            white-space: nowrap;
+        }
+
+        .breadcrumb a {
+            color: black;
+            text-decoration: none;
+        }
+
+        .breadcrumb a:hover {
+            color: var(--accent-hover-foreground);
+        }
+
+        #content-container {
+            padding-top: 1rem !important;
+        }
+    </style>
+{% endblock %}
+{% block banner %}
+    <img src="{% static 'images/contact_banner4.jpg' %}" id="header-banner"/>
+{% endblock %}
+
 {% block content %}
+    <div id="header-content" class="d-flex flex-column justify-content-between">
+        <div class="breadcrumb"><a href="{% url 'front-page' %}">Home</a> <i class="bi bi-dot"></i> Contact</div>
+        <div class="heading d-flex flex-column justify-content-center">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1 class="section-title">Contact Us
+                    <div class="underline underline-left"></div>
+                </h1>
+            </div>
+        </div>
+        <div></div>
+    </div>
+
     <form method="POST">
         {% csrf_token %}
         {% bootstrap_form form %}

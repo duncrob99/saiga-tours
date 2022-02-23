@@ -266,3 +266,7 @@ body * {
     visibility: hidden;
     pointer-events: none;
 }
+
+.text-muted {
+    letter-spacing: -5px;
+}
