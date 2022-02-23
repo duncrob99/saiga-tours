@@ -184,7 +184,7 @@ class Tour(DraftHistory):
             return 9999 ** 9999
 
     class Meta:
-        ordering = [F('state').asc(nulls_last=True), 'start_date', 'price']
+        ordering = [F('state__priority').asc(nulls_last=True), 'start_date', 'price']
 
 
 class ItineraryTemplate(models.Model):

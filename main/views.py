@@ -239,6 +239,7 @@ def tour(request, slug):
 
 
 def tours(request):
+    print(Tour.visible(request.user.is_staff).filter(display=True))
     context = {
                   'tours': Tour.visible(request.user.is_staff).filter(display=True),
                   'destinations': Destination.visible(request.user.is_staff),
