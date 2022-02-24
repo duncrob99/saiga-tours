@@ -6,6 +6,7 @@
 
 <div class="row {{ uid|default:"tour_cards" }}">
     {% for tour in tours %}
+        {% if max_num is None or forloop.counter <= max_num %}
         <div class="d-flex flex-column tour-col {% if not two_col %}col-xl-4{% endif %} col-lg-6 col-md-12 g-0">
             <div start_date="{{ tour.start_date|date:'Y-m-d' }}"
                  end_date="{{ tour.end_date|date:'Y-m-d' }}"
@@ -69,6 +70,7 @@
                    href="{% url 'tour' tour.slug %}{% if parent %}?parent={{ parent }}{% endif %}"></a>
             </div>
         </div>
+        {% endif %}
     {% endfor %}
 </div>
 

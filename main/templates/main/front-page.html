@@ -70,7 +70,7 @@ Home
                 <h1 class="section-title">Tours
                     <div class="underline"></div>
                 </h1>
-                {% include 'main/tours_cards.html' %}
+                {% include 'main/tours_cards.html' with max_num=6 %}
             {% elif row.type == 'section' %}
                 {% if not row.colour_before %}
                     {% include 'main/separator.svg' with colour=row.colour pos="pre" %}
