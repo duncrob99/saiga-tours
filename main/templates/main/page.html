@@ -7,8 +7,8 @@
 {% endblock %}
 
 {% block extrahead %}
-    <link rel="stylesheet" href="{% static 'css/banner.css' %}">
-    <link rel="stylesheet" href="{% static 'css/custom_ckeditor.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/banner.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/custom_ckeditor.css' %}">
     {% if request.user.is_staff %}
         <script src="https://cdn.jsdelivr.net/npm/@svgdotjs/svg.js@3.0/dist/svg.min.js"></script>
     {% endif %}

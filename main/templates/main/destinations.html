@@ -8,9 +8,9 @@
 {% endblock %}
 
 {% block extrahead %}
-    <link rel="stylesheet" href="{% static 'css/map.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/map.css' %}">
     {% if request.user.is_staff %}
-        <link rel="stylesheet" href="{% static 'nouislider/nouislider_asdlj.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'nouislider/nouislider_asdlj.css' %}">
     {% endif %}
 {% endblock %}
 

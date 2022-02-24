@@ -7,10 +7,10 @@ Home
 {% endblock %}
 
 {% block extrahead %}
-    <link rel="stylesheet" href="{% static 'css/banner.css' %}">
-    <link rel="stylesheet" href="{% static 'css/custom_ckeditor.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/banner.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/custom_ckeditor.css' %}">
     {% if request.user.is_staff %}
-        <link rel="stylesheet" href="{% static 'nouislider/nouislider_asdlj.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'nouislider/nouislider_asdlj.css' %}">
     {% endif %}
     <style>
         .banner-img {

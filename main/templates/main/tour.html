@@ -8,13 +8,13 @@
 {% endblock %}
 
 {% block extrahead %}
-    <link rel="stylesheet" href="{% static 'css/tour.css' %}">
-    <link rel="stylesheet" href="{% static 'css/custom_ckeditor.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/tour.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/custom_ckeditor.css' %}">
     {% if tour.stops.count %}
-        <link rel="stylesheet" href="{% static 'css/map.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'css/map.css' %}">
     {% endif %}
     {% if request.user.is_staff %}
-        <link href="{% static 'nouislider/nouislider_asdlj.css' %}" rel="stylesheet">
+        <link href="{% static 'nouislider/nouislider_asdlj.css' %}" type="text/css" rel="stylesheet">
     {% endif %}
 {% endblock %}
 
