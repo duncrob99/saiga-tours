@@ -261,7 +261,10 @@ def statistics(request):
             return [{'name': key} | values for key, values in data.items()]
 
     def format_for_sunburst(data: dict):
-        return {'name': '', 'children': format_children_for_sunburst(data)}
+        if len(data) > 0:
+            return {'name': '', 'children': format_children_for_sunburst(data)}
+        else:
+            return {'name': '', 'children': []}
 
     lats = []
     lons = []
