@@ -271,7 +271,7 @@ class Article(DraftHistory):
         return self.title
 
     class Meta:
-        ordering = ['creation', 'title']
+        ordering = ['-creation', 'title']
 
     def tag_list(self) -> str:
         return ' '.join([str(tag) for tag in self.tags.all()])
