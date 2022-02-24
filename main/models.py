@@ -71,8 +71,8 @@ class Destination(DraftHistory):
     card_img = models.ImageField()
     slug = models.SlugField()
     region = models.ForeignKey(Region, on_delete=models.CASCADE, null=True, related_name='destinations')
-    description = RichTextWithPlugins(config_name='default')
-    tour_blurb = RichTextWithPlugins(config_name='default')
+    description = RichTextWithPlugins(config_name='default', null=True, blank=True)
+    tour_blurb = RichTextWithPlugins(config_name='default', null=True, blank=True)
     map_colour = ColorField(null=True, blank=True)
 
     title_x = models.FloatField(null=True, blank=True)
