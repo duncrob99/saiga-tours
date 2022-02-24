@@ -160,7 +160,8 @@ def mouse_action(request):
 
 def subscribe(request, return_path: str = None):
     form = SubscriptionForm(request.POST or None)
-    user_cookie = UserCookie.objects.get(uuid=request.COOKIES['userID'])
+    if 'userID' in request.COOKIES:
+        user_cookie = UserCookie.objects.get(uuid=request.COOKIES['userID'])
     if request.method == "POST" and form.is_valid():
         try:
             subscription = SubscriptionSubmission.objects.create(email_address=form.cleaned_data['email'],
@@ -169,8 +170,10 @@ def subscribe(request, return_path: str = None):
         except IntegrityError:
             subscription = SubscriptionSubmission.objects.get(email_address=form.cleaned_data['email'])
             messages.add_message(request, messages.SUCCESS, 'Successfully subscribed')
-        user_cookie.subscription = subscription
-        user_cookie.save()
+
+        if 'userID' in request.COOKIES:
+            user_cookie.subscription = subscription
+            user_cookie.save()
     else:
         errors = "; ".join([f'{field}: {", ".join(errors)}' for field, errors in form.errors.items()])
         messages.add_message(request, messages.WARNING, f'Invalid attempt to subscribe: {errors}')
