@@ -71,6 +71,11 @@ Home
                     <div class="underline"></div>
                 </h1>
                 {% include 'main/tours_cards.html' with max_num=6 %}
+                <div class="d-flex justify-content-center mb-5">
+                <a href="{% url 'tours' %}" class="nice-link">
+                    VIEW MORE
+                </a>
+                </div>
             {% elif row.type == 'section' %}
                 {% if not row.colour_before %}
                     {% include 'main/separator.svg' with colour=row.colour pos="pre" %}
@@ -149,14 +154,6 @@ Home
                 {% endfor %}
             </div>
                 <div class="d-flex justify-content-center mb-5">
-                    <a href="{{ row.link }}">
-                        {#                    <button id="filter-button"#}
-                    {#                            class="btn btn-outline-secondary d-inline-flex align-items-center accent hoverable-accent"#}
-                    {#                            data-bs-toggle="offcanvas" href="{{ row.link }}"#}
-                    {#                            data-bs-target="#filter-sidebar" aria-controls="filter-sidebar" role="button"#}
-                    {#                            style="align-self: center">#}
-                    {#                        View More#}
-                    {#                    </button>#}
                     <a href="{{ row.link }}" class="nice-link">
                         VIEW MORE
                     </a>
