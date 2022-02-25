@@ -8,8 +8,8 @@ CKEDITOR.plugins.add('splitsection', {
             template:
                 '<div class="split-section">' +
                 '<div class="row">' +
-                '<div class="left-col col-md-6 d-flex justify-content-center flex-column py-5"></div>' +
-                '<div class="right-col col-md-6 d-flex justify-content-center flex-column py-5"></div>' +
+                '<div class="left-col col-md-6 d-flex justify-content-center flex-column"></div>' +
+                '<div class="right-col col-md-6 d-flex justify-content-center flex-column"></div>' +
                 '</div>' +
                 '</div>',
 

@@ -157,6 +157,15 @@ checkEditing();
 
 desc.addEventListener('input', editorChange);
 
+window.addEventListener('load', () => {
+    document.getElementById('editor-form').addEventListener('submit', (ev) => {
+        deactivateEditor();
+        for (let editor_name in rich_field_map) {
+            rich_field_map[editor_name].value = document.querySelector(`#${editor_name}`).innerHTML;
+        }
+    })
+})
+
 function editorChange() {
     document.querySelector('textarea[name="description"]').value = desc.innerHTML;
 }
