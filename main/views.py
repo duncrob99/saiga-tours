@@ -1,3 +1,4 @@
+import enum
 import os
 from dataclasses import dataclass
 from datetime import datetime
@@ -76,7 +77,13 @@ def front_page(request):
                   'highlights': HightlightBox.visible(request.user.is_staff),
                   'destinations': Destination.visible(request.user.is_staff),
                   'points': MapPoint.objects.all(),
-                  'rows': rows
+                  'rows': rows,
+                  'meta': MetaInfo(
+                      request.get_raw_uri(),
+                      'SAIGA Tours Homepage',
+                      settings.logo.url,
+                      description='Come share some tours with us!',
+                  )
               } | global_context(request)
     return render(request, 'main/front-page.html', context)
 
@@ -125,6 +132,20 @@ def global_context(request):
     return context
 
 
+class MetaInfoTypes(enum.Enum):
+    ARTICLE = 'article'
+    WEBSITE = 'website'
+
+
+@dataclass
+class MetaInfo:
+    url: str
+    title: str
+    image_url: str
+    description: str = ''
+    type: MetaInfoTypes = MetaInfoTypes.WEBSITE
+
+
 def destination_overview(request, region_slug, country_slug):
     destination = get_object_or_404(Destination, region__slug=region_slug, slug=country_slug)
     detail_list = destination.details.visible(request.user.is_staff).filter(type=DestinationDetails.GUIDE)
@@ -135,7 +156,13 @@ def destination_overview(request, region_slug, country_slug):
     context = {
                   'destination': destination,
                   'details': detail_list,
-                  'tours': tour_list
+                  'tours': tour_list,
+                  'meta': MetaInfo(
+                      request.get_raw_uri(),
+                      destination.name,
+                      destination.card_img.url,
+                      f'Come look at the tours we offer in {destination.name}!',
+                  )
               } | global_context(request)
 
     return render(request, 'main/destination.html', context)
@@ -164,7 +191,13 @@ def details_page(request, region_slug, country_slug, detail_slug, detail_type):
         form = None
 
     context = {'details': details,
-               'form': form} | global_context(request)
+               'form': form,
+               'meta': MetaInfo(
+                   url=request.get_raw_uri(),
+                   title=details.title,
+                   image_url=details.card_img.url,
+                   description=details.content[:40]
+               )} | global_context(request)
 
     return render(request, 'main/destination_details.html', context)
 
@@ -233,17 +266,30 @@ def tour(request, slug):
                   'parent': parent,
                   'extensions': extensions,
                   'position_templates': PositionTemplate.objects.all(),
-                  'itinerary_templates': ItineraryTemplate.objects.all()
+                  'itinerary_templates': ItineraryTemplate.objects.all(),
+                  'meta': MetaInfo(
+                      url=request.get_raw_uri(),
+                      title=tour_obj.name,
+                      image_url=tour_obj.card_img.url,
+                      description=tour_obj.excerpt,
+                      type=MetaInfoTypes.ARTICLE
+                  )
               } | global_context(request)
     return render(request, 'main/tour.html', context)
 
 
 def tours(request):
-    print(Tour.visible(request.user.is_staff).filter(display=True))
+    settings = Settings.load()
     context = {
                   'tours': Tour.visible(request.user.is_staff).filter(display=True),
                   'destinations': Destination.visible(request.user.is_staff),
-                  'query': request.GET.get('q')
+                  'query': request.GET.get('q'),
+                  'meta': MetaInfo(
+                      url=request.get_raw_uri(),
+                      title='Tours',
+                      image_url=settings.logo.url,
+                      description='Come see all the tours we have on offer!'
+                  )
               } | global_context(request)
     return render(request, 'main/tours.html', context)
 
@@ -253,7 +299,12 @@ def article(request, slug):
     assert_visible(request, article_obj)
 
     context = {
-                  'article': article_obj
+                  'article': article_obj,
+                  'meta': MetaInfo(request.get_raw_uri(),
+                                   article_obj.title,
+                                   article_obj.card_img.url,
+                                   article_obj.excerpt,
+                                   MetaInfoTypes.ARTICLE)
               } | global_context(request)
     return render(request, 'main/article.html', context)
 
@@ -310,7 +361,13 @@ def article_list(request, type, title):
                   'end_date': end_date or '',
                   'authors': Author.visible(request.user.is_staff),
                   'checked_authors': checked_authors,
-                  'checked_tags': checked_tags
+                  'checked_tags': checked_tags,
+                  'meta': MetaInfo(
+                      url=request.get_raw_uri(),
+                      title='title',
+                      image_url=Settings.load().logo.url,
+                      description=f'See all the {title.lower()} we have on offer!'
+                  )
               } | global_context(request)
     return render(request, 'main/article_list.html', context)
 
@@ -333,7 +390,13 @@ def region(request, slug):
     context = {
                   'region': region_obj,
                   'destinations': destination_list,
-                  'tours': tours_list
+                  'tours': tours_list,
+                  'meta': MetaInfo(
+                      url=request.get_raw_uri(),
+                      title=f'{region_obj.name} Guide',
+                      image_url=Settings.load().logo.url,
+                      description=f'Learn everything you need to know about {region_obj.name}'
+                  )
               } | global_context(request)
     return render(request, 'main/region.html', context)
 
@@ -356,9 +419,16 @@ def page(request, path):
         form = None
 
     context = {
-                  'page': page_obj,
-                  'form': form
-              } | global_context(request)
+        'page': page_obj,
+        'form': form,
+        'meta': MetaInfo(
+            request.get_raw_uri(),
+            page_obj.title,
+            page_obj.card_img.url,
+            page_obj.content[:36] + '...',
+            MetaInfoTypes.ARTICLE
+        )
+    } | global_context(request)
     return render(request, 'main/page.html', context)
 
 
@@ -381,12 +451,21 @@ def contact(request):
             return render(request, 'main/contact.html', {'form': form} | global_context(request))
     elif request.method == 'GET':
         form.fields['subject'].initial = request.GET.get('subject')
-    return render(request, 'main/contact.html', {'form': form} | global_context(request))
+    context = {
+        'form': form,
+        'meta': MetaInfo(
+            request.get_raw_uri(),
+            'Contact Us',
+            Settings.load().logo.url,
+        )
+    } | global_context(request)
+    return render(request, 'main/contact.html', context)
 
 
 def destinations(request):
     if request.user.is_staff:
-        DestinationFormsetFactory = modelformset_factory(Destination, fields=('title_x', 'title_y', 'title_scale', 'title_rotation', 'title_curve'), extra=0)
+        DestinationFormsetFactory = modelformset_factory(Destination, fields=(
+            'title_x', 'title_y', 'title_scale', 'title_rotation', 'title_curve'), extra=0)
         destination_formset = DestinationFormsetFactory(request.POST or None, prefix='countries')
         PointFormsetFactory = modelformset_factory(MapPoint, exclude=(), extra=0)
         point_formset = PointFormsetFactory(request.POST or None, prefix='points')
@@ -400,9 +479,16 @@ def destinations(request):
     else:
         form_context = {}
 
-    context = {'destinations': Destination.visible(request.user.is_staff),
-               'points': MapPoint.objects.all(),
-               } | form_context | global_context(request)
+    context = {
+        'destinations': Destination.visible(request.user.is_staff),
+        'points': MapPoint.objects.all(),
+        'meta': MetaInfo(
+            request.get_raw_uri(),
+            'Destinations',
+            Settings.load().logo.url,
+            "Come and see the destinations we have on offer!"
+        )
+    } | form_context | global_context(request)
     return render(request, 'main/destinations.html', context)
 
 
@@ -418,10 +504,16 @@ def country_tours(request, region_slug, country_slug):
     assert_visible(request, destination)
 
     context = {
-                  'destination': destination,
-                  'details': detail_list,
-                  'tours': tour_list
-              } | global_context(request)
+        'destination': destination,
+        'details': detail_list,
+        'tours': tour_list,
+        'meta': MetaInfo(
+            request.get_raw_uri(),
+            f'Tours to {destination.name}',
+            destination.card_img.url,
+            f'Learn more about the tours we offer to {destination.name}'
+        )
+    } | global_context(request)
 
     return render(request, 'main/country_tours.html', context)
 
@@ -435,11 +527,17 @@ def region_tours(request, region_slug):
     assert_visible(request, region_obj)
 
     context = {
-                  'region': region_obj,
-                  'countries': countries,
-                  'tours': tours,
-                  'points': points
-              } | global_context(request)
+        'region': region_obj,
+        'countries': countries,
+        'tours': tours,
+        'points': points,
+        'meta': MetaInfo(
+            request.get_raw_uri(),
+            f'Tours to {region_obj.name}',
+            Settings.load().logo.url,
+            f'Learn more about our tour offerings to {region_obj.name}'
+        )
+    } | global_context(request)
     return render(request, 'main/region-tours.html', context)
 
 
