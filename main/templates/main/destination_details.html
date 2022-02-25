@@ -65,3 +65,7 @@
         {% include 'main/tours_cards.html' with tours=details.linked_tours.all %}
     {% endif %}
 {% endblock %}
+
+{% block js %}
+    <script src="{% static 'js/ckeditor_styling.js' %}"></script>
+{% endblock %}

@@ -92,7 +92,8 @@ CKEDITOR.plugins.add('splitsection', {
                     pre_svg.setAttribute('preserveaspectratio', "xMaxYMax meet");
                     this.element.$.insertAdjacentElement("afterbegin", pre_svg);
                     let svg = SVG(pre_svg).viewbox('0 0 100 2').fill(this.data.background);
-                    svg.path('M 0 1 c 5 3 5 -3 10 0 c 5 3 5 -3 10 0 c 5 3 5 -3 10 0 c 5 3 5 -3 10 0 c 5 3 5 -3 10 0 c 5 3 5 -3 10 0 c 5 3 5 -3 10 0 c 5 3 5 -3 10 0 c 5 3 5 -3 10 0 c 5 3 5 -3 10 0 l 0 -1 L 0 0 z');
+                    console.log('changing background');
+                    svg.path('M 0 1 c 20 3 20 -3 40 0 c 20 3 20 -3 40 0 c 20 3 20 -3 40 0 c 20 3 20 -3 40 0 c 20 3 20 -3 40 0 c 20 3 20 -3 40 0 c 20 3 20 -3 40 0 c 20 3 20 -3 40 0 c 20 3 20 -3 40 0 c 20 3 20 -3 40 0 l 0 -1 L 0 0 z');
 
                     let post_svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
                     post_svg.classList.add('post-separator');
@@ -100,7 +101,7 @@ CKEDITOR.plugins.add('splitsection', {
                     post_svg.setAttribute('preserveaspectratio', "xMaxYMax meet");
                     this.element.$.insertAdjacentElement('beforeend', post_svg);
                     svg = SVG(post_svg).viewbox('0 0 100 2').fill(this.data.background);
-                    svg.path('M 0 1 c 5 3 5 -3 10 0 c 5 3 5 -3 10 0 c 5 3 5 -3 10 0 c 5 3 5 -3 10 0 c 5 3 5 -3 10 0 c 5 3 5 -3 10 0 c 5 3 5 -3 10 0 c 5 3 5 -3 10 0 c 5 3 5 -3 10 0 c 5 3 5 -3 10 0 l 0 -1 L 0 0 z');
+                    svg.path('M 0 1 c 20 3 20 -3 40 0 c 20 3 20 -3 40 0 c 20 3 20 -3 40 0 c 20 3 20 -3 40 0 c 20 3 20 -3 40 0 c 20 3 20 -3 40 0 c 20 3 20 -3 40 0 c 20 3 20 -3 40 0 c 20 3 20 -3 40 0 c 20 3 20 -3 40 0 l 0 -1 L 0 0 z');
 
                     this.element.$.querySelector('div.row').classList.add('wide-bg');
                     this.element.$.querySelector('div.row').style.setProperty('--background', this.data.background);
