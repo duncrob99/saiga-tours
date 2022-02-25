@@ -676,8 +676,26 @@ SVG.Path.prototype.segmentLengths = function () {
     return this.segments().map(seg => SVG().path(seg).length());
 }
 
+let get_path_segment_lengths = function (path) {
+    return path_segments(path).map(seg => SVG().path(seg).length());
+}
+
 SVG.Path.prototype.getArray = function () {
     let path_str = this.node.getAttribute('d');
+    let commaed_strs = path_str.replaceAll(/\s*([CL])/gi, ",$1");
+    let command_strs = commaed_strs.split(',');
+    let command_arrs = command_strs.map(cmd => {
+        let cmd_arr = [cmd[0]];
+        cmd.substring(1).trim().split(' ').forEach(val => {
+            cmd_arr.push(parseFloat(val));
+        })
+        return cmd_arr;
+    })
+    return command_arrs;
+}
+
+let get_path_array = function(path) {
+    let path_str = path.node.getAttribute('d');
     let commaed_strs = path_str.replaceAll(/\s*([CL])/gi, ",$1");
     let command_strs = commaed_strs.split(',');
     let command_arrs = command_strs.map(cmd => {
@@ -709,6 +727,33 @@ SVG.Path.prototype.segments = function () {
     let last_point = get_endpoint(this.getArray()[0]);
 
     this.getArray().slice(1).forEach((el, i) => {
+        let path_str = `${last_point.string()} ${get_string(el)}`;
+        segments.push(path_str);
+        last_point = get_endpoint(el);
+    })
+
+    return segments;
+}
+
+let path_segments = function (path) {
+    function get_endpoint(arr) {
+        return {
+            x: arr.slice(-2)[0],
+            y: arr.slice(-1)[0],
+            string: function () {
+                return `M${this.x} ${this.y}`
+            }
+        }
+    }
+
+    function get_string(arr) {
+        return arr[0] + arr.slice(1).join(' ');
+    }
+
+    let segments = [];
+    let last_point = get_endpoint(get_path_array(path)[0]);
+
+    get_path_array(path).slice(1).forEach((el, i) => {
         let path_str = `${last_point.string()} ${get_string(el)}`;
         segments.push(path_str);
         last_point = get_endpoint(el);
@@ -753,7 +798,8 @@ function updatePath(stops) {
         arrow.remove();
     });
 
-    let all_segment_lengths = path_svg.segmentLengths();
+    let all_segment_lengths;
+    all_segment_lengths = get_path_segment_lengths(path_svg);
 
     let broken_segment_lengths = [];
     for (let i=0; i < stops.length-1; i++) {
