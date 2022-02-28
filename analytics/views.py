@@ -143,8 +143,6 @@ def mouse_action(request):
 
 def subscribe(request, return_path: str = None):
     form = SubscriptionForm(request.POST or None)
-    if 'userID' in request.COOKIES:
-        user_cookie = UserCookie.objects.get(uuid=request.COOKIES['userID'])
     if request.method == "POST" and form.is_valid():
         try:
             subscription = SubscriptionSubmission.objects.create(email_address=form.cleaned_data['email'],
@@ -154,7 +152,7 @@ def subscribe(request, return_path: str = None):
             subscription = SubscriptionSubmission.objects.get(email_address=form.cleaned_data['email'])
             messages.add_message(request, messages.SUCCESS, 'Successfully subscribed')
 
-        if 'userID' in request.COOKIES:
+            user_cookie = UserCookie.objects.get(uuid=request.COOKIES['userID'])
             user_cookie.subscription = subscription
             user_cookie.save()
     else:

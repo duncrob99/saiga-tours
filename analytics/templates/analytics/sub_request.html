@@ -10,7 +10,11 @@
                 <form class="my-3" method="post" action="{% url 'subscribe' request.path %}">
                     {% csrf_token %}
                     <div class="d-flex w-100 gap-2">
-                        <label for="newsletter1" class="visually-hidden">Email address</label>
+                        <label for="{{ subscription_form.name.id_for_label }}" class="visually-hidden">Name</label>
+                        <input id="{{ subscription_form.name.id_for_label }}"
+                               name="{{ subscription_form.name.name }}"
+                               type="text" class="form-control" placeholder="Name">
+                        <label for="{{ subscription_form.email.id_for_label }}" class="visually-hidden">Email address</label>
                         <input id="{{ subscription_form.email.id_for_label }}"
                                name="{{ subscription_form.email.name }}"
                                type="text" class="form-control" placeholder="Email address">
