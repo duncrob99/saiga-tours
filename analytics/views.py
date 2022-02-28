@@ -76,8 +76,7 @@ def view(request):
 
     response_content = response_content | {'pageview': page_view.uuid}
     response = JsonResponse(response_content)
-    if response_content['new_user']:
-        response.set_cookie('userID', user.uuid, samesite='Lax')
+    response.set_cookie('userID', user.uuid, samesite='Lax')
 
     client_ip, is_routable = get_client_ip(request)
     if client_ip is not None:
@@ -109,25 +108,13 @@ def heartbeat(request):
     page = Page.objects.get(path=request.POST.get('path'))
     page_view = PageView.objects.get(uuid=request.POST.get('pageview'))
 
-    try:
-        # page_view, new_view = PageView.objects.get_or_create(session=session, page=page, complete=False)
-        page_view.duration = timezone.now() - page_view.time + datetime.timedelta(
-            milliseconds=int(request.POST.get('interval')) / 2)
-        page_view.time_visible += datetime.timedelta(milliseconds=int(request.POST.get('time_visible')))
-        page_view.save()
+    # page_view, new_view = PageView.objects.get_or_create(session=session, page=page, complete=False)
+    page_view.duration = timezone.now() - page_view.time + datetime.timedelta(
+        milliseconds=int(request.POST.get('interval')) / 2)
+    page_view.time_visible += datetime.timedelta(milliseconds=int(request.POST.get('time_visible')))
+    page_view.save()
 
-        return JsonResponse({'success': True})
-    except Exception as e:
-        print('Error with heartbeat')
-        print(request.session['session_id'])
-        print(request.COOKIES['userID'])
-        print(request.POST.get('path'))
-        print(request.POST.get('interval'))
-        print(timezone.now())
-        print(page)
-        print(session)
-
-        raise e
+    return JsonResponse({'success': True})
 
 
 def close_view(request):
