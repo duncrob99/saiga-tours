@@ -103,12 +103,8 @@ def assign_email(request):
 
 
 def heartbeat(request):
-    user = UserCookie.objects.get(uuid=request.COOKIES['userID'])
-    session = Session.objects.get(session_id=request.session['session_id'], user=user)
-    page = Page.objects.get(path=request.POST.get('path'))
     page_view = PageView.objects.get(uuid=request.POST.get('pageview'))
 
-    # page_view, new_view = PageView.objects.get_or_create(session=session, page=page, complete=False)
     page_view.duration = timezone.now() - page_view.time + datetime.timedelta(
         milliseconds=int(request.POST.get('interval')) / 2)
     page_view.time_visible += datetime.timedelta(milliseconds=int(request.POST.get('time_visible')))
