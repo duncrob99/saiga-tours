@@ -679,3 +679,12 @@ def error_404(request, exception):
 
 def error_500(request):
     return render(request, '500.html', global_context(request))
+
+
+def gen_500(request):
+    if request.user.is_staff:
+        hello = 5
+        bye = hello/0
+        return HttpResponse(status=500)
+    else:
+        return error_404(request, '')

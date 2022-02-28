@@ -34,5 +34,7 @@ urlpatterns = [
     path('create/position_template/', views.create_position_template, name='create-position-template'),
     path('create/itinerary_template/', views.create_itinerary_template, name='create-itinerary-template'),
 
+    path('gen_500/', views.gen_500, name='gen-500'),
+
     path('<path:path>/', views.page, name='page')
 ]

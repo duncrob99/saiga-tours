@@ -12,12 +12,22 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 
 from pathlib import Path
 
+import sentry_sdk
 import environ
 
 env = environ.Env(
     DEBUG=(bool, False)
 )
 environ.Env.read_env()
+
+import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
+
+sentry_sdk.init(
+    dsn="https://5b4daf3a4a544ecfbff1da449e1d84ab@o1154947.ingest.sentry.io/6235023",
+    integrations=[DjangoIntegration()],
+    traces_sample_rate=1.0,
+)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -28,8 +38,28 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = env("SECRET_KEY", default='django-insecure-+c1*+&n&%r5=)lirl@$3s415*!n%3!(w@^d7kg!!^*in3f7m%f')
 
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'mail_admins': {
+            'level': 'ERROR',
+            'class': 'django.utils.log.AdminEmailHandler'
+        }
+    },
+    'loggers': {
+        'django.request': {
+            'handlers': ['mail_admins'],
+            'level': 'ERROR',
+            'propagate': True,
+        },
+    }
+}
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env('DEBUG')
+ADMINS = [('Admin', 'admin@saigatours.com')]
+MANAGERS = [('Admin', 'admin@saigatours.com')]
 
 ALLOWED_HOSTS = ["coolwebsite.pythonanywhere.com", "127.0.0.1", "www.saigatours.com", "saigatours.com"]
 
@@ -55,6 +85,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'django.middleware.common.BrokenLinkEmailsMiddleware',
     'django.middleware.gzip.GZipMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -153,6 +184,8 @@ EMAIL_PORT = '587'
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'duncrob99@gmail.com'
 EMAIL_HOST_PASSWORD = 'zfdplgquornelpax'
+SERVER_EMAIL = 'duncrob99@gmail.com'
+DEFAULT_FROM_EMAIL = 'duncrob99@gmail.com'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
