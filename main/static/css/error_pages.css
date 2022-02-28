@@ -1,0 +1,23 @@
+.whole-height {
+    height: 50vh;
+    display: grid;
+    grid-template-rows: 1fr min-content 1fr;
+    grid-template-areas:
+             "."
+             "content"
+             "."
+}
+
+.whole-height .error-content {
+    grid-area: content;
+}
+
+.error-content h1 {
+    margin-bottom: 30px;
+}
+
+.error-content a {
+    margin-top: 10px;
+    margin-right: 10px;
+    margin-left: 0;
+}

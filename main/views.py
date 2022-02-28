@@ -675,3 +675,7 @@ def create_itinerary_template(request):
 
 def error_404(request, exception):
     return render(request, '404.html', global_context(request))
+
+
+def error_500(request):
+    return render(request, '500.html', global_context(request))

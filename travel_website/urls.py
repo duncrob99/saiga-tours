@@ -31,3 +31,4 @@ urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 urlpatterns.append(path('', include('main.urls')))
 
 handler404 = 'main.views.error_404'
+handler500 = 'main.views.error_500'

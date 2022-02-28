@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block title %}
-    Error 404
+    Error 500
 {% endblock %}
 
 {% block extrahead %}
@@ -13,16 +13,17 @@
     <div class="whole-height">
         <div class="error-content">
             <h1>
-                Page not found
+                We made an error!
             </h1>
             <div>
-                Whoops! We don't have a page by that name.
+                Whoops! We did something wrong.
             </div>
             <div>
-                Either go back, or have a look at one of the pages we do have.
+                Either go back, try again or have a look at a different page.
             </div>
             <div>
                 <a href="javascript:history.back()" class="btn accent hoverable-accent">Go Back</a>
+                <a href="javascript:window.location.href=window.location.href" class="btn accent hoverable-accent">Refresh Page</a>
                 <a href="{% url 'front-page' %}" class="btn accent hoverable-accent">Go Home</a>
             </div>
         </div>
