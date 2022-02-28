@@ -101,6 +101,30 @@
                 window.addEventListener('mousemove', (ev) => {
                     if (last_pos === undefined || Math.sqrt((last_pos.x - ev.x) ** 2 + (last_pos.y - ev.y) ** 2) > distance_trigger) {
                         last_pos = {x: ev.x, y: ev.y};
+                        if (ev.x && ev.y) {
+                            $.ajax({
+                                type: "POST",
+                                url: "{% url 'mouse-action' %}",
+                                data: {
+                                    'path': window.location.pathname,
+                                    'x': ev.x,
+                                    'y': ev.y,
+                                    'pageview': view_id
+                                },
+                                success: function () {
+                                },
+                                error: () => {
+                                },
+                                headers: {
+                                    'X-CSRFToken': csrfToken
+                                }
+                            })
+                        }
+                    }
+                })
+
+                window.addEventListener('mousedown', (ev) => {
+                    if (ev.x && ev.y) {
                         $.ajax({
                             type: "POST",
                             url: "{% url 'mouse-action' %}",
@@ -108,6 +132,7 @@
                                 'path': window.location.pathname,
                                 'x': ev.x,
                                 'y': ev.y,
+                                'clicked': ev.button,
                                 'pageview': view_id
                             },
                             success: function () {
@@ -119,27 +144,6 @@
                             }
                         })
                     }
-                })
-
-                window.addEventListener('mousedown', (ev) => {
-                    $.ajax({
-                        type: "POST",
-                        url: "{% url 'mouse-action' %}",
-                        data: {
-                            'path': window.location.pathname,
-                            'x': ev.x,
-                            'y': ev.y,
-                            'clicked': ev.button,
-                            'pageview': view_id
-                        },
-                        success: function () {
-                        },
-                        error: () => {
-                        },
-                        headers: {
-                            'X-CSRFToken': csrfToken
-                        }
-                    })
                 })
             },
             error: () => {
