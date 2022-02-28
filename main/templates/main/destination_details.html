@@ -15,6 +15,7 @@
     <script src="{% static 'js/ckeditor/ckeditor.js' %}"></script>
     <script src="{% static 'js/custom_ckeditor.js' %}"></script>
     <script src="{% static 'js/destination_detail_editing.js' %}"></script>
+    <script src="{% static 'js/ckeditor_styling.js' %}"></script>
 {% endblock %}
 
 {% block banner %}
@@ -64,8 +65,4 @@
         <h4 class="display-4">Example Tours</h4>
         {% include 'main/tours_cards.html' with tours=details.linked_tours.all %}
     {% endif %}
-{% endblock %}
-
-{% block js %}
-    <script src="{% static 'js/ckeditor_styling.js' %}"></script>
 {% endblock %}
