@@ -12,19 +12,19 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 
 from pathlib import Path
 
-import sentry_sdk
 import environ
+import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
+
 
 env = environ.Env(
     DEBUG=(bool, False)
 )
 environ.Env.read_env()
 
-import sentry_sdk
-from sentry_sdk.integrations.django import DjangoIntegration
-
+SENTRY_PROJECT = env('SENTRY_PROJECT')
 sentry_sdk.init(
-    dsn="https://5b4daf3a4a544ecfbff1da449e1d84ab@o1154947.ingest.sentry.io/6235023",
+    dsn=SENTRY_PROJECT,
     integrations=[DjangoIntegration()],
     traces_sample_rate=1.0,
 )
