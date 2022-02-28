@@ -678,17 +678,17 @@ def create_itinerary_template(request):
 
 
 def error_404(request, exception):
-    return render(request, '404.html', global_context(request))
+    return render(request, '404.html', global_context(request), status=404)
 
 
 def error_500(request):
-    return render(request, '500.html', global_context(request))
+    return render(request, '500.html', global_context(request), status=500)
 
 
 def gen_500(request):
     if request.user.is_staff:
         hello = 5
         bye = hello/0
-        return HttpResponse(status=500)
+        return HttpResponse('Well, darn. Apparently maths is broken.')
     else:
         return error_404(request, '')
