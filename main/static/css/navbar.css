@@ -148,7 +148,7 @@
 }
 
 .navbar .logo {
-    max-height: calc(0.5 * var(--navbar-height));
+    height: calc(0.5 * var(--navbar-height));
     margin-bottom: calc(-0.5 * var(--navbar-height));
     margin-top: calc(-0.5 * var(--navbar-height));
 }

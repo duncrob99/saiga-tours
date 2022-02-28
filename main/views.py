@@ -566,6 +566,10 @@ def resized_imaged(request, filename: str, width: int = None, height: int = None
         (old_width, old_height) = image.size
 
         ar = old_width / old_height
+        if height == 0:
+            height = int(width / ar)
+        if width == 0:
+            width = int(height * ar)
         if old_width / width > old_width / height:
             height = int(width / ar)
         else:

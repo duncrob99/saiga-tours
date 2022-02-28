@@ -68,6 +68,8 @@ function deactivateEditor() {
     if (typeof updateStops === 'function') {
         updateStops(stops, false);
     }
+
+    minimise_images();
 }
 
 function activateEditor() {

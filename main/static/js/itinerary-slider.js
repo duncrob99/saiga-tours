@@ -92,13 +92,13 @@ function setVerticalHeight() {
         slides[i].style.height = max_height + "px";
         tot_height += slides[i].getBoundingClientRect().height;
     }
-    document.querySelector('.slideshow-container').style.height = max_height + 15 + 'px';
-    document.querySelector('.slides').style.height = max_height + 15 + 'px';
+    document.querySelector('.slideshow-container').style.height = max_height + 35 + 'px';
+    document.querySelector('.slides').style.height = max_height + 35 + 'px';
 }
 
 function minimiseSlides() {
     let slides = document.getElementsByClassName('mySlides');
-    let max_height = 450;
+    let max_height = 400;
     console.log('minimising')
     for (let i = 0; i < slides.length; i++) {
         let slide = slides[i];
@@ -137,7 +137,7 @@ function loadImages() {
 
 window.addEventListener('resize', setVerticalHeight);
 
-loadImages();
+// loadImages();
 minimiseSlides();
 setVerticalHeight();
 

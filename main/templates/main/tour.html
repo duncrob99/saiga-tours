@@ -291,16 +291,14 @@
                 });
             {% endfor %}
 
-            {% if request.user.is_staff %}
-                let position_templates = {};
-                {% for template in position_templates %}
-                    position_templates[{{ template.pk }}] = {
-                        x: {{ template.x }},
-                        y: {{ template.y }},
-                        name: {{ template.name|js_str }}
-                    };
-                {% endfor %}
-            {% endif %}
+            let position_templates = {};
+            {% for template in position_templates %}
+                position_templates[{{ template.pk }}] = {
+                    x: {{ template.x }},
+                    y: {{ template.y }},
+                    name: {{ template.name|js_str }}
+                };
+            {% endfor %}
 
             let tour_scale = {{ tour.map_scale }};
 

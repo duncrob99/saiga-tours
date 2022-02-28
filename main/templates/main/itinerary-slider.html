@@ -29,9 +29,9 @@
                 {% endif %}
                 <div id="day-{{ forloop.counter }}-body" class="card-body">
                     {% if day.template is None %}
-                        {{ day.body | lazyload_html }}
+                        {{ day.body | safe }}
                     {% else %}
-                        {{ day.template.body | lazyload_html }}
+                        {{ day.template.body | safe }}
                     {% endif %}
                 </div>
                 <a id="day-{{ forloop.counter }}-expand" onclick="expandSlide({{ forloop.counter }})"
