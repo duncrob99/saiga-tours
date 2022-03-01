@@ -69,7 +69,8 @@ class Session(models.Model):
 
     @property
     def duration(self):
-        return self.pageview_set.aggregate(dur=Max('end_time') - Min('time'))['dur']
+        # return self.pageview_set.aggregate(dur=Max('end_time') - Min('time'))['dur']
+        return self.pageview_set.aggregate(sum=Sum('time_visible'))['sum']
 
 
 class Page(models.Model):

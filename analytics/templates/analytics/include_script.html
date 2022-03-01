@@ -59,8 +59,10 @@
                             'time_visible': time_visible,
                             'pageview': view_id
                         },
-                        success: function () {
-                            time_visible = 0;
+                        success: function (data) {
+                            if (data.success) {
+                                time_visible = 0;
+                            }
                         },
                         error: () => {
                             console.log("You're not being tracked anymore");
