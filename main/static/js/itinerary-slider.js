@@ -2,7 +2,7 @@ let slideIndex = 1;
 
 // Next/previous controls
 function plusSlides(n, shouldScrollToTop, dontScroll) {
-    showSlides(slideIndex += n);
+    showSlides(slideIndex += n, shouldScrollToTop, dontScroll);
 }
 
 // Thumbnail image controls
