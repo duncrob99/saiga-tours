@@ -1,7 +1,7 @@
 let slideIndex = 1;
 
 // Next/previous controls
-function plusSlides(n) {
+function plusSlides(n, shouldScrollToTop, dontScroll) {
     showSlides(slideIndex += n);
 }
 
@@ -156,11 +156,16 @@ showSlides(slideIndex, false, true);
     let container = document.querySelector('.slideshow-container');
     let slides = document.getElementsByClassName("mySlides");
     let initial_transition = slides[0].style.transition;
+    let slide_width = parseFloat(getComputedStyle(document.querySelectorAll('.slides div')[0]).width);
+
     container.addEventListener('touchstart', touchev => {
-        let start_x;
+        let start_x, start_y;
         let start_time = new Date();
         for (let i = 0; i < touchev.changedTouches.length; i++) {
-            if (touchev.changedTouches[i].identifier === 0) start_x = touchev.changedTouches[i].pageX;
+            if (touchev.changedTouches[i].identifier === 0) {
+                start_x = touchev.changedTouches[i].pageX;
+                start_y = touchev.changedTouches[i].pageY;
+            }
         }
 
         let slide_poses = [];
@@ -180,7 +185,7 @@ showSlides(slideIndex, false, true);
                 if (touch.identifier !== 0) return;
 
                 moved = touch.pageX - start_x;
-                console.log(moved);
+                let moved_y = touch.pageY - start_y;
                 for (let i = 0; i < slide_poses.length; i++) {
                     slide_poses[i].slide.style.left = slide_poses[i].start_left + moved + 'px';
                 }
@@ -192,17 +197,21 @@ showSlides(slideIndex, false, true);
             if (complete) return;
             complete = true;
 
+            let end_y;
+            for (let touch  of endev.changedTouches) {
+                if (touch.identifier === 0) end_y = touch.pageY;
+            }
+
             for (let i=0; i < slides.length; i++) {
                 slides[i].style.transition = initial_transition;
             }
 
-            let slide_width = parseFloat(getComputedStyle(document.querySelectorAll('.slides div')[0]).width);
-
             let speed = moved / (new Date() - start_time);
+            let move_y = end_y - start_y;
             if (Math.abs(moved) + Math.abs(speed) * 200 > 0.5*slide_width) {
-                plusSlides(-Math.sign(moved));
+                plusSlides(-Math.sign(moved), true, true);
             } else {
-                plusSlides(0);
+                plusSlides(0, true, true);
             }
         })
     });
