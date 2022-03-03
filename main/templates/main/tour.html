@@ -120,7 +120,11 @@
     {% if tour.dated %}
         <hr>
         <h6 class="display-6">Other Tours</h6>
-        {% include 'main/tours_cards.html' with tours=tour.close_tours uid="other-tours" %}
+        {% if request.user.is_staff %}
+            {% include 'main/tours_cards.html' with tours=tour.close_tours uid="other-tours" %}
+        {% else %}
+            {% include 'main/tours_cards.html' with tours=tour.close_published_tours uid="other-tours" %}
+        {% endif %}
     {% endif %}
 
     {% if request.user.is_staff %}
