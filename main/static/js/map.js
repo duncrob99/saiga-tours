@@ -1451,12 +1451,19 @@ function resize_map_to_countries(destinations, width, height, hoverable) {
             min_bbox[2] *= (ar / cur_ar);
         }
     }
-    Visibility.onVisible(() => {
+    if (Visibility) {
+        Visibility.onVisible(() => {
+            SVG('.map svg').animate({
+                when: 'now',
+                duration: zoom_transition
+            }).ease('quartInOut').viewbox(`${min_bbox[0]} ${min_bbox[1]} ${min_bbox[2]} ${min_bbox[3]}`);
+        })
+    } else {
         SVG('.map svg').animate({
             when: 'now',
             duration: zoom_transition
         }).ease('quartInOut').viewbox(`${min_bbox[0]} ${min_bbox[1]} ${min_bbox[2]} ${min_bbox[3]}`);
-    })
+    }
 }
 
 function resize_map_to_stops(stops, width, height) {
@@ -1501,12 +1508,19 @@ function resize_map_to_stops(stops, width, height) {
             min_bbox[2] *= (ar / cur_ar);
         }
     }
-    Visibility.onVisible(() => {
+    if (Visibility) {
+        Visibility.onVisible(() => {
+            SVG('.map svg').animate({
+                when: 'now',
+                duration: zoom_transition
+            }).ease('quartInOut').viewbox(`${min_bbox[0]} ${min_bbox[1]} ${min_bbox[2]} ${min_bbox[3]}`);
+        })
+    } else {
         SVG('.map svg').animate({
             when: 'now',
             duration: zoom_transition
         }).ease('quartInOut').viewbox(`${min_bbox[0]} ${min_bbox[1]} ${min_bbox[2]} ${min_bbox[3]}`);
-    })
+    }
 }
 
 function resize_map_to_content(stops, width, height) {
@@ -1560,12 +1574,19 @@ function resize_map_to_content(stops, width, height) {
             min_bbox[2] *= (ar / cur_ar);
         }
     }
-    Visibility.onVisible(() => {
+    if (Visibility) {
+        Visibility.onVisible(() => {
+            SVG('.map svg').animate({
+                when: 'now',
+                duration: zoom_transition
+            }).ease('quartInOut').viewbox(`${min_bbox[0]} ${min_bbox[1]} ${min_bbox[2]} ${min_bbox[3]}`);
+        })
+    } else {
         SVG('.map svg').animate({
             when: 'now',
             duration: zoom_transition
         }).ease('quartInOut').viewbox(`${min_bbox[0]} ${min_bbox[1]} ${min_bbox[2]} ${min_bbox[3]}`);
-    })
+    }
 }
 
 function edit_position_template(pk, data) {
