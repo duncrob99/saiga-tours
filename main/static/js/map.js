@@ -1451,7 +1451,7 @@ function resize_map_to_countries(destinations, width, height, hoverable) {
             min_bbox[2] *= (ar / cur_ar);
         }
     }
-    if (Visibility) {
+    if (typeof Visibility !== "undefined") {
         Visibility.onVisible(() => {
             SVG('.map svg').animate({
                 when: 'now',
@@ -1508,7 +1508,7 @@ function resize_map_to_stops(stops, width, height) {
             min_bbox[2] *= (ar / cur_ar);
         }
     }
-    if (Visibility) {
+    if (typeof Visibility !== "undefined") {
         Visibility.onVisible(() => {
             SVG('.map svg').animate({
                 when: 'now',
@@ -1574,7 +1574,7 @@ function resize_map_to_content(stops, width, height) {
             min_bbox[2] *= (ar / cur_ar);
         }
     }
-    if (Visibility) {
+    if (typeof Visibility !== "undefined") {
         Visibility.onVisible(() => {
             SVG('.map svg').animate({
                 when: 'now',
