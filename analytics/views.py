@@ -87,11 +87,14 @@ def view(request):
 
 
 def accept_cookies(request):
-    user = UserCookie.objects.get(uuid=request.COOKIES['userID'])
-    user.accepted_cookies = True
-    user.save()
+    if 'userID' in request.COOKIES:
+        user = UserCookie.objects.get(uuid=request.COOKIES['userID'])
+        user.accepted_cookies = True
+        user.save()
 
-    return JsonResponse({'success': True})
+        return JsonResponse({'success': True})
+    else:
+        return JsonResponse({'success': False})
 
 
 def assign_email(request):
@@ -103,14 +106,17 @@ def assign_email(request):
 
 
 def heartbeat(request):
-    page_view = PageView.objects.get(uuid=request.POST.get('pageview'))
+    if 'pageview' in request.POST:
+        page_view = PageView.objects.get(uuid=request.POST.get('pageview'))
 
-    page_view.duration = timezone.now() - page_view.time + datetime.timedelta(
-        milliseconds=int(request.POST.get('interval')) / 2)
-    page_view.time_visible += datetime.timedelta(milliseconds=int(request.POST.get('time_visible')))
-    page_view.save()
+        page_view.duration = timezone.now() - page_view.time + datetime.timedelta(
+            milliseconds=int(request.POST.get('interval')) / 2)
+        page_view.time_visible += datetime.timedelta(milliseconds=int(request.POST.get('time_visible')))
+        page_view.save()
 
-    return JsonResponse({'success': True})
+        return JsonResponse({'success': True})
+    else:
+        return JsonResponse({'success': False})
 
 
 def close_view(request):
@@ -128,17 +134,17 @@ def close_view(request):
 
 
 def mouse_action(request):
-    user = UserCookie.objects.get(uuid=request.COOKIES['userID'])
-    session = Session.objects.get(session_id=request.session['session_id'], user=user)
-    page = Page.objects.get(path=request.POST.get('path'))
-    page_view = PageView.objects.get(uuid=request.POST.get('pageview'))
-    clicked = int(request.POST.get('clicked')) + 1 if request.POST.get('clicked') is not None else None
-    new_action = MouseAction.objects.create(view=page_view,
-                                            x=int(request.POST.get('x')),
-                                            y=int(request.POST.get('y')),
-                                            clicked=clicked)
+    if 'pageview' in request.POST:
+        page_view = PageView.objects.get(uuid=request.POST.get('pageview'))
+        clicked = int(request.POST.get('clicked')) + 1 if request.POST.get('clicked') is not None else None
+        new_action = MouseAction.objects.create(view=page_view,
+                                                x=int(request.POST.get('x')),
+                                                y=int(request.POST.get('y')),
+                                                clicked=clicked)
 
-    return JsonResponse({'success': True})
+        return JsonResponse({'success': True})
+    else:
+        return JsonResponse({'success': False})
 
 
 def subscribe(request, return_path: str = None):

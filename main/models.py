@@ -173,6 +173,12 @@ class Tour(DraftHistory):
     def close_tours(self):
         return sorted(Tour.objects.exclude(slug=self.slug).filter(display=True, start_date__isnull=False),
                       key=lambda tour: abs(tour.start_date - self.start_date))[:4]
+    
+    @property
+    def close_published_tours(self):
+        ordered_tours = sorted(Tour.objects.exclude(slug=self.slug).filter(display=True, start_date__isnull=False),
+                      key=lambda tour: abs(tour.start_date - self.start_date))
+        return list(filter(lambda tour: tour.published, ordered_tours))[:4]
 
     def __str__(self):
         return self.name

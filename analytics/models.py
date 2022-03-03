@@ -26,7 +26,7 @@ class SubscriptionSubmission(models.Model):
 class UserCookie(models.Model):
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4)
     staff = models.BooleanField(default=False)
-    user_agent = models.CharField(max_length=200)
+    user_agent = models.CharField(max_length=500)
     user_agent_info = models.JSONField(null=True, blank=True)
     accepted_cookies = models.BooleanField(default=False)
     subscription = models.OneToOneField(SubscriptionSubmission, on_delete=models.SET_NULL, null=True, blank=True)
@@ -69,7 +69,8 @@ class Session(models.Model):
 
     @property
     def duration(self):
-        return self.pageview_set.aggregate(dur=Max('end_time') - Min('time'))['dur']
+        # return self.pageview_set.aggregate(dur=Max('end_time') - Min('time'))['dur']
+        return self.pageview_set.aggregate(sum=Sum('time_visible'))['sum']
 
 
 class Page(models.Model):
