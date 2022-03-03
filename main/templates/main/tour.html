@@ -41,9 +41,9 @@
             </button>
         </a>
     </div>
-    <div class="row" id="tour-details" class="d-flex align-items-stretch">
+    <div id="tour-details">
         {% if tour.dated %}
-            <div class="col-lg-3 col-md-12 g-2">
+            <div id="start-card">
                 <div class="card">
                     <div class="card-header">
                         Start
@@ -57,7 +57,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-lg-3 col-md-12 g-2">
+            <div id="end-card">
                 <div class="card">
                     <div class="card-header">
                         End
@@ -72,7 +72,7 @@
                 </div>
             </div>
         {% endif %}
-        <div class="col-lg-3 col-md-12 g-2 d-flex flex-column">
+        <div id="duration-card">
             <div class="card flex-grow-1">
                 <div class="card-header">
                     Duration
@@ -82,7 +82,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-lg-3 col-md-12 g-2 d-flex flex-column justify-content-center">
+        <div id="price-card">
             <div class="card flex-grow-1">
                 <div class="card-header">
                     Price

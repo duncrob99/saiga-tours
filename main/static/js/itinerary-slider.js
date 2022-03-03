@@ -151,3 +151,59 @@ document.querySelectorAll('.mySlides').forEach(el => {
 });
 
 showSlides(slideIndex, false, true);
+
+(function () {
+    let container = document.querySelector('.slideshow-container');
+    let slides = document.getElementsByClassName("mySlides");
+    let initial_transition = slides[0].style.transition;
+    container.addEventListener('touchstart', touchev => {
+        let start_x;
+        let start_time = new Date();
+        for (let i = 0; i < touchev.changedTouches.length; i++) {
+            if (touchev.changedTouches[i].identifier === 0) start_x = touchev.changedTouches[i].pageX;
+        }
+
+        let slide_poses = [];
+        for (let i=0; i < slides.length; i++) {
+            slide_poses.push({
+                slide: slides[i],
+                start_left: parseInt(getComputedStyle(slides[i]).left)
+            });
+
+            slides[i].style.transition = 'all 0s';
+        }
+
+        let moved = 0;
+        container.addEventListener('touchmove', moveev => {
+            for (let i = 0; i < moveev.changedTouches.length; i++) {
+                let touch = moveev.changedTouches[i];
+                if (touch.identifier !== 0) return;
+
+                moved = touch.pageX - start_x;
+                console.log(moved);
+                for (let i = 0; i < slide_poses.length; i++) {
+                    slide_poses[i].slide.style.left = slide_poses[i].start_left + moved + 'px';
+                }
+            }
+        });
+
+        let complete = false;
+        container.addEventListener('touchend', endev => {
+            if (complete) return;
+            complete = true;
+
+            for (let i=0; i < slides.length; i++) {
+                slides[i].style.transition = initial_transition;
+            }
+
+            let slide_width = parseFloat(getComputedStyle(document.querySelectorAll('.slides div')[0]).width);
+
+            let speed = moved / (new Date() - start_time);
+            if (Math.abs(moved) + Math.abs(speed) * 200 > 0.5*slide_width) {
+                plusSlides(-Math.sign(moved));
+            } else {
+                plusSlides(0);
+            }
+        })
+    });
+})();

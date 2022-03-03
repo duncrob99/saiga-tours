@@ -1,6 +1,16 @@
 #tour-details {
     text-align: center;
     font-weight: bold;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 20px;
+    flex-flow: wrap;
+}
+
+#tour-details div {
+    flex-grow: 1;
+    min-width: 200px;
 }
 
 #tour-details div div .card-header {

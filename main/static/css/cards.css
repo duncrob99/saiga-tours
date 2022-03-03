@@ -1,5 +1,5 @@
 h5.card-title {
-    font-size: 1.9vw;
+    font-size: 1.5rem;
     font-weight: bolder;
     color: white;
     position: absolute;
@@ -118,4 +118,59 @@ h5.card-title {
 
 .card .btn {
     border-radius: 100px;
+}
+
+.detail-table {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    grid-template-areas:
+        "date duration"
+        "price view";
+    gap: 10px;
+    padding: 10px;
+}
+
+.detail-table div {
+    display: flex;
+    flex-direction: row;
+    justify-content: start;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+@media screen and (max-width: 500px) {
+    .detail-table div {
+        flex-direction: column;
+        justify-content: center;
+        align-items: start;
+    }
+
+    .detail-table .view {
+        justify-content: start;
+        padding-top: 10px;
+    }
+}
+
+.detail-table .date {
+    grid-area: date;
+}
+
+.detail-table .duration {
+    grid-area: duration;
+}
+
+.detail-table .price {
+    grid-area: price;
+}
+
+.detail-table .view {
+    grid-area: view;
+}
+
+@media screen and (max-width: 600px) {
+    .card .table {
+        /*font-size: 4vw;*/
+    }
 }

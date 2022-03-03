@@ -16,7 +16,6 @@ import environ
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
 
-
 env = environ.Env(
     DEBUG=(bool, False)
 )
@@ -84,6 +83,7 @@ INSTALLED_APPS = [
     'analytics',
 ]
 
+
 MIDDLEWARE = [
     'django.middleware.common.BrokenLinkEmailsMiddleware',
     'django.middleware.gzip.GZipMiddleware',
@@ -95,6 +95,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'simple_history.middleware.HistoryRequestMiddleware',
+    # 'travel_website.middleware.StatsMiddleware'
 ]
 
 ROOT_URLCONF = 'travel_website.urls'
@@ -177,6 +178,8 @@ STATIC_ROOT = BASE_DIR / 'assets'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+CACHE_ROOT = BASE_DIR / 'cached_pages'
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'

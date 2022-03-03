@@ -99,9 +99,27 @@
     }
 
     .footer-col {
-        --padding: 4rem;
+        --padding: 3vw;
         padding-left: var(--padding);
         padding-right: var(--padding);
+    }
+
+    .main-footer img.logo {
+        left: 50%;
+        transform: translateX(-50%);
+        position: relative;
+    }
+
+    #footer-content {
+        gap: 30px;
+    }
+
+    #footer-content > div {
+        gap: 50px;
+    }
+
+    #main-footer .container {
+        padding-top: 5em;
     }
 </style>
 
@@ -127,8 +145,8 @@
     </div>
 
     <div class="main-footer">
-        <div class="container p-5">
-            <div class="d-flex justify-content-start">
+        <div class="container pt-5 px-3 pb-3">
+            <div class="d-flex justify-content-start" id="footer-content">
                 <div class="d-flex flex-column justify-content-around">
                     <img alt="logo" src="{{ settings.logo.url }}" class="logo">
                     <ul class="list-unstyled d-flex">

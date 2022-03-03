@@ -45,6 +45,27 @@ html, body {
     font-size: 7rem;
 }
 
+.section-title {
+    font-family: 'Burford Base', sans-serif;
+    /*font-weight: bold;*/
+    text-align: center;
+    /*margin-top: 10rem;*/
+    font-size: 6rem;
+    color: var(--accent-foreground);
+    text-outline: 2px rgba(0, 0, 0, 0.2);
+    -webkit-text-stroke: 2px rgba(0, 0, 0, 0.2);
+}
+
+@media screen and (max-width: 600px) {
+    .banner-text > h1 {
+        font-size: 20vw;
+    }
+
+    .section-title {
+        font-size: 15vw;
+    }
+}
+
 #content-container {
     margin-top: 0;
     height: min-content;
@@ -136,16 +157,6 @@ body * {
     /*font-weight: 700 !important;*/
 }
 
-.section-title {
-    font-family: 'Burford Base', sans-serif;
-    /*font-weight: bold;*/
-    text-align: center;
-    /*margin-top: 10rem;*/
-    font-size: 6rem;
-    color: var(--accent-foreground);
-    text-outline: 2px rgba(0, 0, 0, 0.2);
-    -webkit-text-stroke: 2px rgba(0, 0, 0, 0.2);
-}
 
 /*.section-title > div.underline {*/
 /*    content: var(--underline);*/

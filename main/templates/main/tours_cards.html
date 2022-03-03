@@ -30,6 +30,7 @@
                         {{ tour.excerpt }}
                     </div>
                     <hr>
+                <!--
                     <table class="table table-borderless">
                         <tr>
                             {% if tour.dated %}
@@ -47,6 +48,15 @@
                             </th>
                         </tr>
                     </table>
+                -->
+                    <div class="detail-table">
+                        <div class="date"><div><i class="bi table-icon bi-calendar4-range"></i></div><span>{{ tour.start_date }}</span></div>
+                        <div class="duration"><div><i class="bi table-icon bi-clock-history"></i></div><span>{{ tour.duration }} day{% if tour.duration > 1 %}s{% endif %}</span></div>
+                        <div class="price"><div><i class="bi table-icon bi-coin"></i></div><span>{{ settings.price_prefix }}{{ tour.price }}</span></div>
+                        <div class="view">
+                            <a href="{% url 'tour' tour.slug %}{% if parent %}?parent={{ parent }}{% endif %}" class="btn accent hoverable-accent">VIEW DETAILS</a>
+                        </div>
+                    </div>
 {#                    <a class="stretched-link"#}
 {#                       href="{% url 'tour' tour.slug %}{% if parent %}?parent={{ parent }}{% endif %}"></a>#}
                 </div>
