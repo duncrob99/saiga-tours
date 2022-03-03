@@ -274,4 +274,4 @@ def statistics(request):
         'lats': json.dumps(lats),
         'lons': json.dumps(lons)
     }
-    return render(request, 'analytics/statistics.html', context)
+    return render(request, 'stats/statistics.html', context)
