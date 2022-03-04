@@ -48,11 +48,7 @@ urlpatterns = [
              'destinationguides': DestinationGuidesMap,
              'static': StaticPagesMap
          }},
-         name='django.contrib.sitemaps.views.sitemap'),
-    path('robots.txt',
-         TemplateView.as_view(template_name='main/robots.txt',
-                              content_type='text/plain')
-         )
+         name='django.contrib.sitemaps.views.sitemap')
 ]
 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

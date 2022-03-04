@@ -1,4 +1,5 @@
 from django.urls import path
+from django.views.generic import TemplateView
 
 from . import views
 
@@ -35,6 +36,8 @@ urlpatterns = [
     path('create/itinerary_template/', views.create_itinerary_template, name='create-itinerary-template'),
 
     path('gen_500/', views.gen_500, name='gen-500'),
+
+    path('robots.txt', TemplateView.as_view(template_name='main/robots.txt', content_type='text/plain'), name='robots'),
 
     path('<path:path>/', views.page, name='page')
 ]
