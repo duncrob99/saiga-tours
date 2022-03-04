@@ -15,6 +15,8 @@ from django.templatetags.static import static
 from django.urls import reverse
 from django.utils.functional import classproperty
 from simple_history.models import HistoricalRecords
+from django.contrib.sitemaps import ping_google
+from django.conf import settings
 
 
 def RichTextWithPlugins(*args, **kwargs):
@@ -61,6 +63,14 @@ class Region(DraftHistory):
     name = models.CharField(max_length=400)
     slug = models.SlugField(primary_key=True)
     tour_blurb = RichTextWithPlugins(config_name='default', null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        super().save(self, *args, **kwargs)
+        if not settings.PRODUCTION:
+            try:
+                ping_google()
+            except Exception as e:
+                print(e)
 
     def __str__(self):
         return self.name
@@ -114,6 +124,14 @@ class DestinationDetails(DraftHistory):
     card_img = models.ImageField()
     linked_tours = models.ManyToManyField('Tour', blank=True)
 
+    def save(self, *args, **kwargs):
+        super().save(self, *args, **kwargs)
+        if not settings.PRODUCTION:
+            try:
+                ping_google()
+            except Exception as e:
+                print(e)
+
     class Meta:
         verbose_name_plural = 'Destination details'
         unique_together = [['destination', 'order', 'type'],
@@ -123,6 +141,10 @@ class DestinationDetails(DraftHistory):
 
     def __str__(self):
         return f'{self.title} for {self.destination.name}'
+
+    def get_absolute_url(self):
+        view = 'tours' if self.type == self.TOURS else 'destination-details'
+        return reverse(view, args=[self.destination.region.slug, self.destination.slug, self.slug])
 
 
 class State(models.Model):
@@ -161,6 +183,8 @@ class Tour(DraftHistory):
     start_location = models.CharField(max_length=100, null=True, blank=True)
     end_location = models.CharField(max_length=100, null=True, blank=True)
 
+    last_modified = models.DateTimeField(auto_now=True, null=True)
+
     @property
     def dated(self):
         return self.start_date is not None
@@ -189,6 +213,17 @@ class Tour(DraftHistory):
             return self.state.priority
         else:
             return 9999 ** 9999
+
+    def get_absolute_url(self):
+        return reverse('tour', args=[self.slug])
+
+    def save(self, *args, **kwargs):
+        super().save(self, *args, **kwargs)
+        if not settings.PRODUCTION:
+            try:
+                ping_google()
+            except Exception as e:
+                print(e)
 
     class Meta:
         ordering = [F('state__priority').asc(nulls_last=True), 'start_date', 'price']
@@ -276,11 +311,22 @@ class Article(DraftHistory):
     def __str__(self):
         return self.title
 
+    def save(self, *args, **kwargs):
+        super().save(self, *args, **kwargs)
+        if not settings.PRODUCTION:
+            try:
+                ping_google()
+            except Exception as e:
+                print(e)
+
     class Meta:
         ordering = ['-creation', 'title']
 
     def tag_list(self) -> str:
         return ' '.join([str(tag) for tag in self.tags.all()])
+
+    def get_absolute_url(self):
+        return reverse('article', args=[self.slug])
 
 
 class Page(DraftHistory):
@@ -298,8 +344,18 @@ class Page(DraftHistory):
     banner_pos_x = models.FloatField(null=True, blank=True)
     banner_pos_y = models.FloatField(null=True, blank=True)
 
+    last_mod = models.DateTimeField(auto_now=True, null=True)
+
     def __str__(self):
         return self.title
+
+    def save(self, *args, **kwargs):
+        super().save(self, *args, **kwargs)
+        if not settings.PRODUCTION:
+            try:
+                ping_google()
+            except Exception as e:
+                print(e)
 
     @property
     def full_path(self):
@@ -331,6 +387,16 @@ class Page(DraftHistory):
     @property
     def published_siblings(self):
         return self.siblings.filter(published=True)
+
+    @property
+    def level(self):
+        if self.parent is None:
+            return 0
+        else:
+            return self.parent.level + 1
+
+    def get_absolute_url(self):
+        return '/' + self.full_path
 
 
 @receiver(post_save)
@@ -410,6 +476,12 @@ class Settings(models.Model):
         if self.active:
             Settings.objects.exclude(pk=self.pk).update(active=False)
         super(Settings, self).save(*args, **kwargs)
+
+        if not settings.PRODUCTION:
+            try:
+                ping_google()
+            except Exception as e:
+                print(e)
 
     @classmethod
     def load(cls):

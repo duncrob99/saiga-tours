@@ -18,11 +18,36 @@ from django.conf.urls.static import static
 from django.conf.urls import handler404
 from django.contrib import admin
 from django.urls import path, include
+from django.contrib.sitemaps.views import sitemap
+
+from main.sitemaps import (TourSitemap,
+                           PageSitemap,
+                           ArticleSitemap,
+                           DetailsSitemap,
+                           RegionToursMap,
+                           RegionGuidesMap,
+                           DestinationToursMap,
+                           DestinationGuidesMap,
+                           StaticPagesMap)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('ckeditor/', include('ckeditor_uploader.urls')),
-    path('stats/', include('analytics.urls'))
+    path('stats/', include('analytics.urls')),
+    path('sitemap.xml',
+         sitemap,
+         {'sitemaps': {
+             'tours': TourSitemap,
+             'pages': PageSitemap,
+             'articles': ArticleSitemap,
+             'details': DetailsSitemap,
+             'regiontours': RegionToursMap,
+             'regionguides': RegionGuidesMap,
+             'destinationtours': DestinationToursMap,
+             'destinationguides': DestinationGuidesMap,
+             'static': StaticPagesMap
+         }},
+         name='django.contrib.sitemaps.views.sitemap')
 ]
 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

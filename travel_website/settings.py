@@ -17,7 +17,8 @@ import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
 
 env = environ.Env(
-    DEBUG=(bool, False)
+    DEBUG=(bool, False),
+    PRODUCTION=(bool, False)
 )
 environ.Env.read_env()
 
@@ -27,6 +28,8 @@ sentry_sdk.init(
     integrations=[DjangoIntegration()],
     traces_sample_rate=1.0,
 )
+
+PRODUCTION = env('production')
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -81,7 +84,12 @@ INSTALLED_APPS = [
     'simple_history',
     'colorfield',
     'analytics',
+    'django.contrib.sitemaps',
+    'django.contrib.sites'
 ]
+
+SITE_ID = 1
+
 
 MIDDLEWARE = [
     'django.middleware.common.BrokenLinkEmailsMiddleware',
