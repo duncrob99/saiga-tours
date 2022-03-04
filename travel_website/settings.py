@@ -83,7 +83,6 @@ INSTALLED_APPS = [
     'analytics',
 ]
 
-
 MIDDLEWARE = [
     'django.middleware.common.BrokenLinkEmailsMiddleware',
     'django.middleware.gzip.GZipMiddleware',
@@ -112,6 +111,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'main.views.global_context',
+                'analytics.analytics_context'
             ],
         },
     },

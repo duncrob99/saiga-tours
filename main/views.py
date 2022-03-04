@@ -139,7 +139,7 @@ def front_page(request):
                       settings.logo.url,
                       description='Come share some tours with us!',
                   )
-              } | global_context(request)
+              }
     return render(request, 'main/front-page.html', context)
 
 
@@ -183,7 +183,7 @@ def global_context(request):
                   'pages': Page.visible(request.user.is_staff).filter(parent=None, in_navbar=True),
                   'settings': Settings.load(),
                   'footer_links': footer_links,
-              } | analytics.analytics_context(request)
+              }
     return context
 
 
@@ -218,7 +218,7 @@ def destination_overview(request, region_slug, country_slug):
                       destination.card_img.url,
                       f'Come look at the tours we offer in {destination.name}!',
                   )
-              } | global_context(request)
+              }
 
     return render(request, 'main/destination.html', context)
 
@@ -252,7 +252,7 @@ def details_page(request, region_slug, country_slug, detail_slug, detail_type):
                    title=details.title,
                    image_url=details.card_img.url,
                    description=details.content[:40]
-               )} | global_context(request)
+               )}
 
     return render(request, 'main/destination_details.html', context)
 
@@ -330,7 +330,7 @@ def tour(request, slug):
                       description=tour_obj.excerpt,
                       type=MetaInfoTypes.ARTICLE
                   )
-              } | global_context(request)
+              }
     return render(request, 'main/tour.html', context)
 
 
@@ -346,7 +346,7 @@ def tours(request):
                       image_url=settings.logo.url,
                       description='Come see all the tours we have on offer!'
                   )
-              } | global_context(request)
+              }
     return render(request, 'main/tours.html', context)
 
 
@@ -361,7 +361,7 @@ def article(request, slug):
                                    article_obj.card_img.url,
                                    article_obj.excerpt,
                                    MetaInfoTypes.ARTICLE)
-              } | global_context(request)
+              }
     return render(request, 'main/article.html', context)
 
 
@@ -424,7 +424,7 @@ def article_list(request, type, title):
                       image_url=Settings.load().logo.url,
                       description=f'See all the {title.lower()} we have on offer!'
                   )
-              } | global_context(request)
+              }
     return render(request, 'main/article_list.html', context)
 
 
@@ -453,7 +453,7 @@ def region(request, slug):
                       image_url=Settings.load().logo.url,
                       description=f'Learn everything you need to know about {region_obj.name}'
                   )
-              } | global_context(request)
+              }
     return render(request, 'main/region.html', context)
 
 
@@ -484,7 +484,7 @@ def page(request, path):
             page_obj.content[:36] + '...',
             MetaInfoTypes.ARTICLE
         )
-    } | global_context(request)
+    }
     return render(request, 'main/page.html', context)
 
 
@@ -504,7 +504,7 @@ def contact(request):
         except BadHeaderError:
             form.add_error('from_email', 'Invalid header found.')
             ContactSubmission.objects.create(from_email=from_email, subject=subject, message=message, success=False)
-            return render(request, 'main/contact.html', {'form': form} | global_context(request))
+            return render(request, 'main/contact.html', {'form': form})
     elif request.method == 'GET':
         form.fields['subject'].initial = request.GET.get('subject')
     context = {
@@ -514,7 +514,7 @@ def contact(request):
             'Contact Us',
             Settings.load().logo.url,
         )
-    } | global_context(request)
+    }
     return render(request, 'main/contact.html', context)
 
 
@@ -544,7 +544,7 @@ def destinations(request):
             Settings.load().logo.url,
             "Come and see the destinations we have on offer!"
         )
-    } | form_context | global_context(request)
+    } | form_context
     return render(request, 'main/destinations.html', context)
 
 
@@ -569,7 +569,7 @@ def country_tours(request, region_slug, country_slug):
             destination.card_img.url,
             f'Learn more about the tours we offer to {destination.name}'
         )
-    } | global_context(request)
+    }
 
     return render(request, 'main/country_tours.html', context)
 
@@ -593,7 +593,7 @@ def region_tours(request, region_slug):
             Settings.load().logo.url,
             f'Learn more about our tour offerings to {region_obj.name}'
         )
-    } | global_context(request)
+    }
     return render(request, 'main/region-tours.html', context)
 
 
