@@ -64,8 +64,12 @@ class Region(DraftHistory):
     slug = models.SlugField(primary_key=True)
     tour_blurb = RichTextWithPlugins(config_name='default', null=True, blank=True)
 
+    banner_img = models.ImageField(null=True, blank=True)
+    banner_x = models.FloatField(default=50)
+    banner_y = models.FloatField(default=50)
+
     def save(self, *args, **kwargs):
-        super().save(self, *args, **kwargs)
+        super(Region, self).save(*args, **kwargs)
         if not settings.PRODUCTION:
             try:
                 ping_google()
@@ -90,6 +94,13 @@ class Destination(DraftHistory):
     title_scale = models.FloatField(null=True, blank=True)
     title_rotation = models.FloatField(null=True, blank=True)
     title_curve = models.FloatField(null=True, blank=True)
+
+    tour_banner = models.ImageField(null=True, blank=True)
+    tour_banner_x = models.FloatField(default=50)
+    tour_banner_y = models.FloatField(default=50)
+    guide_banner = models.ImageField(null=True, blank=True)
+    guide_banner_x = models.FloatField(default=50)
+    guide_banner_y = models.FloatField(default=50)
 
     def __str__(self):
         return self.name
@@ -124,8 +135,12 @@ class DestinationDetails(DraftHistory):
     card_img = models.ImageField()
     linked_tours = models.ManyToManyField('Tour', blank=True)
 
+    banner_img = models.ImageField(null=True, blank=True)
+    banner_x = models.FloatField(default=50)
+    banner_y = models.FloatField(default=50)
+
     def save(self, *args, **kwargs):
-        super().save(self, *args, **kwargs)
+        super(DestinationDetails, self).save(*args, **kwargs)
         if not settings.PRODUCTION:
             try:
                 ping_google()
@@ -171,7 +186,12 @@ class Tour(DraftHistory):
     duration = models.IntegerField(null=True)
     description = RichTextWithPlugins()
     excerpt = models.TextField()
+
     card_img = models.ImageField()
+    banner_img = models.ImageField(null=True, blank=True)
+    banner_x = models.FloatField(null=True, blank=True)
+    banner_y = models.FloatField(null=True, blank=True)
+
     price = models.DecimalField(max_digits=8, decimal_places=2)
     state = models.ForeignKey(State, on_delete=models.CASCADE, null=True, blank=True)
     extensions = models.ManyToManyField('self', blank=True, symmetrical=False)
@@ -218,7 +238,7 @@ class Tour(DraftHistory):
         return reverse('tour', args=[self.slug])
 
     def save(self, *args, **kwargs):
-        super().save(self, *args, **kwargs)
+        super(Tour, self).save(*args, **kwargs)
         if not settings.PRODUCTION:
             try:
                 ping_google()
@@ -308,11 +328,15 @@ class Article(DraftHistory):
     tags = models.ManyToManyField(Tag, related_name='articles', blank=True)
     author = models.ForeignKey(Author, on_delete=models.CASCADE, null=True, blank=True)
 
+    banner_img = models.ImageField(null=True, blank=True)
+    banner_x = models.FloatField(null=True, blank=True)
+    banner_y = models.FloatField(null=True, blank=True)
+
     def __str__(self):
         return self.title
 
     def save(self, *args, **kwargs):
-        super().save(self, *args, **kwargs)
+        super(Article, self).save(*args, **kwargs)
         if not settings.PRODUCTION:
             try:
                 ping_google()
@@ -350,7 +374,7 @@ class Page(DraftHistory):
         return self.title
 
     def save(self, *args, **kwargs):
-        super().save(self, *args, **kwargs)
+        super(Page, self).save(*args, **kwargs)
         if not settings.PRODUCTION:
             try:
                 ping_google()

@@ -5,10 +5,98 @@
     {{ region.name }} Guides
 {% endblock %}
 
+{% block extrahead %}
+    <style>
+        #header-banner {
+            width: 100%;
+            height: 356px;
+            object-fit: cover;
+            position: absolute;
+            z-index: -1;
+            left: 0;
+            object-position: {{ region.banner_x }}% {{ region.banner_y }}%;
+        }
+
+        #header-content {
+            height: 356px;
+            position: relative;
+            padding-left: 24px;
+        }
+
+        .header-subtitle {
+            margin-bottom: 12px;
+            color: #36bca1;
+            font-family: "Caveat", sans-serif;
+            font-weight: bold;
+            font-size: 20px;
+        }
+
+        .breadcrumb {
+            color: grey;
+        }
+
+        .breadcrumb a {
+            color: black;
+            text-decoration: none;
+        }
+
+        .breadcrumb a:hover {
+            color: var(--accent-hover-foreground);
+        }
+
+        #content-container {
+            padding-top: 1rem !important;
+        }
+
+        #content {
+            position: unset !important;
+        }
+    </style>
+{% endblock %}
+
+{% block banner %}
+    {% if region.banner_img %}
+        <img src="{{ region.banner_img.url }}" id="header-banner"/>
+    {% endif %}
+{% endblock %}
+
 {% block content %}
-    <h1 class="display-1">{{ region.name }}</h1>
+    {% if not region.banner_img %}
+        <div class="breadcrumb">
+            <a href="{% url 'front-page' %}">Home</a>
+            <i class="bi bi-dot"></i>
+            <a href="{% url 'destinations' %}">
+                Destinations
+            </a>
+            <i class="bi bi-dot"></i>
+            {{ region }}
+        </div>
+        <h1 class="display-1">{{ region.name }}</h1>
+        {% if destinations.count > 0 %}
+            <hr>
+        {% endif %}
+    {% else %}
+        <div id="header-content" class="d-flex flex-column justify-content-between">
+            <div class="breadcrumb">
+                <a href="{% url 'front-page' %}">Home</a>
+                <i class="bi bi-dot"></i>
+                <a href="{% url 'destinations' %}">
+                    Destinations
+                </a>
+                <i class="bi bi-dot"></i>
+                {{ region }}
+            </div>
+            <div class="heading d-flex flex-column justify-content-center">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h1 id="title" class="section-title">{{ region }}
+                        <div class="underline underline-left"></div>
+                    </h1>
+                </div>
+            </div>
+            <div></div>
+        </div>
+    {% endif %}
     {% if destinations.count > 0 %}
-        <hr>
         <h3 class="display-5">Countries</h3>
         <div class="row">
             {% for country in destinations.all %}
@@ -30,3 +118,7 @@
         {% include 'main/tours_cards.html' %}
     {% endif %}
 {% endblock content %}
+
+{% block js %}
+    <script src="{% static 'js/header-banner.js' %}"></script>
+{% endblock %}

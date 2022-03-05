@@ -16,6 +16,15 @@
     {% if request.user.is_staff %}
         <link href="{% static 'nouislider/nouislider_asdlj.css' %}" type="text/css" rel="stylesheet">
     {% endif %}
+    {% if tour.banner_img %}
+        <style>
+            #header-banner {
+                --banner-x: {{ tour.banner_x }};
+                --banner-y: {{ tour.banner_y }};
+            }
+        </style>
+        <link href="{% static 'css/header-banner.css' %}">
+    {% endif %}
 {% endblock %}
 
 {% block banner %}
@@ -28,19 +37,60 @@
             <span class="bi bi-pencil" style="font-size: 1.5rem"></span> <span style="margin-left: 4px;">Edit</span>
         </button>
     {% endif %}
+
+    {% if tour.banner_img %}
+        <img src="{{ tour.banner_img.url }}" id="header-banner"/>
+    {% endif %}
 {% endblock %}
 
 {% block content %}
     <div id="editor-toolbar"></div>
-    <div class="heading d-flex justify-content-between align-items-center">
-        <h1 class="display-1" id="title">{{ tour }}</h1>
-        <a href="{% url 'contact' %}?subject=Inquiry about {{ tour }}">
-            <button class="btn btn-primary d-inline-flex align-items-center accent hoverable-accent" role="button"
-                    style="float: right; border-radius: var(--border-radius);">
-                <span class="bi bi-chat-left-dots" style="font-size: 1.5rem"></span> <span style="margin-left: 10px;">Inquire Now</span>
-            </button>
-        </a>
-    </div>
+    {% if tour.banner_img %}
+        <div id="header-content" class="d-flex flex-column justify-content-between">
+            <div class="breadcrumb">
+                <a href="{% url 'front-page' %}">Home</a>
+                <i class="bi bi-dot"></i>
+                <a href="{% url 'tours' %}">
+                   Tours
+                </a>
+                <i class="bi bi-dot"></i>
+                {{ tour }}
+            </div>
+            <div class="heading d-flex flex-column justify-content-center">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h1 id="title" class="section-title">{{ tour }}
+                        <div class="underline underline-left"></div>
+                    </h1>
+                    <a href="{% url 'contact' %}?subject=Inquiry about {{ tour }}">
+                        <button class="btn btn-primary d-inline-flex align-items-center accent hoverable-accent" role="button"
+                                style="float: right; border-radius: var(--border-radius)">
+                            <span class="bi bi-chat-left-dots" style="font-size: 1.5rem"></span> <span style="margin-left: 10px;">Inquire Now</span>
+                        </button>
+                    </a>
+                </div>
+            </div>
+            <div></div>
+        </div>
+    {% else %}
+        <div class="breadcrumb">
+            <a href="{% url 'front-page' %}">Home</a>
+            <i class="bi bi-dot"></i>
+            <a href="{% url 'tours' %}">
+                Tours
+            </a>
+            <i class="bi bi-dot"></i>
+            {{ tour }}
+        </div>
+        <div class="heading d-flex justify-content-between align-items-center">
+            <h1 class="display-1" id="title">{{ tour }}</h1>
+            <a href="{% url 'contact' %}?subject=Inquiry about {{ tour }}">
+                <button class="btn btn-primary d-inline-flex align-items-center accent hoverable-accent" role="button"
+                        style="float: right; border-radius: var(--border-radius);">
+                    <span class="bi bi-chat-left-dots" style="font-size: 1.5rem"></span> <span style="margin-left: 10px;">Inquire Now</span>
+                </button>
+            </a>
+        </div>
+    {% endif %}
     <div id="tour-details">
         {% if tour.dated %}
             <div id="start-card">
@@ -326,4 +376,5 @@
         <script src="{% static 'js/tour_editing.js' %}"></script>
     {% endif %}
     <script src="{% static 'js/ckeditor_styling.js' %}"></script>
+    <script src="{% static 'js/header-banner.js' %}"></script>
 {% endblock %}
