@@ -6,6 +6,15 @@
 {% endblock %}
 
 {% block extrahead %}
+    {% if article.banner_img %}
+        <style>
+            #header-banner {
+                --banner-x: {% if article.banner_x %}{{ article.banner_x }}{% else %}50{% endif %};
+                --banner-y: {% if article.banner_y %}{{ article.banner_y }}{% else %}50{% endif %};
+            }
+        </style>
+        <link href="{% static 'css/header-banner.css' %}" rel="stylesheet">
+    {% endif %}
     <link rel="stylesheet" href="{% static 'css/header-banner.css' %}">
 {% endblock %}
 
