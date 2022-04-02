@@ -148,7 +148,17 @@
         {{ tour.description | safe }}
     </div>
     <hr>
-    <h6 class="display-6" id="itinerary">Itinerary</h6>
+    <div class="d-flex justify-content-between align-items-center">
+        <h6 class="display-6" id="itinerary">Itinerary</h6>
+        {% if tour.itinerary_doc %}
+            <a href="{{ tour.itinerary_doc.get_absolute_url }}">
+                <button class="btn btn-primary d-inline-flex align-items-center accent hoverable-accent" role="button"
+                        style="float: right; border-radius: var(--border-radius)">
+                    <span class="bi bi-download" style="font-size: 1.5rem"></span> <span style="margin-left: 10px;">Download</span>
+                </button>
+            </a>
+        {% endif %}
+    </div>
     {% include 'main/itinerary-slider.html' with itinerary=tour.itinerary.all %}
 
     {% if tour.stops.count %}

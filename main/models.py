@@ -186,6 +186,7 @@ class Tour(DraftHistory):
     duration = models.IntegerField(null=True)
     description = RichTextWithPlugins()
     excerpt = models.TextField()
+    itinerary_doc = models.ForeignKey('FileUpload', on_delete=models.SET_NULL, null=True, blank=True)
 
     card_img = models.ImageField()
     banner_img = models.ImageField(null=True, blank=True)
