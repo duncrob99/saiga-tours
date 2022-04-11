@@ -938,7 +938,8 @@ function updateStops(stops, editable) {
 
                     point_svg
                         .cx(stop.x)
-                        .cy(stop.y);
+                        .cy(stop.y)
+                        .transform({scale: 1.2, origin: 'center'});
 
                     if (stop.marked) {
                         text_el.font({anchor: 'middle'}).cx(stop.x + stop.text_x).cy(stop.y + stop.text_y - pointer_size * 20);
