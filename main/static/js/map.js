@@ -198,6 +198,8 @@ function make_map_work(destinations, width, height, hoverable, stops, editable, 
     setMapZooming(true);
 }
 
+let map_svg = SVG('.map svg');
+
 function setMapZooming(en) {
     function zoomIn() {
         let cur_zoom = map_svg.zoom();
@@ -217,7 +219,6 @@ function setMapZooming(en) {
         }
     }
 
-    let map_svg = SVG('.map svg');
     if (en) {
         map_svg.panZoom({
             zoomMax: 20,
@@ -609,8 +610,6 @@ function findCentroid(path) {
 }
 
 function createPoints(points) {
-    let map_svg = SVG('.map svg');
-
     for (let i = 0; i < points.length; i++) {
         let point = points[i];
 
@@ -927,6 +926,8 @@ function updateStops(stops, editable) {
 
             point_el.addEventListener('mousedown', click_ev => {
                 setMapZooming(false);
+                let init_viewbox = SVG('.map svg').viewbox();
+
                 let start = {x: stops[i].x, y: stops[i].y};
 
                 function move_point(move_ev) {
@@ -957,7 +958,7 @@ function updateStops(stops, editable) {
                             other_stop.y = stop.y;
 
                             if (other_stop.marked) {
-                                SVG(document.querySelector(`#pointer-${other_stop.form_ix}`)).animate({when: 'now', duration: 1}).transform({
+                                SVG(document.querySelector(`#pointer-${other_stop.form_ix}`)).transform({
                                     scale: pointer_size,
                                     origin: 'center',
                                     tx: stop.x,
@@ -972,6 +973,10 @@ function updateStops(stops, editable) {
                             }
                         }
                     }
+
+                    // Reset map position, so you don't drag around map at same time
+                    SVG('.map svg').viewbox(init_viewbox.x, init_viewbox.y, init_viewbox.width, init_viewbox.height);
+
                 }
 
                 window.addEventListener('mousemove', move_point);
@@ -987,6 +992,7 @@ function updateStops(stops, editable) {
 
             if (text_el) {
                 window.addEventListener('mousedown', click_ev => {
+                    let init_viewbox = SVG('.map svg').viewbox();
                     try {
                         let box = text_el.rbox();
                         if (click_ev.x >= box.x && click_ev.x <= box.x2 && click_ev.y >= box.y && click_ev.y <= box.y2) {
@@ -1005,6 +1011,7 @@ function updateStops(stops, editable) {
                                 // Edit value in form
                                 document.getElementById(`id_stops-${stop.form_ix}-text_x`).value = stop.text_x;
                                 document.getElementById(`id_stops-${stop.form_ix}-text_y`).value = stop.text_y;
+                                SVG('.map svg').viewbox(init_viewbox.x, init_viewbox.y, init_viewbox.width, init_viewbox.height);
                             }
 
                             window.addEventListener('mousemove', move_text);
@@ -1453,13 +1460,13 @@ function resize_map_to_countries(destinations, width, height, hoverable) {
     }
     if (typeof Visibility !== "undefined") {
         Visibility.onVisible(() => {
-            SVG('.map svg').animate({
+            map_svg.animate({
                 when: 'now',
                 duration: zoom_transition
             }).ease('quartInOut').viewbox(`${min_bbox[0]} ${min_bbox[1]} ${min_bbox[2]} ${min_bbox[3]}`);
         })
     } else {
-        SVG('.map svg').animate({
+        map_svg.animate({
             when: 'now',
             duration: zoom_transition
         }).ease('quartInOut').viewbox(`${min_bbox[0]} ${min_bbox[1]} ${min_bbox[2]} ${min_bbox[3]}`);
@@ -1510,13 +1517,13 @@ function resize_map_to_stops(stops, width, height) {
     }
     if (typeof Visibility !== "undefined") {
         Visibility.onVisible(() => {
-            SVG('.map svg').animate({
+            map_svg.animate({
                 when: 'now',
                 duration: zoom_transition
             }).ease('quartInOut').viewbox(`${min_bbox[0]} ${min_bbox[1]} ${min_bbox[2]} ${min_bbox[3]}`);
         })
     } else {
-        SVG('.map svg').animate({
+        map_svg.animate({
             when: 'now',
             duration: zoom_transition
         }).ease('quartInOut').viewbox(`${min_bbox[0]} ${min_bbox[1]} ${min_bbox[2]} ${min_bbox[3]}`);
@@ -1576,13 +1583,13 @@ function resize_map_to_content(stops, width, height) {
     }
     if (typeof Visibility !== "undefined") {
         Visibility.onVisible(() => {
-            SVG('.map svg').animate({
+            map_svg.animate({
                 when: 'now',
                 duration: zoom_transition
             }).ease('quartInOut').viewbox(`${min_bbox[0]} ${min_bbox[1]} ${min_bbox[2]} ${min_bbox[3]}`);
         })
     } else {
-        SVG('.map svg').animate({
+        map_svg.animate({
             when: 'now',
             duration: zoom_transition
         }).ease('quartInOut').viewbox(`${min_bbox[0]} ${min_bbox[1]} ${min_bbox[2]} ${min_bbox[3]}`);
