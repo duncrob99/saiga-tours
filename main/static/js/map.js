@@ -925,7 +925,6 @@ function updateStops(stops, editable) {
             })
 
             point_el.addEventListener('mousedown', click_ev => {
-                setMapZooming(false);
                 let init_viewbox = SVG('.map svg').viewbox();
 
                 let start = {x: stops[i].x, y: stops[i].y};
@@ -984,7 +983,6 @@ function updateStops(stops, editable) {
                 function stop_dragging() {
                     window.removeEventListener('mousemove', move_point);
                     window.removeEventListener('mouseup', stop_dragging);
-                    setMapZooming(true);
                 }
 
                 window.addEventListener('mouseup', stop_dragging);
