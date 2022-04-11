@@ -43,7 +43,7 @@ class UserCookie(models.Model):
     def should_request_subscription(self):
         return self.subscription is None and \
                (self.last_subscription_request is None or
-                timezone.now() - self.last_subscription_request >= self.subscription_delays[min(len(self.subscription_delays), self.sub_dismissal_count)])
+                timezone.now() - self.last_subscription_request >= self.subscription_delays[min(len(self.subscription_delays) - 1, self.sub_dismissal_count)])
 
     @classmethod
     def calc_uas(cls):
