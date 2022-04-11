@@ -51,7 +51,7 @@
                 <a href="{% url 'front-page' %}">Home</a>
                 <i class="bi bi-dot"></i>
                 <a href="{% url 'tours' %}">
-                   Tours
+                    Tours
                 </a>
                 <i class="bi bi-dot"></i>
                 {{ tour }}
@@ -62,9 +62,11 @@
                         <div class="underline underline-left"></div>
                     </h1>
                     <a href="{% url 'contact' %}?subject=Inquiry about {{ tour }}">
-                        <button class="btn btn-primary d-inline-flex align-items-center accent hoverable-accent" role="button"
+                        <button class="btn btn-primary d-inline-flex align-items-center accent hoverable-accent"
+                                role="button"
                                 style="float: right; border-radius: var(--border-radius)">
-                            <span class="bi bi-chat-left-dots" style="font-size: 1.5rem"></span> <span style="margin-left: 10px;">Inquire Now</span>
+                            <span class="bi bi-chat-left-dots" style="font-size: 1.5rem"></span> <span
+                                style="margin-left: 10px;">Inquire Now</span>
                         </button>
                     </a>
                 </div>
@@ -86,7 +88,8 @@
             <a href="{% url 'contact' %}?subject=Inquiry about {{ tour }}">
                 <button class="btn btn-primary d-inline-flex align-items-center accent hoverable-accent" role="button"
                         style="float: right; border-radius: var(--border-radius);">
-                    <span class="bi bi-chat-left-dots" style="font-size: 1.5rem"></span> <span style="margin-left: 10px;">Inquire Now</span>
+                    <span class="bi bi-chat-left-dots" style="font-size: 1.5rem"></span> <span
+                        style="margin-left: 10px;">Inquire Now</span>
                 </button>
             </a>
         </div>
@@ -147,19 +150,26 @@
     <div id="tour-desc">
         {{ tour.description | safe }}
     </div>
-    <hr>
-    <div class="d-flex justify-content-between align-items-center">
-        <h6 class="display-6" id="itinerary">Itinerary</h6>
-        {% if tour.itinerary_doc %}
-            <a href="{{ tour.itinerary_doc.get_absolute_url }}">
-                <button class="btn btn-primary d-inline-flex align-items-center accent hoverable-accent" role="button"
-                        style="float: right; border-radius: var(--border-radius)">
-                    <span class="bi bi-download" style="font-size: 1.5rem"></span> <span style="margin-left: 10px;">Download</span>
-                </button>
-            </a>
-        {% endif %}
-    </div>
-    {% include 'main/itinerary-slider.html' with itinerary=tour.itinerary.all %}
+
+    {% if tour.itinerary.count > 0 or tour.stols.count > 0 %}
+        <hr>
+        <div class="d-flex justify-content-between align-items-center">
+            <h6 class="display-6" id="itinerary">Itinerary</h6>
+            {% if tour.itinerary_doc %}
+                <a href="{{ tour.itinerary_doc.get_absolute_url }}">
+                    <button class="btn btn-primary d-inline-flex align-items-center accent hoverable-accent"
+                            role="button"
+                            style="float: right; border-radius: var(--border-radius)">
+                        <span class="bi bi-download" style="font-size: 1.5rem"></span> <span style="margin-left: 10px;">Download</span>
+                    </button>
+                </a>
+            {% endif %}
+        </div>
+    {% endif %}
+
+    {% if tour.itinerary.count > 0 %}
+        {% include 'main/itinerary-slider.html' with itinerary=tour.itinerary.all %}
+    {% endif %}
 
     {% if tour.stops.count %}
         {% include 'main/map.html' with destinations=tour.destinations.all hoverable=0 %}
@@ -377,7 +387,7 @@
         <script src="{% static 'js/svg.min.js' %}"></script>
         <script src="{% static 'js/svg.easing.min.js' %}"></script>
         <script src="https://cdn.jsdelivr.net/npm/litepicker/dist/litepicker.js"></script>
-{#        <script src="https://cdn.ckeditor.com/4.16.2/standard-all/ckeditor.js"></script>#}
+        {#        <script src="https://cdn.ckeditor.com/4.16.2/standard-all/ckeditor.js"></script>#}
         <script src="https://cdn.jsdelivr.net/npm/luxon@2/build/global/luxon.min.js"></script>
         <script src="{% static 'js/jscolor.min.js' %}"></script>
         <script src="{% static 'js/ckeditor/ckeditor.js' %}"></script>
