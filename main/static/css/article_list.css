@@ -55,7 +55,8 @@
 }
 
 .page-link:not(.accent) {
-    color: var(--accent-background);
+    color: var(--accent-foreground);
+    background-color: var(--accent-background);
 }
 
 .page-link:hover {
