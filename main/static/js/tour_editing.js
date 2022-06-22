@@ -11,7 +11,7 @@ let initial_slider_button_width = document.querySelector(':root').style.getPrope
 let desc = document.querySelector('#tour-desc');
 desc.setAttribute('contenteditable', true);
 
-document.querySelector('[name="description"]').parentElement.parentElement.style.display = 'none';
+document.querySelector('textarea[name="description"]').parentElement.parentElement.style.display = 'none';
 document.querySelector('[name="name"]').parentElement.style.display = 'none';
 document.querySelector('[name="duration"]').parentElement.style.display = 'none';
 document.querySelector('[name="price"]').parentElement.style.display = 'none';
