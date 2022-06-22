@@ -46,7 +46,6 @@
 {% endblock %}
 
 {% block content %}
-    <div id="editor-toolbar"></div>
     {% if tour.banner_img %}
         <div id="header-content" class="d-flex flex-column justify-content-between">
             <div class="breadcrumb">
@@ -96,6 +95,7 @@
             </a>
         </div>
     {% endif %}
+    <div id="editor-toolbar"></div>
     <div id="tour-details">
         {% if tour.dated %}
             <div id="start-card">
