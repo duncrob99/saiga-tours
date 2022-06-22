@@ -424,11 +424,37 @@ class Page(DraftHistory):
         return '/' + self.full_path
 
 
+def autorotate(img: Image):
+    """
+    Rotate a Pillow image based on exif data.
+    Returns new Pillow image.
+    """
+    exif = img._getexif()
+    orientation_key = 274
+
+    if exif and orientation_key in exif:
+        orientation = exif[orientation_key]
+
+        rotate_values = {
+            3: Image.ROTATE_180,
+            6: Image.ROTATE_270,
+            8: Image.ROTATE_90
+        }
+
+        if orientation in rotate_values:
+            print(f'Rotating by {rotate_values[orientation]}')
+            img = img.transpose(rotate_values[orientation])
+
+    return img
+
+
 @receiver(post_save)
 def validate_image_size(sender, instance, created, **kwargs):
     if hasattr(instance, 'card_img'):
-        print(instance.card_img.path)
-        image = Image.open(instance.card_img)
+        with Image.open(instance.card_img) as image:
+            format = image.format
+            image = autorotate(image)
+
         (width, height) = image.size
 
         ratio = 3 / 2
@@ -447,7 +473,7 @@ def validate_image_size(sender, instance, created, **kwargs):
         new_image = image.crop(crop_coords)
 
         img_io = BytesIO()
-        new_image.save(img_io, format=image.format)
+        new_image.save(img_io, format=format)
         instance.card_img.save(instance.card_img.name, File(img_io))
 
 
