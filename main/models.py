@@ -18,6 +18,8 @@ from simple_history.models import HistoricalRecords
 from django.contrib.sitemaps import ping_google
 from django.conf import settings
 
+from .images import crop_to_ar, autorotate
+
 
 def RichTextWithPlugins(*args, **kwargs):
     def plugin_path(name: str) -> str:
@@ -424,53 +426,17 @@ class Page(DraftHistory):
         return '/' + self.full_path
 
 
-def autorotate(img: Image):
-    """
-    Rotate a Pillow image based on exif data.
-    Returns new Pillow image.
-    """
-    exif = img._getexif()
-    orientation_key = 274
-
-    if exif and orientation_key in exif:
-        orientation = exif[orientation_key]
-
-        rotate_values = {
-            3: Image.ROTATE_180,
-            6: Image.ROTATE_270,
-            8: Image.ROTATE_90
-        }
-
-        if orientation in rotate_values:
-            print(f'Rotating by {rotate_values[orientation]}')
-            img = img.transpose(rotate_values[orientation])
-
-    return img
-
-
 @receiver(post_save)
 def validate_image_size(sender, instance, created, **kwargs):
     if hasattr(instance, 'card_img'):
         with Image.open(instance.card_img) as image:
             format = image.format
             image = autorotate(image)
-
-        (width, height) = image.size
-
-        ratio = 3 / 2
-
-        if abs(width - ratio * height) < 5:
-            return image
-        elif width > ratio * height:
-            new_height = height
-            new_width = height * ratio
-        else:
-            new_width = width
-            new_height = width / ratio
-
-        crop_coords = (
-            (width - new_width) // 2, (height - new_height) // 2, (width + new_width) // 2, (height + new_height) // 2)
-        new_image = image.crop(crop_coords)
+            ratio = 3 / 2
+            (width, height) = image.size
+            if abs(width - ratio * height) <= 5: # Prevents infinte loop when saving
+                return
+            new_image = crop_to_ar(image, ratio)
 
         img_io = BytesIO()
         new_image.save(img_io, format=format)
