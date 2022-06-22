@@ -601,64 +601,56 @@ def region_tours(request, region_slug):
 
 def country_tours_info(request, region_slug, country_slug, detail_slug):
     return details_page(request, region_slug, country_slug, detail_slug, DestinationDetails.TOURS)
-    # details = get_object_or_404(DestinationDetails,
-    #                             destination__region__slug=region_slug,
-    #                             destination__slug=country_slug,
-    #                             slug=detail_slug, type=DestinationDetails.TOURS)
-    #
-    # assert_visible(request, details)
-    #
-    # context = {
-    #               'details': details
-    #           } | global_context(request)
-    #
-    # return render(request, 'main/tour_info.html', context)
 
 
-def resized_imaged(request, filename: str, width: int = None, height: int = None):
-    media_root = settings.MEDIA_ROOT
+def crop_center(pil_img, crop_width, crop_height):
+    img_width, img_height = pil_img.size
+    return pil_img.crop(((img_width - crop_width) // 2,
+                         (img_height - crop_height) // 2,
+                         (img_width + crop_width) // 2,
+                         (img_height + crop_height) // 2))
+
+
+def crop_to_ar(image, ar):
+    (old_width, old_height) = image.size
+
+    original_ar = old_width / old_height
+
+    print(original_ar, ar)
+    if ar > original_ar:
+        crop_height = int(old_width / ar)
+        crop_width = old_width
+    elif ar < original_ar:
+        crop_width = int(old_height * ar)
+        crop_height = old_height
+    else:
+        return image
+
+    return crop_center(image, crop_width, crop_height)
+
+
+def crop_image(request, filename: str, width: int, height: int):
     removed_prefix = filename
     image = Image.open(path.join(settings.MEDIA_ROOT, removed_prefix),
                        mode='r')
     if width is not None or height is not None:
         (old_width, old_height) = image.size
+        old_ar = old_width/old_height
 
-        ar = old_width / old_height
+        if height != 0 and width != 0:
+            ar = width / height
+            image = crop_to_ar(image, ar)
 
-        if height == width == 0:
-            (width, height) = image.size
-        elif height == 0:
-            height = int(width / ar)
-        elif width == 0:
-            width = int(height * ar)
-
-        if old_width / width > old_width / height:
-            height = int(width / ar)
-        else:
-            width = int(height * ar)
-
-        if height < old_height:
             image = image.resize((width, height))
+        elif height == 0 and width != 0:
+            image = image.resize((width, int(width / old_ar)))
+        elif width == 0 and height != 0:
+            image = image.resize((int(height * old_ar), height))
 
         response = HttpResponse(content_type='image/webp')
         # noinspection PyTypeChecker
         image.save(response, 'webp')
         return response
-
-
-def crop_to_ar(image: Image, ratio: float) -> Tuple[int, int, int, int]:
-    (width, height) = image.size
-    if abs(width - ratio * height) < 5:
-        return image
-    elif width > ratio * height:
-        new_height = height
-        new_width = height * ratio
-    else:
-        new_width = width
-        new_height = width / ratio
-
-    return (
-        (width - new_width) // 2, (height - new_height) // 2, (width + new_width) // 2, (height + new_height) // 2)
 
 
 def create_map(request, slug: str):

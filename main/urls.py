@@ -27,7 +27,7 @@ urlpatterns = [
 
     path('favicon.ico', views.favicon, name='favicon'),
     # path('resized-image/<str:filename>/<int:width>x<int:height>/', views.resized_imaged, name='resized-image'),
-    path('resized-image/<path:filename>/<int:width>x<int:height>/', views.resized_imaged, name='resized-image'),
+    path('resized-image/<path:filename>/<int:width>x<int:height>/', views.crop_image, name='resized-image'),
 
     path('doc/<slug:slug>/', views.view_document, name='view-doc'),
 
