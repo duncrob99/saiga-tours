@@ -25,6 +25,8 @@
         </style>
         <link href="{% static 'css/header-banner.css' %}" rel="stylesheet">
     {% endif %}
+    <meta name="description"
+        content="{{ tour.excerpt }}">
 {% endblock %}
 
 {% block banner %}
@@ -39,7 +41,7 @@
     {% endif %}
 
     {% if tour.banner_img %}
-        <img src="{{ tour.banner_img.url }}" id="header-banner"/>
+        <img full-size-src="{{ tour.banner_img.url }}" id="header-banner"/>
     {% endif %}
 {% endblock %}
 
