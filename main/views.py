@@ -273,12 +273,14 @@ def tour(request, slug):
 
     extensions = tour_obj.extensions.visible(request.user.is_staff)
 
+    parent = None
+    other_extensions = None
     if request.GET.get('parent') is not None:
-        parent = Tour.objects.get(slug=request.GET.get('parent'))
-        other_extensions = parent.extensions.visible(request.user.is_staff).exclude(pk=tour_obj.pk)
-    else:
-        other_extensions = None
-        parent = None
+        try:
+            parent = Tour.objects.get(slug=request.GET.get('parent'))
+            other_extensions = parent.extensions.visible(request.user.is_staff).exclude(pk=tour_obj.pk)
+        except Tour.DoesNotExist:
+            pass
 
     if request.user.is_staff:
         form_factory = modelform_factory(Tour, exclude=())
