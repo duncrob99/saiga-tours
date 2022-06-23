@@ -60,7 +60,9 @@
             {% for detail in details.all %}
                 <div class="col-xl-4 col-md-6 col-sm-12 g-0">
                     <div class="card img-card m-3">
-                        <img src="{{ detail.card_img.url }}" class="card-img" alt="{{ detail.title }}">
+                        <div class="img-card-contents">
+                            <img src="{{ detail.card_img.url }}" class="card-img" alt="{{ detail.title }}">
+                        </div>
                         <div class="card-img-overlay">
                             <h5 class="card-title">{{ detail.title }}</h5>
                         </div>
