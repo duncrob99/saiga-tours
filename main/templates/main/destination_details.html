@@ -104,9 +104,17 @@
         </div>
     {% endif %}
 
-    {% if details.linked_tours.count > 0 %}
-        <hr>
-        <h4 class="display-4">Example Tours</h4>
-        {% include 'main/tours_cards.html' with tours=details.linked_tours.all %}
+    {% if request.user.is_staff %}
+        {% if details.linked_tours.count > 0 %}
+            <hr>
+            <h4 class="display-4">Example Tours</h4>
+                {% include 'main/tours_cards.html' with tours=details.linked_tours.all %}
+        {% endif %}
+    {% else %}
+        {% if details.linked_tours.all_published.count > 0 %}
+            <hr>
+            <h4 class="display-4">Example Tours</h4>
+            {% include 'main/tours_cards.html' with tours=details.linked_tours.all_published %}
+        {% endif %}
     {% endif %}
 {% endblock %}
