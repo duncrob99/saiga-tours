@@ -216,7 +216,7 @@ Home
             function size_images() {
                 col_width = Math.max(Math.round(document.querySelectorAll('.article-section img')[0].getBoundingClientRect().width * window.devicePixelRatio), col_width);
                 document.querySelectorAll('.article-section img').forEach(el => {
-                    el.src = "resized-image/" + el.dataset.filename + "/" + col_width + "x99999999" + "/";
+                    el.src = "resized-image/" + el.dataset.filename + "/" + col_width + "x0" + "/";
                 });
             }
 
