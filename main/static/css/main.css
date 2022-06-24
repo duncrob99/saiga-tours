@@ -191,6 +191,11 @@ body * {
     left: 0;
 }
 
+.separator path {
+    transform: translateX(-25px);
+    transition: all 2s ease-in-out;
+}
+
 /*.post-separator {*/
 /*     transform: translateY(5rem);*/
 /* }*/
