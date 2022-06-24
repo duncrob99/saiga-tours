@@ -39,6 +39,9 @@ def crop_to_dims(image: Image, width: int, height: int) -> Image:
             height = int(width / old_ar)
         elif width == 0 and height != 0:
             width = int(height * old_ar)
+        else:  # Don't crop if dims are 0x0
+            width = old_width
+            height = old_height
 
         image = image.resize((width, height))
 
