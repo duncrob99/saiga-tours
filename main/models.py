@@ -18,6 +18,7 @@ from django.utils.functional import classproperty
 from simple_history.models import HistoricalRecords
 from django.contrib.sitemaps import ping_google
 from django.conf import settings
+from django.db.models.functions import Coalesce
 
 from .images import crop_to_ar, autorotate
 
@@ -178,7 +179,8 @@ class State(models.Model):
     color = ColorField(default=None, null=True, blank=True)
     text_color = ColorField(default=None, null=True, blank=True)
     border_color = ColorField(default=None, null=True, blank=True)
-    priority = models.IntegerField(null=True, blank=True, help_text='0=top of list, 1 next, etc. Equivalent '
+    priority = models.IntegerField(null=True, blank=True, help_text='0=same as no priority, 1 further to top, '
+                                                                    '-1 below no priority, etc. Equal '
                                                                     'priorities will be sorted as per usual.')
     history = HistoricalRecords()
 
@@ -186,7 +188,7 @@ class State(models.Model):
         return self.text
 
     class Meta:
-        ordering = ['priority', 'text']
+        ordering = [F('priority').desc(), 'text']
 
 
 class Tour(DraftHistory):
@@ -258,7 +260,7 @@ class Tour(DraftHistory):
                 print(e)
 
     class Meta:
-        ordering = [F('state__priority').asc(nulls_last=True), 'start_date', 'price']
+        ordering = [Coalesce('state__priority', 0).desc(), 'start_date', 'price']
 
 
 class ItineraryTemplate(models.Model):
