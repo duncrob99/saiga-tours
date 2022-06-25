@@ -49,7 +49,7 @@ class PhotoAdmin(PublishableAdmin):
 class ArticleAdmin(PhotoAdmin):
     date_hierarchy = 'creation'
     list_display = ('title', 'author', 'type', 'creation', 'tag_list', 'published')
-    list_filter = ('type', 'author', 'creation', 'published', 'tags')
+    list_filter = ('type', 'author', 'creation', 'published_bool', 'tags')
     search_fields = ('title', 'author', 'content')
     filter_horizontal = ('tags',)
 
@@ -67,7 +67,7 @@ class TourAdmin(PhotoAdmin):
     date_hierarchy = 'start_date'
     list_display = ('name', 'start_date', 'end_date', 'duration', 'published')
     inlines = [ItineraryDayInline]
-    list_filter = ['start_date', 'duration', 'destinations', 'published']
+    list_filter = ['start_date', 'duration', 'destinations', 'published_bool']
 
 
 class StateAdmin(DiffHistoryAdmin):
@@ -81,7 +81,7 @@ class StateAdmin(DiffHistoryAdmin):
 
 class DestinationAdmin(PhotoAdmin):
     list_display = ('name', 'region', 'published')
-    list_filter = ('region', 'published')
+    list_filter = ('region', 'published_bool')
     search_fields = ('name', 'description', 'region__name')
 
 
@@ -93,19 +93,19 @@ class ItineraryDayAdmin(DiffHistoryAdmin):
 
 class DestinationDetailsAdmin(PhotoAdmin):
     list_display = ('title', 'destination', 'order', 'published')
-    list_filter = ('destination', 'published')
+    list_filter = ('destination', 'published_bool')
     search_fields = ('title', 'destination__name', 'content')
 
 
 class PageAdmin(PhotoAdmin):
     list_display = ('title', 'parent', 'published')
-    list_filter = ('parent', 'published')
+    list_filter = ('parent', 'published_bool')
     search_fields = ('title', 'parent__title', 'content')
 
 
 class RegionAdmin(PublishableAdmin):
     list_display = ('name', 'published')
-    list_filter = ('published',)
+    list_filter = ('published_bool',)
 
 
 class SettingsAdmin(DiffHistoryAdmin):

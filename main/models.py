@@ -13,6 +13,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.templatetags.static import static
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.functional import classproperty
 from simple_history.models import HistoricalRecords
 from django.contrib.sitemaps import ping_google
@@ -38,7 +39,7 @@ def RichTextWithPlugins(*args, **kwargs):
 
 class DraftHistoryManager(models.Manager):
     def all_published(self):
-        return self.filter(published=True)
+        return self.filter((Q(published_bool=True) & Q(published_date__isnull=True)) | Q(published_date__lte=timezone.now()))
 
     def visible(self, su: bool):
         return self.all() if su else self.all_published()
@@ -46,15 +47,23 @@ class DraftHistoryManager(models.Manager):
 
 class DraftHistory(models.Model):
     history = HistoricalRecords(inherit=True, excluded_fields=['published'])
-    published = models.BooleanField(default=False)
+    published_bool = models.BooleanField(default=False)
+    published_date = models.DateTimeField(null=True, blank=True)
     objects = DraftHistoryManager()
 
     class Meta:
         abstract = True
 
+    @property
+    def published(self):
+        if self.published_date is not None:
+            return self.published_date < timezone.now()
+        else:
+            return self.published_bool
+
     @classproperty
     def all_published(cls):
-        return cls.objects.filter(published=True)
+        return cls.objects.filter((Q(published_bool=True) & Q(published_date__isnull=True)) | Q(published_date__lte=timezone.now()))
 
     @classmethod
     def visible(cls, su: bool):
@@ -402,7 +411,7 @@ class Page(DraftHistory):
 
     @property
     def published_children(self):
-        return self.children.filter(published=True)
+        return self.children.all_published
 
     @property
     def siblings(self):
