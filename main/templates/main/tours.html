@@ -1,5 +1,6 @@
 {% extends 'main/main.html' %}
 {% load static %}
+{% load main_tags %}
 
 {% block title %}
 Tours
@@ -115,7 +116,24 @@ Tours
 
     <div class="row">
         <div class="col-xl-8">
-            {% include 'main/tours_cards.html' with two_col=True %}
+            {% if pretours.count > 0 %}
+                {% include 'main/tours_cards.html' with two_col=True tours=pretours %}
+            {% endif %}
+            {% if grouped_tours %}
+                {% for year, year_tours in grouped_tours.items %}
+                    <h1 class="year-title">{{ year }}</h1>
+                    {% for month, month_tours in year_tours.items %}
+                        <h3 class="month-title">{{ month | month_name }}</h3>
+                        {% include 'main/tours_cards.html' with two_col=True tours=month_tours %}
+                    {% endfor %}
+                {% endfor %}
+            {% endif %}
+            {% if posttours.count > 0 %}
+                {% include 'main/tours_cards.html' with two_col=True tours=posttours %}
+            {% endif %}
+            {% if tours.count > 0 %}
+                {% include 'main/tours_cards.html' with two_col=True %}
+            {% endif %}
         </div>
         <div class="col-4" id="filter-form">
             <form>

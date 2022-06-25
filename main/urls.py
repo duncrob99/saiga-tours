@@ -14,6 +14,7 @@ urlpatterns = [
          name='destination-details'),
 
     path('tours/', views.tours, name='tours'),
+    path('fancy-tours/', views.fancy_tours, name='fancy-tours'),
     path('tour/<slug:slug>', views.tour, name='tour'),
     path('tours/<slug:region_slug>/', views.region_tours, name='tours'),
     path('tours/<slug:region_slug>/<slug:country_slug>/', views.country_tours, name='tours'),

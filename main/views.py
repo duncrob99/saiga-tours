@@ -8,22 +8,19 @@ from typing import Optional, Dict, List, Any
 
 import ngram
 from bs4 import BeautifulSoup
-from django.conf import settings
 from django.contrib import messages
 from django.core.mail import send_mail, BadHeaderError
 from django.core.paginator import Paginator
-from django.db.models import Q, QuerySet
+from django.db.models import Q, QuerySet, Func
 from django.forms import modelform_factory, inlineformset_factory, modelformset_factory
 from django.http import Http404, HttpResponseRedirect, HttpResponse, FileResponse, JsonResponse
 from django.middleware.csrf import get_token
 from django.shortcuts import render, get_object_or_404, redirect
 from minify_html import minify_html
 
-import analytics
 from .forms import *
 from .models import *
 from .images import crop_to_dims
-
 
 
 def assert_visible(request, model: DraftHistory):
@@ -126,21 +123,21 @@ def front_page(request):
             rows[i].colour_after = row.colour
 
     context = {
-                  'tours': Tour.visible(request.user.is_staff).filter(display=True),
-                  'banners': BannerPhoto.objects.filter(active=True).order_by('?'),
-                  'frontpage_sections': Page.visible(request.user.is_staff).filter(
-                      front_page_pos__isnull=False).order_by('front_page_pos'),
-                  'highlights': HightlightBox.visible(request.user.is_staff),
-                  'destinations': Destination.visible(request.user.is_staff),
-                  'points': MapPoint.objects.all(),
-                  'rows': rows,
-                  'meta': MetaInfo(
-                      request.get_raw_uri(),
-                      'SAIGA Tours Homepage',
-                      settings.logo.url,
-                      description='Come share some tours with us!',
-                  )
-              }
+        'tours': Tour.visible(request.user.is_staff).filter(display=True),
+        'banners': BannerPhoto.objects.filter(active=True).order_by('?'),
+        'frontpage_sections': Page.visible(request.user.is_staff).filter(
+            front_page_pos__isnull=False).order_by('front_page_pos'),
+        'highlights': HightlightBox.visible(request.user.is_staff),
+        'destinations': Destination.visible(request.user.is_staff),
+        'points': MapPoint.objects.all(),
+        'rows': rows,
+        'meta': MetaInfo(
+            request.get_raw_uri(),
+            'SAIGA Tours Homepage',
+            settings.logo.url,
+            description='Come share some tours with us!',
+        )
+    }
     return render(request, 'main/front-page.html', context)
 
 
@@ -180,11 +177,11 @@ def global_context(request):
                      ]
 
     context = {
-                  'regions': Region.visible(request.user.is_staff),
-                  'pages': Page.visible(request.user.is_staff).filter(parent=None, in_navbar=True),
-                  'settings': Settings.load(),
-                  'footer_links': footer_links,
-              }
+        'regions': Region.visible(request.user.is_staff),
+        'pages': Page.visible(request.user.is_staff).filter(parent=None, in_navbar=True),
+        'settings': Settings.load(),
+        'footer_links': footer_links,
+    }
     return context
 
 
@@ -210,16 +207,16 @@ def destination_overview(request, region_slug, country_slug):
     assert_visible(request, destination)
 
     context = {
-                  'destination': destination,
-                  'details': detail_list,
-                  'tours': tour_list,
-                  'meta': MetaInfo(
-                      request.get_raw_uri(),
-                      destination.name,
-                      destination.card_img.url,
-                      f'Come look at the tours we offer in {destination.name}!',
-                  )
-              }
+        'destination': destination,
+        'details': detail_list,
+        'tours': tour_list,
+        'meta': MetaInfo(
+            request.get_raw_uri(),
+            destination.name,
+            destination.card_img.url,
+            f'Come look at the tours we offer in {destination.name}!',
+        )
+    }
 
     return render(request, 'main/destination.html', context)
 
@@ -317,24 +314,36 @@ def tour(request, slug):
         stops_formset = None
 
     context = {
-                  'tour': tour_obj,
-                  'form': form,
-                  'itinerary_forms': itinerary_formset,
-                  'stop_forms': stops_formset,
-                  'other_extensions': other_extensions,
-                  'parent': parent,
-                  'extensions': extensions,
-                  'position_templates': PositionTemplate.objects.all(),
-                  'itinerary_templates': ItineraryTemplate.objects.all(),
-                  'meta': MetaInfo(
-                      url=request.get_raw_uri(),
-                      title=tour_obj.name,
-                      image_url=tour_obj.card_img.url,
-                      description=tour_obj.excerpt,
-                      type=MetaInfoTypes.ARTICLE
-                  )
-              }
+        'tour': tour_obj,
+        'form': form,
+        'itinerary_forms': itinerary_formset,
+        'stop_forms': stops_formset,
+        'other_extensions': other_extensions,
+        'parent': parent,
+        'extensions': extensions,
+        'position_templates': PositionTemplate.objects.all(),
+        'itinerary_templates': ItineraryTemplate.objects.all(),
+        'meta': MetaInfo(
+            url=request.get_raw_uri(),
+            title=tour_obj.name,
+            image_url=tour_obj.card_img.url,
+            description=tour_obj.excerpt,
+            type=MetaInfoTypes.ARTICLE
+        )
+    }
     return render(request, 'main/tour.html', context)
+
+
+class Month(Func):
+    function = 'EXTRACT'
+    template = '%(function)s(MONTH from %(expressions)s)'
+    output_field = models.IntegerField()
+
+
+class Year(Func):
+    function = 'EXTRACT'
+    template = '%(function)s(YEAR from %(expressions)s)'
+    output_field = models.IntegerField()
 
 
 def tours(request):
@@ -353,18 +362,55 @@ def tours(request):
     return render(request, 'main/tours.html', context)
 
 
+def fancy_tours(request):
+    settings = Settings.load()
+    annotated_tours = Tour.visible(request.user.is_staff).filter(Q(state__isnull=True)
+                                                                 | Q(state__priority__isnull=True)
+                                                                 | Q(state__priority=0)
+                                                                 ).filter(display=True
+                                                                          ).annotate(m=Month('start_date'),
+                                                                                     y=Year('start_date'))
+    all_years = annotated_tours.values_list('y', flat=True)
+    all_years = sorted(list(dict.fromkeys(all_years)))  # Removed duplicates and sorted
+    grouped_tours = {}
+    for year in all_years:
+        grouped_tours[year] = {}
+        all_months = annotated_tours.filter(y=year).values_list('m', flat=True)
+        all_months = sorted(list(dict.fromkeys(all_months)))  # Removed duplicates and sorted
+        for month in all_months:
+            tours = annotated_tours.filter(y=year, m=month)
+            grouped_tours[year][month] = tours
+
+    pre_tours = Tour.visible(request.user.is_staff).filter(display=True).filter(state__priority__gt=0)
+    post_tours = Tour.visible(request.user.is_staff).filter(display=True).filter(state__priority__lt=0)
+    context = {
+        'pretours': pre_tours,
+        'posttours': post_tours,
+        'grouped_tours': grouped_tours,
+        'destinations': Destination.visible(request.user.is_staff),
+        'query': request.GET.get('q'),
+        'meta': MetaInfo(
+            url=request.get_raw_uri(),
+            title='Tours',
+            image_url=settings.logo.url,
+            description='Come see all the tours we have on offer!'
+        )
+    }
+    return render(request, 'main/tours.html', context)
+
+
 def article(request, slug):
     article_obj = get_object_or_404(Article, slug=slug)
     assert_visible(request, article_obj)
 
     context = {
-                  'article': article_obj,
-                  'meta': MetaInfo(request.get_raw_uri(),
-                                   article_obj.title,
-                                   article_obj.card_img.url,
-                                   article_obj.excerpt,
-                                   MetaInfoTypes.ARTICLE)
-              }
+        'article': article_obj,
+        'meta': MetaInfo(request.get_raw_uri(),
+                         article_obj.title,
+                         article_obj.card_img.url,
+                         article_obj.excerpt,
+                         MetaInfoTypes.ARTICLE)
+    }
     return render(request, 'main/article.html', context)
 
 
@@ -411,23 +457,23 @@ def article_list(request, type, title):
     page_obj = paginator.get_page(page_number)
 
     context = {
-                  'title': title,
-                  'page_obj': page_obj,
-                  'destinations': Destination.visible(request.user.is_staff),
-                  'tags': tags,
-                  'query': query or '',
-                  'start_date': start_date or '',
-                  'end_date': end_date or '',
-                  'authors': Author.visible(request.user.is_staff),
-                  'checked_authors': checked_authors,
-                  'checked_tags': checked_tags,
-                  'meta': MetaInfo(
-                      url=request.get_raw_uri(),
-                      title='title',
-                      image_url=Settings.load().logo.url,
-                      description=f'See all the {title.lower()} we have on offer!'
-                  )
-              }
+        'title': title,
+        'page_obj': page_obj,
+        'destinations': Destination.visible(request.user.is_staff),
+        'tags': tags,
+        'query': query or '',
+        'start_date': start_date or '',
+        'end_date': end_date or '',
+        'authors': Author.visible(request.user.is_staff),
+        'checked_authors': checked_authors,
+        'checked_tags': checked_tags,
+        'meta': MetaInfo(
+            url=request.get_raw_uri(),
+            title='title',
+            image_url=Settings.load().logo.url,
+            description=f'See all the {title.lower()} we have on offer!'
+        )
+    }
     return render(request, 'main/article_list.html', context)
 
 
@@ -447,16 +493,16 @@ def region(request, slug):
     assert_visible(request, region_obj)
 
     context = {
-                  'region': region_obj,
-                  'destinations': destination_list,
-                  'tours': tours_list,
-                  'meta': MetaInfo(
-                      url=request.get_raw_uri(),
-                      title=f'{region_obj.name} Guide',
-                      image_url=Settings.load().logo.url,
-                      description=f'Learn everything you need to know about {region_obj.name}'
-                  )
-              }
+        'region': region_obj,
+        'destinations': destination_list,
+        'tours': tours_list,
+        'meta': MetaInfo(
+            url=request.get_raw_uri(),
+            title=f'{region_obj.name} Guide',
+            image_url=Settings.load().logo.url,
+            description=f'Learn everything you need to know about {region_obj.name}'
+        )
+    }
     return render(request, 'main/region.html', context)
 
 
@@ -539,15 +585,15 @@ def destinations(request):
         form_context = {}
 
     context = {
-        'destinations': Destination.visible(request.user.is_staff),
-        'points': MapPoint.objects.all(),
-        'meta': MetaInfo(
-            request.get_raw_uri(),
-            'Destinations',
-            Settings.load().logo.url,
-            "Come and see the destinations we have on offer!"
-        )
-    } | form_context
+                  'destinations': Destination.visible(request.user.is_staff),
+                  'points': MapPoint.objects.all(),
+                  'meta': MetaInfo(
+                      request.get_raw_uri(),
+                      'Destinations',
+                      Settings.load().logo.url,
+                      "Come and see the destinations we have on offer!"
+                  )
+              } | form_context
     return render(request, 'main/destinations.html', context)
 
 
@@ -702,7 +748,7 @@ def error_500(request):
 def gen_500(request):
     if request.user.is_staff:
         hello = 5
-        bye = hello/0
+        bye = hello / 0
         return HttpResponse('Well, darn. Apparently maths is broken.')
     else:
         return error_404(request, '')

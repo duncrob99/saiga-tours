@@ -1,3 +1,5 @@
+import calendar
+
 from django import template
 from django.core.paginator import Page
 from django.utils.safestring import mark_safe
@@ -63,6 +65,7 @@ def js_str(value):
 def escape_quotes(string: str):
     return string.replace('`', '\\`')
 
+
 @register.filter()
 def js_html_str(value):
     return 'undefined' if value is None else mark_safe(f'`{escape_quotes(value)}`')
@@ -71,3 +74,9 @@ def js_html_str(value):
 @register.filter()
 def lazyload_html(value: str):
     return mark_safe(value.replace('src=', 'full-size-src='))
+
+
+@register.filter()
+def month_name(month_number: int):
+    num = int(month_number)
+    return calendar.month_name[num]
