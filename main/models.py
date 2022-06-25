@@ -344,6 +344,13 @@ class Article(DraftHistory):
     banner_x = models.FloatField(null=True, blank=True)
     banner_y = models.FloatField(null=True, blank=True)
 
+    @property
+    def date(self):
+        if self.published_date is not None:
+            return self.published_date
+        else:
+            return self.creation
+
     def __str__(self):
         return self.title
 

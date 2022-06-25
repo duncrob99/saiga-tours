@@ -92,7 +92,7 @@
                             <p class="card-text">{{ article.excerpt | default:"Here's some more info." }}</p>
                         </div>
                         <div class="article-date">
-                            {{ article.creation|date }}
+                            {{ article.date|date }}
                         </div>
                         <a class="stretched-link" href="{% url 'article' article.slug %}"></a>
                     </div>

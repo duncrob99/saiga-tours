@@ -52,7 +52,7 @@
         {% if article.author %}
             <h6 style="float: right" class="display-6">{{ article.author }}</h6>
         {% endif %}
-        <h6 style="text-align: left" class="display-6">{{ article.creation | date }}</h6>
+        <h6 style="text-align: left" class="display-6">{{ article.date | date }}</h6>
     </div>
     <hr>
     {{ article.content | safe }}

@@ -124,10 +124,10 @@ Home
                             </div>
                             <div class="card-footer">
                                 <table class="table table-borderless">
-                                    {% if article.creation %}
+                                    {% if article.date %}
                                         <tr>
                                             <th class="table-icon"><i class="bi bi-calendar4-range"></i></th>
-                                            <td class="table-value">{{ article.creation|date }}</td>
+                                            <td class="table-value">{{ article.date|date }}</td>
                                         </tr>
                                     {% endif %}
                                     <tr{% if not article.author %} style="opacity: 0" {% endif %}>
