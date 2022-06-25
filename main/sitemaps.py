@@ -7,7 +7,7 @@ class TourSitemap(Sitemap):
     priority = 0.9
 
     def items(self):
-        return Tour.objects.filter(published=True)
+        return Tour.objects.filter(DraftHistory.published_q)
 
     def lastmod(self, obj: Tour):
         return obj.last_modified
@@ -17,7 +17,7 @@ class PageSitemap(Sitemap):
     changefreq = "monthly"
 
     def items(self):
-        return Page.objects.filter(published=True, in_navbar=True)
+        return Page.objects.filter(DraftHistory.published_q, in_navbar=True)
 
     def lastmod(self, obj: Page):
         return obj.last_mod
@@ -31,7 +31,7 @@ class ArticleSitemap(Sitemap):
     priority = 0.5
 
     def items(self):
-        return Article.objects.filter(published=True)
+        return Article.objects.filter(DraftHistory.published_q)
 
     def lastmod(self, obj: Article):
         return obj.creation

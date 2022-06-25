@@ -52,6 +52,8 @@ class DraftHistory(models.Model):
     published_date = models.DateTimeField(null=True, blank=True)
     objects = DraftHistoryManager()
 
+    published_q = Q(published_bool=True) & Q(published_date__isnull=True) | Q(published_date__lte=timezone.now())
+
     class Meta:
         abstract = True
 
