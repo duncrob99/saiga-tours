@@ -760,14 +760,21 @@ def gen_500(request):
 
 def copy_map(request):
     if request.user.is_staff and request.method == 'POST':
-        copy_from = Tour.objects.get(slug=request.POST.get('from'))
-        copy_to = Tour.objects.get(slug=request.POST.get('to'))
+        try:
+            copy_from = Tour.objects.get(slug=request.POST.get('from'))
+            copy_to = Tour.objects.get(slug=request.POST.get('to'))
 
-        copy_to.stops.all().delete()
-        for stop in copy_from.stops.all():
-            stop.pk = None
-            stop.tour = copy_to
-            stop.save()
-        return JsonResponse({'success': True})
+            copy_to.stops.all().delete()
+            for stop in copy_from.stops.all():
+                stop.pk = None
+                stop.tour = copy_to
+                stop.save()
+
+            copy_to.map_scale = copy_from.map_scale
+            copy_to.save()
+
+            return JsonResponse({'success': True})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': e})
     else:
         return Http404

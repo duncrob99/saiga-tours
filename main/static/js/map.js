@@ -131,8 +131,12 @@ if (copy_btn) {
                 to: copy_to.getAttribute('slug')
             },
             success: data => {
-                console.log('Copied map with response: ', data);
-                location.reload();
+                if (data.success) {
+                    console.log('Copied map with response: ', data);
+                    location.reload();
+                } else {
+                    console.log('Error copying map: ', data.error);
+                }
             },
             error: data => {
                 console.log('Failed with error: ', data);
