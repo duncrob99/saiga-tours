@@ -652,8 +652,8 @@ def country_tours_info(request, region_slug, country_slug, detail_slug):
 
 def crop_image(request, filename: str, width: int, height: int):
     removed_prefix = filename
-    image = Image.open(path.join(settings.MEDIA_ROOT, removed_prefix),
-                       mode='r')
+    image = autorotate(Image.open(path.join(settings.MEDIA_ROOT, removed_prefix),
+                       mode='r'))
 
     cropped_image = crop_to_dims(image, width, height)
 
