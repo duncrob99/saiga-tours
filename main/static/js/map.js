@@ -9,8 +9,8 @@ function getBase64(file, onLoadCallback) {
     });
 }
 
-let btn = document.querySelector('#map-download');
-if (btn) {
+let download_btn = document.querySelector('#map-download');
+if (download_btn) {
     let svg = document.querySelector('.map svg');
 
     let resolution_slider;
@@ -88,7 +88,7 @@ if (btn) {
         svgImage.src = svgUrl;
     }
 
-    btn.addEventListener('click', () => {
+    download_btn.addEventListener('click', () => {
         let modal = new bootstrap.Modal(document.querySelector('#save-modal'));
         let button = document.querySelector('#save-resolution');
         resolution_slider.set(1);
@@ -100,6 +100,49 @@ if (btn) {
     });
 }
 
+let copy_btn = document.querySelector('#map-copy');
+if (copy_btn) {
+    let copy_modal = new bootstrap.Modal(document.getElementById('copy-modal'));
+    let confirm_modal = new bootstrap.Modal(document.getElementById('confirm-modal'));
+
+    let copy_select = document.getElementById('select-copy-tour');
+    let copy_button = document.getElementById('save-copy');
+    let confirm_button = document.getElementById('confirm-copy');
+
+    let copy_from = document.getElementById('copy-from');
+    let copy_to = document.getElementById('copy-to');
+
+    copy_btn.addEventListener('click', () => {
+        copy_modal.show();
+    });
+
+    copy_button.addEventListener('click', () => {
+        confirm_modal.show();
+        copy_from.innerText = copy_select.querySelector(`[value="${copy_select.value}"]`).innerText.trim();
+    })
+
+    confirm_button.addEventListener('click', () => {
+        let csrfToken = document.cookie.substring(document.cookie.indexOf('csrftoken=') + 'csrftoken='.length).split(';')[0];
+        $.ajax({
+            type: "POST",
+            url: `/copy_map/`,
+            data: {
+                from: copy_select.value,
+                to: copy_to.getAttribute('slug')
+            },
+            success: data => {
+                console.log('Copied map with response: ', data);
+                location.reload();
+            },
+            error: data => {
+                console.log('Failed with error: ', data);
+            },
+            headers: {
+                'X-CSRFToken': csrfToken
+            }
+        });
+    })
+}
 
 let menu_instances = [];
 let map_content_width = 0;

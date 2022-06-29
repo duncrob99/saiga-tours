@@ -21,6 +21,7 @@ urlpatterns = [
     path('tours/<slug:region_slug>/<slug:country_slug>/<slug:detail_slug>/', views.country_tours_info, name='tours'),
 
     path('create_map/<slug:slug>/', views.create_map, name='create-map'),
+    path('copy_map/', views.copy_map, name='copy-map'),
 
     path('article/<slug:slug>', views.article, name='article'),
     path('news/', views.news, name='news'),

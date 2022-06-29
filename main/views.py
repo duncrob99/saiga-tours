@@ -308,13 +308,17 @@ def tour(request, slug):
                                                           instance=tour_obj)
         elif request.method == 'POST':
             print(form.errors)
+
+        all_tours = Tour.objects.all()
     else:
         form = None
         itinerary_formset = None
         stops_formset = None
+        all_tours = None
 
     context = {
         'tour': tour_obj,
+        'all_tours': all_tours,
         'form': form,
         'itinerary_forms': itinerary_formset,
         'stop_forms': stops_formset,
@@ -752,3 +756,18 @@ def gen_500(request):
         return HttpResponse('Well, darn. Apparently maths is broken.')
     else:
         return error_404(request, '')
+
+
+def copy_map(request):
+    if request.user.is_staff and request.method == 'POST':
+        copy_from = Tour.objects.get(slug=request.POST.get('from'))
+        copy_to = Tour.objects.get(slug=request.POST.get('to'))
+
+        copy_to.stops.all().delete()
+        for stop in copy_from.stops.all():
+            stop.pk = None
+            stop.tour = copy_to
+            stop.save()
+        return JsonResponse({'success': True})
+    else:
+        return Http404

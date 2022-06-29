@@ -36,12 +36,58 @@
         {% if request.user.is_staff %}
             <button class="btn btn-primary accent hoverable-accent" type="button" id="map-download"><i
                     class="bi bi-download"></i></button>
+            <button class="btn btn-primary accent hoverable-accent" type="button" id="map-copy"><i
+                    class="bi bi-clipboard"></i></button>
         {% endif %}
     </div>
     {% include 'main/world_map.svg' %}
 </div>
 
 {% if request.user.is_staff %}
+    <div class="modal fade" data-bs-scroll="true" data-bs-backdrop="false" id="copy-modal" tabindex="-1"
+         aria-labelledby="copyModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="copyModalLabel">Copy Map from Tour</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    {#                        <input aria-label="select resolution" type="text" id="resolution-input" class="form-control">#}
+                    <select aria-label="Select Tour" id="select-copy-tour" class="form-select flex-grow-1 mx-1">
+                        {% for tour in all_tours %}
+                            <option value="{{ tour.slug }}">
+                                {{ tour }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="save-copy">Copy</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" data-bs-scroll="true" data-bs-backdrop="false" id="confirm-modal" tabindex="-1"
+         aria-labelledby="confirmModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmModalLabel">Confirm Copy</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="confirm-modal-body">Are you sure you want to override the map of "<span id="copy-to" slug="{{ tour.slug }}">{{ tour }}</span>" with that of "<span id="copy-from"></span>"?</div>
+                    {#                        <input aria-label="select resolution" type="text" id="resolution-input" class="form-control">#}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="cancel-copy" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="confirm-copy">Copy</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="modal fade" data-bs-scroll="true" data-bs-backdrop="false" id="save-modal" tabindex="-1"
          aria-labelledby="saveModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
