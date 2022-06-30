@@ -7,7 +7,9 @@ function minimise_images() {
             img_src = img.getAttribute('full-size-src');
         } else return;
         if (img_src.startsWith('/static') || img_src.includes('data:image/') || img_src.includes('http')) return;
-        let img_size = `${Math.ceil(parseInt(getComputedStyle(img).width) * window.devicePixelRatio)}x${Math.ceil(parseInt(getComputedStyle(img).height) * window.devicePixelRatio)}`;
+        let width = Math.ceil(parseInt(getComputedStyle(img).width) * window.devicePixelRatio);
+        let height = img.id === 'header-banner' ? '0' : Math.ceil(parseInt(getComputedStyle(img).height) * window.devicePixelRatio);
+        let img_size = `${width}x${height}`;
         img_src = img_src.replace(/^\/media\//, '').replaceAll(/\/resized-image\//g, '').replaceAll(/\/[0-9]+x[0-9]+\//g, '');
         if (img_src && img_size) {
             img.setAttribute('src', `/resized-image/${img_src}/${img_size}/`);
