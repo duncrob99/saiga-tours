@@ -82,6 +82,8 @@ class Region(DraftHistory):
     banner_x = models.FloatField(default=50)
     banner_y = models.FloatField(default=50)
 
+    list_order = models.IntegerField(default=0)
+
     def save(self, *args, **kwargs):
         super(Region, self).save(*args, **kwargs)
         if not settings.PRODUCTION:
@@ -92,6 +94,9 @@ class Region(DraftHistory):
 
     def __str__(self):
         return self.name
+
+    class Meta:
+        ordering = ['list_order', 'name']
 
 
 class Destination(DraftHistory):
