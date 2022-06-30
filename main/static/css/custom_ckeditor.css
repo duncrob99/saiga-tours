@@ -5,9 +5,10 @@
 
 .image-fan {
     overflow: visible;
-    height: min-content;
-    width: min-content;
-    margin: 10%;
+    height: 100%;
+    width: 100%;
+    --base-rotation: 10;
+    --hover-rotation: 1;
 }
 
 div:has(.image-fan) {
@@ -18,6 +19,7 @@ div:has(.image-fan) {
     border-radius: var(--border-radius);
     box-shadow: 10px 10px 30px rgba(0, 0, 0, 0.2);
     border: 7px solid white;
+    transition: 0.5s transform;
 }
 
 .image-fan div {
@@ -32,23 +34,23 @@ div:has(.image-fan) {
 .above-img {
     position: absolute;
     transform-origin: bottom left;
-    transform: rotate(-10deg);
+    transform: rotate(calc(-1deg * var(--base-rotation)));
     z-index: 1;
 }
 
 .below-img {
     transform-origin: bottom left;
     --trans: translate(10%, -10%) scale(0.9);
-    transform: var(--trans) rotate(10deg);
+    transform: var(--trans) rotate(calc(1deg * var(--base-rotation)));
     z-index: -1;
 }
 
 .image-fan:hover .above-img {
-    transform: rotate(-11deg);
+    transform: rotate(calc(-1deg * var(--base-rotation) - 1deg * var(--hover-rotation)));
 }
 
 .image-fan:hover .below-img {
-    transform: var(--trans) rotate(11deg);
+    transform: var(--trans) rotate(calc(1deg * var(--base-rotation) + 1deg * var(--hover-rotation)));
 }
 
 .underlined-title {
@@ -122,12 +124,12 @@ img.saiga-border {
 
 img.angle-left {
     border-radius: var(--border-radius);
-    transform: rotate(-10deg);
+    transform: rotate(calc(-1deg * var(--base-rotation)));
 }
 
 img.angle-right {
     border-radius: var(--border-radius);
-    transform: rotate(10deg);
+    transform: rotate(calc(1deg * var(--base-rotation)));
 }
 
 table.styled-table {

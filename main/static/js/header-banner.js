@@ -7,7 +7,6 @@
         title.style.fontSize = '';
         while (title.getBoundingClientRect().right > content.getBoundingClientRect().right) {
             title.style.fontSize = parseFloat(getComputedStyle(title).fontSize) - 1 + 'px';
-            console.log(title.style.fontSize);
         }
     }
 

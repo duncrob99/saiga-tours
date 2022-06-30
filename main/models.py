@@ -439,7 +439,7 @@ class Page(DraftHistory):
 
     @property
     def published_siblings(self):
-        return self.siblings.filter(published=True)
+        return self.siblings.filter(DraftHistory.published_q)
 
     @property
     def level(self):
