@@ -11,12 +11,16 @@
 {% endblock %}
 
 {% block content %}
-    {% include 'main/map.html' with destinations=countries %}
-    {% if region.tour_blurb %}
-    <hr>
+    {% if countries %}
+        {% include 'main/map.html' with destinations=countries %}
+    {% endif %}
+    {% if countries and region.tour_blurb or countries and tours %}
+        <hr>
     {% endif %}
     {{ region.tour_blurb | safe }}
-    <hr>
+    {% if region.tour_blurb and tours %}
+        <hr>
+    {% endif %}
     {% include 'main/tours_cards.html' %}
 {% endblock %}
 
