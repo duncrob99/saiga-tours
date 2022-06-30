@@ -1,4 +1,5 @@
 from django.contrib import admin, messages
+from django.core.exceptions import FieldDoesNotExist
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 from django.utils.translation import ngettext
@@ -11,9 +12,13 @@ class DiffHistoryAdmin(SimpleHistoryAdmin):
     history_list_display = ['changed_fields']
 
     def changed_fields(self, obj):
-        if obj.prev_record:
-            delta = obj.diff_against(obj.prev_record)
-            return ", ".join(delta.changed_fields)
+        try:
+            if obj.prev_record:
+                delta = obj.diff_against(obj.prev_record)
+                return ", ".join(delta.changed_fields)
+        except FieldDoesNotExist:
+            return "unknown"
+
         return None
 
 
