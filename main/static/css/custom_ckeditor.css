@@ -24,6 +24,8 @@ div:has(.image-fan) {
 
 .image-fan div {
     transition: 0.5s transform;
+    width: min-content;
+    height: min-content;
 }
 
 .image-fan div:empty {
