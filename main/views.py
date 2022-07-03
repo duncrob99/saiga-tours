@@ -17,6 +17,8 @@ from django.http import Http404, HttpResponseRedirect, HttpResponse, FileRespons
 from django.middleware.csrf import get_token
 from django.shortcuts import render, get_object_or_404, redirect
 from minify_html import minify_html
+from ua_parser import user_agent_parser
+from user_agent_parser import Parser
 
 from .forms import *
 from .models import *
@@ -654,6 +656,20 @@ def country_tours_info(request, region_slug, country_slug, detail_slug):
     return details_page(request, region_slug, country_slug, detail_slug, DestinationDetails.TOURS)
 
 
+def browser_supports_webp(request):
+    """Check if browser is Safari <16 and MacOS <11 or Safari <14"""
+
+    try:
+        ua_info = user_agent_parser.Parse(request.META.get('HTTP_USER_AGENT'))
+        if ua_info['os']['family'] == 'Mac OS X' and ua_info['user_agent']['family'] == 'Safari':
+            if int(ua_info['os']['major']) < 11 and int(ua_info['user_agent']['major']) < 16 or int(ua_info['user_agent']['major']) < 14:
+                return False
+
+        return True
+    except KeyError:
+        return False
+
+
 def crop_image(request, filename: str, width: int, height: int):
     removed_prefix = filename
     image = autorotate(Image.open(path.join(settings.MEDIA_ROOT, removed_prefix),
@@ -661,9 +677,10 @@ def crop_image(request, filename: str, width: int, height: int):
 
     cropped_image = crop_to_dims(image, width, height)
 
-    response = HttpResponse(content_type='image/webp')
+    img_format = 'webp' if browser_supports_webp(request) else 'jpeg'
+    response = HttpResponse(content_type=f'image/{img_format}')
     # noinspection PyTypeChecker
-    cropped_image.save(response, 'webp')
+    cropped_image.save(response, img_format)
     return response
 
 
