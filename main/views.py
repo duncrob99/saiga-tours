@@ -18,7 +18,6 @@ from django.middleware.csrf import get_token
 from django.shortcuts import render, get_object_or_404, redirect
 from minify_html import minify_html
 from ua_parser import user_agent_parser
-from user_agent_parser import Parser
 
 from .forms import *
 from .models import *
