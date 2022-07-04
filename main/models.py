@@ -654,6 +654,33 @@ class MapPoint(models.Model):
         return self.name
 
 
+@receiver(post_save, sender=MapPoint)
+@receiver(post_save, sender=Stop)
+@receiver(post_save, sender=PositionTemplate)
+def update_position_template(sender, instance, **kwargs):
+    template = instance.template if hasattr(instance, 'template') else instance
+    if template is not None and (template.x is None or template.y is None):
+        map_points = template.mappoint_set.all()
+        tour_stops = template.stop_set.all()
+        if template.x is None:
+            avg_x = 0
+            for point in map_points:
+                avg_x += point.x
+            for stop in tour_stops:
+                avg_x += stop.x
+            avg_x /= len(map_points) + len(tour_stops)
+            template.x = avg_x
+        if template.y is None:
+            avg_y = 0
+            for point in map_points:
+                avg_y += point.y
+            for stop in tour_stops:
+                avg_y += stop.y
+            avg_y /= len(map_points) + len(tour_stops)
+            template.y = avg_y
+        template.save()
+
+
 class HightlightBox(DraftHistory):
     title = models.CharField(max_length=100, blank=True, null=True)
     content = RichTextWithPlugins(blank=True, null=True)
