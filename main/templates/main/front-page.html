@@ -200,8 +200,8 @@ Home
         let points = [];
         {% for point in points %}
             points.push({
-                x: {% if point.template %}{{ point.template.x }}{% else %}{{ point.x }}{% endif %},
-                y: {% if point.template %}{{ point.template.y }}{% else %}{{ point.y }}{% endif %},
+                x: {% if point.template and point.template.x is not None %}{{ point.template.x | convert_None }}{% else %}{{ point.x | convert_None }}{% endif %},
+                y: {% if point.template and point.template.y is not None %}{{ point.template.y | convert_None }}{% else %}{{ point.y | convert_None }}{% endif %},
                 name: "{{ point.name }}",
                 radius: {{ point.activation_radius }},
                 size: {{ point.size }}
