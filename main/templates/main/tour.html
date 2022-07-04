@@ -370,8 +370,8 @@
             let position_templates = {};
             {% for template in position_templates %}
                 position_templates[{{ template.pk }}] = {
-                    x: {{ template.x }},
-                    y: {{ template.y }},
+                    x: {{ template.x | convert_None }},
+                    y: {{ template.y | convert_None }},
                     name: {{ template.name|js_str }}
                 };
             {% endfor %}

@@ -46,8 +46,8 @@
         let points = [];
         {% for point in points %}
             points.push({
-                x: {% if point.template %}{{ point.template.x }}{% else %}{{ point.x }}{% endif %},
-                y: {% if point.template %}{{ point.template.y }}{% else %}{{ point.y }}{% endif %},
+                x: {% if point.template and point.template.x is not None %}{{ point.template.x }}{% else %}{{ point.x }}{% endif %},
+                y: {% if point.template and point.template.y is not None %}{{ point.template.y }}{% else %}{{ point.y }}{% endif %},
                 name: "{{ point.name }}",
                 radius: {{ point.activation_radius }},
                 size: {{ point.size }}
