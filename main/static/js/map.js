@@ -888,8 +888,8 @@ function updateStops(stops, editable) {
         let i = parseInt(strIx);
         let stop = stops[i];
         if (stop.template !== undefined) {
-            stop.x = position_templates[stop.template].x;
-            stop.y = position_templates[stop.template].y;
+            stop.x = position_templates[stop.template].x ?? stop.x;
+            stop.y = position_templates[stop.template].y ?? stop.y;
             if (stop.name === undefined || stop.name === '') {
                 stop.name = position_templates[stop.template].name;
             }
