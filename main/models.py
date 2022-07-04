@@ -1,6 +1,8 @@
 from datetime import timedelta
 from io import BytesIO
-from typing import Tuple
+from typing import Tuple, Optional
+from bs4 import BeautifulSoup as bs
+import inspect
 
 from PIL import Image
 from ckeditor_uploader.fields import RichTextUploadingField
@@ -23,6 +25,35 @@ from django.db.models.functions import Coalesce
 from .images import crop_to_ar, autorotate
 
 
+def clean_html(html: str):
+    soup = bs(html, 'html.parser')
+    img_tags = soup.find_all('img')
+
+    for img in img_tags:
+        if img.get('src').startswith('/resized-image/'):
+            img['src'] = img['src'].replace('/resized-image/', '/media/')
+            img['src'] = '/'.join(img['src'].split('/')[:-2])
+
+        if img.get('data-cke-saved-src') and img.get('data-cke-saved-src').startswith('/resized-image/'):
+            img['data-cke-saved-src'] = img['data-cke-saved-src'].replace('/resized-image/', '/media/')
+            img['data-cke-saved-src'] = '/'.join(img['data-cke-saved-src'].split('/')[:-2])
+
+    return soup.prettify()
+
+
+def is_html_clean(html: str):
+    soup = bs(html, 'html.parser')
+    img_tags = soup.find_all('img')
+    img_srcs = [img.get('src') for img in img_tags]
+
+    not_resized = [not img.startswith('/resized-image/') for img in img_srcs]
+
+    if all(not_resized):
+        return True
+    else:
+        return False
+
+
 def RichTextWithPlugins(*args, **kwargs):
     def plugin_path(name: str) -> str:
         return static(f'js/ckeditor/plugins/{name}/')
@@ -35,12 +66,24 @@ def RichTextWithPlugins(*args, **kwargs):
         plugin_def('imagefan')
     ], extra_plugins=['splitsection', 'imagefan'], *args, **kwargs)
 
+    stack = inspect.stack()[1]
+    model_name = inspect.getmodule(stack[0]).__name__.split('.')[0] + '.' + stack.function
+
+    @receiver(post_save, sender=model_name)
+    def clean_field_input(sender, instance: models.Model, **kwargs):
+        field_name = field.name
+        content = getattr(instance, field_name)
+        if not is_html_clean(content):
+            setattr(instance, field_name, clean_html(content))
+            instance.save()
+
     return field
 
 
 class DraftHistoryManager(models.Manager):
     def all_published(self):
-        return self.filter((Q(published_bool=True) & Q(published_date__isnull=True)) | Q(published_date__lte=timezone.now()))
+        return self.filter(
+            (Q(published_bool=True) & Q(published_date__isnull=True)) | Q(published_date__lte=timezone.now()))
 
     def visible(self, su: bool):
         return self.all() if su else self.all_published()
@@ -66,7 +109,8 @@ class DraftHistory(models.Model):
 
     @classproperty
     def all_published(cls):
-        return cls.objects.filter((Q(published_bool=True) & Q(published_date__isnull=True)) | Q(published_date__lte=timezone.now()))
+        return cls.objects.filter(
+            (Q(published_bool=True) & Q(published_date__isnull=True)) | Q(published_date__lte=timezone.now()))
 
     @classmethod
     def visible(cls, su: bool):
@@ -238,11 +282,11 @@ class Tour(DraftHistory):
     def close_tours(self):
         return sorted(Tour.objects.exclude(slug=self.slug).filter(display=True, start_date__isnull=False),
                       key=lambda tour: abs(tour.start_date - self.start_date))[:4]
-    
+
     @property
     def close_published_tours(self):
         ordered_tours = sorted(Tour.objects.exclude(slug=self.slug).filter(display=True, start_date__isnull=False),
-                      key=lambda tour: abs(tour.start_date - self.start_date))
+                               key=lambda tour: abs(tour.start_date - self.start_date))
         return list(filter(lambda tour: tour.published, ordered_tours))[:4]
 
     def __str__(self):
@@ -460,7 +504,7 @@ def validate_image_size(sender, instance, created, **kwargs):
             image = autorotate(image)
             ratio = 3 / 2
             (width, height) = image.size
-            if abs(width - ratio * height) <= 5: # Prevents infinte loop when saving
+            if abs(width - ratio * height) <= 5:  # Prevents infinte loop when saving
                 return
             new_image = crop_to_ar(image, ratio)
 
