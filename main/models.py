@@ -664,19 +664,29 @@ def update_position_template(sender, instance, **kwargs):
         tour_stops = template.stop_set.all()
         if template.x is None:
             avg_x = 0
+            x_count = 0
             for point in map_points:
-                avg_x += point.x or 0
+                if point.x is not None:
+                    avg_x += point.x
+                    x_count += 1
             for stop in tour_stops:
-                avg_x += stop.x or 0
-            avg_x /= len(map_points) + len(tour_stops)
+                if stop.x is not None:
+                    avg_x += stop.x
+                    x_count += 1
+            avg_x /= x_count
             template.x = avg_x
         if template.y is None:
             avg_y = 0
+            y_count = 0
             for point in map_points:
-                avg_y += point.y or 0
+                if point.y is not None:
+                    avg_y += point.y
+                    y_count += 1
             for stop in tour_stops:
-                avg_y += stop.y or 0
-            avg_y /= len(map_points) + len(tour_stops)
+                if stop.y is not None:
+                    avg_y += stop.y
+                    y_count += 1
+            avg_y /= y_count
             template.y = avg_y
         template.save()
 
