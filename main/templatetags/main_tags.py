@@ -80,3 +80,9 @@ def lazyload_html(value: str):
 def month_name(month_number: int):
     num = int(month_number)
     return calendar.month_name[num]
+
+
+@register.filter()
+def short_month_name(month_number: int):
+    num = int(month_number)
+    return calendar.month_abbr[num]

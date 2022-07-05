@@ -114,6 +114,26 @@ Tours
         <div></div>
     </div>
 
+    {% if grouped_tours %}
+        <div id="progress-indicator">
+            <div id="progress-bar"></div>
+            <table id="progress-checkpoints">
+                {% for year, year_tours in grouped_tours.items %}
+                    {% for month in year_tours %}
+                        <tr class="progress-indicator-checkpoint">
+                            {% if forloop.counter0 == 0 %}
+                                <td class="year-checkpoint">{{ year }}</td>
+                            {% else %}
+                                <td class="year-checkpoint hidden">{{ year }}</td>
+                            {% endif %}
+                            <td class="month-checkpoint"><a href="#title-{{ year }}-{{ month }}">{{ month | short_month_name }}</a></td>
+                        </tr>
+                    {% endfor %}
+                {% endfor %}
+            </table>
+        </div>
+    {% endif %}
+
     <div class="row">
         <div class="col-xl-8">
             {% if pretours.count > 0 %}
@@ -121,9 +141,11 @@ Tours
             {% endif %}
             {% if grouped_tours %}
                 {% for year, year_tours in grouped_tours.items %}
-                    <h1 class="year-title">{{ year }}</h1>
                     {% for month, month_tours in year_tours.items %}
-                        <h3 class="month-title">{{ month | month_name }}</h3>
+                        {% if forloop.counter0 == 0 %}
+                            <h1 class="year-title checkpoint-marker" year="{{ year }}" month="{{ month }}" id="title-{{ year }}-{{ month }}">{{ year }}</h1>
+                        {% endif %}
+                        <h3 class="month-title{% if forloop.counter0 != 0 %} checkpoint-marker" id="title-{{ year }}-{{ month }}" {% else %}" {% endif %}year="{{ year }}" month="{{ month }}">{{ month | month_name }}</h3>
                         {% include 'main/tours_cards.html' with two_col=True tours=month_tours %}
                     {% endfor %}
                 {% endfor %}

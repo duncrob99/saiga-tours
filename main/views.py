@@ -371,7 +371,7 @@ def fancy_tours(request):
     settings = Settings.load()
     annotated_tours = Tour.visible(request.user.is_staff).filter(Q(state__isnull=True)
                                                                  | Q(state__priority__isnull=True)
-                                                                 | Q(state__priority=0)
+                                                                 | Q(state__priority__gte=0)
                                                                  ).filter(display=True
                                                                           ).annotate(m=Month('start_date'),
                                                                                      y=Year('start_date'))

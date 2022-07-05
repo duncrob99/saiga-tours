@@ -339,7 +339,7 @@ start_picker.on('show', el => {
     start_picker.ui.style.left = '0px';
     error = start_picker.ui.getBoundingClientRect().left - input_left;
     start_picker.ui.style.left = -error + 'px';
-})
+});
 
 // end_picker.on('show', el => {
 //     let input_bottom = el.getBoundingClientRect().bottom + 8;
@@ -347,3 +347,78 @@ start_picker.on('show', el => {
 //     let error = end_picker.ui.getBoundingClientRect().top - input_bottom;
 //     end_picker.ui.style.top = -error + 'px';
 // })
+
+
+(function () {
+    let navbar_height = document.querySelector('nav.navbar').getBoundingClientRect().height;
+    let progress_indicator = document.querySelector('#progress-indicator');
+    let progress_indicator_height = progress_indicator.getBoundingClientRect().height;
+    progress_indicator.style.setProperty('--bar-height', `${progress_indicator_height * 0.8}px`);
+
+    let checkpoints = document.querySelectorAll('.progress-indicator-checkpoint');
+    let checkpoint_height = checkpoints[0].getBoundingClientRect().height;
+
+    let month_markers = Array.from(document.querySelectorAll('.checkpoint-marker'));
+
+    let indicator_visibility = true;
+
+    function set_progress() {
+        if (!indicator_visibility) return;
+
+        // Update the height of the progress indicator to match month marker positions on scroll
+        // Get month marker closest to the top of the viewport
+        let month_marker = month_markers.reduce((prev, curr) => {
+            return curr.getBoundingClientRect().top < navbar_height ? curr : prev;
+            // return Math.abs(curr.getBoundingClientRect().top) < Math.abs(prev.getBoundingClientRect().top) ? curr : prev;
+        });
+        if (month_markers.indexOf(month_marker) === 0 && month_marker.getBoundingClientRect().top > navbar_height) {
+            let marker_position = month_marker.getBoundingClientRect().top + document.body.scrollTop - navbar_height;
+            let perc_to_first = document.body.scrollTop / marker_position;
+            progress_indicator.style.setProperty('--bar-height', `${perc_to_first * checkpoint_height / 2}px`);
+        } else if (month_markers.indexOf(month_marker) === month_markers.length - 1 && month_marker.getBoundingClientRect().top < window.innerHeight - navbar_height) {
+            let scroll_past = -1 * (month_marker.getBoundingClientRect().top - navbar_height);
+            // let distance_past_last = document.body.getBoundingClientRect().bottom - month_marker.getBoundingClientRect().top - window.innerHeight;
+            let distance_past_last = document.getElementById("content-container").getBoundingClientRect().bottom - month_marker.getBoundingClientRect().top - document.documentElement.clientHeight;
+            let perc_after = (scroll_past / distance_past_last);
+            progress_indicator.style.setProperty('--bar-height', `${progress_indicator_height - (1 - perc_after) * checkpoint_height/2}px`);
+        } else {
+            let percent_complete = (month_markers.indexOf(month_marker) + 1) / month_markers.length;
+            let distance_between = month_markers[month_markers.indexOf(month_marker) + 1].getBoundingClientRect().top - month_markers[month_markers.indexOf(month_marker)].getBoundingClientRect().top;
+            let perc_between = Math.abs(month_marker.getBoundingClientRect().top - navbar_height) / distance_between;
+            progress_indicator.style.setProperty('--bar-height', `${progress_indicator_height * percent_complete - checkpoint_height/2 + perc_between * checkpoint_height}px`);
+        }
+
+        progress_indicator.classList.add('fixed');
+        let contents = document.querySelector('#content-container').getBoundingClientRect();
+        let dist_past_end = window.innerHeight - contents.bottom;
+        if (dist_past_end > 0) {
+            progress_indicator.classList.add('absolute');
+            progress_indicator.classList.remove('fixed');
+            progress_indicator.style.bottom = `${window.innerHeight - navbar_height - contents.height}px`;
+        } else {
+            progress_indicator.classList.remove('absolute');
+            progress_indicator.classList.add('fixed');
+            progress_indicator.style.bottom = 0;
+        }
+    }
+
+    function set_visibility() {
+        progress_indicator.classList.remove('hidden');
+        let indicator_width = progress_indicator.getBoundingClientRect().width;
+        let content_left = document.querySelector('#content-container').getBoundingClientRect().left;
+        if (indicator_width > content_left) {
+            indicator_visibility = false;
+            progress_indicator.classList.add('hidden');
+        } else {
+            indicator_visibility = true;
+            progress_indicator.classList.remove('hidden');
+            progress_indicator.style.left = `${(content_left - indicator_width)/2}px`;
+        }
+    }
+
+    document.body.addEventListener('scroll', set_progress);
+    set_progress();
+
+    window.addEventListener('resize', set_visibility);
+    set_visibility();
+})();
