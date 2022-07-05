@@ -55,7 +55,10 @@
 
 #progress-indicator {
     --bar-height: 0;
-    z-index: -10;
+}
+
+#header-banner, #header-content {
+    z-index: 1;
 }
 
 #progress-checkpoints tr:first-child td:first-child:after {
