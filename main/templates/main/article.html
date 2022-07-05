@@ -1,11 +1,13 @@
 {% extends 'main/main.html' %}
 {% load static %}
+{% load django_bootstrap5 %}
 
 {% block title %}
     {{ article.title }}
 {% endblock %}
 
 {% block extrahead %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/custom_ckeditor.css' %}">
     {% if article.banner_img %}
         <style>
             #header-banner {
@@ -17,7 +19,29 @@
     {% endif %}
 {% endblock %}
 
+{% block js %}
+    <script src="https://cdn.jsdelivr.net/npm/litepicker/dist/litepicker.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/luxon@2/build/global/luxon.min.js"></script>
+    <script src="{% static 'js/jscolor.min.js' %}"></script>
+    <script src="{% static 'js/ckeditor/ckeditor.js' %}"></script>
+    <script src="{% static 'js/custom_ckeditor.js' %}"></script>
+    <script src="{% static 'js/article_editing.js' %}"></script>
+    <script src="{% static 'js/ckeditor_styling.js' %}"></script>
+    <script src="{% static 'js/header-banner.js' %}"></script>
+    <script src="{% static 'js/header-banner.js' %}"></script>
+    <script src="{% static 'js/svg.min.js' %}"></script>
+{% endblock %}
+
 {% block banner %}
+    {% if request.user.is_staff %}
+        <button id="editor-button" class="btn btn-outline-secondary d-inline-flex align-items-center"
+                data-bs-toggle="offcanvas"
+                data-bs-target="#editor-offcanvas" aria-controls="editor-offcanvas" role="button"
+                style="float: left; position: sticky; margin: 50px; top: 200px;">
+            <span class="bi bi-pencil" style="font-size: 1.5rem"></span> <span style="margin-left: 4px;">Edit</span>
+        </button>
+    {% endif %}
+
     {% if article.banner_img %}
         <img src="{{ article.banner_img.url }}" id="header-banner"/>
     {% endif %}
@@ -48,14 +72,19 @@
         </div>
     {% endif %}
 
+    <div id="editor-toolbar"></div>
+
     <div>
         {% if article.author %}
             <h6 style="float: right" class="display-6">{{ article.author }}</h6>
         {% endif %}
-        <h6 style="text-align: left" class="display-6">{{ article.date | date }}</h6>
+        <h6 style="text-align: left" class="display-6" id="date">{{ article.date | date }}</h6>
     </div>
     <hr>
+
+    <div id="content">
     {{ article.content | safe }}
+    </div>
 
     {% if article.author %}
         <div class="row">
@@ -75,8 +104,23 @@
             </div>
         </div>
     {% endif %}
-{% endblock %}
 
-{% block js %}
-    <script src="{% static 'js/header-banner.js' %}"></script>
+    {% if request.user.is_staff %}
+        <div class="offcanvas offcanvas-start" tabindex="-1" id="editor-offcanvas">
+            <form style="margin: 20px;" method="post" enctype="multipart/form-data" id="edit-page-form">
+                {% bootstrap_form_errors form %}
+                {% csrf_token %}
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="" id="editing">
+                    <label class="form-check-label" for="editing">
+                        In-place editing
+                    </label>
+                </div>
+                {% bootstrap_form form %}
+                <button type="submit" id="edit-page-submit" class="btn btn-primary accent hoverable-accent">Submit
+                    Changes
+                </button>
+            </form>
+        </div>
+    {% endif %}
 {% endblock %}

@@ -408,8 +408,17 @@ def article(request, slug):
     article_obj = get_object_or_404(Article, slug=slug)
     assert_visible(request, article_obj)
 
+    if request.user.is_staff:
+        form_factory = modelform_factory(Article, exclude=())
+        form = form_factory(request.POST or None, request.FILES or None, instance=article_obj)
+        if request.method == 'POST' and form.is_valid():
+            form.save()
+    else:
+        form = None
+
     context = {
         'article': article_obj,
+        'form': form,
         'meta': MetaInfo(request.get_raw_uri(),
                          article_obj.title,
                          article_obj.card_img.url,
