@@ -352,6 +352,7 @@ start_picker.on('show', el => {
 (function () {
     let navbar_height = document.querySelector('nav.navbar').getBoundingClientRect().height;
     let progress_indicator = document.querySelector('#progress-indicator');
+    if (progress_indicator === null) return;
     let progress_indicator_height = progress_indicator.getBoundingClientRect().height;
     progress_indicator.style.setProperty('--bar-height', `${progress_indicator_height * 0.8}px`);
 
