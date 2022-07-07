@@ -53,7 +53,7 @@ def autorotate(img: Image):
     Rotate a Pillow image based on exif data.
     Returns new Pillow image.
     """
-    exif = img._getexif()
+    exif = img.getexif()
     orientation_key = 274
 
     if exif and orientation_key in exif:
