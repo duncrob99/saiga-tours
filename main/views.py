@@ -150,7 +150,7 @@ class FooterLink:
 
 
 def global_context(request):
-    footer_links = [FooterLink(page.title, page.full_path, [
+    footer_links = [FooterLink(page.title, f'/{page.full_path}', [
         FooterLink(subpage.title, '/' + subpage.full_path)
         for subpage in page.children.visible(request.user.is_staff)
     ])
