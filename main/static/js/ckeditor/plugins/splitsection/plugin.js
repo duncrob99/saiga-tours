@@ -22,7 +22,7 @@ CKEDITOR.plugins.add('splitsection', {
                 }
             },
 
-            allowedContent: 'div(!row); div(!left-col,!col-md-6,!d-flex,justify-content-center,align-content-start,align-content-end,!flex-column,!py-5); p; svg[*]{*}(*); path[d]; *[onclick]; *[id]',
+            allowedContent: 'div(!row); div(!left-col,!col-md-6,!d-flex,hidden,justify-content-center,align-content-start,align-content-end,!flex-column,!py-5); p; svg[*]{*}(*); path[d]; *[onclick]; *[id]',
 
             upcast: function (element) {
                 return element.name === 'div' && element.hasClass('split-section');
@@ -32,9 +32,14 @@ CKEDITOR.plugins.add('splitsection', {
 
             init: function () {
                 let left_col_classes = Array.from(this.element.$.querySelector('div.row div.left-col').classList);
-                let width = parseInt(left_col_classes.filter(e => /^col-md-/g.test(e))[0].slice(-1));
+                let width = parseInt(left_col_classes.filter(e => /^col-md-/g.test(e))[0].split("-")[2]);
                 if (width)
                     this.setData('width', width);
+
+                // let height = parseInt(this.element.$.style.getProperty("--row-height"));
+                let height = parseInt(getComputedStyle(this.element.$.querySelector('div.row')).getPropertyValue("--row-height"));
+                if (height)
+                    this.setData('height', height);
 
                 if (left_col_classes.includes('justify-content-start'))
                     this.setData('align', 'start');
@@ -63,13 +68,24 @@ CKEDITOR.plugins.add('splitsection', {
                     Array.from(col.classList).filter(el => el.startsWith('col-md-')).forEach(cls => col.classList.remove(cls));
                 });
 
+                if (this.data.height === '') {
+                    this.element.$.querySelector('div.row').style.removeProperty("--row-height");
+                } else {
+                    this.element.$.querySelector('div.row').style.setProperty("--row-height", `${this.data.height}px`);
+                }
+
                 if (this.data.width === '' || parseInt(this.data.width) % 1 !== 0 || parseInt(this.data.width) > 12 || isNaN(parseInt(this.data.width))) {
                     cols.forEach(col => {
                         col.classList.add('col-md-6');
+                        col.classList.remove('hidden');
                     })
+                } else if (parseInt(this.data.width) === 12) {
+                    cols[0].classList.add('col-md-12');
+                    cols[1].classList.add('hidden');
                 } else {
                     cols[0].classList.add(`col-md-${parseInt(this.data.width)}`);
                     cols[1].classList.add(`col-md-${12 - parseInt(this.data.width)}`);
+                    cols[1].classList.remove('hidden');
                 }
 
                 if (this.data.align) {
@@ -110,7 +126,11 @@ CKEDITOR.plugins.add('splitsection', {
                 }
 
                 this.element.$.id = this.data.id;
-                this.element.$.setAttribute('data-cke-pa-onclick', `document.getElementById('${this.data.link}').scrollIntoView({behavior: 'smooth'});`)
+                if (this.data.link) {
+                    this.element.$.setAttribute('data-cke-pa-onclick', `document.getElementById('${this.data.link}').scrollIntoView({behavior: 'smooth'});`)
+                } else {
+                    this.element.$.removeAttribute('data-cke-pa-onclick');
+                }
             }
         })
 

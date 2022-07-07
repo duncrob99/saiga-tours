@@ -49,7 +49,7 @@
 
 {% block content %}
     {% if not article.banner_img %}
-        <h1 class="display-1">{{ article.title }}</h1>
+        <h1 id="title" class="display-1">{{ article.title }}</h1>
     {% else %}
         <div id="header-content" class="d-flex flex-column justify-content-between">
             <div class="breadcrumb">

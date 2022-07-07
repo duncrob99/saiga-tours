@@ -25,6 +25,23 @@ CKEDITOR.dialog.add('splitsection', function (editor) {
                         }
                     },
                     {
+                        id: 'height',
+                        type: 'text',
+                        label: 'Min Height',
+                        width: '50px',
+                        setup: function (widget) {
+                            this.setValue(widget.data.height);
+                        },
+                        commit: function (widget) {
+                            let val = parseInt(this.getValue());
+                            if (isNaN(val)) {
+                                widget.setData('height', '');
+                            } else {
+                                widget.setData('height', `${Math.round(val)}`)
+                            }
+                        }
+                    },
+                    {
                         id: 'width',
                         type: 'text',
                         label: 'Left Width',
