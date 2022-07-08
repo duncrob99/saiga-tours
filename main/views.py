@@ -179,6 +179,8 @@ def global_context(request):
 
     context = {
         'regions': Region.visible(request.user.is_staff),
+        'tour_regions': Region.visible(request.user.is_staff).filter(display_tours=True),
+        'guide_regions': Region.visible(request.user.is_staff).filter(display_guides=True),
         'pages': Page.visible(request.user.is_staff).filter(parent=None, in_navbar=True),
         'settings': Settings.load(),
         'footer_links': footer_links,

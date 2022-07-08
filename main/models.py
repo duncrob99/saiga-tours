@@ -127,6 +127,8 @@ class Region(DraftHistory):
     banner_y = models.FloatField(default=50)
 
     list_order = models.IntegerField(default=0)
+    display_tours = models.BooleanField(default=True)
+    display_guides = models.BooleanField(default=True)
 
     def save(self, *args, **kwargs):
         super(Region, self).save(*args, **kwargs)

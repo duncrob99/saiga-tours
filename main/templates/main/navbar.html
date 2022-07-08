@@ -61,7 +61,7 @@
                        data-bs-toggle="dropdown">
                     </a>
                     <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                        {% for region in regions %}
+                        {% for region in tour_regions %}
                             <li>
                                 <a class="dropdown-item d-flex justify-content-between"
                                    href="{% url 'tours' region.slug %}">{{ region.name }} <i
@@ -114,7 +114,7 @@
                        data-bs-toggle="dropdown">
                     </a>
                     <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                        {% for region in regions %}
+                        {% for region in guide_regions %}
                             <li>
                                 <a class="dropdown-item d-flex justify-content-between"
                                    href="{% url 'region' region.slug %}">{{ region.name }} <i
