@@ -919,8 +919,8 @@ function updateStops(stops, editable) {
 
             if (!editable) {
                 point_el.addEventListener('click', () => {
-                    document.querySelector('#itinerary').scrollIntoView({behavior: 'smooth'});
                     currentSlide(stop.day, true);
+                    document.querySelector('#itinerary').scrollIntoView();
                 });
             }
 
