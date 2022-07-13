@@ -54,6 +54,8 @@
             let pre_sep = split.querySelector('.pre-separator');
             let post_sep = split.querySelector('.post-separator');
 
+            if (!pre_sep || !post_sep) return;
+
             let pre_sep_rect = pre_sep.getBoundingClientRect();
             let post_sep_rect = post_sep.getBoundingClientRect();
 

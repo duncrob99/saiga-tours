@@ -897,15 +897,17 @@ function updateStops(stops, editable) {
 
         let point_el, text_el, point_svg;
         if (stop.marked) {
-            text_el = SVG(map_svg).text(stop.name)
-                .font({anchor: 'middle'})
-                .fill('black')
-                .stroke('none')
-                .font({size: `${text_size}px`})
-                .cx(stop.x + stop.text_x)
-                .cy(stop.y + stop.text_y - pointer_size * 20)
-                .addClass('pointer-text')
-                .attr('id', `pointer-text-${stop.form_ix}`);
+            if (stop.name !== undefined && stop.name !== '') {
+                text_el = SVG(map_svg).text(stop.name)
+                    .font({anchor: 'middle'})
+                    .fill('black')
+                    .stroke('none')
+                    .font({size: `${text_size}px`})
+                    .cx(stop.x + stop.text_x)
+                    .cy(stop.y + stop.text_y - pointer_size * 20)
+                    .addClass('pointer-text')
+                    .attr('id', `pointer-text-${stop.form_ix}`);
+            }
 
             point_svg = SVG(map_svg).circle(8*pointer_size)
                 .cx(stop.x)
@@ -988,7 +990,7 @@ function updateStops(stops, editable) {
                         .cy(stop.y)
                         .transform({scale: 1.2, origin: 'center'});
 
-                    if (stop.marked) {
+                    if (stop.marked && text_el !== undefined) {
                         text_el.font({anchor: 'middle'}).cx(stop.x + stop.text_x).cy(stop.y + stop.text_y - pointer_size * 20);
                     }
 
