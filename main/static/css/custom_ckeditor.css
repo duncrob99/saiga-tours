@@ -130,7 +130,7 @@ img.angle-right {
     transform: rotate(calc(1deg * var(--base-rotation)));
 }
 
-table.styled-table {
+#contents table:not(.styled-table) {
     border-collapse: collapse;
     margin: 25px 0;
     font-size: 0.9em;
@@ -139,33 +139,41 @@ table.styled-table {
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
 }
 
-.styled-table thead tr {
+#contents table:not(.styled-table) thead tr {
     background-color: var(--accent-foreground);
     color: var(--accent-background);
     text-align: left;
 }
 
-.styled-table th,
-.styled-table td {
+#contents table:not(.styled-table) th,
+#contents table:not(.styled-table) td {
     padding: 12px 15px;
 }
 
 
-.styled-table tbody tr {
+#contents table:not(.styled-table) tbody tr {
     border-bottom: 1px solid #dddddd;
 }
 
-.styled-table tbody tr:nth-of-type(even) {
-    background-color: #f3f3f3;
+#contents table:not(.styled-table) tbody tr:nth-of-type(even) {
+    background-color: var(--accent-background);
 }
 
-.styled-table tbody tr:last-of-type {
+#contents table:not(.styled-table) tbody tr:nth-of-type(odd) {
+    background-color: white;
+}
+
+#contents table:not(.styled-table) tbody tr:last-of-type {
     border-bottom: 1px solid #000;
 }
 
-.styled-table tbody tr.active-row {
+#contents table:not(.styled-table) tbody tr.active-row {
     font-weight: bold;
     color: #009879;
+}
+
+#contents table:not(.styled-table) p {
+    margin-bottom: 0;
 }
 
 div.split-section div.hidden {
