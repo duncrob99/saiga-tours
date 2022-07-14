@@ -50,7 +50,9 @@
                     </table>
                 -->
                     <div class="detail-table">
-                        <div class="date"><div><i class="bi table-icon bi-calendar4-range"></i></div><span>{{ tour.start_date }}</span></div>
+                        <div class="date">
+                            {% if tour.dated %}<div><i class="bi table-icon bi-calendar4-range"></i></div><span>{{ tour.start_date }}</span>{% endif %}
+                        </div>
                         <div class="duration"><div><i class="bi table-icon bi-clock-history"></i></div><span>{{ tour.duration }} day{% if tour.duration > 1 %}s{% endif %}</span></div>
                         <div class="price"><div><i class="bi table-icon bi-coin"></i></div><span>{{ settings.price_prefix }}{{ tour.price }}</span></div>
                         <div class="view">

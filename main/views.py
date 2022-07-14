@@ -362,17 +362,18 @@ def tours(request):
                                                                           ).annotate(m=Month('start_date'),
                                                                                      y=Year('start_date'))
     all_years = annotated_tours.values_list('y', flat=True)
-    all_years = sorted(list(dict.fromkeys(all_years)))  # Removed duplicates and sorted
+    all_years = sorted(list(filter(None, list(dict.fromkeys(all_years)))))  # Removed duplicates and sorted
     grouped_tours = {}
     for year in all_years:
         grouped_tours[year] = {}
         all_months = annotated_tours.filter(y=year).values_list('m', flat=True)
-        all_months = sorted(list(dict.fromkeys(all_months)))  # Removed duplicates and sorted
+        all_months = sorted(list(filter(None, list(dict.fromkeys(all_months)))))  # Removed duplicates and sorted
         for month in all_months:
             tours = annotated_tours.filter(y=year, m=month)
             grouped_tours[year][month] = tours
 
-    pre_tours = Tour.visible(request.user.is_staff).filter(display=True).filter(state__priority__gt=0)
+    pre_tours = Tour.visible(request.user.is_staff).filter(display=True).filter(Q(state__priority__gt=0) |
+                                                                                Q(start_date__isnull=True))
     post_tours = Tour.visible(request.user.is_staff).filter(display=True).filter(state__priority__lt=0)
     context = {
         'pretours': pre_tours,
