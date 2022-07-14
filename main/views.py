@@ -355,22 +355,6 @@ class Year(Func):
 
 def tours(request):
     settings = Settings.load()
-    context = {
-                  'tours': Tour.visible(request.user.is_staff).filter(display=True),
-                  'destinations': Destination.visible(request.user.is_staff),
-                  'query': request.GET.get('q'),
-                  'meta': MetaInfo(
-                      url=request.get_raw_uri(),
-                      title='Tours',
-                      image_url=settings.logo.url,
-                      description='Come see all the tours we have on offer!'
-                  )
-              }
-    return render(request, 'main/tours.html', context)
-
-
-def fancy_tours(request):
-    settings = Settings.load()
     annotated_tours = Tour.visible(request.user.is_staff).filter(Q(state__isnull=True)
                                                                  | Q(state__priority__isnull=True)
                                                                  | Q(state__priority__gte=0)
