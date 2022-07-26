@@ -96,6 +96,12 @@
     <meta property="og:site_name" content="SAIGA Tours">
     <meta name="og:image:alt" content="Image for '{{ meta.title }}'">
 
+    {% if request.user.is_staff %}
+        <script>
+            var CKEDITOR_BASEPATH = '/static/js/ckeditor/';
+        </script>
+    {% endif %}
+
     {% block extrahead %}
     {% endblock %}
 </head>
