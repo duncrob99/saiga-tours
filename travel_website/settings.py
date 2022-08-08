@@ -18,16 +18,18 @@ from sentry_sdk.integrations.django import DjangoIntegration
 
 env = environ.Env(
     DEBUG=(bool, False),
-    PRODUCTION=(bool, False)
+    PRODUCTION=(bool, False),
+    SENTRY=(bool, True)
 )
 environ.Env.read_env()
 
-SENTRY_PROJECT = env('SENTRY_PROJECT')
-sentry_sdk.init(
-    dsn=SENTRY_PROJECT,
-    integrations=[DjangoIntegration()],
-    traces_sample_rate=1.0,
-)
+if env('SENTRY'):
+    SENTRY_PROJECT = env('SENTRY_PROJECT')
+    sentry_sdk.init(
+        dsn=SENTRY_PROJECT,
+        integrations=[DjangoIntegration()],
+        traces_sample_rate=1.0,
+    )
 
 PRODUCTION = env('PRODUCTION')
 
