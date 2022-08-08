@@ -395,6 +395,7 @@ class Article(DraftHistory):
     keywords = models.TextField(null=True, blank=True)
     tags = models.ManyToManyField(Tag, related_name='articles', blank=True)
     author = models.ForeignKey(Author, on_delete=models.CASCADE, null=True, blank=True)
+    order = models.IntegerField(null=True, blank=True)
 
     banner_img = models.ImageField(null=True, blank=True)
     banner_x = models.FloatField(null=True, blank=True)
@@ -419,7 +420,7 @@ class Article(DraftHistory):
                 print(e)
 
     class Meta:
-        ordering = ['-creation', 'title']
+        ordering = ['-order', '-creation', 'title']
 
     def tag_list(self) -> str:
         return ' '.join([str(tag) for tag in self.tags.all()])
