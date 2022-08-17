@@ -99,7 +99,6 @@ function setVerticalHeight() {
 function minimiseSlides() {
     let slides = document.getElementsByClassName('mySlides');
     let max_height = 400;
-    console.log('minimising')
     for (let i = 0; i < slides.length; i++) {
         let slide = slides[i];
         let style = getComputedStyle(slide);
@@ -212,6 +211,40 @@ showSlides(slideIndex, false, true);
                 plusSlides(-Math.sign(moved), true, true);
             } else {
                 plusSlides(0, true, true);
+            }
+        })
+    });
+
+
+    let runners = [];
+    document.querySelectorAll('.goto-map-point-button').forEach(but => {
+        let day = parseInt(but.getAttribute('data-model-day'));
+        but.addEventListener('click', () => {
+            // Stop all animation runners
+            console.log('Current runners: ', runners);
+            for (let runner of runners) {
+                runner.finish();
+            }
+            runners = [];
+            for (let id in stops) {
+                let stop = stops[id];
+                document.querySelector(`#pointer-${id}`).classList.remove('focused');
+                let pointer = SVG(document.querySelector((`#pointer-${id}`)));
+                if (stop.day === day) {
+                    document.querySelector('div.map').scrollIntoView();
+                    // document.querySelector(`#pointer-${id}`).classList.add('focused');
+                    let runner = pointer.animate({
+                        duration: 1000,
+                        when: 'now',
+                        swing: true,
+                        ease: '<>',
+                        times: 16
+                    });
+                    runner.scale(1.3);
+                    runners.push(runner);
+                    console.log('Current runners: ', runners)
+                    break;
+                }
             }
         })
     });

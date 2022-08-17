@@ -1122,7 +1122,7 @@ function updateStops(stops, editable) {
                             input.setAttribute('placeholder', stop.day);
                             input.value = "";
                             button.onclick = function () {
-                                stops[i].day = document.querySelector('#change-day-input').value;
+                                stops[i].day = parseInt(document.querySelector('#change-day-input').value);
                                 document.querySelector(`#id_stops-${stop.form_ix}-day`).value = stops[i].day;
                                 modal.hide();
                                 updateStops(stops, true);

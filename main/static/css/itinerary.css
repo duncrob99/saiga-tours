@@ -51,7 +51,7 @@
 }
 
 :root {
-  --slider-button-width: 15%;
+  --slider-button-width: 10%;
 }
 
 /* Next & previous buttons */
@@ -73,8 +73,9 @@
 
 /* Position the "next button" to the right */
 .next {
-  left: calc(100% - var(--slider-button-width));
+  /*left: calc(100% - var(--slider-button-width));*/
   border-radius: 3px 0 0 3px;
+  right: 0;
 }
 
 .prev > i {
