@@ -43,7 +43,7 @@ function minimise_images() {
                 entry.target.setAttribute('observing-intersection', 'false');
             }
         });
-    }, { threshold: [0], rootMargin: '0%', root: document.body });
+    }, { threshold: [0], rootMargin: '200%', root: document.body });
     let banner_observer = new IntersectionObserver(entries => {
         entries.forEach(entry => {
             if (entry.intersectionRatio > 0) {
