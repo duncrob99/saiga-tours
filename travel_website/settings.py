@@ -15,6 +15,7 @@ from pathlib import Path
 import environ
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
+from .middleware import CacheControlMiddleware
 
 env = environ.Env(
     DEBUG=(bool, False),
@@ -102,6 +103,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'travel_website.middleware.CacheControlMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'simple_history.middleware.HistoryRequestMiddleware',
