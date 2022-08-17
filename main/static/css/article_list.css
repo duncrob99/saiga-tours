@@ -4,6 +4,10 @@
     box-shadow: 5px 5px 10px darkgrey;
 }
 
+.article-card p.card-text {
+    min-height: 5em;
+}
+
 .card img {
     width: 200px;
     object-fit: cover;
