@@ -42,7 +42,7 @@ Home
     <div class="banner">
         <div id="banner-slideshow">
             {% for banner in banners %}
-                <img alt="banner image" data-filename="{{ banner.img.name }}" class="banner-img hide to-load"
+                <img data-filename="{{ banner.img.name }}" class="banner-img hide to-load"
                      idx="{{ forloop.counter0 }}" min_ar="{{ banner.min_AR }}"
                      max_ar="{{ banner.max_AR }}">
             {% endfor %}
@@ -213,15 +213,15 @@ Home
         (function () {
             let col_width = 10;
 
-            function size_images() {
-                col_width = Math.max(Math.round(document.querySelectorAll('.article-section img')[0].getBoundingClientRect().width * window.devicePixelRatio), col_width);
-                document.querySelectorAll('.article-section img').forEach(el => {
-                    el.src = "resized-image/" + el.dataset.filename + "/" + col_width + "x0" + "/";
-                });
-            }
+            //function size_images() {
+                //col_width = Math.max(Math.round(document.querySelectorAll('.article-section img')[0].getBoundingClientRect().width * window.devicePixelRatio), col_width);
+                //document.querySelectorAll('.article-section img').forEach(el => {
+                    //el.src = "resized-image/" + el.dataset.filename + "/" + col_width + "x0" + "/";
+                //});
+            //}
 
-            window.addEventListener('load', size_images);
-            window.addEventListener('resize', size_images);
+            //window.addEventListener('load', size_images);
+            //window.addEventListener('resize', size_images);
         })();
     </script>
     <script src="{% static 'js/ckeditor_styling.js' %}"></script>

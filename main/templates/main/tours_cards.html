@@ -85,20 +85,3 @@
         {% endif %}
     {% endfor %}
 </div>
-
-<script>
-    (function () {
-        let col_width = 10;
-
-        function size_images() {
-            col_width = Math.max(Math.round(document.querySelector('.{{ uid|default:"tour_cards" }} .tour-col').getBoundingClientRect().width * window.devicePixelRatio), col_width);
-            document.querySelectorAll('.{{ uid|default:"tour_cards" }} img').forEach(el => {
-                el.src = "/resized-image/" + el.dataset.filename + "/" + col_width + "x0" + "/";
-            });
-        }
-
-        size_images();
-        window.addEventListener('load', size_images);
-        window.addEventListener('resize', size_images);
-    })();
-</script>

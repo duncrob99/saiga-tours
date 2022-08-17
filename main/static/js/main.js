@@ -1,19 +1,81 @@
+function minimise_image(img) {
+    let img_src;
+    if (img.hasAttribute('src')) {
+        img_src = img.getAttribute('src');
+    } else if (img.hasAttribute('full-size-src')) {
+        img_src = img.getAttribute('full-size-src');
+    } else if (img.hasAttribute('data-filename')) {
+        img_src = img.getAttribute('data-filename');
+    } else return;
+    let original_src = img_src;
+    if (img_src.startsWith('/static') || img_src.includes('data:image/') || img_src.includes('http')) return;
+    let width = Math.ceil(parseInt(getComputedStyle(img).width) * window.devicePixelRatio);
+    let height = img.id === 'header-banner' ? '0' : Math.ceil(parseInt(getComputedStyle(img).height) * window.devicePixelRatio);
+
+    // Only increase the size of the image
+    if (img.hasAttribute('loaded-width')) {
+        width = Math.max(width, parseInt(img.getAttribute('loaded-width')));
+    }
+    if (img.hasAttribute('loaded-height')) {
+        height = Math.max(height, parseInt(img.getAttribute('loaded-height')));
+    }
+    img.setAttribute('loaded-width', width);
+    img.setAttribute('loaded-height', height);
+
+    let img_size = `${width}x${height}`;
+    img_src = img_src.replace(/^\/media\//, '').replaceAll(/\/?resized-image\//g, '').replaceAll(/\/[0-9]+x[0-9]+\//g, '');
+    // Check if img src still has resized-image in it
+    if (img_src.includes('resized-image')) {
+        console.warn("Image still has resized-image in it: ", img, img_src, original_src);
+    }
+    if (img_src && img_size) {
+        img.setAttribute('src', `/resized-image/${img_src}/${img_size}/`);
+    }
+}
+
 function minimise_images() {
-    document.querySelectorAll(`img`).forEach(img => {
-        let img_src;
-        if (img.hasAttribute('src')) {
-            img_src = img.getAttribute('src');
-        } else if (img.hasAttribute('full-size-src')) {
-            img_src = img.getAttribute('full-size-src');
-        } else return;
-        if (img_src.startsWith('/static') || img_src.includes('data:image/') || img_src.includes('http')) return;
-        let width = Math.ceil(parseInt(getComputedStyle(img).width) * window.devicePixelRatio);
-        let height = img.id === 'header-banner' ? '0' : Math.ceil(parseInt(getComputedStyle(img).height) * window.devicePixelRatio);
-        let img_size = `${width}x${height}`;
-        img_src = img_src.replace(/^\/media\//, '').replaceAll(/\/resized-image\//g, '').replaceAll(/\/[0-9]+x[0-9]+\//g, '');
-        if (img_src && img_size) {
-            img.setAttribute('src', `/resized-image/${img_src}/${img_size}/`);
+    let images = document.querySelectorAll('img');
+    let general_observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+            if (entry.intersectionRatio > 0) {
+                minimise_image(entry.target);
+                general_observer.unobserve(entry.target);
+                entry.target.setAttribute('observing-intersection', 'false');
+            }
+        });
+    }, { threshold: [0], rootMargin: '0%', root: document.body });
+    let banner_observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+            if (entry.intersectionRatio > 0) {
+                minimise_image(entry.target);
+                banner_observer.unobserve(entry.target);
+                entry.target.setAttribute('observing-intersection', 'false');
+            }
+        });
+    }, { threshold: [0], rootMargin: '20%', root: document.body });
+    images.forEach(img => {
+        if (img.classList.contains('banner-img')) {
+            banner_observer.observe(img);
+        } else {
+            general_observer.observe(img);
         }
+        img.setAttribute('observing-intersection', 'true');
+    });
+
+    let resize_observer = new ResizeObserver(entries => {
+        entries.forEach(entry => {
+            if (entry.target.hasAttribute('observing-intersection') && entry.target.getAttribute('observing-intersection') === 'false') {
+                if (entry.target.classList.contains('banner-img')) {
+                    banner_observer.observe(entry.target);
+                } else {
+                    general_observer.observe(entry.target);
+                }
+                entry.target.setAttribute('observing-intersection', 'true');
+            }
+        });
+    });
+    images.forEach(img => {
+        resize_observer.observe(img);
     })
 }
 
