@@ -194,5 +194,57 @@
         {% endif %}
         -->
     </div>
+
+    {% if request.user.is_staff %}
+        <div id="testing-button">
+            <!-- button to add testing parameter to url -->
+            <a class="btn hoverable-accent accent" href=""><span class="full-text">Testing version</span><i class="bi icon bi-clipboard-data"></i></a>
+        </div>
+
+        <style>
+            #testing-button {
+                position: absolute;
+                right: 30px;
+            }
+
+            #testing-button .icon {
+                display: none;
+            }
+
+            @media (max-width: 1500px) {
+                #testing-button .full-text {
+                    display: none;
+                }
+
+                #testing-button .icon {
+                    display: inline-block;
+                }
+            }
+
+            #testing-button.active a {
+                background-color: var(--accent-hover-background);
+            }
+        </style>
+
+        <script>
+            (function () {
+                let testing_button = document.getElementById('testing-button');
+                let testing_cookie = document.cookie.split(';').find(row => row.includes('testing'));
+                console.log("testing_cookie: ", testing_cookie);
+                let testing = false;
+                if (testing_cookie && testing_cookie.includes('true')) {
+                    testing_button.classList.add('active');
+                    testing = true;
+                }
+
+                testing_button.addEventListener('click', function () {
+                    testing = !testing;
+                    testing_button.classList.toggle('active');
+                    document.cookie = `testing=${testing}; path=/`;
+                    window.location.reload();
+                });
+            })();
+        </script>
+    {% endif %}
 </nav>
 

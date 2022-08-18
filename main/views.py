@@ -184,6 +184,7 @@ def global_context(request):
         'pages': Page.visible(request.user.is_staff).filter(parent=None, in_navbar=True),
         'settings': Settings.load(),
         'footer_links': footer_links,
+        'testing': request.COOKIES.get('testing', 'false') == 'true' and request.user.is_staff,
     }
     return context
 

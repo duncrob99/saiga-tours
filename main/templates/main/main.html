@@ -81,6 +81,12 @@
             font-weight: normal;
         }
 
+        {% if testing %}
+            * {
+                outline: 1px solid red;
+            }
+        {% endif %}
+
     </style>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
