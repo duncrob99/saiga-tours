@@ -24,6 +24,12 @@ function minimise_image(img) {
 
     let img_size = `${width}x${height}`;
     img_src = img_src.replace(/^\/media\//, '').replaceAll(/\/?resized-image\//g, '').replaceAll(/\/[0-9]+x[0-9]+\//g, '');
+
+    // Remove trailing slash if it exists
+    if (img_src.endsWith('/')) {
+        img_src = img_src.substring(0, img_src.length - 1);
+    }
+
     // Check if img src still has resized-image in it
     if (img_src.includes('resized-image')) {
         console.warn("Image still has resized-image in it: ", img, img_src, original_src);
@@ -54,6 +60,7 @@ function minimise_images() {
         });
     }, { threshold: [0], rootMargin: '20%', root: document.body });
     images.forEach(img => {
+        if (img.hasAttribute('data-no-minimise')) return;
         if (img.classList.contains('banner-img')) {
             banner_observer.observe(img);
         } else {
@@ -75,6 +82,7 @@ function minimise_images() {
         });
     });
     images.forEach(img => {
+        if (img.hasAttribute('data-no-minimise')) return;
         resize_observer.observe(img);
     })
 }

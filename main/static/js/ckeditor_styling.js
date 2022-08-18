@@ -13,34 +13,40 @@
         };
     }
 
-    function fitFans() {
-        document.querySelectorAll('div.image-fan').forEach(fan => {
-            console.log("Fitting fan image", fan);
-            fan.style.setProperty('transform', `scale(1)`);
-            let fan_bounds = getFanBounds(fan);
-            let fan_parent = fan.parentElement;
-            let max_bounds = fan_parent.getBoundingClientRect();
+    function fitFan(fan) {
+        console.log("Fitting fan image", fan);
+        fan.style.setProperty('transform', `scale(1)`);
+        let fan_bounds = getFanBounds(fan);
+        let fan_parent = fan.parentElement;
+        let max_bounds = fan_parent.getBoundingClientRect();
 
-            let width_scale = (max_bounds.right - max_bounds.left) / (fan_bounds.right - fan_bounds.left);
-            let height_scale = (max_bounds.bottom - max_bounds.top) / (fan_bounds.bottom - fan_bounds.top);
-            let scale = Math.min(width_scale, height_scale);
-            console.log(fan_bounds, max_bounds, scale);
+        let width_scale = (max_bounds.right - max_bounds.left) / (fan_bounds.right - fan_bounds.left);
+        let height_scale = (max_bounds.bottom - max_bounds.top) / (fan_bounds.bottom - fan_bounds.top);
+        let scale = Math.min(width_scale, height_scale, 1);
+        console.log(fan_bounds, max_bounds, scale);
+        if (scale > 1) {
+            console.warn("Fan image is too big to fit in container");
+        }
 
-            fan.style.setProperty('transform', `scale(${scale})`);
-            fan.style.setProperty('transform-origin', 'left');
-            fan_bounds = getFanBounds(fan);
-            max_bounds = fan_parent.getBoundingClientRect();
+        fan.style.setProperty('transform', `scale(${scale})`);
+        fan.style.setProperty('transform-origin', 'left');
+        fan_bounds = getFanBounds(fan);
+        max_bounds = fan_parent.getBoundingClientRect();
 
-            let transform_x = ((max_bounds.left + max_bounds.right) - (fan_bounds.left + fan_bounds.right)) / 2;
-            let transform_y = ((max_bounds.top + max_bounds.bottom) - (fan_bounds.top + fan_bounds.bottom)) / 2;
+        let transform_x = ((max_bounds.left + max_bounds.right) - (fan_bounds.left + fan_bounds.right)) / 2;
+        let transform_y = ((max_bounds.top + max_bounds.bottom) - (fan_bounds.top + fan_bounds.bottom)) / 2;
 
-            fan.style.setProperty('transform', `scale(${scale}) translateX(${transform_x}px) translateY(${transform_y}px)`);
-            fan.style.setProperty('transform-origin', 'left');
-        });
+        fan.style.setProperty('transform', `scale(${scale}) translateX(${transform_x}px) translateY(${transform_y}px)`);
+        fan.style.setProperty('transform-origin', 'left');
     }
 
-    fitFans();
-    document.addEventListener('resize', fitFans);
+    // Fit fans on resize of parent element using ResizeObserver
+    document.querySelectorAll('.image-fan').forEach(fan => {
+        let observer = new ResizeObserver(() => {
+            fitFan(fan);
+        });
+        observer.observe(fan.parentElement);
+    });
 })();
 
 (function() {

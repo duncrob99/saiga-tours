@@ -28,9 +28,9 @@
                 </div>
                 <div id="day-{{ forloop.counter }}-body" class="card-body">
                     {% if day.template is None %}
-                        {{ day.body | safe }}
+                        {{ day.body | delay_images:request }}
                     {% else %}
-                        {{ day.template.body | safe }}
+                        {{ day.template.body | delay_images:request }}
                     {% endif %}
                 </div>
                 <a id="day-{{ forloop.counter }}-expand" onclick="expandSlide({{ forloop.counter }})"

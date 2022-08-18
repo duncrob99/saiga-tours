@@ -1,4 +1,5 @@
 import calendar
+from bs4 import BeautifulSoup as bs
 
 from django import template
 from django.core.paginator import Page
@@ -86,3 +87,32 @@ def month_name(month_number: int):
 def short_month_name(month_number: int):
     num = int(month_number)
     return calendar.month_abbr[num]
+
+
+@register.filter()
+def delay_images(value: str, request):
+    # print(value, value.replace('<img src=', '<img data-filename='))
+    soup = bs(value, 'html.parser')
+    img_tags = soup.find_all('img')
+
+    for img in img_tags:
+        if img.get('src').startswith('/resized-image/'):
+            print("Found resized image", img.get('src'))
+            img['src'] = img['src'].replace('/resized-image/', '/media/')
+            img['src'] = '/'.join(img['src'].split('/')[:-2])
+
+        if img.get('data-cke-saved-src') and img.get('data-cke-saved-src').startswith('/resized-image/'):
+            img['data-cke-saved-src'] = img['data-cke-saved-src'].replace('/resized-image/', '/media/')
+            img['data-cke-saved-src'] = '/'.join(img['data-cke-saved-src'].split('/')[:-2])
+
+        if not (img['src'].startswith('http://') or img['src'].startswith('https://') or request.user.is_staff):
+            img['data-filename'] = img['src']
+            # Remove src attribute to avoid loading image
+            img.attrs.pop('src')
+        else:
+            # Mark image as not to be minimised
+            img.attrs['data-no-minimise'] = 'true'
+
+    # print('soupstr: ', soup.str())
+    return mark_safe(soup.prettify().replace('<span style="background-color:rgba(220,220,220,0.5)"><img src="data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==" style="height:15px; width:15px" title="Click and drag to move"></span>', ''))
+    # return mark_safe(value.replace('<img src=', '<img data-filename='))

@@ -150,7 +150,7 @@
     </div>
     <hr>
     <div id="tour-desc">
-        {{ tour.description | safe }}
+        {{ tour.description | delay_images:request }}
     </div>
 
     {% if tour.itinerary.count > 0 or tour.stols.count > 0 %}

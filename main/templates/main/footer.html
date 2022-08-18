@@ -64,8 +64,8 @@
     }
 
     .main-footer .logo {
-        max-width: 70px;
-        max-height: 70px;
+        max-width: 90px;
+        max-height: 90px;
     }
 
     .main-footer a {
@@ -108,6 +108,7 @@
         left: 50%;
         transform: translateX(-50%);
         position: relative;
+        flex-grow: 1;
     }
 
     #footer-content {
@@ -147,7 +148,7 @@
         <div class="container pt-5 px-3 pb-3">
             <div class="d-flex justify-content-start" id="footer-content">
                 <div class="d-flex flex-column justify-content-around">
-                    <img alt="logo" src="{{ settings.logo.url }}" class="logo">
+                    <img alt="logo" data-filename="{{ settings.logo.url }}" class="logo">
                     <ul class="list-unstyled d-flex">
                         {% if settings.twitter_link %}
                             <li class="ms-3"><a href="{{ settings.twitter_link }}"><i

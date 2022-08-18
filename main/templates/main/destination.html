@@ -1,4 +1,5 @@
 {% extends 'main/main.html' %}
+{% load main_tags %}
 {% load static %}
 
 {% block title %}
@@ -52,7 +53,7 @@
             <div></div>
         </div>
     {% endif %}
-    {{ destination.description | safe }}
+    {{ destination.description | delay_images:request }}
     {% if details.count > 0 %}
         <hr>
         <h3 class="display-5">More Information</h3>

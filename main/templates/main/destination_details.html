@@ -1,6 +1,7 @@
 {% extends 'main/main.html' %}
 {% load static %}
 {% load django_bootstrap5 %}
+{% load main_tags %}
 
 {% block title %}
     {{ details.title }} | {{ details.destination}}
@@ -81,7 +82,7 @@
         <div id="editor-toolbar"></div>
 
         <div id="content">
-            {{ details.content | safe }}
+            {{ details.content | delay_images:request }}
         </div>
     </div>
 

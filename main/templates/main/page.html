@@ -1,4 +1,5 @@
 {% extends 'main/main.html' %}
+{% load main_tags %}
 {% load static %}
 {% load django_bootstrap5 %}
 
@@ -91,7 +92,7 @@
     <div id="editor-toolbar"></div>
 
     <div id="content">
-        {{ page.content | safe }}
+        {{ page.content | delay_images:request }}
     </div>
 
     {% if user.is_staff %}

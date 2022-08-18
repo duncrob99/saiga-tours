@@ -1,6 +1,7 @@
 {% extends 'main/main.html' %}
 {% load static %}
 {% load django_bootstrap5 %}
+{% load main_tags %}
 
 {% block title %}
     {{ article.title }}
@@ -83,7 +84,7 @@
     <hr>
 
     <div id="content">
-    {{ article.content | safe }}
+    {{ article.content | delay_images:request }}
     </div>
 
     {% if article.author %}
@@ -95,7 +96,7 @@
                              style="border-radius: 500px; margin-right: 20px;" alt="{{ article.author }}">
                         <div>
                             <h3>{{ article.author }}</h3>
-                            {{ article.author.blurb | safe }}
+                            {{ article.author.blurb | delay_images:request }}
                             <a href="/{% if article.type == 'n' %}news{% else %}blog{% endif %}/?author={{ article.author }}">Read
                                 more from {{ article.author }}</a>
                         </div>

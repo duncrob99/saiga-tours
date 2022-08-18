@@ -1,4 +1,5 @@
 {% extends 'main/main.html' %}
+{% load main_tags %}
 
 {% block title %}
     {{ details.title }} | {{ details.destination }}
@@ -10,7 +11,7 @@
             <a href="{% url 'tours' details.destination.region.slug details.destination.slug %}"><small
                     class="text-muted">{{ details.destination }}</small></a>
         </h1>
-        {{ details.content | safe }}
+        {{ details.content | delay_images:request }}
     </div>
     {% if details.linked_tours.count > 0 %}
         <hr>
