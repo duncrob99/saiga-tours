@@ -1,5 +1,6 @@
 import datetime
 import json
+import re
 from collections import defaultdict
 
 import requests
@@ -13,6 +14,7 @@ from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from ipware import get_client_ip
 
+from travel_website import settings
 from .forms import SubscriptionForm
 from .models import UserCookie, Session, Page, PageView, MouseAction, SubscriptionSubmission
 
@@ -31,9 +33,7 @@ def ip_location(ip: str):
 # Create your views here.
 @csrf_exempt
 def view(request):
-    print("User ID: ", request.POST.get('user_id'))
     if 'user_id' not in request.POST:
-        print("Creating new user")
         user = UserCookie.objects.create(staff=request.user.is_staff, user_agent=request.META['HTTP_USER_AGENT'])
         new_user = True
     else:
@@ -46,15 +46,15 @@ def view(request):
             if not user.user_agent:
                 user.user_agent = request.META['HTTP_USER_AGENT']
         except ValidationError:
-            print("Invalid user ID")
             user = UserCookie.objects.create(staff=request.user.is_staff, user_agent=request.META['HTTP_USER_AGENT'])
             new_user = True
 
-    if 'session_id' in request.session:
-        session, _ = Session.objects.get_or_create(session_id=request.session['session_id'], user=user)
+    # Check if referer includes allowed host
+    referer_is_allowed_host = len(list(set(re.split('[/:]', request.POST.get('referer'))) & set(settings.ALLOWED_HOSTS))) > 0
+    if referer_is_allowed_host and 'session_id' in request.POST and request.POST.get('session_id') != '':
+        session, _ = Session.objects.get_or_create(session_id=request.POST.get('session_id'), user=user)
     else:
         session = Session.objects.create(user=user)
-        request.session['session_id'] = str(session.session_id)
 
     show_subscription = user.should_request_subscription
     if show_subscription:
@@ -65,7 +65,7 @@ def view(request):
     page, _ = Page.objects.get_or_create(path=request.POST.get('path'))
     page_view = PageView.objects.create(session=session, page=page)
     page_view.duration = datetime.timedelta(milliseconds=int(request.POST.get('interval')) / 2)
-    page_view.referer = request.META['HTTP_REFERER']
+    page_view.referer = request.POST.get('referer')
 
     response_content = {
         'new_user': new_user,
@@ -73,6 +73,7 @@ def view(request):
         'show_subscription': show_subscription,
         'user_id': user.uuid,
         'pageview': page_view.uuid,
+        'session_id': session.session_id,
     }
     response = JsonResponse(response_content)
 
