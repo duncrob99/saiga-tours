@@ -10,6 +10,7 @@ from django.db.models import Max, Min
 from django.http import JsonResponse, Http404, HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt
 from ipware import get_client_ip
 
 from .forms import SubscriptionForm
@@ -28,35 +29,26 @@ def ip_location(ip: str):
 
 
 # Create your views here.
+@csrf_exempt
 def view(request):
-    if 'userID' not in request.COOKIES:
+    print("User ID: ", request.POST.get('user_id'))
+    if 'user_id' not in request.POST:
+        print("Creating new user")
         user = UserCookie.objects.create(staff=request.user.is_staff, user_agent=request.META['HTTP_USER_AGENT'])
-
-        response_content = {
-            'new_user': True,
-            'accepted_cookies': user.accepted_cookies,
-            'show_subscription': user.should_request_subscription
-        }
+        new_user = True
     else:
         try:
-            user = UserCookie.objects.get(uuid=request.COOKIES['userID'])
-            response_content = {
-                'new_user': False,
-                'accepted_cookies': user.accepted_cookies,
-                'show_subscription': user.should_request_subscription
-            }
+            user = UserCookie.objects.get(uuid=request.POST.get('user_id'))
+            new_user = False
             if request.user.is_staff and not user.staff:
                 user.staff = True
                 user.save()
             if not user.user_agent:
                 user.user_agent = request.META['HTTP_USER_AGENT']
         except ValidationError:
+            print("Invalid user ID")
             user = UserCookie.objects.create(staff=request.user.is_staff, user_agent=request.META['HTTP_USER_AGENT'])
-            response_content = {
-                'new_user': True,
-                'accepted_cookies': user.accepted_cookies,
-                'show_subscription': user.should_request_subscription
-            }
+            new_user = True
 
     if 'session_id' in request.session:
         session, _ = Session.objects.get_or_create(session_id=request.session['session_id'], user=user)
@@ -64,7 +56,8 @@ def view(request):
         session = Session.objects.create(user=user)
         request.session['session_id'] = str(session.session_id)
 
-    if user.should_request_subscription:
+    show_subscription = user.should_request_subscription
+    if show_subscription:
         user.last_subscription_request = timezone.now()
         user.sub_dismissal_count += 1
         user.save()
@@ -74,9 +67,14 @@ def view(request):
     page_view.duration = datetime.timedelta(milliseconds=int(request.POST.get('interval')) / 2)
     page_view.referer = request.META['HTTP_REFERER']
 
-    response_content = response_content | {'pageview': page_view.uuid}
+    response_content = {
+        'new_user': new_user,
+        'accepted_cookies': user.accepted_cookies,
+        'show_subscription': show_subscription,
+        'user_id': user.uuid,
+        'pageview': page_view.uuid,
+    }
     response = JsonResponse(response_content)
-    response.set_cookie('userID', user.uuid, samesite='Lax')
 
     client_ip, is_routable = get_client_ip(request)
     if client_ip is not None:
@@ -86,9 +84,10 @@ def view(request):
     return response
 
 
+@csrf_exempt
 def accept_cookies(request):
-    if 'userID' in request.COOKIES:
-        user = UserCookie.objects.get(uuid=request.COOKIES['userID'])
+    if 'user_id' in request.POST:
+        user = UserCookie.objects.get(uuid=request.POST.get('user_id'))
         user.accepted_cookies = True
         user.save()
 
@@ -97,14 +96,16 @@ def accept_cookies(request):
         return JsonResponse({'success': False})
 
 
+@csrf_exempt
 def assign_email(request):
-    user = UserCookie.objects.get(uuid=request.COOKIES['userID'])
+    user = UserCookie.objects.get(uuid=request.POST.get('user_id'))
     email = request.POST.get('email')
     user.email = email
 
     return JsonResponse({'success': True})
 
 
+@csrf_exempt
 def heartbeat(request):
     if 'pageview' in request.POST:
         page_view = PageView.objects.get(uuid=request.POST.get('pageview'))
@@ -119,20 +120,25 @@ def heartbeat(request):
         return JsonResponse({'success': False})
 
 
+@csrf_exempt
 def close_view(request):
-    user = UserCookie.objects.get(uuid=request.COOKIES['userID'])
-    session = Session.objects.get(session_id=request.session['session_id'], user=user)
-    page = Page.objects.get(path=request.POST.get('path'))
+    if 'pageview' in request.POST and 'user_id' in request.POST:
+        user = UserCookie.objects.get(uuid=request.POST.get('user_id'))
+        # session = Session.objects.get(session_id=request.session['session_id'], user=user)
+        # page = Page.objects.get(path=request.POST.get('path'))
 
-    page_view = PageView.objects.get(uuid=request.POST.get('pageview'))
-    page_view.duration = timezone.now() - page_view.time
-    page_view.time_visible += datetime.timedelta(milliseconds=float(request.POST.get('time_visible')))
-    page_view.complete = True
-    page_view.save()
+        page_view = PageView.objects.get(uuid=request.POST.get('pageview'))
+        page_view.duration = timezone.now() - page_view.time
+        page_view.time_visible += datetime.timedelta(milliseconds=float(request.POST.get('time_visible')))
+        page_view.complete = True
+        page_view.save()
 
-    return JsonResponse({'success': True})
+        return JsonResponse({'success': True})
+    else:
+        return JsonResponse({'success': False})
 
 
+@csrf_exempt
 def mouse_action(request):
     if 'pageview' in request.POST:
         page_view = PageView.objects.get(uuid=request.POST.get('pageview'))
@@ -147,6 +153,7 @@ def mouse_action(request):
         return JsonResponse({'success': False})
 
 
+@csrf_exempt
 def subscribe(request, return_path: str = None):
     form = SubscriptionForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
@@ -158,9 +165,9 @@ def subscribe(request, return_path: str = None):
             subscription = SubscriptionSubmission.objects.get(email_address=form.cleaned_data['email'])
             messages.add_message(request, messages.SUCCESS, 'Successfully subscribed')
 
-            user_cookie = UserCookie.objects.get(uuid=request.COOKIES['userID'])
-            user_cookie.subscription = subscription
-            user_cookie.save()
+            user = UserCookie.objects.get(uuid=request.POST.get('user_id'))
+            user.subscription = subscription
+            user.save()
     else:
         errors = "; ".join([f'{field}: {", ".join(errors)}' for field, errors in form.errors.items()])
         messages.add_message(request, messages.WARNING, f'Invalid attempt to subscribe: {errors}')

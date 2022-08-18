@@ -14,7 +14,6 @@ def crop_to_ar(image: Image, ar: float) -> Image:
 
     original_ar = old_width / old_height
 
-    print(original_ar, ar)
     if ar > original_ar:
         crop_height = int(old_width / ar)
         crop_width = old_width

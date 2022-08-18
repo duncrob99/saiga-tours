@@ -47,18 +47,18 @@
 
 <script>
     document.getElementById('cookie-banner-button').addEventListener('click', () => {
-        let cookie = document.cookie;
-        let csrfToken = cookie.substring(cookie.indexOf('csrftoken=') + 'csrftoken='.length).split(';')[0];
-
         document.getElementById('cookie-banner').classList.add('hidden');
         $.ajax({
             type: "POST",
             url: "{% url 'accept-cookies' %}",
+            data: {
+                'user_id': localStorage.getItem('user_id')
+            },
+            success: function (data) {
+                console.log(data);
+            },
             error: () => {
                 console.log("Failed at accepting cookies");
-            },
-            headers: {
-                'X-CSRFToken': csrfToken
             }
         });
     });

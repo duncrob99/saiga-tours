@@ -6,7 +6,14 @@
 <script>
     (function () {
         let cookie = document.cookie;
-        let csrfToken = cookie.substring(cookie.indexOf('csrftoken=') + 'csrftoken='.length).split(';')[0];
+        // Transfer user id from cookie to localStorage if it exists
+        if (cookie.indexOf('userID=') > -1) {
+            console.log("Migrating cookie to local storage");
+            let user_id = cookie.split('userID=')[1].split(';')[0];
+            localStorage.setItem('user_id', user_id);
+        }
+        document.cookie = 'userID=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+        let userId = localStorage.getItem('user_id');
         let reportInterval = 5000;
 
         let time_visible = 0;
@@ -21,9 +28,12 @@
             data: {
                 'path': window.location.pathname,
                 'interval': reportInterval,
-                'referer': "{{ request.META.HTTP_REFERER }}"
+                'referer': "{{ request.META.HTTP_REFERER }}",
+                'user_id': userId
             },
             success: data => {
+                localStorage.setItem('user_id', data.user_id);
+                userId = data.user_id;
                 console.log('success data: ', data);
 
                 Visibility.change((ev, state) => {
@@ -57,7 +67,8 @@
                             'path': window.location.pathname,
                             'interval': reportInterval,
                             'time_visible': time_visible,
-                            'pageview': view_id
+                            'pageview': view_id,
+                            'user_id': userId
                         },
                         success: function (data) {
                             if (data.success) {
@@ -66,9 +77,6 @@
                         },
                         error: () => {
                             console.log("You're not being tracked anymore");
-                        },
-                        headers: {
-                            'X-CSRFToken': csrfToken
                         }
                     })
                 }, reportInterval)
@@ -84,16 +92,14 @@
                         data: {
                             'path': window.location.pathname,
                             'time_visible': time_visible,
-                            'pageview': view_id
+                            'pageview': view_id,
+                            'user_id': userId
                         },
                         success: function () {
                             console.log("You're still being tracked");
                         },
                         error: () => {
                             console.log("You're not being tracked anymore");
-                        },
-                        headers: {
-                            'X-CSRFToken': csrfToken
                         }
                     })
                 })
@@ -111,14 +117,12 @@
                                     'path': window.location.pathname,
                                     'x': ev.x,
                                     'y': ev.y,
-                                    'pageview': view_id
+                                    'pageview': view_id,
+                                    'user_id': userId
                                 },
                                 success: function () {
                                 },
                                 error: () => {
-                                },
-                                headers: {
-                                    'X-CSRFToken': csrfToken
                                 }
                             })
                         }
@@ -135,14 +139,12 @@
                                 'x': ev.x,
                                 'y': ev.y,
                                 'clicked': ev.button,
-                                'pageview': view_id
+                                'pageview': view_id,
+                                'user_id': userId
                             },
                             success: function () {
                             },
                             error: () => {
-                            },
-                            headers: {
-                                'X-CSRFToken': csrfToken
                             }
                         })
                     }
@@ -150,9 +152,6 @@
             },
             error: () => {
                 console.log("You're not being tracked");
-            },
-            headers: {
-                'X-CSRFToken': csrfToken
             }
         })
 

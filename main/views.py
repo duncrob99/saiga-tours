@@ -449,7 +449,6 @@ def article_list(request, type, title):
         article_ngrams = ngram.NGram(articles, key=lambda article: ' '.join(
             (article.title.lower(), article.keywords.lower(), article.tag_list().lower())), N=4, warp=2)
         search_results = article_ngrams.search(query.lower())
-        print(search_results)
         articles = [result[0] for result in sorted(search_results, key=lambda result: result[1], reverse=True)]
 
     paginator = Paginator(articles, Settings.load().articles_per_page)
