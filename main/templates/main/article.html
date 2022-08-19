@@ -18,6 +18,23 @@
         </style>
         <link href="{% static 'css/header-banner.css' %}" rel="stylesheet">
     {% endif %}
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "author": {
+            "@type": "Person",
+            "name": "{{ article.author }}",
+            "url": "https://www.saigatours.com/{% if article.type == 'n' %}news{% else %}blog{% endif %}/?author={{ article.author }}"
+        },
+        "headline": "{{ article.title }}",
+        "image": [
+            "{{ article.card_img.url }}"
+        ],
+        "datePublished": "{{ article.published_date }}",
+    }
+    </script>
 {% endblock %}
 
 {% block js %}

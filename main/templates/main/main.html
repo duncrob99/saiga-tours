@@ -101,12 +101,23 @@
     <meta property="og:description" content="{{ meta.description }}">
     <meta property="og:site_name" content="SAIGA Tours">
     <meta name="og:image:alt" content="Image for '{{ meta.title }}'">
+    <meta name="description" content="{{ meta.description }}">
 
     {% if request.user.is_staff %}
         <script>
             var CKEDITOR_BASEPATH = '/static/js/ckeditor/';
         </script>
     {% endif %}
+
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            "name": "SAIGA Tours",
+            "url": "https://saigatours.com",
+            "logo": {{ settings.logo.url }},
+        }
+    </script>
 
     {% block extrahead %}
     {% endblock %}
