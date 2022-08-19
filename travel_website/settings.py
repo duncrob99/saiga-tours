@@ -9,8 +9,9 @@ https://docs.djangoproject.com/en/3.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
-
+import re
 from pathlib import Path
+from random import random
 
 import environ
 import sentry_sdk
@@ -88,7 +89,8 @@ INSTALLED_APPS = [
     'colorfield',
     'analytics',
     'django.contrib.sitemaps',
-    'django.contrib.sites'
+    'django.contrib.sites',
+    'silk'
 ]
 
 SITE_ID = 1
@@ -97,6 +99,7 @@ SITE_ID = 1
 MIDDLEWARE = [
     'django.middleware.common.BrokenLinkEmailsMiddleware',
     'django.middleware.gzip.GZipMiddleware',
+    'silk.middleware.SilkyMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -108,6 +111,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'simple_history.middleware.HistoryRequestMiddleware',
     # 'travel_website.middleware.StatsMiddleware'
+    'main.middleware.CacheForUsers'
 ]
 
 ROOT_URLCONF = 'travel_website.urls'
@@ -242,3 +246,32 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 SESSION_COOKIE_SECURE = True
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 SESSION_COOKIE_AGE = 60 * 60 * 24 * 365 * 1000  # 1000 years
+
+
+SILKY_IGNORE_PATHS = [
+    r'^/admin/',
+    r'^/static/',
+    r'^/stats/',
+]
+
+
+def should_intercept(request):
+    # Don't intercept if path is in the list of ignored paths
+    for ignored_path in SILKY_IGNORE_PATHS:
+        if re.match(ignored_path, request.path):
+            return False
+
+    if DEBUG:
+        return True
+    else:
+        return random() < 0.1
+
+
+SILKY_PYTHON_PROFILER = True
+SILKY_PYTHON_PROFILER_BINARY = True
+SILKY_META = True
+SILKY_MAX_RECORDED_REQUESTS = 100000
+SILKY_MAX_RECORDED_REQUESTS_CHECK_PERCENT = 10
+SILKY_AUTHENTICATION = True
+SILKY_AUTHORISATION = True
+SILKY_INTERCEPT_FUNC = should_intercept

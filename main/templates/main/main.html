@@ -115,7 +115,8 @@
 {#<body style="background-image: url('{% static "images/background_a.jpg" %}');">#}
 {% include 'main/navbar.html' %}
 
-{% bootstrap_messages %}
+<div id="messages-container"></div>
+
 {% block banner %}
 {% endblock %}
 <div class="container p-3 p-sm-5" id="content-container">

@@ -48,7 +48,8 @@ urlpatterns = [
              'destinationguides': DestinationGuidesMap,
              'static': StaticPagesMap
          }},
-         name='django.contrib.sitemaps.views.sitemap')
+         name='django.contrib.sitemaps.views.sitemap'),
+    path('silk/', include('silk.urls', namespace='silk')),
 ]
 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

@@ -137,6 +137,9 @@
                            type="text" class="form-control" placeholder="Your Name">
                     <input id="{{ subscription_form.email.id_for_label }}" name="{{ subscription_form.email.name }}"
                            type="text" class="form-control" placeholder="Your Email">
+                    <input id="{{ subscription_form.id.id_for_label }}"
+                           name="{{ subscription_form.id.name }}"
+                           type="text" class="form-control" hidden>
                 </div>
                 <button class="btn btn-primary accent hoverable-accent" type="submit" role="button">Subscribe
                 </button>

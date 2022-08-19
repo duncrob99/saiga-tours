@@ -37,6 +37,8 @@ urlpatterns = [
     path('create/itinerary_template/', views.create_itinerary_template, name='create-itinerary-template'),
 
     path('gen_500/', views.gen_500, name='gen-500'),
+    path('messages/', views.return_messages, name='messages'),
+    path('purge_cache/', views.purge_cache, name='purge-cache'),
 
     path('robots.txt', TemplateView.as_view(template_name='main/robots.txt', content_type='text/plain'), name='robots'),
 

@@ -161,14 +161,14 @@ def subscribe(request, return_path: str = None):
         try:
             subscription = SubscriptionSubmission.objects.create(email_address=form.cleaned_data['email'],
                                                                  name=form.cleaned_data['name'])
-            messages.add_message(request, messages.SUCCESS, 'Successfully subscribed')
-        except IntegrityError:
-            subscription = SubscriptionSubmission.objects.get(email_address=form.cleaned_data['email'])
-            messages.add_message(request, messages.SUCCESS, 'Successfully subscribed')
-
-            user = UserCookie.objects.get(uuid=request.POST.get('user_id'))
+            id = form.cleaned_data['id']
+            user = UserCookie.objects.get(uuid=id)
             user.subscription = subscription
             user.save()
+        except IntegrityError:  # Email already exists
+            pass
+        messages.add_message(request, messages.SUCCESS, 'Successfully subscribed')
+
     else:
         errors = "; ".join([f'{field}: {", ".join(errors)}' for field, errors in form.errors.items()])
         messages.add_message(request, messages.WARNING, f'Invalid attempt to subscribe: {errors}')

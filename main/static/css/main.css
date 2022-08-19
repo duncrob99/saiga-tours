@@ -287,3 +287,15 @@ body * {
 .text-muted {
     letter-spacing: -5px;
 }
+
+#messages-container {
+    position: sticky;
+    --alert-margin: 5px;
+    top: calc(var(--navbar-height) + var(--alert-margin) + 1px);
+    z-index: 9999;
+}
+
+#messages-container .alert {
+    margin: var(--alert-margin);
+    opacity: 0.9;
+}

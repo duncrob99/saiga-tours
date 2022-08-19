@@ -38,7 +38,10 @@ def clean_html(html: str):
             img['data-cke-saved-src'] = img['data-cke-saved-src'].replace('/resized-image/', '/media/')
             img['data-cke-saved-src'] = '/'.join(img['data-cke-saved-src'].split('/')[:-2])
 
-    return soup.prettify()
+    print('soupstr: ', soup.str())
+    return soup.prettify().replace(
+        '<span style="background-color:rgba(220,220,220,0.5)"><img src="data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==" style="height:15px; width:15px" title="Click and drag to move"></span>',
+        '')
 
 
 def is_html_clean(html: str):
@@ -48,7 +51,11 @@ def is_html_clean(html: str):
 
     not_resized = [not img.startswith('/resized-image/') for img in img_srcs]
 
-    if all(not_resized):
+    print('soupstr: ', soup.str())
+    has_drag_img = soup.prettify().find(
+        '<span style="background-color:rgba(220,220,220,0.5)"><img src="data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==" style="height:15px; width:15px" title="Click and drag to move"></span>') != -1
+
+    if all(not_resized) and not has_drag_img:
         return True
     else:
         return False
@@ -69,10 +76,12 @@ def RichTextWithPlugins(*args, **kwargs):
     stack = inspect.stack()[1]
     model_name = inspect.getmodule(stack[0]).__name__.split('.')[0] + '.' + stack.function
 
-    @receiver(post_save, sender=model_name)
+    # @receiver(post_save, sender=model_name)
     def clean_field_input(sender, instance: models.Model, **kwargs):
+        print('cleaning')
         field_name = field.name
         content = getattr(instance, field_name)
+        print('content: ', content)
         if not is_html_clean(content):
             setattr(instance, field_name, clean_html(content))
             instance.save()
@@ -130,6 +139,9 @@ class Region(DraftHistory):
     display_tours = models.BooleanField(default=True)
     display_guides = models.BooleanField(default=True)
 
+    def get_caches_to_invalidate(self, previous):
+        return 'all'
+
     def save(self, *args, **kwargs):
         super(Region, self).save(*args, **kwargs)
         if not settings.PRODUCTION:
@@ -166,6 +178,9 @@ class Destination(DraftHistory):
     guide_banner = models.ImageField(null=True, blank=True)
     guide_banner_x = models.FloatField(default=50)
     guide_banner_y = models.FloatField(default=50)
+
+    def get_caches_to_invalidate(self, previous):
+        return 'all'
 
     def __str__(self):
         return self.name
@@ -204,6 +219,9 @@ class DestinationDetails(DraftHistory):
     banner_x = models.FloatField(default=50)
     banner_y = models.FloatField(default=50)
 
+    def get_caches_to_invalidate(self, previous):
+        return 'all'
+
     def save(self, *args, **kwargs):
         super(DestinationDetails, self).save(*args, **kwargs)
         if not settings.PRODUCTION:
@@ -236,6 +254,16 @@ class State(models.Model):
                                                                     '-1 below no priority, etc. Equal '
                                                                     'priorities will be sorted as per usual.')
     history = HistoricalRecords()
+
+    def get_caches_to_invalidate(self, previous):
+        changed_destinations = Destination.objects.filter(tours__state=self)
+        changed_regions = Region.objects.filter(destinations__in=changed_destinations)
+        changed_details = DestinationDetails.objects.filter(linked_tours__state=self)
+        destination_paths = [reverse('tours', args=[d.region.slug, d.slug]) for d in changed_destinations]
+        region_paths = [reverse('tours', args=[region.slug]) for region in changed_regions]
+        detail_paths = [reverse('tours', args=[d.destination.region.slug, d.destination.slug, d.slug]) for d in changed_details]
+        tours_path = reverse('tours')
+        return destination_paths + region_paths + detail_paths + [tours_path]
 
     def __str__(self):
         return self.text
@@ -271,6 +299,16 @@ class Tour(DraftHistory):
     end_location = models.CharField(max_length=100, null=True, blank=True)
 
     last_modified = models.DateTimeField(auto_now=True, null=True)
+
+    def get_caches_to_invalidate(self, previous):
+        changed_destinations = Destination.objects.filter(tours=self)
+        changed_regions = Region.objects.filter(destinations__in=changed_destinations)
+        changed_details = DestinationDetails.objects.filter(linked_tours=self)
+        destination_paths = [reverse('tours', args=[d.region.slug, d.slug]) for d in changed_destinations]
+        region_paths = [reverse('tours', args=[region.slug]) for region in changed_regions]
+        detail_paths = [reverse('tours', args=[d.destination.region.slug, d.destination.slug, d.slug]) for d in changed_details]
+        tours_path = reverse('tours')
+        return destination_paths + region_paths + detail_paths + [tours_path, self.get_absolute_url()]
 
     @property
     def dated(self):
@@ -321,6 +359,10 @@ class ItineraryTemplate(models.Model):
     body = RichTextWithPlugins()
     history = HistoricalRecords()
 
+    def get_caches_to_invalidate(self, previous):
+        instances = self.itineraryday_set.all()
+        return [reverse('tour', args=[instance.tour.slug]) for instance in instances]
+
     def __str__(self):
         return self.title
 
@@ -332,6 +374,9 @@ class ItineraryDay(models.Model):
     body = RichTextWithPlugins(null=True, blank=True)
     history = HistoricalRecords()
     template = models.ForeignKey(ItineraryTemplate, on_delete=models.SET_NULL, null=True, blank=True)
+
+    def get_caches_to_invalidate(self, previous):
+        return [reverse('tour', args=[self.tour.slug])]
 
     class Meta:
         unique_together = [['tour', 'day']]
@@ -373,6 +418,10 @@ class Author(DraftHistory):
     picture = models.ImageField()
     blurb = RichTextWithPlugins(config_name='default')
 
+    def get_caches_to_invalidate(self, previous):
+        articles = self.article_set.all()
+        return [reverse('article', args=[article.slug]) for article in articles]
+
     def __str__(self):
         return self.name
 
@@ -400,6 +449,9 @@ class Article(DraftHistory):
     banner_img = models.ImageField(null=True, blank=True)
     banner_x = models.FloatField(null=True, blank=True)
     banner_y = models.FloatField(null=True, blank=True)
+
+    def get_caches_to_invalidate(self, previous):
+        return [self.get_absolute_url(), reverse('news') if self.type == self.NEWS else reverse('blog')]
 
     @property
     def date(self):
@@ -445,6 +497,14 @@ class Page(DraftHistory):
     banner_pos_y = models.FloatField(null=True, blank=True)
 
     last_mod = models.DateTimeField(auto_now=True, null=True)
+
+    def get_caches_to_invalidate(self, previous):
+        if self.in_navbar:
+            return "all"
+        elif self.front_page_pos is not None:
+            return [reverse('front-page'), self.get_absolute_url()]
+        else:
+            return [self.get_absolute_url()]
 
     def __str__(self):
         return self.title
@@ -554,6 +614,9 @@ class Settings(models.Model):
 
     history = HistoricalRecords(excluded_fields=('active',))
 
+    def get_caches_to_invalidate(self, previous):
+        return "all"
+
     def save(self, *args, **kwargs):
         print(self.logo.url)
         if not self.pk:
@@ -592,6 +655,9 @@ class ContactSubmission(models.Model):
     time = models.DateTimeField(auto_now_add=True)
     success = models.BooleanField(default=True)
 
+    def get_caches_to_invalidate(self, previous):
+        return []
+
     def __str__(self):
         return f'"{self.subject}" from {self.from_email}'
 
@@ -610,6 +676,9 @@ class BannerPhoto(models.Model):
     active = models.BooleanField(default=True)
     history = HistoricalRecords(excluded_fields=('active',))
 
+    def get_caches_to_invalidate(self, previous):
+        return [reverse("front-page")]
+
     def __str__(self):
         return self.img.name
 
@@ -618,6 +687,13 @@ class PositionTemplate(models.Model):
     x = models.FloatField(null=True, blank=True)
     y = models.FloatField(null=True, blank=True)
     name = models.CharField(max_length=100, unique=True)
+
+    def get_caches_to_invalidate(self, previous):
+        tours = Tour.objects.filter(stops__template=self).distinct()
+        tour_paths = [reverse("tour", args=[tour.slug]) for tour in tours]
+        regions = Region.objects.all()
+        region_paths = [reverse("tours", args=[region.slug]) for region in regions]
+        return tour_paths + region_paths + [reverse("front-page"), reverse("destinations")]
 
     def __str__(self):
         return self.name
@@ -638,6 +714,9 @@ class Stop(models.Model):
     poststrength = models.FloatField(default=1)
     template = models.ForeignKey(PositionTemplate, on_delete=models.SET_NULL, null=True, blank=True)
 
+    def get_caches_to_invalidate(self, previous):
+        return [reverse("tour", args=[self.tour.slug])]
+
     def __str__(self):
         return f'Stop {self.name} in {self.tour}'
 
@@ -652,6 +731,10 @@ class MapPoint(models.Model):
     activation_radius = models.FloatField(default=1)
     size = models.FloatField(default=1)
     template = models.ForeignKey(PositionTemplate, on_delete=models.SET_NULL, null=True, blank=True)
+
+    def get_caches_to_invalidate(self, previous):
+        region_tours = [reverse("tours", args=[region.slug]) for region in Region.objects.all()]
+        return [reverse("front-page"), reverse("destinations")] + region_tours
 
     def __str__(self):
         return self.name
@@ -702,6 +785,9 @@ class HightlightBox(DraftHistory):
     row = models.PositiveSmallIntegerField(default=1)
     col = models.PositiveSmallIntegerField(default=1)
 
+    def get_caches_to_invalidate(self, previous):
+        return [reverse("front-page")]
+
     def __str__(self):
         return self.title
 
@@ -711,8 +797,39 @@ class FileUpload(models.Model):
     file = models.FileField()
     slug = models.SlugField(unique=True)
 
+    def get_caches_to_invalidate(self, previous):
+        tours = self.tour_set.all()
+        tour_paths = [reverse("tour", args=[tour.slug]) for tour in tours]
+        return [self.get_absolute_url()] + tour_paths
+
     def __str__(self):
         return self.name
 
     def get_absolute_url(self):
         return reverse('view-doc', args=[self.slug])
+
+
+class PageCache(models.Model):
+    url = models.URLField()
+    content = models.TextField()
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['url'], name='url_idx'),
+        ]
+
+
+# Invalidate pagecache on model save
+def invalidate_page_cache(sender, instance, **kwargs):
+    pages_to_invalidate = instance.get_caches_to_invalidate(sender.objects.get(pk=instance.pk) if instance.pk else None)
+    if pages_to_invalidate == 'all':
+        print('Invalidating all pages')
+        PageCache.objects.all().delete()
+    else:
+        print(f'Invalidating {pages_to_invalidate}')
+        for page in pages_to_invalidate:
+            try:
+                cache_entry = PageCache.objects.get(url=page)
+                cache_entry.delete()
+            except PageCache.DoesNotExist:
+                pass

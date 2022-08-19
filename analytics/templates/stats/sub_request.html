@@ -17,6 +17,10 @@
                         <input id="{{ subscription_form.email.id_for_label }}"
                                name="{{ subscription_form.email.name }}"
                                type="text" class="form-control" placeholder="Email address">
+                        <label for="{{ subscription_form.id.id_for_label }}" class="visually-hidden">User ID</label>
+                        <input id="{{ subscription_form.id.id_for_label }}"
+                               name="{{ subscription_form.id.name }}"
+                               type="text" class="form-control" hidden>
                         <button class="btn btn-primary accent hoverable-accent" type="submit" role="button">
                             Subscribe
                         </button>
@@ -33,3 +37,21 @@
         padding: 1.2rem;
     }
 </style>
+
+<script>
+    function setUserId() {
+        if (!localStorage.getItem('user_id')) {
+            console.log('No user id found, waiting longer');
+            setTimeout(setUserId, 100);
+        }
+        const userId = document.querySelectorAll('input[name="{{ subscription_form.id.name }}"]');
+        userId.forEach((input) => {
+            input.value = localStorage.getItem('user_id');
+            console.log("Setting user id to: " + input.value);
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        setUserId();
+    });
+</script>

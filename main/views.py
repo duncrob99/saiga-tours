@@ -1,22 +1,20 @@
 import enum
-import os
 from dataclasses import dataclass
 from datetime import datetime
 from functools import reduce, wraps
 from os import path
-from typing import Optional, Dict, List, Any
+from typing import Dict, List, Any
 
 import ngram
 from bs4 import BeautifulSoup
 from django.contrib import messages
 from django.core.mail import send_mail, BadHeaderError
 from django.core.paginator import Paginator
-from django.db.models import Q, QuerySet, Func
+from django.db.models import QuerySet, Func
 from django.forms import modelform_factory, inlineformset_factory, modelformset_factory
-from django.http import Http404, HttpResponseRedirect, HttpResponse, FileResponse, JsonResponse
-from django.middleware.csrf import get_token
+from django.http import Http404, HttpResponseRedirect, HttpResponse, FileResponse, JsonResponse, HttpRequest
 from django.shortcuts import render, get_object_or_404, redirect
-from minify_html import minify_html
+from silk.profiling.profiler import silk_profile
 from ua_parser import user_agent_parser
 
 from .forms import *
@@ -41,58 +39,13 @@ class FrontPageRow:
     colour_after: Optional[str] = None
 
 
-def cache_for_users(view):
-    @wraps(view)
-    def wrapper(request, *args, **kwargs):
-        if request.user.is_staff:
-            if request.method == 'POST':
-                whole_path = path.join(settings.CACHE_ROOT, request.path.removeprefix('/') + '.html')
-                os.makedirs("/".join(whole_path.split('/')[:-1]), exist_ok=True)
-                with open(whole_path, 'w') as file:
-                    request.user.is_staff = False
-                    content = view(request, *args, **kwargs).content.decode()
-                    soup = BeautifulSoup(content, features='lxml')
-                    csrf_tags = soup.find_all('input', {'name': 'csrfmiddlewaretoken'})
-                    for tag in csrf_tags:
-                        tag['value'] = '{csrfmiddlewaretoken}'
-                    content = minify_html.minify(str(soup), minify_css=True, minify_js=True)
-                    file.write(content)
-                    request.user.is_staff = True
-            response = view(request, *args, **kwargs)
-        else:
-            whole_path = path.join(settings.CACHE_ROOT, request.path.removeprefix('/') + '.html')
-            if os.path.exists(whole_path):
-                print('Caching for user')
-                csrf_token = get_token(request)
-                with open(whole_path, 'r') as file:
-                    print('open file')
-                    content = file.read()
-                    soup = BeautifulSoup(content, features='lxml')
-                    for tag in soup.find_all('input', {'name': 'csrfmiddlewaretoken'}):
-                        tag['value'] = csrf_token
-                    content = minify_html.minify(str(soup), minify_css=True, minify_js=True)
-                    print('content:')
-                    print(content)
-                    response = HttpResponse(content)
-            else:
-                print('No cache, making cache')
-                whole_path = path.join(settings.CACHE_ROOT, request.path.removeprefix('/') + '.html')
-                os.makedirs("/".join(whole_path.split('/')[:-1]), exist_ok=True)
-                with open(whole_path, 'w') as file:
-                    response = view(request, *args, **kwargs)
-                    content = response.content.decode()
-                    soup = BeautifulSoup(content)
-                    csrf_tags = soup.find_all(tag='input', attrs={'name': 'csrfmiddlewaretoken'})
-                    for tag in csrf_tags:
-                        tag['value'] = '{csrfmiddlewaretoken}'
-                    content = minify_html.minify(content, minify_css=True, minify_js=True)
-                    file.write(content)
-        return response
-
-    return wrapper
+def minify_html(html):
+    soup = BeautifulSoup(html, 'html.parser')
+    return str(soup)
 
 
 # Create your views here.
+@silk_profile(name='Home Page')
 def front_page(request):
     settings = Settings.load()
 
@@ -657,7 +610,8 @@ def browser_supports_webp(request):
     try:
         ua_info = user_agent_parser.Parse(request.META.get('HTTP_USER_AGENT'))
         if ua_info['os']['family'] == 'Mac OS X' and ua_info['user_agent']['family'] == 'Safari':
-            if int(ua_info['os']['major']) < 11 and int(ua_info['user_agent']['major']) < 16 or int(ua_info['user_agent']['major']) < 14:
+            if int(ua_info['os']['major']) < 11 and int(ua_info['user_agent']['major']) < 16 or int(
+                    ua_info['user_agent']['major']) < 14:
                 return False
 
         return True
@@ -668,7 +622,7 @@ def browser_supports_webp(request):
 def crop_image(request, filename: str, width: int, height: int):
     removed_prefix = filename
     image = autorotate(Image.open(path.join(settings.MEDIA_ROOT, removed_prefix),
-                       mode='r'))
+                                  mode='r'))
 
     cropped_image = crop_to_dims(image, width, height)
 
@@ -770,6 +724,24 @@ def gen_500(request):
         return error_404(request, '')
 
 
+def return_messages(request: HttpRequest) -> JsonResponse:
+    # Getting the messages from the django message framework
+    msgs = messages.get_messages(request)
+    # Converting the messages to a list of dictionaries
+    level_strings = {
+        messages.DEBUG: 'secondary',
+        messages.INFO: 'info',
+        messages.SUCCESS: 'success',
+        messages.WARNING: 'warning',
+        messages.ERROR: 'danger'
+    }
+    msgs = [{'level': level_strings[msg.level], 'message': msg.message} for msg in msgs]
+    # Returning the messages as a JsonResponse
+    print("messages: ", msgs)
+    response = JsonResponse({'messages': msgs})
+    return response
+
+
 def copy_map(request):
     if request.user.is_staff and request.method == 'POST':
         try:
@@ -785,6 +757,17 @@ def copy_map(request):
             copy_to.map_scale = copy_from.map_scale
             copy_to.save()
 
+            return JsonResponse({'success': True})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': e})
+    else:
+        return Http404
+
+
+def purge_cache(request):
+    if request.user.is_staff:
+        try:
+            PageCache.objects.all().delete()
             return JsonResponse({'success': True})
         except Exception as e:
             return JsonResponse({'success': False, 'error': e})

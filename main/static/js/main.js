@@ -49,7 +49,7 @@ function minimise_images() {
                 entry.target.setAttribute('observing-intersection', 'false');
             }
         });
-    }, { threshold: [0], rootMargin: '200%', root: document.body });
+    }, {threshold: [0], rootMargin: '200%', root: document.body});
     let banner_observer = new IntersectionObserver(entries => {
         entries.forEach(entry => {
             if (entry.intersectionRatio > 0) {
@@ -58,7 +58,7 @@ function minimise_images() {
                 entry.target.setAttribute('observing-intersection', 'false');
             }
         });
-    }, { threshold: [0], rootMargin: '20%', root: document.body });
+    }, {threshold: [0], rootMargin: '20%', root: document.body});
     images.forEach(img => {
         if (img.hasAttribute('data-no-minimise')) return;
         if (img.classList.contains('banner-img')) {
@@ -97,18 +97,17 @@ function storageAvailable(type) {
         storage.setItem(x, x);
         storage.removeItem(x);
         return true;
-    }
-    catch(e) {
+    } catch (e) {
         return e instanceof DOMException && (
-            // everything except Firefox
-            e.code === 22 ||
-            // Firefox
-            e.code === 1014 ||
-            // test name field too, because code might not be present
-            // everything except Firefox
-            e.name === 'QuotaExceededError' ||
-            // Firefox
-            e.name === 'NS_ERROR_DOM_QUOTA_REACHED') &&
+                // everything except Firefox
+                e.code === 22 ||
+                // Firefox
+                e.code === 1014 ||
+                // test name field too, because code might not be present
+                // everything except Firefox
+                e.name === 'QuotaExceededError' ||
+                // Firefox
+                e.name === 'NS_ERROR_DOM_QUOTA_REACHED') &&
             // acknowledge QuotaExceededError only if there's something already stored
             (storage && storage.length !== 0);
     }
@@ -117,6 +116,7 @@ function storageAvailable(type) {
 if (storageAvailable('sessionStorage')) {
     let left_name = `scroll-left-${window.location.pathname}`;
     let top_name = `scroll-top-${window.location.pathname}`;
+
     function storeScroll() {
         sessionStorage.setItem(top_name, document.body.scrollTop.toString());
         sessionStorage.setItem(left_name, document.body.scrollLeft.toString());
@@ -137,3 +137,31 @@ if (storageAvailable('sessionStorage')) {
         storeScroll();
     }
 }
+
+(function () {
+    let message_container = document.getElementById('messages-container');
+    const alert = (message, type) => {
+        const wrapper = document.createElement('div')
+        wrapper.innerHTML = [
+            `<div class="alert alert-${type.toLowerCase()} alert-dismissible" role="alert">`,
+            `   <div>${message}</div>`,
+            '   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>',
+            '</div>'
+        ].join('')
+
+        message_container.append(wrapper)
+    }
+
+
+    // Fetch messages from the server
+    fetch('/messages/').then(response => response.json()).then(data => {
+        console.log("Data: ", data);
+        let messages = data.messages;
+        let message_html = '';
+        if (messages.length > 0) {
+            messages.forEach(message => {
+                alert(message.message, message.level);
+            });
+        }
+    });
+})();
