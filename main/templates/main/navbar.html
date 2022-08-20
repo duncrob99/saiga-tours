@@ -5,8 +5,8 @@
 <nav class="navbar sticky-top navbar-expand-xl navbar-light py-0">
     <div class="container px-5">
         <div class="navbar-brand">
-            <a class="navbar-brand" href="{% url 'front-page' %}">
-                <img class="logo" full-size-src="{{ settings.logo.url }}">
+            <a aria-label="homepage" class="navbar-brand" href="{% url 'front-page' %}">
+                <img alt="SAIGA logo" class="logo" full-size-src="{{ settings.logo.url }}">
                 {#                {{ settings.site_title }}#}
             </a>
         </div>

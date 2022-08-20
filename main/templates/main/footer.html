@@ -154,15 +154,15 @@
                     <img alt="logo" data-filename="{{ settings.logo.url }}" class="logo">
                     <ul class="list-unstyled d-flex">
                         {% if settings.twitter_link %}
-                            <li class="ms-3"><a href="{{ settings.twitter_link }}"><i
+                            <li class="ms-3"><a aria-label="twitter" href="{{ settings.twitter_link }}"><i
                                     class="bi bi-twitter"></i></a></li>
                         {% endif %}
                         {% if settings.instagram_link %}
-                            <li class="ms-3"><a href="{{ settings.instagram_link }}"><i
+                            <li class="ms-3"><a aria-label="instagram" href="{{ settings.instagram_link }}"><i
                                     class="bi bi-instagram"></i></a></li>
                         {% endif %}
                         {% if settings.facebook_link %}
-                            <li class="ms-3"><a href="{{ settings.facebook_link }}"><i
+                            <li class="ms-3"><a aria-label="facebook" href="{{ settings.facebook_link }}"><i
                                     class="bi bi-facebook"></i></a></li>
                         {% endif %}
                     </ul>

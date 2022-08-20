@@ -41,7 +41,7 @@
             }
         },
         image: "{{ tour.card_img.url }}",
-        description: "{{ tour.description|striptags|truncatechars:200 }}",
+        description: "{{ tour.excerpt|striptags|truncatechars:200 }}",
         offers: {
             @type: "Offer",
             price: "{{ tour.price }}",

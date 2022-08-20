@@ -78,7 +78,7 @@
                         {% endif %}
                     </div>
                 </div>
-                <a class="stretched-link"
+                <a class="stretched-link" aria-label="View {{ tour.name }}"
                    href="{% url 'tour' tour.slug %}{% if parent %}?parent={{ parent }}{% endif %}"></a>
             </div>
         </div>

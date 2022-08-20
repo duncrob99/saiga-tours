@@ -1,3 +1,4 @@
+import re
 from functools import wraps
 
 from bs4 import BeautifulSoup
@@ -16,7 +17,14 @@ class CacheForUsers:
         self.get_response = get_response
 
     def __call__(self, request):
-        if request.method == 'GET' and not request.user.is_authenticated:
+        bypass_urls = [
+            r'^/admin/',
+            r'^/static/',
+            r'^/stats/',
+        ]
+
+        if request.method == 'GET' and not request.user.is_authenticated and not any(
+                re.match(ignored_path, request.path) for ignored_path in bypass_urls):
             # Retrieve response from PageCache if it exists, otherwise store response
             try:
                 try:
