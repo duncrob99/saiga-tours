@@ -12,11 +12,13 @@ function minimise_image(img) {
     let width = Math.ceil(parseInt(getComputedStyle(img).width) * window.devicePixelRatio);
     let height = img.id === 'header-banner' ? '0' : Math.ceil(parseInt(getComputedStyle(img).height) * window.devicePixelRatio);
 
+    if (isNaN(width) || isNaN(height)) return;
+
     // Only increase the size of the image
-    if (img.hasAttribute('loaded-width')) {
+    if (img.hasAttribute('loaded-width') && !isNaN(parseInt(img.getAttribute('loaded-width')))) {
         width = Math.max(width, parseInt(img.getAttribute('loaded-width')));
     }
-    if (img.hasAttribute('loaded-height')) {
+    if (img.hasAttribute('loaded-height') && !isNaN(parseInt(img.getAttribute('loaded-height')))) {
         height = Math.max(height, parseInt(img.getAttribute('loaded-height')));
     }
     img.setAttribute('loaded-width', width);
