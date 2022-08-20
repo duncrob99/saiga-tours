@@ -4,8 +4,8 @@
     box-shadow: 5px 5px 10px darkgrey;
 }
 
-.article-card p.card-text {
-    min-height: 5em;
+.article-card .card-body {
+    min-height: 10em;
 }
 
 .card img {
