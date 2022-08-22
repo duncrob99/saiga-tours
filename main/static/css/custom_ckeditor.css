@@ -179,3 +179,8 @@ img.angle-right {
 div.split-section div.hidden {
     display: none !important;
 }
+
+.split-section {
+    margin-bottom: 3vw;
+    margin-top: 3vw;
+}

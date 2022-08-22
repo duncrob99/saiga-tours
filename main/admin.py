@@ -144,6 +144,11 @@ class FileUploadAdmin(admin.ModelAdmin):
     view_document.short_description = u"File"
 
 
+class TestimonialAdmin(admin.ModelAdmin):
+    list_display = ('name', 'added', 'approved')
+    list_editable = ('approved',)
+
+
 # Register your models here.
 admin.site.register(Destination, DestinationAdmin)
 admin.site.register(DestinationDetails, DestinationDetailsAdmin)
@@ -164,3 +169,4 @@ admin.site.register(ItineraryTemplate)
 admin.site.register(Author, DiffHistoryAdmin)
 admin.site.register(HightlightBox, DiffHistoryAdmin)
 admin.site.register(FileUpload, FileUploadAdmin)
+admin.site.register(Testimonial, TestimonialAdmin)

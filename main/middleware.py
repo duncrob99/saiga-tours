@@ -2,6 +2,7 @@ import re
 from functools import wraps
 
 from bs4 import BeautifulSoup
+from django.conf import settings
 from django.http import HttpResponse
 
 from main.models import PageCache
@@ -24,7 +25,7 @@ class CacheForUsers:
         ]
 
         if request.method == 'GET' and not request.user.is_authenticated and not any(
-                re.match(ignored_path, request.path) for ignored_path in bypass_urls):
+                re.match(ignored_path, request.path) for ignored_path in bypass_urls) and settings.NOCACHE is False:
             # Retrieve response from PageCache if it exists, otherwise store response
             try:
                 try:

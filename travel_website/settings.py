@@ -21,9 +21,18 @@ from .middleware import CacheControlMiddleware
 env = environ.Env(
     DEBUG=(bool, False),
     PRODUCTION=(bool, False),
-    SENTRY=(bool, True)
+    SENTRY=(bool, True),
+    CLOUDFLARE_API_TOKEN=(str, None),
+    CLOUDFLARE_ZONE_ID=(str, None),
+    CLOUDFLARE_DOMAIN=(str, None),
+    NOCACHE=(bool, False),
 )
 environ.Env.read_env()
+
+CLOUDFLARE_API_TOKEN = env('CLOUDFLARE_API_TOKEN')
+CLOUDFLARE_ZONE_ID = env('CLOUDFLARE_ZONE_ID')
+CLOUDFLARE_DOMAIN = env('CLOUDFLARE_DOMAIN')
+NOCACHE = env('NOCACHE')
 
 if env('SENTRY'):
     SENTRY_PROJECT = env('SENTRY_PROJECT')
@@ -216,7 +225,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CKEDITOR_UPLOAD_PATH = 'media/ckeditor/images'
 
 DJANGO_WYSIWYG_FLAVOR = "ckeditor"
-CKEDITOR_JQUERY_URL = 'https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js'
+# CKEDITOR_JQUERY_URL = 'https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js'
 CKEDITOR_RESTRICT_BY_USER = True  # Only who upload image see it
 CKEDITOR_BROWSE_SHOW_DIRS = True  # Shows directory of image in the server
 CKEDITOR_RESTRICT_BY_DATE = True  # Arranges image in terms of date uploaded

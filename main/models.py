@@ -1,6 +1,9 @@
+import json
 from datetime import timedelta
 from io import BytesIO
 from typing import Tuple, Optional
+
+import requests
 from bs4 import BeautifulSoup as bs
 import inspect
 
@@ -819,12 +822,30 @@ class PageCache(models.Model):
         ]
 
 
-# Invalidate pagecache on model save
-def invalidate_page_cache(sender, instance, **kwargs):
-    pages_to_invalidate = instance.get_caches_to_invalidate(sender.objects.get(pk=instance.pk) if instance.pk else None)
+def purge_cloudflare_page(path):
+    purge_url = f'https://api.cloudflare.com/client/v4/zones/{settings.CLOUDFLARE_ZONE_ID}/purge_cache'
+    headers = {
+        'Authorization': f'Bearer {settings.CLOUDFLARE_API_TOKEN}',
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+    }
+    data = {
+        'files': [f'https://{settings.CLOUDFLARE_DOMAIN}{path}']
+    }
+    print(f'Purging {path} from Cloudflare using url: {purge_url}, headers: {headers}, data: {data}')
+    response = requests.post(purge_url, headers=headers, data=json.dumps(data))
+    print(f'Cloudflare response: {response.text}')
+    if response.status_code != 200:
+        raise Exception(f'Cloudflare purge of {path} failed with status code {response.status_code} and message {response.text}')
+
+
+def invalidate_pages(pages_to_invalidate):
     if pages_to_invalidate == 'all':
         print('Invalidating all pages')
-        PageCache.objects.all().delete()
+        # Purge all on cloudflare before deleting
+        for page in PageCache.objects.all():
+            purge_cloudflare_page(page.url)
+            page.delete()
     else:
         print(f'Invalidating {pages_to_invalidate}')
         for page in pages_to_invalidate:
@@ -833,3 +854,32 @@ def invalidate_page_cache(sender, instance, **kwargs):
                 cache_entry.delete()
             except PageCache.DoesNotExist:
                 pass
+            # Also invalidate the page on Cloudflare using the REST API
+            if settings.CLOUDFLARE_API_TOKEN is not None:
+                print(f'Invalidating {page} on Cloudflare')
+                purge_cloudflare_page(page)
+
+
+# Invalidate pagecache on model save
+def invalidate_page_cache(sender, instance, **kwargs):
+    pages_to_invalidate = instance.get_caches_to_invalidate(sender.objects.get(pk=instance.pk) if instance.pk else None)
+    invalidate_pages(pages_to_invalidate)
+
+
+class Testimonial(models.Model):
+    name = models.CharField(max_length=200)
+    quote = models.TextField()
+    image = models.ImageField(upload_to='testimonials', null=True, blank=True)
+    approved = models.BooleanField(default=False)
+    added = models.DateTimeField(blank=True)
+
+    def save(self, *args, **kwargs):
+        if not self.id:
+            self.added = timezone.now()
+        super().save(*args, **kwargs)
+
+    def get_caches_to_invalidate(self, previous):
+        return [reverse("front-page")]
+
+    def __str__(self):
+        return self.name
