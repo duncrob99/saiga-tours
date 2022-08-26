@@ -765,9 +765,9 @@ def copy_map(request):
 
 
 def purge_cache(request):
-    if request.user.is_staff:
+    if request.user.is_staff or settings.DEBUG:
         try:
-            PageCache.objects.all().delete()
+            invalidate_pages('all')
             return JsonResponse({'success': True})
         except Exception as e:
             return JsonResponse({'success': False, 'error': e})

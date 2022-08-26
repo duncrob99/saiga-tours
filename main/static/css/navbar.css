@@ -181,3 +181,7 @@
 .nav-link {
     color: var(--accent-foreground);
 }
+
+.main-nav.nav-link {
+    appearance: auto;
+}

@@ -11,10 +11,6 @@
     --hover-rotation: 1;
 }
 
-div:has(.image-fan) {
-    margin: 10%;
-}
-
 .image-fan img {
     border-radius: var(--border-radius);
     box-shadow: 10px 10px 30px rgba(0, 0, 0, 0.2);
