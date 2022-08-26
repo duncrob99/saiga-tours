@@ -823,6 +823,8 @@ class PageCache(models.Model):
 
 
 def purge_cloudflare_page(path):
+    if not settings.PRODUCTION or settings.CLOUDFLARE_API_TOKEN is None:
+        return
     purge_url = f'https://api.cloudflare.com/client/v4/zones/{settings.CLOUDFLARE_ZONE_ID}/purge_cache'
     headers = {
         'Authorization': f'Bearer {settings.CLOUDFLARE_API_TOKEN}',
@@ -839,13 +841,33 @@ def purge_cloudflare_page(path):
         raise Exception(f'Cloudflare purge of {path} failed with status code {response.status_code} and message {response.text}')
 
 
+def purge_cloudflare_pages(paths):
+    if not settings.PRODUCTION or settings.CLOUDFLARE_API_TOKEN is None:
+        return
+    purge_url = f'https://api.cloudflare.com/client/v4/zones/{settings.CLOUDFLARE_ZONE_ID}/purge_cache'
+    headers = {
+        'Authorization': f'Bearer {settings.CLOUDFLARE_API_TOKEN}',
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+    }
+    data = {
+        'files': [f'https://{settings.CLOUDFLARE_DOMAIN}{path}' for path in paths]
+    }
+    print(f'Purging {paths} from Cloudflare using url: {purge_url}, headers: {headers}, data: {data}')
+    response = requests.post(purge_url, headers=headers, data=json.dumps(data))
+    print(f'Cloudflare response: {response.text}')
+    if response.status_code != 200:
+        raise Exception(f'Cloudflare purge of {paths} failed with status code {response.status_code} and message {response.text}')
+
+
 def invalidate_pages(pages_to_invalidate):
     if pages_to_invalidate == 'all':
         print('Invalidating all pages')
         # Purge all on cloudflare before deleting
         for page in PageCache.objects.all():
-            purge_cloudflare_page(page.url)
             page.delete()
+        for page in PageCache.objects.all():
+            purge_cloudflare_page(page.url)
     else:
         print(f'Invalidating {pages_to_invalidate}')
         for page in pages_to_invalidate:
@@ -854,10 +876,8 @@ def invalidate_pages(pages_to_invalidate):
                 cache_entry.delete()
             except PageCache.DoesNotExist:
                 pass
-            # Also invalidate the page on Cloudflare using the REST API
-            if settings.CLOUDFLARE_API_TOKEN is not None:
-                print(f'Invalidating {page} on Cloudflare')
-                purge_cloudflare_page(page)
+        print(f'Invalidating {pages_to_invalidate} on Cloudflare')
+        purge_cloudflare_page(pages_to_invalidate)
 
 
 # Invalidate pagecache on model save

@@ -49,8 +49,13 @@ def view(request):
             user = UserCookie.objects.create(staff=request.user.is_staff, user_agent=request.META['HTTP_USER_AGENT'])
             new_user = True
 
+    # Strip referer of params
+    referer = request.POST.get('referer', None)
+    if referer:
+        referer = re.sub(r'\?.*', '', referer)
+
     # Check if referer includes allowed host
-    referer_is_allowed_host = len(list(set(re.split('[/:]', request.POST.get('referer'))) & set(settings.ALLOWED_HOSTS))) > 0
+    referer_is_allowed_host = len(list(set(re.split('[/:]', referer)) & set(settings.ALLOWED_HOSTS))) > 0
     if referer_is_allowed_host and 'session_id' in request.POST and request.POST.get('session_id') != '':
         session, _ = Session.objects.get_or_create(session_id=request.POST.get('session_id'), user=user)
     else:
@@ -65,7 +70,7 @@ def view(request):
     page, _ = Page.objects.get_or_create(path=request.POST.get('path'))
     page_view = PageView.objects.create(session=session, page=page)
     page_view.duration = datetime.timedelta(milliseconds=int(request.POST.get('interval')) / 2)
-    page_view.referer = request.POST.get('referer')
+    page_view.referer = referer
 
     response_content = {
         'new_user': new_user,

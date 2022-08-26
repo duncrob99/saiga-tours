@@ -759,7 +759,7 @@ def copy_map(request):
 
             return JsonResponse({'success': True})
         except Exception as e:
-            return JsonResponse({'success': False, 'error': e})
+            return JsonResponse({'success': False, 'error': str(e)})
     else:
         return Http404
 
@@ -770,6 +770,6 @@ def purge_cache(request):
             invalidate_pages('all')
             return JsonResponse({'success': True})
         except Exception as e:
-            return JsonResponse({'success': False, 'error': e})
+            return JsonResponse({'success': False, 'error': str(e)})
     else:
         return Http404
