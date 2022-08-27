@@ -50,7 +50,6 @@ def front_page(request):
     settings = Settings.load()
 
     rows = [FrontPageRow(settings.frontpage_tours_pos, 'tours'), FrontPageRow(settings.frontpage_map_pos, 'map'),
-            FrontPageRow(settings.testimonials_frontpage_pos, 'testimonials'),
             FrontPageRow(settings.frontpage_blog_pos, 'articles',
                          Article.visible(request.user.is_staff).filter(type=Article.BLOG)[:3], 'Blogs',
                          reverse('blog')), FrontPageRow(settings.frontpage_news_pos, 'articles',
@@ -58,6 +57,9 @@ def front_page(request):
                                                             type=Article.NEWS)[:3], 'News', reverse('news'))] + [
                FrontPageRow(pg.front_page_pos, 'section', pg, colour=pg.front_page_colour) for pg in
                Page.visible(request.user.is_staff).filter(front_page_pos__isnull=False).order_by('front_page_pos')]
+
+    if (settings.testimonials_active or request.user.is_staff) and settings.testimonials_frontpage_pos:
+        rows.append(FrontPageRow(settings.testimonials_frontpage_pos, 'testimonials'))
 
     highlight_rows: Dict[int, list] = {}
     for highlight in HightlightBox.visible(request.user.is_staff):
