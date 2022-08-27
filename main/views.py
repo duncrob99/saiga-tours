@@ -791,6 +791,12 @@ def testimonials(request):
 
     context = {
         'testimonials': Testimonial.objects.filter(approved=True).order_by('?'),
-        'form': form
+        'form': form,
+        'meta': MetaInfo(
+            request.get_raw_uri(),
+            "Testimonials",
+            Settings.load().logo.url,
+            f'See what people have to say about {Settings.load().site_title}',
+        )
     }
     return render(request, 'main/testimonials_page.html', context)

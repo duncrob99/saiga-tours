@@ -303,3 +303,56 @@ body * {
     margin: var(--alert-margin);
     opacity: 0.9;
 }
+
+.form-control {
+    border: none;
+    background: rgba(0, 0, 0, 1%);
+    border-top-left-radius: 0.5rem;
+    border-top-right-radius: 0.5rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 10%);
+}
+
+.form-control:focus {
+    box-shadow: none;
+    background: rgba(0, 0, 0, 3%);
+    transition: background-color 1s ease;
+    border-bottom: 1px solid rgba(0, 0, 0, 10%);
+}
+
+form div.mb-3 {
+    overflow-x: hidden;
+}
+
+form div.mb-3::after {
+    width: 0;
+    height: 100%;
+    border: 1px solid var(--accent-foreground);
+    content: "";
+    display: block;
+    transition: width 1s ease-in-out;
+    left: -5px;
+    position: relative;
+    top: -2px;
+}
+
+form div.mb-3:hover::after {
+    width: 20%;
+    border: 1px solid var(--accent-foreground);
+}
+
+form div.mb-3:focus-within::after {
+    width: calc(100% + 5px);
+    border: 1px solid var(--accent-foreground);
+}
+
+.form-control::file-selector-button {
+    background-color: var(--accent-background);
+    border: none;
+    color: var(--accent-foreground);
+    cursor: pointer;
+}
+
+.form-control:hover::file-selector-button {
+    background-color: var(--accent-hover-background) !important;
+    color: var(--accent-hover-foreground);
+}
