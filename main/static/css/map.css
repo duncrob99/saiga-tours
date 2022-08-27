@@ -10,6 +10,9 @@ object, .map svg {
     mask-composite: intersect;
     -webkit-mask-image: linear-gradient(to right, transparent 0%, white var(--map-fade), white calc(100% - var(--map-fade)), transparent 100%),
     linear-gradient(to bottom, transparent 0%, white var(--map-fade), white calc(100% - var(--map-fade)), transparent 100%);
+}
+
+.chrome .map svg {
     -webkit-mask-composite: destination-in;
 }
 

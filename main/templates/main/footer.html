@@ -64,8 +64,8 @@
     }
 
     .main-footer .logo {
-        max-width: 90px;
-        max-height: 90px;
+        width: 150px;
+        object-fit: contain;
     }
 
     .main-footer a {
@@ -151,7 +151,7 @@
         <div class="container pt-5 px-3 pb-3">
             <div class="d-flex justify-content-start" id="footer-content">
                 <div class="d-flex flex-column justify-content-around">
-                    <img alt="logo" data-filename="{{ settings.logo.url }}" class="logo">
+                    <img alt="logo" data-no-minimise src="{{ settings.logo.url }}" class="logo">
                     <ul class="list-unstyled d-flex">
                         {% if settings.twitter_link %}
                             <li class="ms-3"><a aria-label="twitter" href="{{ settings.twitter_link }}"><i
