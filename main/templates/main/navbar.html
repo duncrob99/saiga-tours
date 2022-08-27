@@ -36,7 +36,7 @@
                             <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                                 {% if user.is_staff %}
                                     {% for child_page in page.children.all %}
-                                        {% if forloop.counter == settings.testimonials_navbar_pos %}
+                                        {% if forloop.counter == settings.testimonials_navbar_pos and settings.testimonials_parent == page %}
                                             <li>
                                                 <a class="dropdown-item d-flex justify-content-between"
                                                    href="{% url 'testimonials' %}">Testimonials</a>
