@@ -91,6 +91,7 @@
     font-size: 2em;
     font-weight: bold;
     line-height: 0.1em;
+    float: left;
 }
 
 #testimonial-slider .quote:after {
@@ -98,6 +99,7 @@
     font-size: 2em;
     font-weight: bold;
     line-height: 0.1em;
+    float: right;
 }
 
 #testimonial-slider .quote:not(.testing-height) {
