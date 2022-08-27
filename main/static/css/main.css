@@ -203,7 +203,11 @@ body * {
 
 .pre-separator {
     transform-origin: top;
-    transform: rotateX(180deg);
+    transform: translateY(1px) rotateX(180deg);
+}
+
+.post-separator {
+    transform: translateY(-1px);
 }
 
 /* width */
