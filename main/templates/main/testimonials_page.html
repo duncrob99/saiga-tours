@@ -1,0 +1,25 @@
+{% extends 'main/main.html' %}
+{% load static %}
+{% load django_bootstrap5 %}
+
+{% block extrahead %}
+    <link rel="stylesheet" href="{% static 'css/testimonials.css' %}">
+    <link rel="stylesheet" href="{% static 'css/testimonials_page.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div id="testimonial-sizer"></div>
+    <h1 class="section-title">Testimonials</h1>
+    {% include 'main/testimonials.html' %}
+
+    We'd love to hear from you! Fill out the form below to submit your testimonial.
+    <form method="POST" enctype='multipart/form-data'>
+        {% csrf_token %}
+        {% bootstrap_form form %}
+        <button type="submit" class="btn btn-primary hoverable-accent accent">Submit</button>
+    </form>
+{% endblock %}
+
+{% block js %}
+    <script src="{% static 'js/testimonials.js' %}"></script>
+{% endblock %}

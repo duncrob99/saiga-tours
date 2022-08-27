@@ -7,3 +7,7 @@ class ContactForm(forms.Form):
     message = forms.CharField(widget=forms.Textarea, required=True)
 
 
+class TestimonialForm(forms.Form):
+    name = forms.CharField(required=True, max_length=100)
+    message = forms.CharField(widget=forms.Textarea, required=True)
+    picture = forms.ImageField(required=False)

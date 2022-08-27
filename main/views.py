@@ -50,6 +50,7 @@ def front_page(request):
     settings = Settings.load()
 
     rows = [FrontPageRow(settings.frontpage_tours_pos, 'tours'), FrontPageRow(settings.frontpage_map_pos, 'map'),
+            FrontPageRow(settings.testimonials_frontpage_pos, 'testimonials'),
             FrontPageRow(settings.frontpage_blog_pos, 'articles',
                          Article.visible(request.user.is_staff).filter(type=Article.BLOG)[:3], 'Blogs',
                          reverse('blog')), FrontPageRow(settings.frontpage_news_pos, 'articles',
@@ -84,6 +85,7 @@ def front_page(request):
         'highlights': HightlightBox.visible(request.user.is_staff),
         'destinations': Destination.visible(request.user.is_staff),
         'points': MapPoint.objects.all(),
+        'testimonials': Testimonial.visible(request.user.is_staff),
         'rows': rows,
         'meta': MetaInfo(
             request.get_raw_uri(),
@@ -773,3 +775,20 @@ def purge_cache(request):
             return JsonResponse({'success': False, 'error': str(e)})
     else:
         return Http404
+
+
+def testimonials(request):
+    if not Settings.load().testimonials_active and not request.user.is_staff:
+        raise Http404
+    form_factory = modelform_factory(Testimonial, fields=('name', 'quote', 'image'))
+    form = form_factory(request.POST or None, request.FILES or None)
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+        messages.add_message(request, messages.SUCCESS, 'Testimonial submitted')
+        return redirect('testimonials')
+
+    context = {
+        'testimonials': Testimonial.objects.filter(approved=True).order_by('?'),
+        'form': form
+    }
+    return render(request, 'main/testimonials_page.html', context)

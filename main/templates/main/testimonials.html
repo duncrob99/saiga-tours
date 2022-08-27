@@ -1,0 +1,17 @@
+{% load static %}
+
+<div id="testimonial-slider">
+    {% for testimonial in testimonials %}
+        <div class="testimonial">
+            {% if testimonial.image %}
+                <div class="pic">
+                    <img src="{{ testimonial.image.url }}" alt="">
+                </div>
+            {% endif %}
+            <p class="quote">
+                {{ testimonial.quote }}
+            </p>
+            <h3 class="name">{{ testimonial.name }}</h3>
+        </div>
+    {% endfor %}
+</div>

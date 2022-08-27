@@ -111,6 +111,14 @@ Home
                     </div>
                 {% endfor %}
             </div>
+        {% elif row.type == 'testimonials' %}
+            <h1 class="section-title testimonial-start">Testimonials
+                <div class="underline"></div>
+            </h1>
+            <div id="testimonial-sizer" class="not-fold"></div>
+            {% include 'main/testimonials.html' %}
+            <link rel="stylesheet" href="{% static 'css/testimonials.css' %}">
+            <script src="{% static 'js/testimonials.js' %}"></script>
         {% elif row.type == 'articles' %}
             <h1 class="section-title">{{ row.title }}
                 <div class="underline"></div>

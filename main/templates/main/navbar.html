@@ -19,7 +19,7 @@
         <div class="collapse navbar-collapse justify-content-between" id="navbarNav">
             <ul class="navbar-nav">
                 {% for page in pages %}
-                    {% if page.children.count == 0 and user.is_staff or page.published_children.count == 0 and not user.is_staff %}
+                    {% if not page.has_children and user.is_staff or not page.has_published_children and not user.is_staff %}
                         <li class="nav-item">
                             <a class="nav-link main-nav"
                                href="{% url 'page' page.full_path %}">{{ page.title.upper }}</a>
@@ -36,10 +36,22 @@
                             <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                                 {% if user.is_staff %}
                                     {% for child_page in page.children.all %}
+                                        {% if forloop.counter == settings.testimonials_navbar_pos %}
+                                            <li>
+                                                <a class="dropdown-item d-flex justify-content-between"
+                                                   href="{% url 'testimonials' %}">Testimonials</a>
+                                            </li>
+                                        {% endif %}
                                         {% include 'main/page_dropdown.html' with page=child_page %}
                                     {% endfor %}
                                 {% else %}
                                     {% for child_page in page.published_children %}
+                                        {% if forloop.counter == settings.testimonials_navbar_pos and settings.testimonials_active and settings.testimonials_parent == page %}
+                                            <li>
+                                                <a class="dropdown-item d-flex justify-content-between"
+                                                   href="{% url 'testimonials' %}">Testimonials</a>
+                                            </li>
+                                        {% endif %}
                                         {% include 'main/page_dropdown.html' with page=child_page %}
                                     {% endfor %}
                                 {% endif %}

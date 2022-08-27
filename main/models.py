@@ -558,6 +558,16 @@ class Page(DraftHistory):
         else:
             return self.parent.level + 1
 
+
+    @property
+    def has_children(self):
+        return not (self.children.count() == 0 and self.testimonial_children.count() == 0)
+
+    @property
+    def has_published_children(self):
+        return not (self.published_children().count() == 0 and (self.testimonial_children.count() == 0 or not Settings.load().testimonials_active))
+
+
     def get_absolute_url(self):
         return '/' + self.full_path
 
@@ -614,6 +624,11 @@ class Settings(models.Model):
     address = models.TextField(null=True, blank=True)
     footer_email = models.CharField(max_length=200, null=True, blank=True)
     copyright = models.CharField(max_length=200, null=True, blank=True)
+
+    testimonials_active = models.BooleanField(default=False)
+    testimonials_parent = models.ForeignKey(Page, on_delete=models.SET_NULL, null=True, blank=True, related_name='testimonial_children')
+    testimonials_navbar_pos = models.PositiveSmallIntegerField(default=1)
+    testimonials_frontpage_pos = models.PositiveSmallIntegerField(default=6, null=True, blank=True)
 
     history = HistoricalRecords(excluded_fields=('active',))
 
@@ -892,6 +907,13 @@ class Testimonial(models.Model):
     image = models.ImageField(upload_to='testimonials', null=True, blank=True)
     approved = models.BooleanField(default=False)
     added = models.DateTimeField(blank=True)
+
+
+    @classmethod
+    def visible(cls, is_staff):
+        if is_staff:
+            return cls.objects.all()
+        return cls.objects.filter(approved=True)
 
     def save(self, *args, **kwargs):
         if not self.id:
