@@ -46,13 +46,6 @@
         if (fan_bounds.left < max_bounds.left || fan_bounds.right > max_bounds.right || fan_bounds.top < max_bounds.top || fan_bounds.bottom > max_bounds.bottom) {
             console.warn("Fan image is not fitting in container");
         }
-
-        // Use negative margins to account for whitespace around the images
-        let left_margin = (max_bounds.left - fan_bounds.left);
-        let right_margin = (fan_bounds.right - max_bounds.right);
-        let top_margin = (max_bounds.top - fan_bounds.top);
-        let bottom_margin = (fan_bounds.bottom - max_bounds.bottom);
-        fan.style.setProperty('margin', `${top_margin}px ${right_margin}px ${bottom_margin}px ${left_margin}px`);
     }
 
     // Fit fans on resize of parent element using ResizeObserver
