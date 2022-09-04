@@ -37,7 +37,7 @@
             name: "{{ tour.start_location }}",
             address: {
                 @type: "PostalAddress",
-                addressLocality: "{{ tour.start_location }}",
+                addressLocality: "{{ tour.start_location }}"
             }
         },
         image: "{{ tour.card_img.url }}",
@@ -47,12 +47,12 @@
             price: "{{ tour.price }}",
             priceCurrency: "USD",
             url: "{{ request.build_absolute_uri }}",
-            availability: "https://schema.org/InStock",
+            availability: "https://schema.org/InStock"
         },
         organizer: {
             @type: "Organization",
             name: "SAIGA Tours",
-            url: "https://www.saigatours.com",
+            url: "https://www.saigatours.com"
         }
     }
     </script>
