@@ -503,7 +503,7 @@ class Page(DraftHistory):
 
     class Meta:
         unique_together = [['parent', 'slug']]
-        ordering = ['parent', 'title', 'slug']
+        ordering = ['title', 'slug']
 
     def get_caches_to_invalidate(self, previous):
         if self.in_navbar:
