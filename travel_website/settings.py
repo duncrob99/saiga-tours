@@ -40,6 +40,7 @@ if env('SENTRY'):
         dsn=SENTRY_PROJECT,
         integrations=[DjangoIntegration()],
         traces_sample_rate=1.0,
+        send_default_pii=True,
     )
 
 PRODUCTION = env('PRODUCTION')

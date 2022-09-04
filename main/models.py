@@ -501,6 +501,10 @@ class Page(DraftHistory):
 
     last_mod = models.DateTimeField(auto_now=True, null=True)
 
+    class Meta:
+        unique_together = [['parent', 'slug']]
+        ordering = ['parent', 'title', 'slug']
+
     def get_caches_to_invalidate(self, previous):
         if self.in_navbar:
             return "all"
