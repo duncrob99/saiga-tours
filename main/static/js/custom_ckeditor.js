@@ -14,6 +14,7 @@
         {name: 'Angle Right', element: 'img', attributes: {'class': 'angle-right'}},
         {name: 'Angle Left', element: 'img', attributes: {'class': 'angle-left'}},
         {name: 'Underlined Title', element: 'h3', attributes: {'class': 'underlined-title'}},
+        {name: 'Centred Underlined Title', element: 'h3', attributes: {'class': 'underlined-title centred'}},
         {name: 'Faded', element: 'p', attributes: {'class': 'faded'}},
         {name: 'Text block', element: 'p', attributes: {'class': 'block'}},
         {name: 'Styled table', element: 'table', attributes: {'class': 'styled-table'}}

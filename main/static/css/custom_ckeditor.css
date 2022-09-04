@@ -56,13 +56,24 @@
     /*margin-top: 10rem;*/
     font-size: 30px;
     margin-bottom: 60px;
+    position: relative;
 }
 
-.underlined-title::before {
+.underlined-title.centred {
+    text-align: center;
+}
+
+.underlined-title::after {
     background-repeat: no-repeat;
     transform: translateY(100%);
     content: var(--underline);
     position: absolute;
+    left: 0;
+}
+
+.underlined-title.centred::after {
+    left: 50%;
+    transform: translateX(-50%) translateY(100%);
 }
 
 .faded {
