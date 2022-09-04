@@ -90,9 +90,17 @@ def view(request):
     return response
 
 
+def is_valid_uuid(uuid):
+    try:
+        uuid = uuid.replace('-', '')
+        int(uuid, 16)
+        return len(uuid) == 32
+    except ValueError:
+        return False
+
 @csrf_exempt
 def accept_cookies(request):
-    if 'user_id' in request.POST:
+    if 'user_id' in request.POST and is_valid_uuid(request.POST.get('user_id')):
         user = UserCookie.objects.get(uuid=request.POST.get('user_id'))
         user.accepted_cookies = True
         user.save()

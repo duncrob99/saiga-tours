@@ -72,7 +72,7 @@ def front_page(request):
         highlight_row.sort(key=lambda box: box.col)
         rows.append(FrontPageRow(row_num, 'highlight', highlight_row))
 
-    rows.sort(key=lambda row: row.pos)
+    rows.sort(key=lambda row: row.pos if row.pos is not None else 1000)
 
     for i, row in enumerate(rows[1:]):
         if row.type == 'section' and rows[i].type == 'section':
