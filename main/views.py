@@ -623,6 +623,13 @@ def browser_supports_webp(request):
         return False
 
 
+def no_transparency(image):
+    """Check if image has transparency"""
+    if image.mode in ('RGBA', 'LA'):
+        return False
+    return True
+
+
 def crop_image(request, filename: str, width: int, height: int):
     removed_prefix = filename
     image = autorotate(Image.open(path.join(settings.MEDIA_ROOT, removed_prefix),
@@ -630,7 +637,13 @@ def crop_image(request, filename: str, width: int, height: int):
 
     cropped_image = crop_to_dims(image, width, height)
 
-    img_format = 'webp' if browser_supports_webp(request) else 'jpeg'
+    if browser_supports_webp(request):
+        img_format = 'webp'
+    elif no_transparency(image):
+        img_format = 'jpeg'
+    else:
+        img_format = 'png'
+
     response = HttpResponse(content_type=f'image/{img_format}')
     # noinspection PyTypeChecker
     cropped_image.save(response, img_format)
