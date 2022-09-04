@@ -632,8 +632,11 @@ def no_transparency(image):
 
 def crop_image(request, filename: str, width: int, height: int):
     removed_prefix = filename
-    image = autorotate(Image.open(path.join(settings.MEDIA_ROOT, removed_prefix),
-                                  mode='r'))
+    try:
+        raw_image = Image.open(path.join(settings.MEDIA_ROOT, removed_prefix), mode='r')
+    except FileNotFoundError:
+        raise Http404
+    image = autorotate(raw_image)
 
     cropped_image = crop_to_dims(image, width, height)
 

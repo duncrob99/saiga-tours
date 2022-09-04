@@ -27,32 +27,32 @@
     {% endif %}
     <script type="application/ld+json">
     {
-        @context: "https://schema.org",
-        @type: "Event",
-        name: "{{ tour }}",
-        startDate: "{{ tour.start_date|date:'Y-m-d' }}",
-        endDate: "{{ tour.end_date|date:'Y-m-d' }}",
-        location: {
-            @type: "Place",
-            name: "{{ tour.start_location }}",
-            address: {
-                @type: "PostalAddress",
-                addressLocality: "{{ tour.start_location }}"
+        "@context": "https://schema.org",
+        "@type": "Event",
+        "name": "{{ tour }}",
+        "startDate": "{{ tour.start_date|date:'Y-m-d' }}",
+        "endDate": "{{ tour.end_date|date:'Y-m-d' }}",
+        "location": {
+            "@type": "Place",
+            "name": "{{ tour.start_location }}",
+            "address": {
+                "@type": "PostalAddress",
+                "addressLocality": "{{ tour.start_location }}"
             }
         },
-        image: "{{ tour.card_img.url }}",
-        description: "{{ tour.excerpt|striptags|truncatechars:200 }}",
-        offers: {
-            @type: "Offer",
-            price: "{{ tour.price }}",
-            priceCurrency: "USD",
-            url: "{{ request.build_absolute_uri }}",
-            availability: "https://schema.org/InStock"
+        "image": "{{ tour.card_img.url }}",
+        "description": "{{ tour.excerpt|striptags|truncatechars:200 }}",
+        "offers": {
+            "@type": "Offer",
+            "price": "{{ tour.price }}",
+            "priceCurrency": "USD",
+            "url": "{{ request.build_absolute_uri }}",
+            "availability": "https://schema.org/InStock"
         },
-        organizer: {
-            @type: "Organization",
-            name: "SAIGA Tours",
-            url: "https://www.saigatours.com"
+        "organizer": {
+            "@type": "Organization",
+            "name": "SAIGA Tours",
+            "url": "https://www.saigatours.com"
         }
     }
     </script>

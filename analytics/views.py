@@ -116,9 +116,19 @@ def heartbeat(request):
     if 'pageview' in request.POST:
         page_view = PageView.objects.get(uuid=request.POST.get('pageview'))
 
+        try:
+            time_visible = int(request.POST.get('time_visible'))
+        except ValueError:
+            time_visible = 0
+
+        try:
+            duration = int(request.POST.get('interval')) / 2
+        except ValueError:
+            duration = 0
+
         page_view.duration = timezone.now() - page_view.time + datetime.timedelta(
-            milliseconds=int(request.POST.get('interval')) / 2)
-        page_view.time_visible += datetime.timedelta(milliseconds=int(request.POST.get('time_visible')))
+            milliseconds=duration)
+        page_view.time_visible += datetime.timedelta(milliseconds=time_visible)
         page_view.save()
 
         return JsonResponse({'success': True})
