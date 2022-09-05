@@ -57,10 +57,14 @@
     font-size: 30px;
     margin-bottom: 60px;
     position: relative;
+    width: max-content;
+    max-width: 100%;
 }
 
 .underlined-title.centred {
     text-align: center;
+    left: 50%;
+    transform: translateX(-50%);
 }
 
 .underlined-title::after {
@@ -69,6 +73,7 @@
     content: var(--underline);
     position: absolute;
     left: 0;
+    width: 130px
 }
 
 .underlined-title.centred::after {
