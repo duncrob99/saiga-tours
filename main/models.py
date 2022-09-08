@@ -95,7 +95,7 @@ def RichTextWithPlugins(*args, **kwargs):
 class DraftHistoryManager(models.Manager):
     def all_published(self):
         return self.filter(
-            (Q(published_bool=True) & Q(published_date__isnull=True)) | Q(published_date__lte=timezone.now()))
+            Q(published_bool=True) | Q(published_date__lte=timezone.now()))
 
     def visible(self, su: bool):
         return self.all() if su else self.all_published()
@@ -122,7 +122,7 @@ class DraftHistory(models.Model):
     @classproperty
     def all_published(cls):
         return cls.objects.filter(
-            (Q(published_bool=True) & Q(published_date__isnull=True)) | Q(published_date__lte=timezone.now()))
+            Q(published_bool=True) | Q(published_date__lte=timezone.now()))
 
     @classmethod
     def visible(cls, su: bool):
