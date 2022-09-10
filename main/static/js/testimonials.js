@@ -187,7 +187,7 @@
             } else if (initial_countries.includes(a.value) && initial_countries.includes(b.value)) {
                 return initial_countries.indexOf(a.value) - initial_countries.indexOf(b.value);
             } else {
-                return a.value.localeCompare(b.value);
+                return a.label.localeCompare(b.label);
             }
         }
     });
