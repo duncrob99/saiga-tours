@@ -11,6 +11,12 @@
 
     function testimonial_slider_loop(reverse = false) {
         if (!animation_complete) return;
+        if (Visibility.hidden()) {
+            clearInterval(testimonial_interval);
+            Visibility.onVisible(() => {
+                testimonial_interval = setInterval(testimonial_slider_loop, normal_delay);
+            });
+        }
         animation_complete = false;
         testimonial_index = (testimonial_index + (reverse ? -1 : 1)) % testimonials.length;
         if (testimonial_index < 0) {
