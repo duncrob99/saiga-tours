@@ -20,6 +20,7 @@ from ua_parser import user_agent_parser
 from .forms import *
 from .models import *
 from .images import crop_to_dims
+from .widgets import CountrySelectWidget
 
 
 def assert_visible(request, model: DraftHistory):
@@ -609,7 +610,7 @@ def country_tours_info(request, region_slug, country_slug, detail_slug):
 
 
 def browser_supports_webp(request):
-    """Check if browser is Safari <16 and MacOS <11 or Safari <14"""
+    """Check if browser is Safari <16 and macOS <11 or Safari <14"""
 
     try:
         ua_info = user_agent_parser.Parse(request.META.get('HTTP_USER_AGENT'))
@@ -798,8 +799,12 @@ def purge_cache(request):
 def testimonials(request):
     if not Settings.load().testimonials_active and not request.user.is_staff:
         raise Http404
-    form_factory = modelform_factory(Testimonial, fields=('name', 'quote', 'image'))
+
+    form_factory = modelform_factory(Testimonial,
+                                     fields=('name', 'quote', 'image', 'country'),
+                                     widgets={'country': CountrySelectWidget()})
     form = form_factory(request.POST or None, request.FILES or None)
+
     if request.method == 'POST' and form.is_valid():
         form.save()
         messages.add_message(request, messages.SUCCESS, 'Testimonial submitted')

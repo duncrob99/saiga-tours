@@ -1,17 +1,67 @@
 {% load static %}
+{% load countries %}
 
 <div id="testimonial-slider">
+    <div class="testimonials-button left">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left-circle" viewBox="0 0 16 16">
+            <path fill-rule="evenodd" d="M1 8a7 7 0 1 0 14 0A7 7 0 0 0 1 8zm15 0A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-4.5-.5a.5.5 0 0 1 0 1H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5z"></path>
+        </svg>
+    </div>
+
     {% for testimonial in testimonials %}
         <div class="testimonial">
             {% if testimonial.image %}
                 <div class="pic">
                     <img src="{{ testimonial.image.url }}" alt="">
+                    {% if testimonial.country %}
+                        <div class="country-flag">
+                            <img src="{{ testimonial.flag_url }}" />
+                        </div>
+                    {% endif %}
                 </div>
             {% endif %}
             <p class="quote">
                 {{ testimonial.quote }}
             </p>
+            <a data-bs-toggle="modal" data-bs-target="#testimonial-{{ forloop.counter0 }}-modal" class="read-more nice-link">
+                Read more
+            </a>
             <h3 class="name">{{ testimonial.name }}</h3>
         </div>
     {% endfor %}
+    <div class="testimonials-button right">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-right-circle" viewBox="0 0 16 16">
+            <path fill-rule="evenodd" d="M1 8a7 7 0 1 0 14 0A7 7 0 0 0 1 8zm15 0A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM4.5 7.5a.5.5 0 0 0 0 1h5.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3a.5.5 0 0 0 0-.708l-3-3a.5.5 0 1 0-.708.708L10.293 7.5H4.5z"></path>
+        </svg>
+    </div>
 </div>
+
+{% for testimonial in testimonials %}
+    <div class="modal fade" id="testimonial-{{ forloop.counter0 }}-modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-body testimonial-modal-body">
+                    <div class="testimonial">
+                        {% if testimonial.image %}
+                            <div class="pic">
+                                <img src="{{ testimonial.image.url }}" alt="">
+                                {% if testimonial.country %}
+                                    <div class="country-flag">
+                                        <img src="{{ testimonial.flag_url }}" />
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                        <p class="quote">
+                            {{ testimonial.quote }}
+                        </p>
+                        <h3 class="name">{{ testimonial.name }}</h3>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endfor %}

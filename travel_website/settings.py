@@ -100,7 +100,8 @@ INSTALLED_APPS = [
     'analytics',
     'django.contrib.sitemaps',
     'django.contrib.sites',
-    'silk'
+    'silk',
+    'django_countries'
 ]
 
 SITE_ID = 1
@@ -285,3 +286,20 @@ SILKY_MAX_RECORDED_REQUESTS_CHECK_PERCENT = 10
 SILKY_AUTHENTICATION = True
 SILKY_AUTHORISATION = True
 SILKY_INTERCEPT_FUNC = should_intercept
+
+# countries settings
+COUNTRIES_FLAG_URL = STATIC_URL + 'flags/{code}.gif'
+COUNTRIES_FIRST = [
+    'AU',
+    'US',
+    'GB',
+    'FR',
+    'ME',
+    'CA',
+    'NL',
+    'KZ',
+    'IN',
+    'IE'
+]
+# COUNTRIES_FIRST_REPEAT = True
+# COUNTRIES_FIRST_BREAK = "-----------------"

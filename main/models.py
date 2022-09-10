@@ -6,10 +6,11 @@ from typing import Tuple, Optional
 import requests
 from bs4 import BeautifulSoup as bs
 import inspect
-
 from PIL import Image
 from ckeditor_uploader.fields import RichTextUploadingField
 from colorfield.fields import ColorField
+from django_countries.fields import CountryField
+
 from django.core.exceptions import ValidationError
 from django.core.files import File
 from django.db import models
@@ -911,7 +912,7 @@ class Testimonial(models.Model):
     image = models.ImageField(upload_to='testimonials', null=True, blank=True)
     approved = models.BooleanField(default=False)
     added = models.DateTimeField(blank=True)
-
+    country = CountryField(blank=True, null=True, blank_label='(select country)')
 
     @classmethod
     def visible(cls, is_staff):
@@ -926,6 +927,10 @@ class Testimonial(models.Model):
 
     def get_caches_to_invalidate(self, previous):
         return [reverse("front-page")]
+
+    @property
+    def flag_url(self):
+        return static(f'images/flags/{self.country.code.lower()}.svg')
 
     def __str__(self):
         return self.name

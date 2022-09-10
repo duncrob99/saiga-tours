@@ -54,6 +54,8 @@ html, body {
     color: var(--accent-foreground);
     text-outline: 2px rgba(0, 0, 0, 0.2);
     -webkit-text-stroke: 2px rgba(0, 0, 0, 0.2);
+    line-height: 1;
+    margin-bottom: 0;
 }
 
 @media screen and (max-width: 600px) {
@@ -304,7 +306,7 @@ body * {
     opacity: 0.9;
 }
 
-.form-control {
+.form-control, .country-selector {
     border: none;
     background: rgba(0, 0, 0, 1%);
     border-top-left-radius: 0.5rem;
@@ -312,7 +314,7 @@ body * {
     border-bottom: 1px solid rgba(0, 0, 0, 10%);
 }
 
-.form-control:focus {
+.form-control:focus, .country-selector:focus {
     box-shadow: none;
     background: rgba(0, 0, 0, 3%);
     transition: background-color 1s ease;
@@ -355,4 +357,14 @@ form div.mb-3:focus-within::after {
 .form-control:hover::file-selector-button {
     background-color: var(--accent-hover-background) !important;
     color: var(--accent-hover-foreground);
+}
+
+.form-select {
+    border: none;
+    background: none;
+}
+
+.form-select:focus {
+    box-shadow: none;
+    background: none;
 }

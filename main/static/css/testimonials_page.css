@@ -1,0 +1,108 @@
+.country-selector {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.country-selector * {
+    cursor: pointer;
+}
+
+.country-selector img {
+    border-radius: 50%;
+    object-fit: cover;
+    --size: 3rem;
+    height: var(--size);
+    width: var(--size);
+}
+
+.country-selector .flag-container {
+    position: relative;
+    margin-left: 10px;
+}
+
+.country-selector .flag-container img {
+    --transition-rotation: 3;
+}
+
+.country-selector .flag-container .transition-out {
+    transition: transform 0.5s ease-in;
+    transform: scale(0) rotate(calc(var(--transition-rotation) * 180deg));
+}
+
+.country-selector .flag-container .transition-in {
+    transition: transform 0.5s ease-out;
+    transform: scale(1) rotate(calc(var(--transition-rotation) * 360deg));
+}
+
+.country-selector .flag-container:after {
+    /* vignette of background colour */
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    border-radius: 100%;
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.country-selector::after {
+    content: '';
+    /* Down arrow */
+    border: solid var(--accent-foreground);
+    border-width: 0 3px 3px 0;
+    display: inline-block;
+    padding: 3px;
+    margin: 10px;
+    transform: rotate(45deg);
+    -webkit-transform: rotate(45deg);
+    cursor: pointer;
+    transition: border-color 0.2s ease-in-out, transform 0.2s ease-in-out;
+}
+
+.country-selector:hover::after {
+    border-color: var(--accent-hover-foreground);
+}
+
+.country-selector.open::after {
+    transform: rotate(225deg);
+}
+
+.country-selector option {
+    width: 100px;
+}
+
+.country-selector .choices {
+    flex-grow: 1;
+    border: none;
+    background: none;
+    margin: 0;
+}
+
+.country-selector .choices__inner {
+    padding: 0 !important;
+    background: none;
+    border: none;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.choices::after {
+    display: none;
+}
+
+.choices .choices__button {
+    margin-right: 0 !important;
+}
+
+.choices .choices__list--dropdown {
+    width: calc(100% + 87px);
+    transform: translateY(4px);
+}
+
+form div.mb-3 {
+    overflow: visible;
+    overflow-x: clip;
+}

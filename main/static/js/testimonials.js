@@ -3,9 +3,19 @@
     let testimonial_slider = document.querySelector('#testimonial-slider');
     let testimonials = testimonial_slider.querySelectorAll('.testimonial');
     let testimonial_index = 0;
-    let testimonial_interval = setInterval(testimonial_slider_loop, 10000);
+    let animation_complete = true;
 
-    function testimonial_slider_loop() {
+    let normal_delay = 5000;
+    let long_delay = 20000;
+    let testimonial_interval = setInterval(testimonial_slider_loop, normal_delay);
+
+    function testimonial_slider_loop(reverse = false) {
+        if (!animation_complete) return;
+        animation_complete = false;
+        testimonial_index = (testimonial_index + (reverse ? -1 : 1)) % testimonials.length;
+        if (testimonial_index < 0) {
+            testimonial_index += testimonials.length;
+        }
         testimonials.forEach(function (testimonial, index) {
             testimonial.classList.remove('centre');
             testimonial.classList.remove('left-1');
@@ -38,8 +48,10 @@
                 testimonial.classList.add('hidden');
             }
         });
-        testimonial_index = (testimonial_index + 1) % testimonials.length;
         initialised = true;
+        setTimeout(function () {
+            animation_complete = true;
+        }, 1000);
     }
 
     // Listen to resize events of the slider using ResizeObserver
@@ -48,12 +60,6 @@
     });
     function resize_testimonials() {
         testimonial_slider.style.height = '0';
-        // Set the height of the slider to the height of the tallest testimonial
-        // let max_height = 0;
-        // testimonials.forEach(function (testimonial) {
-        //     max_height = Math.max(max_height, testimonial.offsetHeight);
-        // });
-        // testimonial_slider.style.height = `${max_height}px`;
 
         let fills_space = (testimonial) => {
             let quote = testimonial.querySelector('.quote');
@@ -75,7 +81,7 @@
 
         // Elide testimonial text if it makes the card taller than the container
         let max_height = 0;
-        let margin = 100;
+        let margin = 10;
         let testimonial_start = document.querySelector('.testimonial-start');
         if (testimonial_start) {
             document.getElementById('testimonial-sizer').style.top = `${testimonial_start.getBoundingClientRect().top + document.body.scrollTop}px`;
@@ -98,22 +104,17 @@
             // Ensure card bottom is above the fold
             if (container_box.top + testimonial.offsetHeight > fold_box.bottom - margin) {
                 let words = text.innerText.split(' ');
+                testimonial.classList.add('minimised');
                 while (container_box.top + testimonial.offsetHeight > fold_box.bottom - margin && words.length > 0 && fills_space(testimonial)) {
                     words.pop();
                     text.innerText = words.join(' ') + '...';
                     card_box = testimonial.getBoundingClientRect();
                 }
+            } else {
+                testimonial.classList.remove('minimised');
             }
-            // else if (testimonial_start !== null && card_box.height + testimonial_start.getBoundingClientRect().height > fold_box.height - margin) {
-            //     let words = text.innerText.split(' ');
-            //     while (card_box.height + testimonial_start.getBoundingClientRect().height > fold_box.height - margin && words.length > 0 && fills_space(testimonial)) {
-            //         words.pop();
-            //         text.innerText = words.join(' ') + '...';
-            //         card_box = testimonial.getBoundingClientRect();
-            //     }
-            // }
 
-            max_height = Math.max(max_height, testimonial.offsetHeight + 2*margin);
+            max_height = Math.max(max_height, testimonial.offsetHeight);
 
             if (initialised) {
                 testimonial.classList.add('animated');
@@ -133,4 +134,91 @@
     resize_observer.observe(document.getElementById('testimonial-sizer'));
     resize_observer.observe(document.body);
     testimonial_slider_loop();
+
+    document.querySelector('#testimonial-slider .left').addEventListener('click', () => {
+        testimonial_slider_loop(true);
+        clearInterval(testimonial_interval);
+        testimonial_interval = setTimeout(() => {
+            testimonial_slider_loop();
+            testimonial_interval = setInterval(testimonial_slider_loop, normal_delay);
+        }, long_delay);
+    });
+
+    document.querySelector('#testimonial-slider .right').addEventListener('click', () => {
+        testimonial_slider_loop(false);
+        clearInterval(testimonial_interval);
+        testimonial_interval = setTimeout(() => {
+            testimonial_slider_loop();
+            testimonial_interval = setInterval(testimonial_slider_loop, normal_delay);
+        }, long_delay);
+    });
+
+    let country_selector = document.querySelector('.country-selector select');
+    let initial_countries = [
+        'AU',
+        'US',
+        'GB',
+        'FR',
+        'ME',
+        'CA',
+        'NL',
+        'KZ',
+        'IN',
+        'IE'
+    ]
+
+    let country_choices = new Choices(country_selector, {
+        allowHTML: false,
+        removeItemButton: true,
+        duplicateItemsAllowed: false,
+        searchResultLimit: 10,
+        resetScrollPosition: false,
+        sorter: (a, b) => {
+            if (initial_countries.includes(a.value) && !initial_countries.includes(b.value)) {
+                return -1;
+            } else if (!initial_countries.includes(a.value) && initial_countries.includes(b.value)) {
+                return 1;
+            } else if (initial_countries.includes(a.value) && initial_countries.includes(b.value)) {
+                return initial_countries.indexOf(a.value) - initial_countries.indexOf(b.value);
+            } else {
+                return a.value.localeCompare(b.value);
+            }
+        }
+    });
+
+    country_selector.addEventListener('showDropdown', () => {
+        document.querySelector('.country-selector').classList.add('open');
+    });
+
+    country_selector.addEventListener('hideDropdown', () => {
+        document.querySelector('.country-selector').classList.remove('open');
+    });
+
+    // country_choices.setChoices([
+    //     {value: 'au', label: 'Australia', selected: true},
+    //     {value: 'us', label: 'United States', selected: true},
+    // ], 'value', 'label', true);
+
+    window.country_choices = country_choices;
+    
+    const preloadImage = src =>
+        new Promise((resolve, reject) => {
+            const image = new Image()
+            image.onload = resolve
+            image.onerror = reject
+            image.src = src
+        })
+
+    window.setFlag = (el, src) => {
+        el.classList.add('transition-out');
+        setTimeout(async () => {
+            await preloadImage(src)
+            el.src = src;
+            el.classList.remove('transition-out');
+            el.classList.add('transition-in');
+            setTimeout(() => {
+                el.classList.remove('transition-in');
+            }, 500);
+        }, 500);
+    }
 })();
