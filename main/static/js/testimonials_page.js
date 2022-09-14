@@ -47,14 +47,6 @@
 
     window.country_choices = country_choices;
 
-    const preloadImage = src =>
-        new Promise((resolve, reject) => {
-            const image = new Image()
-            image.onload = resolve
-            image.onerror = reject
-            image.src = src
-        })
-
     window.setFlag = (el, src) => {
         el.classList.add('transition-out');
         setTimeout(async () => {
