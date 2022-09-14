@@ -608,7 +608,7 @@ class Settings(models.Model):
     accent_hover_foreground = ColorField(default='#000000')
     site_title = models.CharField(max_length=500, default='Crowley Tours')
     catchphrase = models.CharField(max_length=500, default='We do cool tours')
-    logo = models.ImageField(null=True, blank=True)
+    logo = models.FileField(null=True, blank=True)
     twitter_link = models.URLField(blank=True, null=True)
     instagram_link = models.URLField(blank=True, null=True)
     facebook_link = models.URLField(blank=True, null=True)
