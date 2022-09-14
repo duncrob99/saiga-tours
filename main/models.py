@@ -753,12 +753,21 @@ class Stop(models.Model):
 
 
 class MapPoint(models.Model):
-    x = models.FloatField()
-    y = models.FloatField()
+    x = models.FloatField(blank=True, null=True)
+    y = models.FloatField(blank=True, null=True)
     name = models.CharField(max_length=100)
     activation_radius = models.FloatField(default=1)
     size = models.FloatField(default=1)
     template = models.ForeignKey(PositionTemplate, on_delete=models.SET_NULL, null=True, blank=True)
+
+    # Validate that either x & y are both set or template is set
+    def clean(self):
+        if (self.x is None) != (self.y is None):
+            raise ValidationError('Either both x and y must be set or template must be set')
+        if self.template is not None and (self.x is not None or self.y is not None):
+            raise ValidationError('Either both x and y must be set or template must be set')
+        if self.template is None and (self.x is None or self.y is None):
+            raise ValidationError('Either both x and y must be set or template must be set')
 
     def get_caches_to_invalidate(self, previous):
         region_tours = [reverse("tours", args=[region.slug]) for region in Region.objects.all()]
