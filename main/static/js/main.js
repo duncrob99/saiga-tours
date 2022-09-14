@@ -124,6 +124,10 @@ function minimise_images() {
     }, {threshold: [0], rootMargin: '20%', root: document.body});
     images.forEach(img => {
         if (img.hasAttribute('data-no-minimise')) return;
+        if (img.hasAttribute('data-lazy-load') && img.getAttribute('data-lazy-load') === 'false') {
+            minimise_image(img).then();
+            return;
+        }
         if (img.classList.contains('banner-img')) {
             banner_observer.observe(img);
         } else {

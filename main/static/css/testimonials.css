@@ -166,6 +166,7 @@
     height: 150px;
     border-radius: 50%;
     border: 5px solid #f1f1f1;
+    margin-bottom: 2em;
 }
 
 .pic .main-pic::after {

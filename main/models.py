@@ -918,6 +918,7 @@ class Testimonial(models.Model):
     approved = models.BooleanField(default=False)
     added = models.DateTimeField(blank=True)
     country = CountryField(blank=True, null=True, blank_label='(select country)')
+    age = models.PositiveIntegerField(blank=True, null=True)
 
     @classmethod
     def visible(cls, is_staff):

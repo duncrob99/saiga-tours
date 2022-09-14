@@ -28,7 +28,8 @@
             <a data-bs-toggle="modal" data-bs-target="#testimonial-{{ forloop.counter0 }}-modal" class="read-more nice-link">
                 Read more
             </a>
-            <h3 class="name">{{ testimonial.name }}</h3>
+            <h3 class="name">{{ testimonial.name }}{% if testimonial.age %}, {{ testimonial.age }}{% endif %}{% if testimonial.country %}, {{ testimonial.country.name }}{% endif %}</h3>
+            <div>{{ testimonial.added | date }}</div>
         </div>
     {% endfor %}
     <div class="testimonials-button right">
@@ -46,7 +47,9 @@
                     <div class="testimonial">
                         {% if testimonial.image %}
                             <div class="pic">
-                                <img full-size-src="{{ testimonial.image.url }}" alt="">
+                                <div class="main-pic">
+                                    <img data-lazy-load="false" full-size-src="{{ testimonial.image.url }}" alt="">
+                                </div>
                                 {% if testimonial.country %}
                                     <div class="country-flag">
                                         <img data-no-minimise src="{{ testimonial.flag_url }}" />
@@ -57,7 +60,8 @@
                         <p class="quote">
                             {{ testimonial.quote }}
                         </p>
-                        <h3 class="name">{{ testimonial.name }}</h3>
+                        <h3 class="name">{{ testimonial.name }}{% if testimonial.age %}, {{ testimonial.age }}{% endif %}{% if testimonial.country %}, {{ testimonial.country.name }}{% endif %}</h3>
+                        <div>{{ testimonial.added | date }}</div>
                     </div>
                 </div>
                 <div class="modal-footer">
