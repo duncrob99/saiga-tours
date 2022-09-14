@@ -42,6 +42,9 @@ Home
             transform: scale(1.2);
         }
     </style>
+    <script src="{% static 'js/visibility/visibility.core.js' %}"></script>
+    <script src="{% static 'js/visibility/visibility.fallback.js' %}"></script>
+    <script src="{% static 'js/visibility/visibility.timers.js' %}"></script>
 {% endblock %}
 
 {% block banner %}
@@ -181,9 +184,6 @@ Home
 {% endblock %}
 
 {% block js %}
-    <script src="{% static 'js/visibility/visibility.core.js' %}"></script>
-    <script src="{% static 'js/visibility/visibility.fallback.js' %}"></script>
-    <script src="{% static 'js/visibility/visibility.timers.js' %}"></script>
     <script>
         let banner_delay = {{ settings.banner_delay }};
         let banner_init_delay = {{ settings.banner_initial_delay }};
