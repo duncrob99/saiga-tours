@@ -2,6 +2,7 @@ import calendar
 from bs4 import BeautifulSoup as bs
 
 from django import template
+from django.conf import settings
 from django.core.paginator import Page
 from django.utils.safestring import mark_safe
 
@@ -116,3 +117,9 @@ def delay_images(value: str, request):
     # print('soupstr: ', soup.str())
     return mark_safe(soup.prettify().replace('<span style="background-color:rgba(220,220,220,0.5)"><img src="data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==" style="height:15px; width:15px" title="Click and drag to move"></span>', ''))
     # return mark_safe(value.replace('<img src=', '<img data-filename='))
+
+
+@register.simple_tag()
+def resized_image(url: str, x: int, y: int):
+    print('resized_image', url, x, y)
+    return f'/resized-image/{url.removeprefix(settings.MEDIA_URL)}/{x}x{y}/'

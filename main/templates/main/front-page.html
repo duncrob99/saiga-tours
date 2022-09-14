@@ -14,7 +14,11 @@ Home
     {% endif %}
     <style>
         .banner-img {
-            transition: left {{ settings.banner_transition_time }}s;
+            transition: transform {{ settings.banner_transition_time }}s;
+        }
+
+        .banner-img[data-full-size-loaded="true"] {
+            transition: transform {{ settings.banner_transition_time }}s, filter var(--blur-transition);
         }
 
         :root {

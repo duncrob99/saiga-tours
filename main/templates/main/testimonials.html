@@ -12,10 +12,12 @@
         <div class="testimonial">
             {% if testimonial.image %}
                 <div class="pic">
-                    <img src="{{ testimonial.image.url }}" alt="">
+                    <div class="main-pic">
+                        <img full-size-src="{{ testimonial.image.url }}" alt="">
+                    </div>
                     {% if testimonial.country %}
                         <div class="country-flag">
-                            <img src="{{ testimonial.flag_url }}" />
+                            <img data-no-minimise src="{{ testimonial.flag_url }}" />
                         </div>
                     {% endif %}
                 </div>
@@ -44,10 +46,10 @@
                     <div class="testimonial">
                         {% if testimonial.image %}
                             <div class="pic">
-                                <img src="{{ testimonial.image.url }}" alt="">
+                                <img full-size-src="{{ testimonial.image.url }}" alt="">
                                 {% if testimonial.country %}
                                     <div class="country-flag">
-                                        <img src="{{ testimonial.flag_url }}" />
+                                        <img data-no-minimise src="{{ testimonial.flag_url }}" />
                                     </div>
                                 {% endif %}
                             </div>

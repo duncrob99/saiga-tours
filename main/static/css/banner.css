@@ -3,11 +3,11 @@
 }
 
 .banner-img.hide-right {
-    left: 100%;
+    transform: translateX(100%);
 }
 
 .banner-img.hide-left {
-    left: -100%;
+    transform: translateX(-100%);
 }
 
 .banner-img.show {
@@ -15,13 +15,13 @@
 }
 
 .banner-img.left {
-    left: -100%;
+    transform: translateX(-100%);
     z-index: -1;
     visibility: hidden;
 }
 
 .banner-img.right {
-    left: 100%;
+    transform: translateX(100%);
 }
 
 .banner-img.below {

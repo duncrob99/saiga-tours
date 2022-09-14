@@ -9,11 +9,19 @@
     --hover-rotation: 1;
 }
 
-.image-fan img {
-    border-radius: var(--border-radius);
-    box-shadow: 10px 10px 30px rgba(0, 0, 0, 0.2);
+#content img[data-full-size-loaded="true"] {
+    transition: filter var(--blur-transition);
+}
+
+.image-fan .above-img:after, .image-fan .below-img:after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     border: 7px solid white;
-    transition: 0.5s transform;
+    border-radius: var(--border-radius);
 }
 
 .image-fan div {
@@ -32,6 +40,8 @@
     transform-origin: bottom left;
     transform: rotate(calc(-1deg * var(--base-rotation)));
     z-index: 1;
+    overflow: hidden;
+    border-radius: var(--border-radius);
 }
 
 .below-img {
@@ -39,6 +49,8 @@
     --trans: translate(10%, -10%) scale(0.9);
     transform: var(--trans) rotate(calc(1deg * var(--base-rotation)));
     z-index: -1;
+    overflow: hidden;
+    border-radius: var(--border-radius);
 }
 
 .image-fan:hover .above-img {

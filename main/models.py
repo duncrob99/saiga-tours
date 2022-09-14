@@ -506,6 +506,11 @@ class Page(DraftHistory):
         unique_together = [['parent', 'slug']]
         ordering = ['title', 'slug']
 
+    @property
+    def card_img_url(self):
+        # Return card_img.url without the media url
+        return self.card_img.url[len(settings.MEDIA_URL):]
+
     def get_caches_to_invalidate(self, previous):
         if self.in_navbar:
             return "all"

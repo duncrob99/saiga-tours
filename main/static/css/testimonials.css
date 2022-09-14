@@ -133,15 +133,14 @@
 }
 
 .pic img {
-    width: 150px;
-    height: 150px;
-    border-radius: 50%;
-    border: 5px solid #f1f1f1;
-    margin-bottom: 20px;
+    width: 102%;
+    height: 102%;
     overflow: hidden;
     position: relative;
     object-fit: cover;
     object-position: center;
+    background-color: white;
+    margin: -1%;
 }
 
 .pic .country-flag:after {
@@ -159,6 +158,18 @@
 .pic {
     position: relative;
     width: min-content;
+}
+
+.pic .main-pic {
+    overflow: hidden;
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    border: 5px solid #f1f1f1;
+}
+
+.pic .main-pic::after {
+
 }
 
 .pic .country-flag {

@@ -8,6 +8,10 @@
     object-position: calc(var(--banner-x) * 1%) calc(var(--banner-y) * 1%);
 }
 
+#header-banner[data-full-size-loaded="true"] {
+    transition: filter var(--blur-transition);
+}
+
 #header-content {
     height: 356px;
     position: relative;

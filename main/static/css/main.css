@@ -6,6 +6,10 @@ html, body {
     scroll-behavior: smooth;
 }
 
+:root {
+    --blur-transition: 0.5s;
+}
+
 .banner {
     height: calc(100% - var(--navbar-height) - 6px);
 }
@@ -367,4 +371,8 @@ form div.mb-3:focus-within::after {
 .form-select:focus {
     box-shadow: none;
     background: none;
+}
+
+img.downscaled {
+    filter: blur(50px);
 }
