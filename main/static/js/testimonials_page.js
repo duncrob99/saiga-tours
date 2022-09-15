@@ -49,8 +49,9 @@
 
     window.setFlag = (el, src) => {
         el.classList.add('transition-out');
+        let next_img = preloadImage(src);
         setTimeout(async () => {
-            await preloadImage(src)
+            await next_img;
             el.src = src;
             el.classList.remove('transition-out');
             el.classList.add('transition-in');
