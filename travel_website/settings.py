@@ -303,3 +303,10 @@ COUNTRIES_FIRST = [
 ]
 # COUNTRIES_FIRST_REPEAT = True
 # COUNTRIES_FIRST_BREAK = "-----------------"
+
+if DEBUG:
+    try:
+        import nplusone
+        nplusone.show_nplusones()
+    except ImportError:
+        print("nplusone not installed")

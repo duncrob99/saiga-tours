@@ -57,7 +57,7 @@ Home
             {% for banner in banners %}
                 <img alt="" data-filename="{{ banner.img.name }}" class="banner-img hide to-load"
                      idx="{{ forloop.counter0 }}" min_ar="{{ banner.min_AR }}"
-                     max_ar="{{ banner.max_AR }}">
+                     max_ar="{{ banner.max_AR }}" src="{% downscaled_image banner.img 100 %}">
             {% endfor %}
         </div>
         <div class="banner-text">
@@ -163,7 +163,7 @@ Home
 
                         <div class="card order-1 img-title-card img-card mt-4">
                             <div class="img-card-contents">
-                                <img data-filename="{{ article.card_img.name }}" class="card-img" alt="{{ article }}">
+                                <img src="{% downscaled_image article.card_img 50 %}" data-filename="{{ article.card_img.name }}" class="card-img" alt="{{ article }}">
                                 <div class="card-img-overlay">
                                     <h5 class="card-title">{{ article }}</h5>
                                 </div>

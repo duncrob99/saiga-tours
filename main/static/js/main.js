@@ -16,21 +16,21 @@ async function minimise_image(img, downscale) {
     return new Promise(async (resolve, reject) => {
 
         let img_src;
-        if (img.hasAttribute('src')) {
-            img_src = img.getAttribute('src');
-        } else if (img.hasAttribute('full-size-src')) {
+        if (img.hasAttribute('full-size-src')) {
             img_src = img.getAttribute('full-size-src');
         } else if (img.hasAttribute('data-filename')) {
             img_src = img.getAttribute('data-filename');
+        } else if (img.hasAttribute('src')) {
+            img_src = img.getAttribute('src');
         } else return reject('No src attribute found');
 
         let original_src = img_src;
         if (img_src.startsWith('/static') || img_src.includes('data:image/') || img_src.includes('http')) return reject('Not a local media image');
 
         if (downscale === undefined) {
-            await minimise_image(img, 50).catch(reason => {
-                reject(reason);
-            });
+            // await minimise_image(img, 50).catch(reason => {
+            //     reject(reason);
+            // });
             // await pause_async(5000);
             console.log("Finished minimising");
             downscale = 1;
@@ -95,7 +95,7 @@ function minimise_images() {
         for (const entry of entries) {
             if (entry.intersectionRatio > 0) {
                 general_observer.unobserve(entry.target);
-                entry.target.setAttribute('observing-intersection', 'false');
+                // entry.target.setAttribute('observing-intersection', 'false');
                 await minimise_image(entry.target).catch(reason => {
                     console.warn("Failed to minimise image: ", entry.target, reason);
                 });
@@ -131,7 +131,8 @@ function minimise_images() {
         if (img.classList.contains('banner-img')) {
             banner_observer.observe(img);
         } else {
-            blurred_observer.observe(img);
+            // blurred_observer.observe(img);
+            general_observer.observe(img);
         }
         img.setAttribute('observing-intersection', 'true');
     });

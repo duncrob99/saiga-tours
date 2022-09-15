@@ -9,7 +9,7 @@
         {% for page in pages %}
             <div class="col-md-4 col-sm-12 g-0">
                 <div class="card img-card m-3">
-                    <img src="{% resized_image page.card_img_url 12 9 %}" old-src="/resized-image/{{ page.card_img_url }}/12x9/" class="downscaled card-img" alt="{{ page.title }}">
+                    <img style="width: auto; height: auto;" src="{% resized_image page.card_img_url 12 9 %}" height="9" width="12" full-size-src="{{ page.card_img.url }}" class="card-img" alt="{{ page.title }}">
                     <div class="card-img-overlay">
                         <h5 class="card-title">{{ page.title }}</h5>
                     </div>

@@ -1,4 +1,5 @@
 from PIL import Image
+from ua_parser import user_agent_parser
 
 
 def crop_center(pil_img: Image, crop_width: int, crop_height: int) -> Image:
@@ -68,3 +69,35 @@ def autorotate(img: Image):
             img = img.transpose(rotate_values[orientation])
 
     return img
+
+
+def browser_supports_webp(request):
+    """Check if browser is Safari <16 and macOS <11 or Safari <14"""
+
+    try:
+        ua_info = user_agent_parser.Parse(request.META.get('HTTP_USER_AGENT'))
+        if ua_info['os']['family'] == 'Mac OS X' and ua_info['user_agent']['family'] == 'Safari':
+            if int(ua_info['os']['major']) < 11 and int(ua_info['user_agent']['major']) < 16 or int(
+                    ua_info['user_agent']['major']) < 14:
+                return False
+
+        return True
+    except KeyError:
+        return False
+
+
+def no_transparency(image):
+    """Check if image has transparency"""
+    if image.mode in ('RGBA', 'LA'):
+        return False
+    return True
+
+
+def get_image_format(request, image):
+    if browser_supports_webp(request):
+        img_format = 'webp'
+    elif no_transparency(image):
+        img_format = 'jpeg'
+    else:
+        img_format = 'png'
+    return img_format

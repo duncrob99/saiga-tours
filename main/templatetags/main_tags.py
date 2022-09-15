@@ -1,12 +1,20 @@
 import calendar
+from os import path
+
+from PIL import Image
 from bs4 import BeautifulSoup as bs
+from io import BytesIO
+import base64
 
 from django import template
 from django.conf import settings
 from django.core.paginator import Page
+from django.db.models import ImageField
+from django.http import Http404
 from django.utils.safestring import mark_safe
 
 from main.models import Settings
+from main.images import get_image_format, autorotate, crop_to_dims
 
 register = template.Library()
 
@@ -123,3 +131,22 @@ def delay_images(value: str, request):
 def resized_image(url: str, x: int, y: int):
     print('resized_image', url, x, y)
     return f'/resized-image/{url.removeprefix(settings.MEDIA_URL)}/{x}x{y}/'
+
+
+@register.simple_tag(takes_context=True)
+def downscaled_image(context, img: ImageField, scale: float):
+    try:
+        raw_image = Image.open(img, mode='r')
+    except FileNotFoundError:
+        raise Http404
+    image = autorotate(raw_image)
+
+    cropped_image = crop_to_dims(image, int(img.width / scale), int(img.height / scale))
+
+    img_format = get_image_format(context.request, image)
+
+    buff = BytesIO()
+    cropped_image.save(buff, format=img_format)
+    img64 = base64.b64encode(buff.getvalue()).decode('utf-8')
+
+    return f'data:image/{img_format};base64,{img64}'

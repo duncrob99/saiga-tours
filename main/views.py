@@ -15,11 +15,10 @@ from django.forms import modelform_factory, inlineformset_factory, modelformset_
 from django.http import Http404, HttpResponseRedirect, HttpResponse, FileResponse, JsonResponse, HttpRequest
 from django.shortcuts import render, get_object_or_404, redirect
 from silk.profiling.profiler import silk_profile
-from ua_parser import user_agent_parser
 
 from .forms import *
 from .models import *
-from .images import crop_to_dims
+from .images import crop_to_dims, get_image_format
 from .widgets import CountrySelectWidget
 
 
@@ -87,7 +86,7 @@ def front_page(request):
             front_page_pos__isnull=False).order_by('front_page_pos'),
         'highlights': HightlightBox.visible(request.user.is_staff),
         'destinations': Destination.visible(request.user.is_staff),
-        'points': MapPoint.objects.all(),
+        'points': MapPoint.objects.all().select_related('template'),
         'testimonials': Testimonial.visible(request.user.is_staff),
         'rows': rows,
         'meta': MetaInfo(
@@ -112,7 +111,7 @@ def global_context(request):
         FooterLink(subpage.title, '/' + subpage.full_path)
         for subpage in page.children.visible(request.user.is_staff)
     ])
-                    for page in Page.visible(request.user.is_staff).filter(parent=None, in_navbar=True)]
+                    for page in Page.visible(request.user.is_staff).filter(parent=None, in_navbar=True).prefetch_related('children')]
 
     footer_links += [FooterLink('tours', reverse('tours'), [
         FooterLink(region.name, reverse('tours', args=[region.slug]), [
@@ -348,6 +347,29 @@ def tours(request):
         )
     }
     return render(request, 'main/tours.html', context)
+
+
+def tours_json(request):
+    tours = Tour.visible(request.user.is_staff).filter(display=True)
+
+    tour_url = "/media/animage.png"
+    tour_url_without_media = tour_url.replace("/media/", "")
+
+    data = [{
+            'title': tour.name,
+            'slug': tour.slug,
+            'excerpt': tour.excerpt,
+            'image': f"https://www.saigatours.com/resized-image{tour.card_img.url.replace('/media', '')}/500x350/",
+            "state": {
+                "label": tour.state.text,
+                "border_colour": tour.state.border_color,
+                "label_colour": tour.state.color,
+            } if tour.state else None,
+            'start_date': tour.start_date.strftime('%Y-%m-%d') if tour.start_date else None,
+            'duration': tour.duration,
+            'price': tour.price,
+        } for tour in tours]
+    return JsonResponse(data, safe=False)
 
 
 def article(request, slug):
@@ -609,28 +631,6 @@ def country_tours_info(request, region_slug, country_slug, detail_slug):
     return details_page(request, region_slug, country_slug, detail_slug, DestinationDetails.TOURS)
 
 
-def browser_supports_webp(request):
-    """Check if browser is Safari <16 and macOS <11 or Safari <14"""
-
-    try:
-        ua_info = user_agent_parser.Parse(request.META.get('HTTP_USER_AGENT'))
-        if ua_info['os']['family'] == 'Mac OS X' and ua_info['user_agent']['family'] == 'Safari':
-            if int(ua_info['os']['major']) < 11 and int(ua_info['user_agent']['major']) < 16 or int(
-                    ua_info['user_agent']['major']) < 14:
-                return False
-
-        return True
-    except KeyError:
-        return False
-
-
-def no_transparency(image):
-    """Check if image has transparency"""
-    if image.mode in ('RGBA', 'LA'):
-        return False
-    return True
-
-
 def crop_image(request, filename: str, width: int, height: int):
     removed_prefix = filename
     try:
@@ -641,15 +641,9 @@ def crop_image(request, filename: str, width: int, height: int):
 
     cropped_image = crop_to_dims(image, width, height)
 
-    if browser_supports_webp(request):
-        img_format = 'webp'
-    elif no_transparency(image):
-        img_format = 'jpeg'
-    else:
-        img_format = 'png'
+    img_format = get_image_format(request, image)
 
     response = HttpResponse(content_type=f'image/{img_format}')
-    # noinspection PyTypeChecker
     cropped_image.save(response, img_format)
     return response
 

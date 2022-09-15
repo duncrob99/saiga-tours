@@ -128,11 +128,7 @@
             }
         });
         // Set height of container
-        testimonial_slider.style.height = `${max_height}px`;
-        while (testimonial_slider.getBoundingClientRect().bottom < fold_box.bottom) {
-            max_height += 1;
-            testimonial_slider.style.height = `${max_height}px`;
-        }
+        testimonial_slider.style.height = `${max_height + margin}px`;
     }
 
     // Observe the slider
