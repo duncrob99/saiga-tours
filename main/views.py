@@ -795,7 +795,7 @@ def testimonials(request):
         raise Http404
 
     form_factory = modelform_factory(Testimonial,
-                                     fields=('name', 'age', 'quote', 'image', 'country'),
+                                     fields=('name', 'age', 'country', 'image', 'quote'),
                                      widgets={'country': CountrySelectWidget()})
     form = form_factory(request.POST or None, request.FILES or None)
 

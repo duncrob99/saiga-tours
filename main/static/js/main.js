@@ -244,4 +244,28 @@ if (storageAvailable('sessionStorage')) {
             });
         }
     });
+
 })();
+
+var $buoop = {
+    required: {e: 18, f: 95, o: 80, s: 9, c: 96},
+    insecure: true,
+    style: "corner",
+    api: 2022.10,
+    text: {
+        'msgmore': 'Update your browser for more security, speed and the best experience on our website.',
+    },
+    no_permanent_hide: true,
+};
+
+function $buo_f() {
+    var e = document.createElement("script");
+    e.src = "//browser-update.org/update.min.js";
+    document.body.appendChild(e);
+}
+
+try {
+    document.addEventListener("DOMContentLoaded", $buo_f, false)
+} catch (e) {
+    window.attachEvent("onload", $buo_f)
+}

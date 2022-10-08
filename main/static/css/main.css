@@ -118,15 +118,31 @@ small {
 }
 
 a.nice-link {
+    --underline-width: 3px;
     text-decoration: none;
-    border-bottom: 2px dashed var(--accent-foreground);
+    border-bottom: var(--underline-width) dashed var(--accent-foreground);
     color: var(--accent-foreground);
     cursor: pointer;
+    position: relative;
 }
 
 a.nice-link:hover {
-    border-bottom: 2px dashed var(--accent-hover-foreground);
+    /*border-bottom: 2px dashed var(--accent-hover-foreground);*/
     color: var(--accent-hover-foreground);
+}
+
+a.nice-link::after {
+    content: '';
+    position: absolute;
+    border-bottom: var(--underline-width) solid var(--accent-hover-foreground);
+    left: 0;
+    bottom: calc(var(--underline-width) * -1);
+    width: 0;
+    transition: width 200ms ease-out;
+}
+
+a.nice-link:hover::after {
+    width: 100%;
 }
 
 body * {
@@ -375,4 +391,36 @@ form div.mb-3:focus-within::after {
 
 img.downscaled {
     filter: blur(50px);
+}
+
+::selection {
+    background: var(--accent-hover-background);
+    color: var(--accent-hover-foreground);
+    font-family: serif;
+}
+
+body .buorg {
+    border-radius: var(--border-radius);
+    background-color: rgba(255, 255, 255, 0.5);
+    top: calc(var(--navbar-height) + 1rem);
+    backdrop-filter: blur(20px);
+    border: none;
+}
+
+body .buorg b {
+    color: var(--accent-hover-foreground);
+}
+
+a#buorgul, a#buorgig {
+    background-color: var(--accent-background);
+    color: var(--accent-foreground);
+}
+
+a#buorgul:hover, a#buorgig:hover {
+    background-color: var(--accent-hover-background);
+    color: var(--accent-hover-foreground);
+}
+
+a#buorgig:not(:hover) {
+    backdrop-filter: opacity(0.5);
 }

@@ -609,9 +609,12 @@ class Settings(models.Model):
     site_title = models.CharField(max_length=500, default='Crowley Tours')
     catchphrase = models.CharField(max_length=500, default='We do cool tours')
     logo = models.FileField(null=True, blank=True)
+
     twitter_link = models.URLField(blank=True, null=True)
     instagram_link = models.URLField(blank=True, null=True)
     facebook_link = models.URLField(blank=True, null=True)
+    tiktok_link = models.URLField(blank=True, null=True)
+
     price_prefix = models.CharField(max_length=10, default='US$')
     rounded_card_headers = models.BooleanField(default=True)
     corner_radius = models.FloatField(default=20)

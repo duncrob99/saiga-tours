@@ -119,6 +119,7 @@
             "logo": "{{ settings.logo.url }}"
         }
     </script>
+    <script defer src="{% static 'js/main.js' %}"></script>
 
     {% block extrahead %}
     {% endblock %}
@@ -131,12 +132,12 @@
 
 {% block banner %}
 {% endblock %}
-<div class="container p-3 p-sm-5" id="content-container">
-    <div id="contents">
-        {% block content %}
-        {% endblock %}
+    <div class="container p-3 p-sm-5" id="content-container">
+        <div id="contents">
+            {% block content %}
+            {% endblock %}
+        </div>
     </div>
-</div>
 
 <div class="loader">
     <div class="spinner">
@@ -150,7 +151,6 @@
 {% sub_request %}
 
 </body>
-<script src="{% static 'js/main.js' %}"></script>
 <script src="{% static 'js/spinner.js' %}"></script>
 {#<script src="https://unpkg.com/@popperjs/core@2"></script>#}
 {#<script src="https://unpkg.com/tippy.js@6"></script>#}
