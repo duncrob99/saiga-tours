@@ -908,19 +908,19 @@ def invalidate_pages(pages_to_invalidate):
     else:
         print(f'Invalidating {pages_to_invalidate}')
         for page in pages_to_invalidate:
-            try:
-                cache_entry = PageCache.objects.get(url=page)
-                cache_entry.delete()
-            except PageCache.DoesNotExist:
-                pass
+            # Remove all PageCaches that begin with the page
+            for cache in PageCache.objects.filter(url__startswith=page):
+                cache.delete()
         print(f'Invalidating {pages_to_invalidate} on Cloudflare')
         purge_cloudflare_page(pages_to_invalidate)
 
 
 # Invalidate pagecache on model save
+@receiver(post_save)
 def invalidate_page_cache(sender, instance, **kwargs):
-    pages_to_invalidate = instance.get_caches_to_invalidate(sender.objects.get(pk=instance.pk) if instance.pk else None)
-    invalidate_pages(pages_to_invalidate)
+    if hasattr(instance, 'get_caches_to_invalidate'):
+        pages_to_invalidate = instance.get_caches_to_invalidate(sender.objects.get(pk=instance.pk) if instance.pk else None)
+        invalidate_pages(pages_to_invalidate)
 
 
 class Testimonial(models.Model):

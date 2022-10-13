@@ -24,25 +24,26 @@ class CacheForUsers:
             r'^/stats/',
             r'^/testimonials/',
         ]
+        path = request.get_full_path()
 
         if request.method == 'GET' and not request.user.is_authenticated and not any(
-                re.match(ignored_path, request.path) for ignored_path in bypass_urls) and settings.NOCACHE is False:
+                re.match(ignored_path, path) for ignored_path in bypass_urls) and settings.NOCACHE is False:
             # Retrieve response from PageCache if it exists, otherwise store response
             try:
                 try:
-                    cache = PageCache.objects.get(url=request.path)
+                    cache = PageCache.objects.get(url=path)
                     response = HttpResponse(cache.content)
                 except PageCache.MultipleObjectsReturned:
-                    cache = PageCache.objects.filter(url=request.path).first()
+                    cache = PageCache.objects.filter(url=path).first()
                     response = HttpResponse(cache.content)
                     # Delete duplicates other than the one we retrieved
-                    PageCache.objects.filter(url=request.path).exclude(id=cache.id).delete()
+                    PageCache.objects.filter(url=path).exclude(id=cache.id).delete()
             except PageCache.DoesNotExist:
                 response = self.get_response(request)
                 if isinstance(response, HttpResponse) and response.status_code == 200 and response.get("Content-Type", "").startswith("text/html"):
                     # Minify HTML response
                     minified = minify_html(response.content)
-                    PageCache.objects.create(url=request.path, content=minified)
+                    PageCache.objects.create(url=path, content=minified)
         else:
             response = self.get_response(request)
 
