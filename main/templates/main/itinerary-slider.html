@@ -88,8 +88,8 @@
 </div>
 
 {% block js %}
-    <script>
-        let days = {};
+    <script type="module">
+        window.days = {};
         {% for day in itinerary %}
             days[{{ day.pk }}] = {
                 day: {{ day.day }},
@@ -102,7 +102,7 @@
             };
         {% endfor %}
 
-        let itinerary_templates = {};
+        window.itinerary_templates = {};
         {% for template in itinerary_templates %}
             itinerary_templates[{{ template.pk }}] = {
                 title: {{ template.title | js_str }},
@@ -110,5 +110,5 @@
             };
         {% endfor %}
     </script>
-    <script src="{% static 'js/itinerary-slider.js' %}"></script>
+    <script defer src="{% static 'js/itinerary-slider.js' %}"></script>
 {% endblock %}

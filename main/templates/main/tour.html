@@ -358,15 +358,18 @@
 
 {% block js %}
     {% if tour.stops.count %}
-        <script src="{% static 'js/map.js' %}"></script>
+        <script defer src="{% static 'js/svg.js' %}"></script>
+        <script defer src="{% static 'js/svg.panzoom.min.js' %}"></script>
+        <script defer src="{% static 'js/svg.easing.min.js' %}"></script>
+        <script defer src="{% static 'js/map.js' %}"></script>
 
         {% if request.user.is_staff %}
-            <script src="https://code.jquery.com/jquery-3.6.1.min.js" integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" crossorigin="anonymous"></script>
-            <script src="{% static 'js/bootstrap_contextmenu.js' %}"></script>
+            <script defer src="https://code.jquery.com/jquery-3.6.1.min.js" integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" crossorigin="anonymous"></script>
+            <script defer src="{% static 'js/bootstrap_contextmenu.js' %}"></script>
         {% endif %}
 
-        <script>
-            let destinations = {};
+        <script type="module">
+            window.destinations = {};
             {% for destination in tour.destinations.all %}
                 destinations[{{ destination.pk }}] = {
                     name: {{ destination.name | js_str }},
@@ -374,7 +377,7 @@
                 };
             {% endfor %}
 
-            let stops = [];
+            window.stops = [];
             {% for stop in tour.stops.all %}
                 {% comment %}
                 stops.push(["{{ stop.name }}", {{ stop.x }}, {{ stop.y }}, {{ stop.day }}, {{ forloop.counter0 }}])
@@ -397,7 +400,7 @@
                 });
             {% endfor %}
 
-            let position_templates = {};
+            window.position_templates = {};
             {% for template in position_templates %}
                 position_templates[{{ template.pk }}] = {
                     x: {{ template.x | convert_None }},
@@ -406,27 +409,26 @@
                 };
             {% endfor %}
 
-            let tour_scale = {{ tour.map_scale }};
-
-            make_map_work(destinations, undefined, 500, false, stops);
+            window.tour_scale = {{ tour.map_scale }};
         </script>
+        <script defer src="{% static 'js/tour.js' %}"></script>
     {% endif %}
 
     {% if request.user.is_staff %}
         <script>
             let dated = "{{ tour.dated }}" === "True";
         </script>
-        <script src="{% static 'js/svg.js' %}"></script>
-        <script src="{% static 'js/svg.easing.min.js' %}"></script>
-        <script src="https://cdn.jsdelivr.net/npm/litepicker/dist/litepicker.js"></script>
+        <script defer src="{% static 'js/svg.js' %}"></script>
+        <script defer src="{% static 'js/svg.easing.min.js' %}"></script>
+        <script defer src="https://cdn.jsdelivr.net/npm/litepicker/dist/litepicker.js"></script>
         {#        <script src="https://cdn.ckeditor.com/4.16.2/standard-all/ckeditor.js"></script>#}
-        <script src="https://cdn.jsdelivr.net/npm/luxon@2/build/global/luxon.min.js"></script>
-        <script src="{% static 'js/jscolor.min.js' %}"></script>
-        <script src="{% static 'js/ckeditor/ckeditor.js' %}"></script>
-        <script src="{% static 'js/custom_ckeditor.js' %}"></script>
-        <script src="{% static 'nouislider/nouislider.js' %}"></script>
-        <script src="{% static 'js/tour_editing.js' %}"></script>
+        <script defer src="https://cdn.jsdelivr.net/npm/luxon@2/build/global/luxon.min.js"></script>
+        <script defer src="{% static 'js/jscolor.min.js' %}"></script>
+        <script defer src="{% static 'js/ckeditor/ckeditor.js' %}"></script>
+        <script defer src="{% static 'js/custom_ckeditor.js' %}"></script>
+        <script defer src="{% static 'nouislider/nouislider.js' %}"></script>
+        <script defer src="{% static 'js/tour_editing.js' %}"></script>
     {% endif %}
-    <script src="{% static 'js/ckeditor_styling.js' %}"></script>
-    <script src="{% static 'js/header-banner.js' %}"></script>
+    <script defer src="{% static 'js/ckeditor_styling.js' %}"></script>
+    <script defer src="{% static 'js/header-banner.js' %}"></script>
 {% endblock %}

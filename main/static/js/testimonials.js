@@ -33,7 +33,6 @@
             testimonial.classList.remove('hidden');
 
             if (initialised) {
-                console.log("initialised");
                 testimonial.classList.add('animated');
             } else {
                 console.log("Not initialised, not animating");

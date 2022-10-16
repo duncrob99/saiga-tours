@@ -71,7 +71,7 @@
                          --card-border-width: 10px;"
                     {% endif %}>
                 <div class="img-card-contents">
-                    <img src="{% downscaled_image tour.card_img 50 %}" data-filename="{{ tour.card_img.name }}" class="card-img" alt="{{ tour.name }}">
+                    <img src="{% downscaled_image tour.card_img %}" data-filename="{{ tour.card_img.name }}" class="card-img" alt="{{ tour.name }}">
                     <div class="card-img-overlay">
                         {% if tour.state is not None %}
                             <div class="state" style="background-color: {{ tour.state.color }};

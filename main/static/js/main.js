@@ -32,7 +32,6 @@ async function minimise_image(img, downscale) {
             //     reject(reason);
             // });
             // await pause_async(5000);
-            console.log("Finished minimising");
             downscale = 1;
         }
 

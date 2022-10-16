@@ -88,12 +88,15 @@
 {% endblock %}
 
 {% block js %}
+    <script defer src="{% static 'js/svg.js' %}"></script>
+    <script defer src="{% static 'js/svg.panzoom.min.js' %}"></script>
+    <script defer src="{% static 'js/svg.easing.min.js' %}"></script>
     {% if request.user.is_staff %}
-        <script src="{% static 'nouislider/nouislider.js' %}"></script>
+        <script defer src="{% static 'nouislider/nouislider.js' %}"></script>
     {% endif %}
-    <script src="{% static 'js/map.js' %}"></script>
-    <script>
-        let destinations = {};
+    <script defer src="{% static 'js/map.js' %}"></script>
+    <script type="module">
+        window.destinations = {};
         {% for destination in destinations %}
             destinations[{{ destination.pk }}] = {
                 name: {{ destination.name | js_str }},
@@ -109,7 +112,7 @@
             };
         {% endfor %}
 
-        let points = [];
+        window.points = [];
         {% for point in points %}
             points.push({
                 x: {% if point.template %}{{ point.template.x }}{% else %}{{ point.x }}{% endif %},
@@ -122,6 +125,6 @@
         make_map_work(destinations, undefined, undefined, undefined, undefined, undefined, points);
     </script>
     {% if request.user.is_staff %}
-        <script src="{% static 'js/destinations_editing.js' %}"></script>
+        <script defer src="{% static 'js/destinations_editing.js' %}"></script>
     {% endif %}
 {% endblock %}

@@ -1,4 +1,5 @@
 import calendar
+import math
 from os import path
 
 from PIL import Image
@@ -122,6 +123,12 @@ def delay_images(value: str, request):
             # Mark image as not to be minimised
             img.attrs['data-no-minimise'] = 'true'
 
+    # Ensure empty paragraphs contain <br> tags
+    for p in soup.find_all('p'):
+        if p.text.strip() == '':
+            p.string = ""
+            p.append(soup.new_tag('br'))
+
     # print('soupstr: ', soup.str())
     return mark_safe(soup.prettify().replace('<span style="background-color:rgba(220,220,220,0.5)"><img src="data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==" style="height:15px; width:15px" title="Click and drag to move"></span>', ''))
     # return mark_safe(value.replace('<img src=', '<img data-filename='))
@@ -134,14 +141,14 @@ def resized_image(url: str, x: int, y: int):
 
 
 @register.simple_tag(takes_context=True)
-def downscaled_image(context, img: ImageField, scale: float):
+def downscaled_image(context, img: ImageField, width: int = 10):
     try:
         raw_image = Image.open(img, mode='r')
     except FileNotFoundError:
         raise Http404
     image = autorotate(raw_image)
 
-    cropped_image = crop_to_dims(image, int(img.width / scale), int(img.height / scale))
+    cropped_image = crop_to_dims(image, width, math.ceil(width * image.height / image.width))
 
     img_format = get_image_format(context.request, image)
 

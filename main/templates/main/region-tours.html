@@ -25,9 +25,15 @@
 {% endblock %}
 
 {% block js %}
-    <script src="{% static 'js/map.js' %}"></script>
-    <script>
-        let destinations = {};
+    <script defer src="{% static 'js/svg.js' %}"></script>
+    <script defer src="{% static 'js/svg.panzoom.min.js' %}"></script>
+    <script defer src="{% static 'js/svg.easing.min.js' %}"></script>
+    <script defer src="{% static 'js/map.js' %}"></script>
+    {% if request.user.is_staff %}
+        <script defer src="{% static 'nouislider/nouislider.js' %}"></script>
+    {% endif %}
+    <script type="module">
+        window.destinations = {};
         {% for destination in countries %}
             destinations[{{ destination.pk }}] = {
                 name: {{ destination.name | js_str }},
@@ -43,7 +49,7 @@
             };
         {% endfor %}
 
-        let points = [];
+        window.points = [];
         {% for point in points %}
             points.push({
                 x: {% if point.template and point.template.x is not None %}{{ point.template.x }}{% else %}{{ point.x }}{% endif %},
@@ -53,8 +59,9 @@
                 size: {{ point.size }}
             })
         {% endfor %}
-        let navbar_height = document.querySelector('.navbar').getBoundingClientRect().height;
-        height = 0.8 * (document.documentElement.clientHeight - navbar_height);
+
+        window.navbar_height = document.querySelector('.navbar').getBoundingClientRect().height;
+        window.height = 0.8 * (document.documentElement.clientHeight - navbar_height);
         make_map_work(destinations, undefined, height, undefined, undefined, undefined, points);
     </script>
 {% endblock %}

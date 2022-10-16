@@ -248,12 +248,5 @@
 {% endblock %}
 
 {% block js %}
-    <script src="https://cdn.jsdelivr.net/npm/litepicker/dist/litepicker.js"></script>
-    <script src="{% static 'js/fuse.js' %}"></script>
-    <script src="{% static 'js/article_list.js' %}"></script>
-    <script>
-        start_picker.setDate("{{ start_date|date:'Y-m-d' }}");
-        start_picker.setDate("{{ end_date|date:'Y-m-d' }}");
-    </script>
-    <script src="{% static 'js/header-banner.js' %}"></script>
+    <script defer src="{% static 'js/header-banner.js' %}"></script>
 {% endblock %}

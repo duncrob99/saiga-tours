@@ -46,9 +46,6 @@ Home
             transform: scale(1.2);
         }
     </style>
-    <script src="{% static 'js/visibility/visibility.core.js' %}"></script>
-    <script src="{% static 'js/visibility/visibility.fallback.js' %}"></script>
-    <script src="{% static 'js/visibility/visibility.timers.js' %}"></script>
 {% endblock %}
 
 {% block banner %}
@@ -57,7 +54,7 @@ Home
             {% for banner in banners %}
                 <img alt="" data-filename="{{ banner.img.name }}" class="banner-img hide to-load"
                      idx="{{ forloop.counter0 }}" min_ar="{{ banner.min_AR }}"
-                     max_ar="{{ banner.max_AR }}" src="{% downscaled_image banner.img 100 %}">
+                     max_ar="{{ banner.max_AR }}" src="{% downscaled_image banner.img 20 %}">
             {% endfor %}
         </div>
         <div class="banner-text">
@@ -131,7 +128,7 @@ Home
             <div id="testimonial-sizer" class="not-fold"></div>
             {% include 'main/testimonials.html' %}
             <link rel="stylesheet" href="{% static 'css/testimonials.css' %}">
-            <script src="{% static 'js/testimonials.js' %}"></script>
+            <script defer src="{% static 'js/testimonials.js' %}"></script>
         {% elif row.type == 'articles' %}
             <h1 class="section-title">{{ row.title }}
                 <div class="underline"></div>
@@ -163,7 +160,7 @@ Home
 
                         <div class="card order-1 img-title-card img-card mt-4">
                             <div class="img-card-contents">
-                                <img src="{% downscaled_image article.card_img 50 %}" data-filename="{{ article.card_img.name }}" class="card-img" alt="{{ article }}">
+                                <img src="{% downscaled_image article.card_img %}" data-filename="{{ article.card_img.name }}" class="card-img" alt="{{ article }}">
                                 <div class="card-img-overlay">
                                     <h5 class="card-title">{{ article }}</h5>
                                 </div>
@@ -188,18 +185,24 @@ Home
 {% endblock %}
 
 {% block js %}
+    <script defer src="{% static 'js/svg.js' %}"></script>
+    <script defer src="{% static 'js/svg.panzoom.min.js' %}"></script>
+    <script defer src="{% static 'js/svg.easing.min.js' %}"></script>
+    <script defer src="{% static 'js/visibility/visibility.core.js' %}"></script>
+    <script defer src="{% static 'js/visibility/visibility.fallback.js' %}"></script>
+    <script defer src="{% static 'js/visibility/visibility.timers.js' %}"></script>
     <script>
         let banner_delay = {{ settings.banner_delay }};
         let banner_init_delay = {{ settings.banner_initial_delay }};
     </script>
-    <script src="{% static 'js/banner.js' %}"></script>
+    <script defer src="{% static 'js/banner.js' %}"></script>
 
     {% if request.user.is_staff %}
-        <script src="{% static 'nouislider/nouislider.js' %}"></script>
+        <script defer src="{% static 'nouislider/nouislider.js' %}"></script>
     {% endif %}
-    <script src="{% static 'js/map.js' %}"></script>
-    <script>
-        let destinations = {};
+    <script defer src="{% static 'js/map.js' %}"></script>
+    <script type="module">
+        window.destinations = {};
         {% for destination in destinations %}
             destinations[{{ destination.pk }}] = {
                 name: {{ destination.name | js_str }},
@@ -215,7 +218,7 @@ Home
             };
         {% endfor %}
 
-        let points = [];
+        window.points = [];
         {% for point in points %}
             points.push({
                 x: {% if point.template and point.template.x is not None %}{{ point.template.x | convert_None }}{% else %}{{ point.x | convert_None }}{% endif %},
@@ -227,5 +230,5 @@ Home
         {% endfor %}
         make_map_work(destinations, undefined, undefined, undefined, undefined, undefined, points);
     </script>
-    <script src="{% static 'js/ckeditor_styling.js' %}"></script>
+    <script defer src="{% static 'js/ckeditor_styling.js' %}"></script>
 {% endblock %}
