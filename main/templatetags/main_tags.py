@@ -99,6 +99,19 @@ def short_month_name(month_number: int):
     return calendar.month_abbr[num]
 
 
+def is_empty_element(tag) -> bool:
+    if tag.name in ['img', 'br', 'hr'] or tag.text.strip() != '':
+        return False
+    else:
+        if 'contents' in dir(tag):
+            for child in tag.contents:
+                if not is_empty_element(child):
+                    return False
+            return True
+        else:
+            return True
+
+
 @register.filter()
 def delay_images(value: str, request):
     # print(value, value.replace('<img src=', '<img data-filename='))
@@ -123,9 +136,9 @@ def delay_images(value: str, request):
             # Mark image as not to be minimised
             img.attrs['data-no-minimise'] = 'true'
 
-    # Ensure empty paragraphs contain <br> tags
-    for p in soup.find_all('p'):
-        if p.text.strip() == '':
+    # Ensure empty paragraphs and other text tags contain <br> tags
+    for p in soup.find_all(['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'li', 'td', 'th', 'div', 'span']):
+        if is_empty_element(p):
             p.string = ""
             p.append(soup.new_tag('br'))
 
