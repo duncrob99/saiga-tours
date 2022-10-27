@@ -92,7 +92,7 @@ def front_page(request):
         'meta': MetaInfo(
             request.get_raw_uri(),
             'SAIGA Tours Homepage',
-            settings.logo.url,
+            settings.logo_url,
             description='Come share some tours with us!',
         )
     }
@@ -579,7 +579,7 @@ def destinations(request):
 
 
 def favicon(request):
-    return HttpResponseRedirect(Settings.load().logo.url)
+    return HttpResponseRedirect(Settings.load().logo_url)
 
 
 def country_tours(request, region_slug, country_slug):
@@ -641,10 +641,11 @@ def crop_image(request, filename: str, width: int, height: int):
 
     cropped_image = crop_to_dims(image, width, height)
 
-    img_format = get_image_format(request, image)
+    img_format, save_func = get_image_format(request, image)
 
     response = HttpResponse(content_type=f'image/{img_format}')
-    cropped_image.save(response, img_format)
+    # cropped_image.save(response, img_format)
+    save_func(cropped_image, response)
     return response
 
 

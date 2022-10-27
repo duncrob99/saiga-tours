@@ -163,10 +163,11 @@ def downscaled_image(context, img: ImageField, width: int = 10):
 
     cropped_image = crop_to_dims(image, width, math.ceil(width * image.height / image.width))
 
-    img_format = get_image_format(context.request, image)
+    img_format, save_func = get_image_format(context.request, image)
 
     buff = BytesIO()
-    cropped_image.save(buff, format=img_format)
+    # cropped_image.save(buff, format=img_format)
+    save_func(cropped_image, buff)
     img64 = base64.b64encode(buff.getvalue()).decode('utf-8')
 
     return f'data:image/{img_format};base64,{img64}'

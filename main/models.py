@@ -292,7 +292,7 @@ class Tour(DraftHistory):
     banner_y = models.FloatField(null=True, blank=True)
 
     price = models.DecimalField(max_digits=8, decimal_places=2)
-    state = models.ForeignKey(State, on_delete=models.CASCADE, null=True, blank=True)
+    state = models.ForeignKey(State, on_delete=models.SET_NULL, null=True, blank=True)
     extensions = models.ManyToManyField('self', blank=True, symmetrical=False)
     display = models.BooleanField(default=True)
     keywords = models.TextField(null=True, blank=True)
@@ -584,7 +584,7 @@ class Page(DraftHistory):
 
 @receiver(post_save)
 def validate_image_size(sender, instance, created, **kwargs):
-    if hasattr(instance, 'card_img'):
+    if hasattr(instance, 'card_img') and instance.card_img:
         with Image.open(instance.card_img) as image:
             format = image.format
             image = autorotate(image)
@@ -648,8 +648,14 @@ class Settings(models.Model):
     def get_caches_to_invalidate(self, previous):
         return "all"
 
+    @property
+    def logo_url(self):
+        if self.logo:
+            return self.logo.url
+        else:
+            return None
+
     def save(self, *args, **kwargs):
-        print(self.logo.url)
         if not self.pk:
             if self.title == '':
                 num_defaults = Settings.objects.filter(title__startswith='Default').count()

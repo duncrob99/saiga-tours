@@ -1,4 +1,7 @@
+from typing import Callable
+
 from PIL import Image
+from django.http import HttpResponse
 from ua_parser import user_agent_parser
 
 
@@ -48,7 +51,7 @@ def crop_to_dims(image: Image, width: int, height: int) -> Image:
     return image
 
 
-def autorotate(img: Image):
+def autorotate(img: Image) -> Image:
     """
     Rotate a Pillow image based on exif data.
     Returns new Pillow image.
@@ -71,7 +74,7 @@ def autorotate(img: Image):
     return img
 
 
-def browser_supports_webp(request):
+def browser_supports_webp(request) -> bool:
     """Check if browser is Safari <16 and macOS <11 or Safari <14"""
 
     try:
@@ -86,7 +89,7 @@ def browser_supports_webp(request):
         return False
 
 
-def no_transparency(image):
+def no_transparency(image) -> bool:
     """Check if image has transparency"""
     if image.mode in ('RGBA', 'LA'):
         return False
@@ -96,8 +99,11 @@ def no_transparency(image):
 def get_image_format(request, image):
     if browser_supports_webp(request):
         img_format = 'webp'
+        save_func = lambda img, loc: img.save(loc, img_format)
     elif no_transparency(image):
         img_format = 'jpeg'
+        save_func = lambda img, loc: img.convert('RGB').save(loc, img_format, optimize=True, progressive=True)
     else:
         img_format = 'png'
-    return img_format
+        save_func = lambda img, loc: img.save(loc, img_format)
+    return img_format, save_func
