@@ -287,8 +287,8 @@ body * {
     opacity: 1;
   }
   100% {
-    top: 0px;
-    left: 0px;
+    top: 0;
+    left: 0;
     width: 72px;
     height: 72px;
     opacity: 0;
@@ -423,4 +423,8 @@ a#buorgul:hover, a#buorgig:hover {
 
 a#buorgig:not(:hover) {
     backdrop-filter: opacity(0.5);
+}
+
+.table-holder {
+    overflow: auto;
 }

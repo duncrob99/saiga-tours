@@ -77,7 +77,7 @@ DEBUG = env('DEBUG')
 ADMINS = [('Admin', 'admin@saigatours.com')]
 MANAGERS = [('Admin', 'admin@saigatours.com')]
 
-ALLOWED_HOSTS = ["coolwebsite.pythonanywhere.com", "127.0.0.1", "www.saigatours.com", "saigatours.com", "admin.saigatours.com"]
+ALLOWED_HOSTS = ["coolwebsite.pythonanywhere.com", "127.0.0.1", "www.saigatours.com", "saigatours.com", "admin.saigatours.com", 'localhost']
 
 # Application definition
 

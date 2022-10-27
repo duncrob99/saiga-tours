@@ -268,3 +268,14 @@ try {
 } catch (e) {
     window.attachEvent("onload", $buo_f)
 }
+
+(function() {
+    // Surround all tables in table-holder
+    let tables = document.querySelectorAll('table');
+    tables.forEach(table => {
+        let wrapper = document.createElement('div');
+        wrapper.classList.add('table-holder');
+        table.parentNode.insertBefore(wrapper, table);
+        wrapper.appendChild(table);
+    });
+})();

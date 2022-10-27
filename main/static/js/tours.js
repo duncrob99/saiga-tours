@@ -406,7 +406,7 @@ start_picker.on('show', el => {
     function set_visibility() {
         progress_indicator.classList.remove('hidden');
         let indicator_width = progress_indicator.getBoundingClientRect().width;
-        let content_left = document.querySelector('#content-container').getBoundingClientRect().left;
+        let content_left = document.querySelector('#contents').getBoundingClientRect().left;
         if (indicator_width > content_left) {
             indicator_visibility = false;
             progress_indicator.classList.add('hidden');
