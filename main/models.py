@@ -675,7 +675,11 @@ class Settings(models.Model):
 
     @classmethod
     def load(cls):
-        obj, _ = cls.objects.get_or_create(active=True)
+        try:
+            obj, _ = cls.objects.get_or_create(active=True)
+        except cls.MultipleObjectsReturned:
+            obj = cls.objects.filter(active=True).first()
+            cls.objects.filter(active=True).exclude(pk=obj.pk).update(active=False)
         return obj
 
     class Meta:

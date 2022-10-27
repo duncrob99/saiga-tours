@@ -353,17 +353,16 @@ start_picker.on('show', el => {
     let navbar_height = document.querySelector('nav.navbar').getBoundingClientRect().height;
     let progress_indicator = document.querySelector('#progress-indicator');
     if (progress_indicator === null) return;
-    let progress_indicator_height = progress_indicator.getBoundingClientRect().height;
-    progress_indicator.style.setProperty('--bar-height', `${progress_indicator_height * 0.8}px`);
 
     let checkpoints = document.querySelectorAll('.progress-indicator-checkpoint');
-    let checkpoint_height = checkpoints[0].getBoundingClientRect().height;
 
     let month_markers = Array.from(document.querySelectorAll('.checkpoint-marker'));
 
     let indicator_visibility = true;
 
     function set_progress() {
+        let checkpoint_height = checkpoints[0].getBoundingClientRect().height;
+        let progress_indicator_height = progress_indicator.getBoundingClientRect().height;
         if (!indicator_visibility) return;
 
         // Update the height of the progress indicator to match month marker positions on scroll
@@ -372,6 +371,7 @@ start_picker.on('show', el => {
             return curr.getBoundingClientRect().top < navbar_height ? curr : prev;
             // return Math.abs(curr.getBoundingClientRect().top) < Math.abs(prev.getBoundingClientRect().top) ? curr : prev;
         });
+
         if (month_markers.indexOf(month_marker) === 0 && month_marker.getBoundingClientRect().top > navbar_height) {
             let marker_position = month_marker.getBoundingClientRect().top + document.body.scrollTop - navbar_height;
             let perc_to_first = document.body.scrollTop / marker_position;
