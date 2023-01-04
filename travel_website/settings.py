@@ -215,7 +215,7 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = '587'
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'duncrob99@gmail.com'
-EMAIL_HOST_PASSWORD = 'zfdplgquornelpax'
+EMAIL_HOST_PASSWORD = 'uopqavdbzsvdivxg'
 SERVER_EMAIL = 'duncrob99@gmail.com'
 DEFAULT_FROM_EMAIL = 'duncrob99@gmail.com'
 
