@@ -1,4 +1,5 @@
 import enum
+import smtplib
 from dataclasses import dataclass
 from datetime import datetime
 from functools import reduce, wraps
@@ -14,6 +15,7 @@ from django.db.models import QuerySet, Func
 from django.forms import modelform_factory, inlineformset_factory, modelformset_factory
 from django.http import Http404, HttpResponseRedirect, HttpResponse, FileResponse, JsonResponse, HttpRequest
 from django.shortcuts import render, get_object_or_404, redirect
+from django.views.decorators.csrf import csrf_exempt
 from silk.profiling.profiler import silk_profile
 
 from .forms import *
@@ -518,6 +520,7 @@ def page(request, path):
     return render(request, 'main/page.html', context)
 
 
+@csrf_exempt
 def contact(request):
     form = ContactForm(request.POST or None)
     if request.method == 'POST' and form.is_valid():
@@ -534,6 +537,10 @@ def contact(request):
         except BadHeaderError:
             form.add_error('from_email', 'Invalid header found.')
             ContactSubmission.objects.create(from_email=from_email, subject=subject, message=message, success=False)
+            return render(request, 'main/contact.html', {'form': form})
+        except smtplib.SMTPAuthenticationError:
+            ContactSubmission.objects.create(from_email=from_email, subject=f'FAILED AUTH: {subject}', message=message, success=False)
+            messages.add_message(request, messages.SUCCESS, 'Successfully sent')
             return render(request, 'main/contact.html', {'form': form})
     elif request.method == 'GET':
         form.fields['subject'].initial = request.GET.get('subject')
