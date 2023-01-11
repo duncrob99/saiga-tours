@@ -50,6 +50,10 @@
         #content-container {
             padding-top: 1rem !important;
         }
+
+        .logo-graphic path:not([fill="white"]):not([fill="#555555"]) {
+            fill: red;
+        }
     </style>
 
     <link rel="canonical" href="{{ request.build_absolute_uri }}" />
@@ -73,7 +77,11 @@
 
     <form method="POST">
         {% csrf_token %}
-        {% bootstrap_form form %}
+{#        {% bootstrap_form form %}#}
+        {% bootstrap_field form.from_email %}
+        {% bootstrap_field form.subject %}
+        {% bootstrap_field form.message %}
+        {{ form.captcha }}
         <button type="submit" role="button" class="btn btn-primary accent hoverable-accent">Send</button>
     </form>
 {% endblock %}

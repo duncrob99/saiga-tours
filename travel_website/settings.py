@@ -26,6 +26,8 @@ env = environ.Env(
     CLOUDFLARE_ZONE_ID=(str, None),
     CLOUDFLARE_DOMAIN=(str, None),
     NOCACHE=(bool, False),
+    HCAPTCHA_SITEKEY=(str, None),
+    HCAPTCHA_SECRET=(str, None),
 )
 environ.Env.read_env()
 
@@ -77,7 +79,7 @@ DEBUG = env('DEBUG')
 ADMINS = [('Admin', 'admin@saigatours.com')]
 MANAGERS = [('Admin', 'admin@saigatours.com')]
 
-ALLOWED_HOSTS = ["coolwebsite.pythonanywhere.com", "127.0.0.1", "www.saigatours.com", "saigatours.com", "admin.saigatours.com", 'localhost']
+ALLOWED_HOSTS = ["coolwebsite.pythonanywhere.com", "127.0.0.1", "www.saigatours.com", "saigatours.com", "admin.saigatours.com", 'localhost', '192.168.1.16']
 
 # Application definition
 
@@ -101,7 +103,8 @@ INSTALLED_APPS = [
     'django.contrib.sitemaps',
     'django.contrib.sites',
     'silk',
-    'django_countries'
+    'django_countries',
+    'hcaptcha_field'
 ]
 
 SITE_ID = 1
@@ -310,3 +313,8 @@ if DEBUG:
         nplusone.show_nplusones()
     except ImportError:
         print("nplusone not installed")
+
+
+if env('HCAPTCHA_SITEKEY') and env('HCAPTCHA_SECRET'):
+    HCAPTCHA_SITEKEY = env("HCAPTCHA_SITEKEY")
+    HCAPTCHA_SECRET = env("HCAPTCHA_SECRET")
