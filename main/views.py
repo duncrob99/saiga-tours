@@ -1,4 +1,5 @@
 import enum
+import emoji
 import smtplib
 from dataclasses import dataclass
 from datetime import datetime
@@ -12,6 +13,7 @@ from django.contrib import messages
 from django.core.mail import send_mail, BadHeaderError
 from django.core.paginator import Paginator
 from django.db.models import QuerySet, Func
+from django.db.utils import OperationalError
 from django.forms import modelform_factory, inlineformset_factory, modelformset_factory
 from django.http import Http404, HttpResponseRedirect, HttpResponse, FileResponse, JsonResponse, HttpRequest
 from django.shortcuts import render, get_object_or_404, redirect
@@ -540,6 +542,10 @@ def contact(request):
             return render(request, 'main/contact.html', {'form': form})
         except smtplib.SMTPAuthenticationError:
             ContactSubmission.objects.create(from_email=from_email, subject=f'FAILED AUTH: {subject}', message=message, success=False)
+            messages.add_message(request, messages.SUCCESS, 'Successfully sent')
+            return render(request, 'main/contact.html', {'form': form})
+        except OperationalError:
+            ContactSubmission.objects.create(from_email=from_email, subject=f'FAILED EMOJI: {subject}', message=emoji.demojize(message), success=True)
             messages.add_message(request, messages.SUCCESS, 'Successfully sent')
             return render(request, 'main/contact.html', {'form': form})
     elif request.method == 'GET':
