@@ -17,6 +17,7 @@
 .navbar {
     background: var(--accent-background);
     z-index: 1000;
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
 }
 
 .navbar .dropdown-menu li {
@@ -184,4 +185,96 @@
 
 .main-nav.nav-link {
     appearance: auto;
+}
+
+.offcanvas-nav a.main-nav.nav-link {
+    width: 100%;
+}
+
+.offcanvas-nav {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+}
+
+.tree-toggle {
+    width: 1em;
+    appearance: none;
+    padding-inline-end: 2em;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+
+.tree-toggle:hover {
+    transform: scale(1.1);
+}
+
+.tree-toggle::before {
+    content: ">";
+    display: inline-block;
+    transition: transform 0.3s;
+    padding-block: 1em;
+}
+
+.tree-toggle:checked::before {
+    transform: rotate(90deg);
+}
+
+.tree-toggle ~ ul {
+    transform-origin: top;
+    grid-column: 1 / 3;
+    display: none;
+}
+
+.tree-toggle:checked ~ ul {
+    transform: rotateX(0);
+    display: block;
+}
+
+.offcanvas-nav li {
+    display: grid;
+    grid-template-columns: min-content 1fr;
+}
+
+.offcanvas-nav ul .tree-toggle::before {
+    padding-block: 0;
+}
+
+.offcanvas-nav ul .tree-toggle {
+    padding-inline-end: 2em;
+}
+
+#offcanvasNav .offcanvas-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 1rem 2rem;
+    margin: 0;
+	background: var(--accent-background);
+	/*height: var(--navbar-height);*/
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
+    flex-shrink: 0;
+    flex-grow: 0;
+}
+
+#offcanvasNav .offcanvas-body {
+    padding: 0.5rem 2rem;
+}
+
+#offcanvasNav .offcanvas-header h5 {
+    margin: 0;
+}
+
+.offcanvas-nav ul {
+    padding-left: 1rem;
+}
+
+.offcanvas-nav .dropdown-item {
+    padding: 0.5rem 0;
+}
+
+.offcanvas-nav li > a.dropdown-item:nth-child(1) {
+    padding-inline-start: 2rem;
 }
