@@ -136,6 +136,17 @@
     {% block js %}
     {% endblock %}
     {% analytics_script %}
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-4SZK6XKZB4"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-4SZK6XKZB4');
+    </script>
+
 </head>
 <body>
 {#<body style="background-image: url('{% static "images/background_a.jpg" %}');">#}
