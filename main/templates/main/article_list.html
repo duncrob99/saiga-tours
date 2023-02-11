@@ -82,7 +82,11 @@
     <div class="container">
         {% for article in page_obj %}
             <div class="row m-4">
-                <div class="card g-0 article-card">
+                <div class="card g-0 article-card"
+                    {% if article.state.border_color is not None %}
+                        style="border-color: {{ article.state.border_color }};
+                                --card-border-width: 10px;"
+                    {% endif %}>
                     <div class="d-flex flex-column flex-lg-row justify-content-between">
                         <div class="img-container flex-shrink-0">
                             <img full-size-src="{{ article.card_img.url }}" src="{% downscaled_image article.card_img 50 %}" width="9" height="5">
@@ -96,6 +100,10 @@
                         </div>
                         <a class="stretched-link" href="{% url 'article' article.slug %}"></a>
                     </div>
+                    {% if article.state is not None %}
+                        <div class="article-state" style="background-color: {{ article.state.color }};
+                                color: {{ article.state.text_color }}">{{ article.state.text }}</div>
+                    {% endif %}
                 </div>
             </div>
         {% endfor %}
