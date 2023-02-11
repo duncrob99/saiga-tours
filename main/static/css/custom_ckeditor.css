@@ -162,6 +162,11 @@ img.angle-right {
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
 }
 
+
+#contents table {
+    grid-area: table;
+}
+
 #contents table:not(.styled-table) thead tr {
     background-color: var(--accent-foreground);
     color: var(--accent-background);
@@ -206,4 +211,11 @@ div.split-section div.hidden {
 .split-section {
     margin-bottom: 3vw;
     margin-top: 3vw;
+}
+
+.table-holder {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr max-content 1fr;
+    grid-template-areas: '. table .';
 }

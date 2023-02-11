@@ -142,8 +142,15 @@ def delay_images(value: str, request):
             p.string = ""
             p.append(soup.new_tag('br'))
 
+    # Remove divs with 'table-holder' class
+    for div in soup.find_all('div', {'class': 'table-holder'}):
+        div.unwrap()
+
+    prettified = soup.prettify()
+    without_boxes = prettified.replace('<span style="background-color:rgba(220,220,220,0.5)"><img src="data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==" style="height:15px; width:15px" title="Click and drag to move"></span>', '')
+
     # print('soupstr: ', soup.str())
-    return mark_safe(soup.prettify().replace('<span style="background-color:rgba(220,220,220,0.5)"><img src="data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==" style="height:15px; width:15px" title="Click and drag to move"></span>', ''))
+    return mark_safe(without_boxes)
     # return mark_safe(value.replace('<img src=', '<img data-filename='))
 
 
