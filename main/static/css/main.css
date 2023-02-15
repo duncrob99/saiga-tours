@@ -452,6 +452,7 @@ a#buorgig:not(:hover) {
     transition: transform 1s ease;
     text-decoration: none;
     display: flex;
+    align-items: center;
 }
 
 .notification-banner a .show-on-hover {
@@ -460,8 +461,21 @@ a#buorgig:not(:hover) {
     width: max-content;
 }
 
+.notification-banner a i {
+    height: min-content;
+}
+
 .notification-banner a:hover {
     color: var(--accent-hover-background);
     transform: translateX(0);
 }
 
+@media (max-width: 768px) {
+    .notification-banner a .show-on-hover {
+        display: none;
+    }
+
+    .notification-banner a {
+        transform: translateX(0);
+    }
+}
