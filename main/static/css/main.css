@@ -428,3 +428,40 @@ a#buorgig:not(:hover) {
 .table-holder {
     overflow: auto;
 }
+
+.notification-banner {
+	width: 100%;
+	background-color: #ff914d;
+	z-index: 100;
+	position: relative;
+	font-family: 'Burford Rustic Book', sans-serif;
+	font-size: 2em;
+	color: var(--accent-hover-foreground);
+}
+
+.notification-banner div.container > div {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    overflow: hidden;
+}
+
+.notification-banner a {
+    color: var(--accent-hover-foreground);
+    transform: translateX(calc(100% - 32px));
+    transition: transform 1s ease;
+    text-decoration: none;
+    display: flex;
+}
+
+.notification-banner a .show-on-hover {
+    display: inline-block;
+    text-wrap: none;
+    width: max-content;
+}
+
+.notification-banner a:hover {
+    color: var(--accent-hover-background);
+    transform: translateX(0);
+}
+
