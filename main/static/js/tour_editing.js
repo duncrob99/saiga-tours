@@ -183,7 +183,36 @@ document.querySelectorAll('textarea').forEach(el => {
 })
 
 // Initialise buttons to bind itinerary day templates
+let select = document.querySelector('#select-itinerary-template');
+let input = document.querySelector('#new-itinerary-template-input');
+let choices, select_container;
+
+// Wait for choices to load
+function setChoices() {
+    if (typeof Choices === 'undefined') {
+        setTimeout(setChoices, 100);
+        console.log('Waiting for choices');
+        return;
+    }
+
+    console.log('Choices loaded');
+
+    choices = new Choices(select, {
+        allowHTML: false,
+        removeItemButton: true,
+        duplicateItemsAllowed: false,
+        // searchResultLimit: 10,
+        resetScrollPosition: false
+    });
+
+    select = document.querySelector('#select-itinerary-template');
+    select_container = document.querySelector('#select-container');
+}
+
+setChoices();
+
 document.querySelectorAll('.bind-itinerary-template-button').forEach(btn => {
+
     btn.addEventListener('click', () => {
         let day = days[parseInt(btn.getAttribute('data-model-pk'))];
         if (day.template) {
@@ -191,32 +220,42 @@ document.querySelectorAll('.bind-itinerary-template-button').forEach(btn => {
             document.querySelector(`#id_itinerary-${day.position}-template`).value = '';
             console.log('Removed bind');
             btn.innerText = 'Bind Template';
+            btn.removeAttribute('data-template-name');
+            btn.classList.remove('hover-template-name');
         } else {
             let modal = new bootstrap.Modal(document.querySelector('#bind-itinerary-template-modal'));
             let submitButton = document.querySelector('#save-itinerary-template-selection');
             let creating_new = false;
 
-            let select = document.querySelector('#select-itinerary-template');
-            let input = document.querySelector('#new-itinerary-template-input');
-
             let newButton = document.querySelector('#new-itinerary-template-button');
             let existingButton = document.querySelector('#use-existing-itinerary-template-button');
 
-            select.querySelectorAll('option').forEach(opt => opt.remove());
-            let opt = document.createElement('option');
-            opt.value = '';
-            opt.innerHTML = '-----';
-            select.appendChild(opt);
+            // select.querySelectorAll('option').forEach(opt => opt.remove());
+            // let opt = document.createElement('option');
+            // opt.value = '';
+            // opt.innerHTML = '-----';
+            // select.appendChild(opt);
+            // for (let [templateId, templateData] of Object.entries(itinerary_templates)) {
+            //     let opt = document.createElement('option');
+            //     opt.value = templateId;
+            //     opt.innerHTML = templateData.title;
+            //     if (templateId === day.template) {
+            //         opt.selected = true;
+            //     }
+            //     select.appendChild(opt);
+            // }
+            // select.value = day.template;
+
+            let template_choices = [];
             for (let [templateId, templateData] of Object.entries(itinerary_templates)) {
-                let opt = document.createElement('option');
-                opt.value = templateId;
-                opt.innerHTML = templateData.title;
-                if (templateId === day.template) {
-                    opt.selected = true;
-                }
-                select.appendChild(opt);
+                template_choices.push({
+                    value: templateId,
+                    label: templateData.title,
+                });
             }
-            select.value = day.template;
+            console.log(template_choices);
+
+            choices.setChoices(template_choices, 'value', 'label', true);
 
             submitButton.onclick = function () {
                 if (creating_new) {
@@ -242,6 +281,8 @@ document.querySelectorAll('.bind-itinerary-template-button').forEach(btn => {
                                 document.querySelector(`#id_itinerary-${day.position}-template`).value = parseInt(data.pk);
                                 modal.hide();
                                 btn.textContent = 'Unbind Template';
+                                btn.setAttribute('data-template-name', input.value);
+                                btn.classList.add('hover-template-name');
                                 hide_spinner();
                             },
                             error: (data) => {
@@ -267,20 +308,22 @@ document.querySelectorAll('.bind-itinerary-template-button').forEach(btn => {
                     document.querySelector(`#day-${day.position + 1}-title`).innerHTML = day.title;
                     modal.hide();
                     btn.textContent = 'Unbind Template';
+                    btn.setAttribute('data-template-name', itinerary_templates[day.template].title);
+                    btn.classList.add('hover-template-name');
                 }
             }
 
             newButton.onclick = function () {
-                select.setAttribute('hidden', true);
-                input.removeAttribute('hidden');
+                select_container.setAttribute('hidden', true);
+                input.parentElement.removeAttribute('hidden');
                 newButton.setAttribute('hidden', true);
                 existingButton.removeAttribute('hidden');
                 creating_new = true;
             }
 
             existingButton.onclick = function () {
-                input.setAttribute('hidden', true);
-                select.removeAttribute('hidden');
+                input.parentElement.setAttribute('hidden', true);
+                select_container.removeAttribute('hidden');
                 existingButton.setAttribute('hidden', true);
                 newButton.removeAttribute('hidden');
                 creating_new = false;

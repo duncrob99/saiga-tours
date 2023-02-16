@@ -3,6 +3,9 @@
 {% load mathfilters %}
 <link rel="stylesheet" type="text/css" href="{% static 'css/itinerary.css' %}">
 
+{% block extrahead %}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js@9.0.1/public/assets/styles/choices.min.css"/>
+{% endblock %}
 
 <!-- Slideshow container -->
 <div class="slideshow-container">
@@ -76,9 +79,11 @@
             </div>
             <div class="modal-body">
                 <div class="d-flex">
-                    <select aria-label="Select Template" id="select-itinerary-template" class="form-select flex-grow-1 mx-1"></select>
-                    <div class="input-group has-validation">
-                        <input hidden placeholder="Template Name" aria-label="New Template Name" id="new-itinerary-template-input" class="form-control flex-grow-1 mx-1"/>
+                    <div class="flex-grow-1" id="select-container">
+                        <select aria-label="Select Template" id="select-itinerary-template" class="form-select flex-grow-1 mx-1"></select>
+                    </div>
+                    <div hidden class="input-group has-validation flex-grow-1">
+                        <input placeholder="Template Name" aria-label="New Template Name" id="new-itinerary-template-input" class="form-control flex-grow-1 mx-1"/>
                         <div class="invalid-feedback">
                             Duplicate Name
                         </div>
@@ -96,6 +101,7 @@
 </div>
 
 {% block js %}
+    <script defer src="https://cdn.jsdelivr.net/npm/choices.js@9.0.1/public/assets/scripts/choices.min.js"></script>
     <script type="module">
         window.days = {};
         {% for day in itinerary %}

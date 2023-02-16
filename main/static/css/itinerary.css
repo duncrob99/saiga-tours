@@ -198,11 +198,12 @@ hr {
   z-index: 1;
 }
 
-.hover-template-name:not(:hover) .tooltip-over-arrow {
+.tooltip-over-arrow {
   display: none;
 }
 
 .hover-template-name:hover .tooltip-over-arrow {
+  display: block;
   position: absolute;
   bottom: 0.7em;
   right: var(--arrow-pos);
