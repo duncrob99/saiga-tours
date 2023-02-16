@@ -164,3 +164,50 @@ hr {
 .mySlides:not(.expanded) {
   max-height: 450px;
 }
+
+.hover-template-name {
+  position: relative;
+  --shadow: 0.1em 0.1em 0.5em rgba(0, 0, 0, 0.5);
+  --arrow-pos: 30%;
+}
+
+.hover-template-name:hover::after {
+  /* Show template name in tooltip on hover */
+  content: attr(data-template-name);
+  position: absolute;
+  top: calc(100% + 0.5em);
+  right: 0;
+  background-color: var(--accent-background);
+  color: var(--accent-foreground);
+  padding: 0.5em;
+  border-radius: 0.5em;
+  z-index: 1;
+  box-shadow: var(--shadow);
+}
+
+/* Arrow above tooltop */
+.hover-template-name:hover::before {
+  content: "▲";
+  position: absolute;
+  bottom: 0.7em;
+  right: var(--arrow-pos);
+  width: 0;
+  height: 0;
+  color: var(--accent-background);
+  text-shadow: var(--shadow);
+  z-index: 1;
+}
+
+.hover-template-name:not(:hover) .tooltip-over-arrow {
+  display: none;
+}
+
+.hover-template-name:hover .tooltip-over-arrow {
+  position: absolute;
+  bottom: 0.7em;
+  right: var(--arrow-pos);
+  width: 0;
+  height: 0;
+  color: var(--accent-background);
+  z-index: 2;
+}

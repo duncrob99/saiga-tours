@@ -21,8 +21,16 @@
                         <button class="btn btn-success goto-map-point-button"
                             id="goto-map-point-day-{{ day.day }}" data-model-day="{{ day.day }}" style="height: min-content; padding: 10px;"><span class="bi bi-geo"></span></button>
                         {% if request.user.is_staff %}
-                            <button class="btn btn-success bind-itinerary-template-button"
-                                    id="bind-itinerary-template-{{ forloop.counter }}" data-model-pk="{{ day.pk }}" data-model-day="{{ day.day }}" data-day-counter="{{ forloop.counter }}" style="height: min-content; padding: 10px;">{% if day.template %}Unb{% else %}B{% endif %}ind Template</button>
+                            <button class="btn btn-success bind-itinerary-template-button {% if day.template %}hover-template-name{% endif %}"
+                                    id="bind-itinerary-template-{{ forloop.counter }}"
+                                    data-model-pk="{{ day.pk }}"
+                                    data-model-day="{{ day.day }}"
+                                    data-day-counter="{{ forloop.counter }}"
+                                    style="height: min-content; padding: 10px;"
+                                    {% if day.template %} data-template-name="{{ day.template }}"{% endif %}>
+                                {% if day.template %}Unb{% else %}B{% endif %}ind Template
+                                {% if day.template %}<div class="tooltip-over-arrow">▲</div>{% endif %}
+                            </button>
                         {% endif %}
                     </div>
                 </div>
