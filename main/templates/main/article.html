@@ -40,14 +40,15 @@
 {% block js %}
     <script defer src="https://cdn.jsdelivr.net/npm/litepicker/dist/litepicker.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/luxon@2/build/global/luxon.min.js"></script>
+    {% if request.user.is_staff %}
     <script defer src="{% static 'js/jscolor.min.js' %}"></script>
     <script defer src="{% static 'js/ckeditor/ckeditor.js' %}"></script>
+    {% endif %}
     <script defer src="{% static 'js/custom_ckeditor.js' %}"></script>
     <script defer src="{% static 'js/article_editing.js' %}"></script>
     <script defer src="{% static 'js/ckeditor_styling.js' %}"></script>
     <script defer src="{% static 'js/header-banner.js' %}"></script>
     <script defer src="{% static 'js/header-banner.js' %}"></script>
-    <script defer src="{% static 'js/svg.js' %}"></script>
 {% endblock %}
 
 {% block banner %}
