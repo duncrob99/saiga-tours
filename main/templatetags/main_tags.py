@@ -165,7 +165,8 @@ def downscaled_image(context, img: ImageField, width: int = 10):
     try:
         raw_image = Image.open(img, mode='r')
     except FileNotFoundError:
-        raise Http404
+        print('File not found:', img)
+        return ''
     image = autorotate(raw_image)
 
     cropped_image = crop_to_dims(image, width, math.ceil(width * image.height / image.width))
@@ -178,3 +179,8 @@ def downscaled_image(context, img: ImageField, width: int = 10):
     img64 = base64.b64encode(buff.getvalue()).decode('utf-8')
 
     return f'data:image/{img_format};base64,{img64}'
+
+@register.filter()
+def strip_params(url: str):
+    return url.split('?')[0].split('#')[0]
+

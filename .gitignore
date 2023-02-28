@@ -5,3 +5,4 @@
 /travel_website/.env
 /analytics/migrations/
 *__pycache__*
+/.venv/
