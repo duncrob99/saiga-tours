@@ -6,6 +6,7 @@ from datetime import datetime
 from functools import reduce, wraps
 from os import path
 from typing import Dict, List, Any
+from urllib.parse import urlparse
 
 import ngram
 from bs4 import BeautifulSoup
@@ -15,10 +16,13 @@ from django.core.paginator import Paginator
 from django.db.models import QuerySet, Func
 from django.db.utils import OperationalError
 from django.forms import modelform_factory, inlineformset_factory, modelformset_factory
-from django.http import Http404, HttpResponseRedirect, HttpResponse, FileResponse, JsonResponse, HttpRequest
+from django.http import Http404, HttpResponseRedirect, HttpResponse, FileResponse, JsonResponse, HttpRequest, StreamingHttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.decorators.csrf import csrf_exempt
+from django.apps import apps
 from silk.profiling.profiler import silk_profile
+from simple_history.models import HistoricalRecords
+from django.urls import resolve, Resolver404
 
 from .forms import *
 from .models import *
@@ -790,7 +794,7 @@ def copy_map(request):
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)})
     else:
-        return Http404
+        raise Http404
 
 
 def purge_cache(request):
@@ -801,7 +805,7 @@ def purge_cache(request):
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)})
     else:
-        return Http404
+        raise Http404
 
 
 def testimonials(request):
@@ -829,3 +833,128 @@ def testimonials(request):
         )
     }
     return render(request, 'main/testimonials_page.html', context)
+
+
+def links_list(request):
+    if not request.user.is_staff:
+        raise Http404
+
+    return render(request, 'main/links.html')
+
+
+def list_links(request):
+    if not request.user.is_staff:
+        raise Http404
+
+    @dataclass
+    class Link:
+        model: models.Model
+        field: models.Field
+        url: str
+        text: str
+
+        def __str__(self):
+            return f'{self.model.__name__}.{self.field.name} -> {self.url}'
+
+        @property
+        def empty(self):
+            return self.url is None or self.url == ''
+
+        @property
+        def relative(self):
+            return self.url.startswith('/') if not self.empty else False
+
+        @property
+        def model_link(self):
+            return reverse(f'admin:{self.model._meta.app_label}_{self.model._meta.model_name}_change', args=(getattr(self.model, 'pk'),))
+
+        @property
+        def is_broken(self):
+            print(f'Checking {self.url} - {self.resolves} - {self.relative}')
+            # Check response code when pinging url
+            if self.url is None:
+                return True
+            if self.resolves:
+                return False
+            if self.url.startswith('mailto:'):
+                return False
+            try:
+                print(f'Checking {self.url}')
+                response = requests.get(self.url)
+                print(f'{self.url} -> {response.status_code}')
+                return response.status_code != 200
+            except Exception as e:
+                print(f'Error checking {self.url}: {e}')
+                return True
+
+        @property
+        def resolves(self):
+            if self.empty:
+                return False
+            clean_url = self.url.split('#')[0].split('?')[0]
+            if not clean_url.endswith('/'):
+                clean_url += '/'
+            try:
+                resolve(clean_url)
+                return True
+            except Resolver404:
+                try:
+                    resolve(urlparse(clean_url).path)
+                    return True
+                except Resolver404:
+                    return False
+
+        @property
+        def domain(self):
+            if self.relative:
+                return ''
+            else:
+                return f'{urlparse(self.url).scheme}://{urlparse(self.url).netloc}'
+
+        @property
+        def internal(self):
+            return self.relative or self.domain == 'https://www.saigatours.com'
+
+
+    def is_text_field(field):
+        return isinstance(field, models.TextField)
+
+    def is_history_model(model):
+        return model.__name__.startswith('Historical')
+
+    if not request.user.is_staff:
+        raise Http404
+
+    all_models = apps.get_app_config('main').get_models()
+    links = []
+
+    for model in all_models:
+        if not is_history_model(model):
+            fields = model._meta.get_fields()
+            for field in fields:
+                if is_text_field(field):
+                    for instance in model.objects.all():
+                        text = getattr(instance, field.name)
+                        try:
+                            if text is not None:
+                                soup = BeautifulSoup(getattr(instance, field.name), 'html.parser')
+                                for link in soup.find_all('a'):
+                                    links.append(Link(instance, field, link.get('href'), link.text))
+                        except Exception as e:
+                            print(getattr(instance, field.name))
+                            raise e
+
+    return JsonResponse({'links': [{
+        'model': str(link.model),
+        'field': link.field.name,
+        'url': link.url,
+        'domain': link.domain,
+        'text': link.text,
+        'empty': link.empty,
+        'relative': link.relative,
+        'model_link': link.model_link,
+        'resolves': link.resolves,
+        'internal': link.internal,
+        'is_broken': link.is_broken,
+    } for link in links]})
+

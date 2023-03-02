@@ -1,0 +1,27 @@
+body {
+    padding-top: 1em;
+    padding-bottom: 1em;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+#table-wrapper {
+    width: clamp(50em, 100%, 100em);
+    overflow-x: auto;
+}
+
+#table-wrapper table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#table-wrapper table :is(td, th) {
+    padding: 0.5em;
+    border: 1px solid #ccc;
+}
+
+#table-wrapper table thead {
+    background: #eee;
+}

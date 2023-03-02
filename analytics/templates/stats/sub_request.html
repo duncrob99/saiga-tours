@@ -41,13 +41,11 @@
 <script>
     function setUserId() {
         if (!localStorage.getItem('user_id')) {
-            console.log('No user id found, waiting longer');
             setTimeout(setUserId, 100);
         }
         const userId = document.querySelectorAll('input[name="{{ subscription_form.id.name }}"]');
         userId.forEach((input) => {
             input.value = localStorage.getItem('user_id');
-            console.log("Setting user id to: " + input.value);
         });
     }
 

@@ -41,6 +41,8 @@ urlpatterns = [
     path('gen_500/', views.gen_500, name='gen-500'),
     path('messages/', views.return_messages, name='messages'),
     path('purge_cache/', views.purge_cache, name='purge-cache'),
+    path('list_links/', views.list_links, name='list-links'),
+    path('links/', views.links_list, name='links'),
 
     path('robots.txt', TemplateView.as_view(template_name='main/robots.txt', content_type='text/plain'), name='robots'),
 

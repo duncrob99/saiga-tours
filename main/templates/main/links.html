@@ -1,0 +1,30 @@
+{% load static %}
+
+<head>
+  <link href="https://unpkg.com/gridjs/dist/theme/mermaid.min.css" rel="stylesheet" />
+  <link href="{% static 'css/links.css' %}" rel="stylesheet" />
+  <script defer src="https://unpkg.com/gridjs/dist/gridjs.umd.js"></script>
+  <script defer src="{% static 'js/links.js' %}"></script>
+</head>
+<body>
+  <div id="table-wrapper">
+    <table id="table" class="hidden">
+      <thead>
+        <tr>
+          <th>Model</th>
+          <th>Field</th>
+          <th>Text</th>
+          <th>URL</th>
+          <th>Domain</th>
+          <th>Empty</th>
+          <th>Relative</th>
+          <th>Resolves</th>
+          <th>Internal</th>
+          <th>Broken</th>
+        </tr>
+      </thead>
+      <tbody>
+      </tbody>
+    </table>
+  </div>
+</body>

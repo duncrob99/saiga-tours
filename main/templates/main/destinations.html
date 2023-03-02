@@ -27,6 +27,7 @@
 {% endblock %}
 
 {% block content %}
+    <h1 class="section-title">Destinations</h1>
     {% include 'main/map.html' %}
 
     {% if request.user.is_staff %}
@@ -122,7 +123,9 @@
                 size: {{ point.size }}
             })
         {% endfor %}
-        make_map_work(destinations, undefined, undefined, undefined, undefined, undefined, points);
+
+        let height = window.outerHeight - document.querySelector('.map').offsetTop;
+        make_map_work(destinations, undefined, height, undefined, undefined, undefined, points);
     </script>
     {% if request.user.is_staff %}
         <script defer src="{% static 'js/destinations_editing.js' %}"></script>
