@@ -76,10 +76,19 @@ window.link_table = new gridjs.Grid({
 
     // do the work...
     document.querySelectorAll('th').forEach(th => th.addEventListener('click', (() => {
-      const table = th.closest('table');
-      const tbody = table.querySelector('tbody');
-      Array.from(tbody.querySelectorAll('tr'))
-        .sort(comparer(Array.from(th.parentNode.children).indexOf(th), this.asc = !this.asc))
-        .forEach(tr => tbody.appendChild(tr) );
-    })));
+        const table = th.closest('table');
+        const tbody = table.querySelector('tbody');
+        Array.from(tbody.querySelectorAll('tr'))
+            .sort(comparer(Array.from(th.parentNode.children).indexOf(th), this.asc = !this.asc))
+            .forEach(tr => tbody.appendChild(tr));
+        document.querySelectorAll('th').forEach(th => th.classList.remove('asc', 'desc'));
+        if (this.asc) {
+            th.classList.remove('asc');
+            th.classList.add('desc');
+        } else {
+            th.classList.remove('desc');
+            th.classList.add('asc');
+        }
+        })
+    ));
 })();

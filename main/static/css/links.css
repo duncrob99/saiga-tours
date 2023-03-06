@@ -24,4 +24,23 @@ body {
 
 #table-wrapper table thead {
     background: #eee;
+    white-space: nowrap;
+}
+
+#table-wrapper table thead th::after {
+    content: " ↓";
+    font-size: 0.8em;
+    color: #999;
+    padding-left: 0.5em;
+    opacity: 0;
+}
+
+#table-wrapper table thead th.desc::after {
+    content: " ↓";
+    opacity: 1;
+}
+
+#table-wrapper table thead th.asc::after {
+    content: " ↑";
+    opacity: 1;
 }

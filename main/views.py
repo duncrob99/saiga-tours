@@ -7,6 +7,7 @@ from functools import reduce, wraps
 from os import path
 from typing import Dict, List, Any
 from urllib.parse import urlparse
+from tabulate import tabulate
 
 import ngram
 from bs4 import BeautifulSoup
@@ -927,12 +928,17 @@ def list_links(request):
 
     all_models = apps.get_app_config('main').get_models()
     links = []
+    searched_fields = []
 
     for model in all_models:
         if not is_history_model(model):
             fields = model._meta.get_fields()
             for field in fields:
                 if is_text_field(field):
+                    searched_fields.append({
+                        'model': model.__name__,
+                        'field': field.name,
+                    })
                     for instance in model.objects.all():
                         text = getattr(instance, field.name)
                         try:
@@ -943,6 +949,9 @@ def list_links(request):
                         except Exception as e:
                             print(getattr(instance, field.name))
                             raise e
+
+    # Print searched_fields as pretty table
+    print(tabulate(searched_fields, headers='keys', tablefmt='fancy_grid'))
 
     return JsonResponse({'links': [{
         'model': str(link.model),
