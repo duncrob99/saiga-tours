@@ -1,0 +1,56 @@
+{% extends 'main/main.html' %}
+{% load main_tags %}
+{% load static %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block extrahead %}
+    <link rel="stylesheet" href="{% static 'customers/css/admin_dashboard.css' %}">
+    <script defer src="{% static 'customers/js/admin_dashboard.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+    <h1>Admin Dashboard</h1>
+
+    <h3>Customers' Form Completion</h3>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Customer Name</th>
+                <th>Task</th>
+                <th>Due Date</th>
+                <th>Progress</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for customer, task_info in customer_tasks.items %}
+                {% with tasks=task_info.tasks %}
+                    <tr>
+                        <td rowspan={{ tasks.count | add:1 }}>{{ customer }}<br>Outstanding: {{ task_info.outstanding_count }}</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    {% for task in tasks %}
+                        <tr {% if task.progress != 'unstarted' %}onclick="location.href='{% url 'view_filled_form' customer.pk task.pk %}';" class="row-link"{% endif %}>
+                            <td>{{ task }}</td>
+                            <td>{{ task.due }}</td>
+                            <td class="task-progress {{task.progress}}">
+                                {% if task.progress == 'unstarted' %}Unstarted
+                                {% elif task.progress == 'in_progress' %}In Progress
+                                {% elif task.progress == 'complete' %}Complete
+                                {% else %}{{ task.progress }}
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    {% if tasks.count == 0 %}
+                        <tr>
+                            <td colspan=4>No tasks</td>
+                        </tr>
+                    {% endif %}
+                {% endwith %}
+            {% endfor %}
+        </tbody>
+      </table>
+{% endblock %}

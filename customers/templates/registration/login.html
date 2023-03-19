@@ -1,0 +1,55 @@
+{% extends 'registration/base.html' %}
+{% load static %}
+
+{% block title %}Log in{% endblock %}
+
+{% block head %}
+    <script defer src="{% static 'customers/js/login.js' %}"></script>
+{% endblock %}
+
+{% block form %}
+    {% if form.errors %}
+    <p>Your username and password didn't match. Please try again.</p>
+    {% endif %}
+
+    {% if next %}
+        {% if user.is_authenticated %}
+        <p>Your account doesn't have access to this page. To proceed,
+        please login with an account that has access.</p>
+        {% else %}
+        <p>Please login to see this page.</p>
+        {% endif %}
+    {% endif %}
+
+    <form method="post" action="{% url 'login' %}">
+        {% csrf_token %}
+
+        <div class="form-group">
+            <div class="field">
+                <label for="{{ form.username.id_for_label }}" hidden>Email: </label>
+                <input type="text" id="{{ form.username.id_for_label }}" name="{{ form.username.name }}" placeholder="Email" required autofocus>
+                {{ form.username.errors }}
+            </div>
+            <div class="field">
+                <label for="{{ form.password.id_for_label }}" hidden>Password: </label>
+                <input type="password" id="{{ form.password.id_for_label }}" name="{{ form.password.name }}" placeholder="Password" required>
+                <div class="password-visibility"></div>
+                {{ form.password.errors }}
+            </div>
+        </div>
+
+        <div class="btn-group">
+            <!--
+            <button class="primary" type="submit" value="login">Log in</button>
+            <button class="secondary" type="button"><a href="{% url 'register' %}">Register</a></button>
+            -->
+            <a class="secondary btn" type="button" href="{% url 'register' %}">Register</a>
+            <button id="login" class="primary btn" type="submit" value="login">Login</button>
+        </div>
+        <input type="hidden" name="next" value="{{ next }}">
+    </form>
+{% endblock %}
+
+{% block extra %}
+    <p><a class="nice-link" href="{% url 'password_reset' %}">Lost password?</a></p>
+{% endblock %}

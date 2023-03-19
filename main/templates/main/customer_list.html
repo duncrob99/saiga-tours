@@ -1,0 +1,10 @@
+{% extends 'main/main.html' %}
+
+{% block content %}
+  {% for customer in customers %}
+      <div class="customer">
+          <h2>{{ customer.name }}</h2>
+          <p>{{ customer.email }}</p>
+      </div>
+  {% endfor %}
+{% endblock %}

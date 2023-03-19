@@ -1,0 +1,72 @@
+{% load static %}
+{% load settings %}
+
+<html>
+    <head>
+        {% set_colors %}
+        <link href="{% static 'customers/general.css' %}" rel="stylesheet" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <style>
+            @font-face {
+                font-family: "Burford Rustic Book";
+                src: url("{% static 'fonts/Burford Rustic/BurfordRusticBook-Regular2.otf' %}");
+            }
+        </style>
+    </head>
+
+    <body>
+        <div class="image-content">
+            <h1>Register</h1>
+        </div>
+        <div class="form-col-background"></div>
+        <div class="form-col">
+            <div class="form-card" >
+                {% if form.errors %}
+                <p>Your username and password didn't match. Please try again.</p>
+                {% endif %}
+
+                {% if next %}
+                    {% if user.is_authenticated %}
+                    <p>Your account doesn't have access to this page. To proceed,
+                    please login with an account that has access.</p>
+                    {% else %}
+                    <p>Please login to see this page.</p>
+                    {% endif %}
+                {% endif %}
+
+                <form method="post" action="{% url 'login' %}">
+                    {% csrf_token %}
+
+                    <div class="form-group">
+                        {{ form.pas }}
+                        <div class="field">
+                            {{ form.username.errors }}
+                            <label for="{{ form.username.id_for_label }}" hidden>Username: </label>
+                            <input type="text" id="{{ form.username.id_for_label }}" name="{{ form.username.name }}" placeholder="Username" required autofocus autocomplete="username">
+                        </div>
+                        <div class="field">
+                            {{ form.password1.errors }}
+                            <label for="{{ form.password1.id_for_label }}" hidden>Password: </label>
+                            <input type="password" id="{{ form.password1.id_for_label }}" name="{{ form.password1.name }}" placeholder="Password" required autocomplete="new-password">
+                        </div>
+                        <div class="field">
+                            {{ form.password2.errors }}
+                            <label for="{{ form.password2.id_for_label }}" hidden>Password: </label>
+                            <input type="password" id="{{ form.password2.id_for_label }}" name="{{ form.password2.name }}" placeholder="Confirm Password" required autocomplete="new-password">
+                        </div>
+                    </div>
+
+                    <div class="btn-group">
+                        <button class="primary" type="submit" value="register">Register</button>
+                        <button class="secondary" type="button"><a href="{% url 'login' %}">Login</a></button>
+                    </div>
+                    <input type="hidden" name="next" value="{{ next }}">
+                </form>
+
+                {# Assumes you setup the password_reset view in your URLconf #}
+            </div>
+            <p><a href="{% url 'password_reset' %}">Lost password?</a></p>
+        </div>
+    </body>
+
+</html>

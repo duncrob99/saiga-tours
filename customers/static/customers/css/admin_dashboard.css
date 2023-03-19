@@ -1,0 +1,27 @@
+.table-striped > tbody > tr.row-link > * {
+    cursor: pointer;
+}
+
+table .row-link:hover {
+    background-color: var(--accent-hover-background);
+    color: var(--accent-hover-foreground);
+    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+}
+
+.table-striped > tbody > tr.row-link:hover > * {
+    background-color: var(--accent-hover-background);
+    color: var(--accent-hover-foreground);
+    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+}
+
+.table-striped > tbody > tr > td.task-progress.complete {
+    color: green;
+}
+
+.table-striped > tbody > tr > td.task-progress.unstarted {
+    color: red;
+}
+
+.table-striped > tbody > tr > td.task-progress.in_progress {
+    color: orange;
+}

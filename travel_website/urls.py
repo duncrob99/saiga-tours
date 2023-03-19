@@ -52,10 +52,10 @@ urlpatterns = [
     path('silk/', include('silk.urls', namespace='silk')),
 ]
 
+urlpatterns.append(path('', include('main.urls')))
+
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-
-urlpatterns.append(path('', include('main.urls')))
 
 handler404 = 'main.views.error_404'
 handler500 = 'main.views.error_500'

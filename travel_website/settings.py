@@ -28,6 +28,9 @@ env = environ.Env(
     NOCACHE=(bool, False),
     HCAPTCHA_SITEKEY=(str, None),
     HCAPTCHA_SECRET=(str, None),
+    STRIPE_PUBLIC_KEY=(str, None),
+    STRIPE_SECRET_KEY=(str, None),
+    ZOHO_PASSWORD=(str, None),
 )
 environ.Env.read_env()
 
@@ -84,6 +87,7 @@ ALLOWED_HOSTS = ["coolwebsite.pythonanywhere.com", "127.0.0.1", "www.saigatours.
 # Application definition
 
 INSTALLED_APPS = [
+    'customers',
     'admin_interface',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -104,7 +108,8 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'silk',
     'django_countries',
-    'hcaptcha_field'
+    'hcaptcha_field',
+    'nested_admin'
 ]
 
 SITE_ID = 1
@@ -127,6 +132,10 @@ MIDDLEWARE = [
     # 'travel_website.middleware.StatsMiddleware'
     'main.middleware.CacheForUsers'
 ]
+
+if DEBUG:
+    INSTALLED_APPS += ['livereload']
+    MIDDLEWARE += ['livereload.middleware.LiveReloadScript']
 
 ROOT_URLCONF = 'travel_website.urls'
 
@@ -214,13 +223,21 @@ MEDIA_ROOT = BASE_DIR / 'media'
 CACHE_ROOT = BASE_DIR / 'cached_pages'
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
+#EMAIL_HOST = 'smtp.gmail.com'
+#EMAIL_PORT = '587'
+#EMAIL_USE_TLS = True
+#EMAIL_HOST_USER = 'duncrob99@gmail.com'
+#EMAIL_HOST_PASSWORD = 'uopqavdbzsvdivxg'
+#SERVER_EMAIL = 'duncrob99@gmail.com'
+#DEFAULT_FROM_EMAIL = 'duncrob99@gmail.com'
+
+EMAIL_HOST = 'smtp.zoho.com.au'
 EMAIL_PORT = '587'
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'duncrob99@gmail.com'
-EMAIL_HOST_PASSWORD = 'uopqavdbzsvdivxg'
-SERVER_EMAIL = 'duncrob99@gmail.com'
-DEFAULT_FROM_EMAIL = 'duncrob99@gmail.com'
+EMAIL_HOST_USER = 'admin@saigatours.com'
+EMAIL_HOST_PASSWORD = env("ZOHO_PASSWORD")
+SERVER_EMAIL = 'admin@saigatours.com'
+DEFAULT_FROM_EMAIL = 'admin@saigatours.com'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
@@ -310,7 +327,7 @@ COUNTRIES_FIRST = [
 if DEBUG:
     try:
         import nplusone
-        nplusone.show_nplusones()
+        #nplusone.show_nplusones()
     except ImportError:
         print("nplusone not installed")
 
@@ -318,3 +335,8 @@ if DEBUG:
 if env('HCAPTCHA_SITEKEY') and env('HCAPTCHA_SECRET'):
     HCAPTCHA_SITEKEY = env("HCAPTCHA_SITEKEY")
     HCAPTCHA_SECRET = env("HCAPTCHA_SECRET")
+
+STRIPE_PUBLIC_KEY = env("STRIPE_PUBLIC_KEY")
+STRIPE_SECRET_KEY = env("STRIPE_SECRET_KEY")
+
+LOGIN_REDIRECT_URL = 'dashboard'

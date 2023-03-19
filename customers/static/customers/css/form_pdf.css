@@ -1,0 +1,20 @@
+@page {
+    size: A4;
+    /*margin: 2cm;*/
+    background-color: red;
+}
+
+* {
+    background-color: red;
+    margin: 0 !important;
+}
+
+h1 {
+    font-size: 3rem;
+    color: green;
+}
+
+h2.section-header {
+    font-size: 2rem;
+    color: var(--accent-foreground);
+}

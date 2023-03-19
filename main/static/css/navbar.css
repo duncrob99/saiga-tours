@@ -134,6 +134,8 @@
 .navbar .navbar-brand {
     color: var(--accent-foreground) !important;
     font-size: 1.1em;
+    display: flex;
+    align-items: center;
 }
 
 .navbar .navbar-brand:hover {
@@ -277,4 +279,44 @@
 
 .offcanvas-nav li > a.dropdown-item:nth-child(1) {
     padding-inline-start: 2rem;
+}
+
+.login-btns {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    gap: 1rem;
+}
+
+.login-btns a {
+    padding: 0.5rem 1rem;
+    --bs-btn-focus-shadow: 0 0 0 0.25rem var(--accent-hover-foreground);
+}
+
+.login-btns a.btn-primary {
+    background-color: var(--accent-foreground);
+    color: var(--accent-background);
+    border: 1px solid var(--accent-foreground);
+}
+
+.login-btns a.btn-primary:is(:hover, :focus) {
+    background-color: var(--accent-hover-foreground);
+    color: var(--accent-hover-background);
+}
+
+.login-btns a.btn-secondary {
+    background-color: var(--accent-background);
+    color: var(--accent-foreground);
+    border: 1px solid var(--accent-foreground);
+}
+
+.login-btns a.btn-secondary:is(:hover, :focus) {
+    background-color: var(--accent-hover-background);
+    color: var(--accent-hover-foreground);
+}
+
+.login-btns a:focus, .login-btns a:focus-visible, .login-btns a:active, .login-btns a:target {
+    outline: none;
+    box-shadow: 0 0 0 0.25rem var(--accent-hover-background) !important;
 }

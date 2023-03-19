@@ -536,7 +536,7 @@ def contact(request):
         message = form.cleaned_data['message']
         try:
             send_mail(f'Contact form submission: "{subject}"',
-                      f'From: {from_email}\nSubject: {subject}\nMessage: \n{message}', from_email,
+                      f'From: {from_email}\nSubject: {subject}\nMessage: \n{message}', 'contact-form@saigatours.com',
                       [Settings.load().contact_form_email])
             ContactSubmission.objects.create(from_email=from_email, subject=subject, message=message)
             messages.add_message(request, messages.SUCCESS, 'Successfully sent')
@@ -966,4 +966,3 @@ def list_links(request):
         'internal': link.internal,
         'is_broken': link.is_broken,
     } for link in links]})
-

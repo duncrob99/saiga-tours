@@ -1,0 +1,2 @@
+{{ user.full_name }} ({{ user.email }}) has completed the form "{{ title }}".
+You can view it <a href="https://www.saigatours.com/{% url 'view_filled_form' user.pk task_pk %}">here</a>, or view the attached PDF.

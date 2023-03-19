@@ -315,10 +315,14 @@ body * {
 }
 
 #messages-container {
-    position: sticky;
+    position: fixed;
     --alert-margin: 5px;
     top: calc(var(--navbar-height) + var(--alert-margin) + 1px);
-    z-index: 9999;
+    right: 0;
+    z-index: 100;
+    margin-right: 1rem;
+    margin-left: 1rem;
+    width: calc(100% - 2rem);
 }
 
 #messages-container .alert {
@@ -478,4 +482,13 @@ a#buorgig:not(:hover) {
     .notification-banner a {
         transform: translateX(0);
     }
+}
+
+.transition-opacity {
+    opacity: 1;
+    transition: opacity 1s ease;
+}
+
+.faded-out {
+    opacity: 0 !important;
 }

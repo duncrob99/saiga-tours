@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, include
 from django.views.generic import TemplateView
 
 from . import views
@@ -45,6 +45,8 @@ urlpatterns = [
     path('links/', views.links_list, name='links'),
 
     path('robots.txt', TemplateView.as_view(template_name='main/robots.txt', content_type='text/plain'), name='robots'),
+
+    path('', include('customers.urls')),
 
     path('<path:path>/', views.page, name='page')
 ]

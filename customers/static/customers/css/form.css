@@ -1,0 +1,214 @@
+body {
+    grid-template-columns: 1fr 2fr;
+}
+
+.section-header {
+    background: var(--accent-foreground);
+    padding: 1rem;
+    color: var(--accent-background);
+    font-size: 1.5rem;
+    font-weight: 700;
+    border-radius: 1rem;
+    margin-top: 2rem;
+    text-align: right;
+    border: 3px solid var(--accent-hover-foreground);
+}
+
+.section-header:first-of-type {
+    margin-top: 0;
+}
+
+.field {
+    margin-bottom: 1em;
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr 3fr;
+    grid-template-rows: 1fr;
+    grid-template-areas: "label input";
+    gap: 0.5em;
+    align-items: center;
+}
+
+.field input {
+    grid-area: input;
+    border: 1px solid #e6e6e6;
+    border-radius: 3px;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,.1);
+    box-sizing: border-box;
+    color: #333;
+    display: block;
+    font-size: 14px;
+    margin: 0;
+    outline: 0;
+    padding: 8px 12px;
+    transition: border-color .1s ease-in-out;
+}
+
+.field textarea {
+    grid-area: input;
+    border: 1px solid #e6e6e6;
+    border-radius: 3px;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,.1);
+    box-sizing: border-box;
+    color: #333;
+    display: block;
+    font-size: 14px;
+    margin: 0;
+    outline: 0;
+    padding: 8px 12px;
+    transition: border-color .1s ease-in-out;
+    width: 100%;
+}
+
+.field > label {
+    grid-area: label;
+    text-align: left;
+}
+
+.field input:focus {
+    border-color: var(--accent-foreground);
+    box-shadow: 0 0 0 1px #c8e1ff;
+}
+
+.field textarea:focus {
+    border-color: var(--accent-foreground);
+    box-shadow: 0 0 0 1px #c8e1ff;
+}
+
+.field select {
+    grid-area: input;
+    border: 1px solid #e6e6e6;
+    border-radius: 3px;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,.1);
+    box-sizing: border-box;
+    color: #333;
+    display: block;
+    font-size: 14px;
+    margin: 0;
+    outline: 0;
+    padding: 8px 12px;
+    transition: border-color .1s ease-in-out;
+    background: #fff;
+}
+
+.field select:focus {
+    border-color: var(--accent-foreground);
+    box-shadow: 0 0 0 1px #c8e1ff;
+}
+
+.field .checkbox-input {
+    grid-area: input;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.field .radio-group {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+    flex-wrap: wrap;
+    max-width: 30rem;
+}
+
+.field .radio-group .radio-option {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.field .radio-group .radio-option label {
+    padding-left: 0.5rem;
+}
+
+.field .file-input {
+    grid-area: input;
+}
+
+.field .file-input p.file-preview {
+    margin: 0;
+    padding: 0;
+}
+
+form.disabled .file-input input {
+    display: none;
+}
+
+form.disabled .file-input span.current-prefix {
+    display: none;
+}
+
+div.submit {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+div.submit button {
+    border-radius: 5px;
+    box-shadow: 0 1px 0 rgba(0,0,0,.1);
+    cursor: pointer;
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 0.5rem 2rem;
+    background: var(--accent-foreground);
+    color: var(--accent-background);
+    border: 2px solid var(--accent-hover-foreground);
+}
+
+div.submit button:hover, div.submit button:focus, div.submit button:active {
+    background: var(--accent-hover-foreground);
+    border: 2px solid var(--accent-foreground);
+    color: var(--accent-background);
+}
+
+form {
+    min-width: min(100%, 40rem);
+    overflow-y: auto;
+    max-height: calc(100vh - 10rem);
+    padding-right: 1rem;
+    background: var(--accent-background);
+    border-radius: 1rem;
+    padding: 1rem;
+    margin: 1rem;
+}
+
+form.disabled input, form.disabled textarea, form.disabled select {
+    background: #e6e6e6;
+    border: 1px solid #e6e6e6;
+    color: #333;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+form.disabled label {
+    color: #333;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+form.disabled button {
+    display: none;
+}
+
+/* card for due date and finalised status */
+.image-content .form-metadata {
+    background-color: rgba(255,255,255,0.5);
+    backdrop-filter: blur(5px);
+    border-radius: 0.5em;
+    box-shadow: 3px 3px 5px rgba(0,0,0,.3);
+    margin: 1em;
+    padding: 1em;
+    max-width: 20em;
+}
+
+.image-content .form-metadata .due {
+    text-align: center;
+}
+
+.image-content .form-metadata p {
+    margin: 0;
+}

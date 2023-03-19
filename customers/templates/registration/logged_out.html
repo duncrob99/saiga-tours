@@ -1,0 +1,14 @@
+{% extends 'registration/base.html' %}
+
+{% block imagecontent %}
+  <h1>Farewell</h1>
+{% endblock %}
+
+{% block form %}
+  <p>Thank you for looking at your tours!</p>
+  <p>Have a nice day!</p>
+  <div class="btn-group">
+    <a class="btn accent hoverable-accent" href="{% url 'front-page' %}">Go to front page</a>
+    <a class="btn accent hoverable-accent" href="{% url 'login' %}">Log back in</a>
+  </div>
+{% endblock %}

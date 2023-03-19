@@ -1,0 +1,158 @@
+.content-container {
+    display: grid;
+    grid-template-columns: 1fr min(100%, 80em) 1fr;
+    grid-template-rows: 1fr;
+    grid-template-areas: ". content .";
+    grid-gap: 1em;
+    padding: 3em;
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.content {
+    grid-area: content;
+}
+
+h1 {
+	font-family: burford base,sans-serif;
+	font-size: 4rem;
+	color: var(--accent-foreground);
+	text-outline: 2px rgba(0,0,0,.2);
+	-webkit-text-stroke: 2px rgba(0,0,0,.2);
+	line-height: 1;
+  text-decoration: 5px underline;
+  margin-bottom: 1em;
+}
+
+.tasks-container {
+    padding: 2em;
+    margin-bottom: 2em;
+    margin-top: 2em;
+    position: relative;
+    box-shadow: 2px 2px 8px rgba(0,0,0,.3);
+}
+
+.tasks {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(15em, 25em));
+    grid-template-rows: 1fr;
+    grid-template-areas: ". .";
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(15em, 1fr);
+    grid-gap: 1em;
+    height: min-content;
+    overflow-x: auto;
+    padding: 1em;
+}
+
+.tasks-container:before {
+    content: "Tasks";
+    position: absolute;
+    font-family: burford base,sans-serif;
+    font-size: 2rem;
+    color: var(--accent-foreground);
+    text-shadow: 0 0 20px rgba(255, 255, 255, 1);
+    background: white;
+    padding-left: 0.2em;
+    padding-right: 0.2em;
+    line-height: 1;
+    margin-bottom: 0;
+    top: -0.5em;
+    left: 1em;
+}
+
+.task {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: min-content 1fr min-content min-content;
+    grid-template-areas: "title" "description" "due" "buttons";
+    gap: 0.5em;
+    padding: 1em;
+    box-shadow: 2px 2px 8px rgba(0,0,0,.3);
+    border-radius: 0.5em;
+}
+
+.task .due {
+    grid-area: due;
+    font-size: 1rem;
+    line-height: 1;
+    margin-bottom: 0;
+    margin-top: 0;
+    justify-self: right;
+    width: min(max-content, 100%);
+}
+
+.task h2 {
+    grid-area: title;
+    font-size: 1.5rem;
+    color: var(--accent-foreground);
+    margin-bottom: 0;
+    margin-top: 0;
+}
+
+.task p {
+    grid-area: description;
+    font-size: 1rem;
+    line-height: 1;
+    margin-bottom: 0;
+    margin-top: 0;
+}
+
+.task a {
+    grid-area: buttons;
+    /*
+    font-size: 1rem;
+    line-height: 1;
+    margin-bottom: 0;
+    margin-top: 0;
+    text-decoration: none;
+    color: var(--accent-foreground);
+    background: var(--accent-background);
+    border: 1px solid var(--accent-foreground);
+    */
+}
+
+.task a {
+    background-color: var(--accent-background);
+    color: var(--accent-foreground);
+    border: 1px solid var(--accent-foreground);
+}
+
+.task a:is(:hover, :focus) {
+    background-color: var(--accent-hover-background);
+    color: var(--accent-hover-foreground);
+    border: 1px solid var(--accent-hover-foreground);
+}
+
+.task a:focus, .task a:focus-visible, .task a:active, .task a:target {
+    outline: none;
+    box-shadow: 0 0 0 0.25rem var(--accent-hover-background) !important;
+    border: 1px solid var(--accent-hover-foreground);
+}
+
+.task.overdue {
+    border-left: 5px solid #ff0000;
+}
+
+.task.overdue .due {
+    color: #ff0000;
+    font-weight: bold;
+}
+
+.task.urgent {
+    border-left: 5px solid #ff9900;
+}
+
+.task.urgent .due {
+    color: #ff9900;
+}
+
+.task.complete {
+    border-left: 5px solid #86b146;
+}
+
+.task.complete .due {
+    color: #86b146;
+}
