@@ -3,5 +3,16 @@
 <script defer src="https://code.jquery.com/jquery-3.6.1.min.js" integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" crossorigin="anonymous"></script>
 <script defer src="{% static 'stats/js/visibility/visibility.core.js' %}"></script>
 <script defer src="{% static 'stats/js/visibility/visibility.timers.js' %}"></script>
+
+<script>
+  let django_urls = {
+    "view": "{% url 'view' %}",
+    "heartbeat": "{% url 'heartbeat' %}",
+    "close": "{% url 'close' %}",
+    "mouse_action": "{% url 'mouse-action' %}",
+  }
+  window.view_url =;
+</script>
+
 <script defer src="{% static 'stats/js/include_script.js' %}"></script>
 <div id="analytics-debug"></div>

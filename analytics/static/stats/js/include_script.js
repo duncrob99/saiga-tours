@@ -19,7 +19,7 @@
 
     $.ajax({
         type: "POST",
-        url: "{% url 'view' %}",
+        url: django_urls.view,
         data: {
             'path': window.location.pathname,
             'interval': reportInterval,
@@ -60,7 +60,7 @@
                 }
                 $.ajax({
                     type: "POST",
-                    url: "{% url 'heartbeat' %}",
+                    url: django_urls.heartbeat,
                     data: {
                         'path': window.location.pathname,
                         'interval': reportInterval,
@@ -86,7 +86,7 @@
                 }
                 $.ajax({
                     type: "POST",
-                    url: "{% url 'close' %}",
+                    url: django_urls.close,
                     data: {
                         'path': window.location.pathname,
                         'time_visible': time_visible,
@@ -110,7 +110,7 @@
                     if (ev.x && ev.y) {
                         $.ajax({
                             type: "POST",
-                            url: "{% url 'mouse-action' %}",
+                            url: django_urls.mouse_action,
                             data: {
                                 'path': window.location.pathname,
                                 'x': ev.x,
@@ -131,7 +131,7 @@
                 if (ev.x && ev.y) {
                     $.ajax({
                         type: "POST",
-                        url: "{% url 'mouse-action' %}",
+                        url: django_urls.mouse_action,
                         data: {
                             'path': window.location.pathname,
                             'x': ev.x,
