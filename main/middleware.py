@@ -23,6 +23,7 @@ class CacheForUsers:
             r'^/static/',
             r'^/stats/',
             r'^/testimonials/',
+            r'^/customer/',
         ]
         path = request.get_full_path()
 
