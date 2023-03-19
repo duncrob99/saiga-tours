@@ -39,6 +39,14 @@ def register(request):
 
         user = authenticate(username=user.username, password=form.cleaned_data['password1'])
         login(request, user)
+
+        customer = Customer.objects.create(
+            user=user,
+            email=user.email,
+            first_name=user.first_name,
+            last_name=user.last_name,
+        )
+
         user.customer.send_email_confirmation()
 
         messages.add_message(request, messages.SUCCESS, 'Thanks for registering, please check your email to confirm you address')
