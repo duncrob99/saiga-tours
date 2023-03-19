@@ -203,7 +203,6 @@ body:after {
 
 .form-card form {
     margin: 0;
-    overflow-y: auto;
 }
 
 .errorlist {
