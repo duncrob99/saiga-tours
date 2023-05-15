@@ -58,7 +58,8 @@ def minify_html(html):
 def front_page(request):
     settings = Settings.load()
 
-    rows = [FrontPageRow(settings.frontpage_tours_pos, 'tours'), FrontPageRow(settings.frontpage_map_pos, 'map'),
+    rows = [FrontPageRow(settings.frontpage_tours_pos, 'tours'),
+            FrontPageRow(settings.frontpage_map_pos, 'map'),
             FrontPageRow(settings.frontpage_blog_pos, 'articles',
                          Article.visible(request.user.is_staff).filter(type=Article.BLOG)[:3], 'Blogs',
                          reverse('blog')), FrontPageRow(settings.frontpage_news_pos, 'articles',
@@ -742,11 +743,11 @@ def create_itinerary_template(request):
 
 
 def error_404(request, exception):
-    return render(request, '404.html', global_context(request), status=404)
+    return render(request, '404.html', global_context(request) | {'no_canonical': True}, status=404)
 
 
 def error_500(request):
-    return render(request, '500.html', global_context(request), status=500)
+    return render(request, '500.html', global_context(request) | {'no_canonical': True}, status=500)
 
 
 def gen_500(request):

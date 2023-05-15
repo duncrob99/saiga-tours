@@ -149,7 +149,9 @@
       gtag('config', 'G-4SZK6XKZB4');
     </script>
 
-    <link rel="canonical" href="{{ request.build_absolute_uri | strip_params }}">
+    {% if not no_canonical %}
+        <link rel="canonical" href="{{ request.build_absolute_uri | strip_params }}">
+    {% endif %}
 </head>
 <body>
 {#<body style="background-image: url('{% static "images/background_a.jpg" %}');">#}
