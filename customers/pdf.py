@@ -159,7 +159,7 @@ def print_field_label(field, pdf, cursor_pos):
 def print_field_instructions(field, pdf, cursor_pos):
     extra_margin = 10
     width = CONTENT_WIDTH * input_width_fraction - extra_margin * 2 if INSTRUCTIONS_IN_COLUMN else CONTENT_WIDTH - extra_margin * 2
-    if field['type'] == 'file' and not field['file']:
+    if field['type'] == 'file' and not field.get('file', None):
         instructions = Paragraph('Please include this file when you submit the form.', field_instruction_style)
         instructions.wrap(width, MARGIN)
         instructions.drawOn(pdf, MARGIN + extra_margin, cursor_pos - instructions.height)
@@ -344,7 +344,7 @@ def gen_form_pdf(form_data):
                     fillColor=WHITE,
                     textColor=BLACK,
                     forceBorder=True,
-                    value=field.get('value', ''),
+                    value=field.get('value', '') or '',
                     maxlen=None,
                     fieldFlags=1<<12 | DEFAULT_FLAGS,
                 )
@@ -432,25 +432,27 @@ def gen_form_pdf(form_data):
                 cursor_pos = initial_cursor_pos
 
             elif field['type'] == 'file':
+                filename_text = str(field.get('filename', None)) or 'no file uploaded'
                 pdf.drawString(
                     CONTENT_WIDTH * (1 - input_width_fraction) + MARGIN,
                     cursor_pos - 20,
-                    str(field['filename']) or 'no file uploaded'
+                    filename_text
                 )
-                string_width = pdf.stringWidth(str(field['filename']) or 'no file uploaded', 'Helvetica', 12)
-                pdf.linkURL(
-                    str(field['file'].url),
-                    (
-                        CONTENT_WIDTH * (1 - input_width_fraction) + MARGIN - 5,
-                        cursor_pos - 24,
-                        CONTENT_WIDTH * (1 - input_width_fraction) + MARGIN + string_width + 5,
-                        cursor_pos - 24 + 20
-                    ),
-                    thickness=0,
-                    relative=0,
-                    color=BLACK,
-                    border=(0, 0, 0)
-                )
+                string_width = pdf.stringWidth(filename_text, 'Helvetica', 12)
+                if field.get('file', None):
+                    pdf.linkURL(
+                        str(field['file'].url),
+                        (
+                            CONTENT_WIDTH * (1 - input_width_fraction) + MARGIN - 5,
+                            cursor_pos - 24,
+                            CONTENT_WIDTH * (1 - input_width_fraction) + MARGIN + string_width + 5,
+                            cursor_pos - 24 + 20
+                        ),
+                        thickness=0,
+                        relative=0,
+                        color=BLACK,
+                        border=(0, 0, 0)
+                    )
 
                 post_input_cursor_pos = 20
             elif field['type'] == 'date':
@@ -481,7 +483,7 @@ def gen_form_pdf(form_data):
                     fillColor=WHITE,
                     textColor=BLACK,
                     forceBorder=True,
-                    value=field.get('value', ''),
+                    value=field.get('value', '') or '',
                     maxlen=None,
                     fieldFlags=DEFAULT_FLAGS,
                 )

@@ -112,6 +112,18 @@ def view_form(request, pk):
     })
 
 
+def view_form_template(request, pk):
+    if not request.user.is_staff:
+        return Http404
+
+    form = get_object_or_404(Form, pk=pk)
+
+    return render(request, 'customers/form.html', {
+        'form_data': form.structured_data,
+        'pdf_link': reverse('view_form_template_pdf', kwargs={'pk': pk}),
+    })
+
+
 def view_filled_form(request, user_pk, task_pk):
     if not request.user.is_staff:
         messages.add_message(request, messages.ERROR, 'You do not have access to this form')
@@ -125,6 +137,7 @@ def view_filled_form(request, user_pk, task_pk):
     return render(request, 'customers/form.html', {
         'form_data': form_data,
         'task': filled_form.task,
+        'user_pk': user_pk,
     })
 
 
@@ -289,7 +302,7 @@ def link_callback(uri, rel):
         return path
 
 
-def view_form_pdf(request, pk):
+def customer_view_form_pdf(request, pk):
     if request.user.is_anonymous:
         messages.add_message(request, messages.ERROR, 'You must be logged in to view forms')
         return redirect_to_login(request)
@@ -299,8 +312,22 @@ def view_form_pdf(request, pk):
     except Customer.DoesNotExist:
         messages.add_message(request, messages.ERROR, 'You do not have access to this form')
         return redirect_to_login(request)
-    
-    task = get_object_or_404(FormTask, pk=pk)
+
+    return view_form_pdf(request, customer.pk, pk)
+
+
+def admin_view_form_pdf(request, customer_pk, task_pk):
+    if not request.user.is_staff:
+        messages.add_message(request, messages.ERROR, 'You do not have access to this form')
+        return redirect('dashboard')
+
+    customer = get_object_or_404(Customer, pk=customer_pk)
+
+    return view_form_pdf(request, customer, task_pk)
+
+
+def view_form_pdf(request, customer, task_pk):
+    task = get_object_or_404(FormTask, pk=task_pk)
 
     if task not in customer.all_tasks:
         messages.add_message(request, messages.ERROR, 'You do not have access to this form')
@@ -319,6 +346,16 @@ def view_form_pdf(request, pk):
         form_data = task.form.structured_data
 
     return FileResponse(gen_form_pdf(form_data), as_attachment=False, filename=f'{form_data["title"]}.pdf')
+
+
+def view_form_template_pdf(request, pk):
+    if not request.user.is_staff:
+        return Http404
+
+    form = get_object_or_404(Form, pk=pk)
+
+    return FileResponse(gen_form_pdf(form.structured_data), as_attachment=False, filename=f'{form.structured_data["title"]}_template.pdf')
+
 
 def new_form_version(request, form_pk):
     if not request.user.is_staff:
