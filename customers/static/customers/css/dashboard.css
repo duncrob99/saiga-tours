@@ -1,10 +1,6 @@
 .content-container {
-    display: grid;
-    grid-template-columns: 1fr min(100%, 80em) 1fr;
-    grid-template-rows: 1fr;
-    grid-template-areas: ". content .";
-    grid-gap: 1em;
-    padding: 3em;
+    padding-block: 2em;
+    padding-inline: max(3rem, calc((100vw - 80rem) / 2));
     margin: 0;
     width: 100%;
     height: 100%;
