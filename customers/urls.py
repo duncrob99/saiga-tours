@@ -18,4 +18,5 @@ urlpatterns = [
     path('confirm_email/', views.confirm_email, name='confirm_email'),
     path('media/form_files/<uuid:user_id>/<uuid:form_id>/<str:filename>', views.form_file, name='form_file'),
     path('form_pdf/<str:pk>', views.view_form_pdf, name='view_form_pdf'),
+    path('new_form_version/<uuid:form_pk>/', views.new_form_version, name='new_form_version'),
 ]

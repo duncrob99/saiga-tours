@@ -43,25 +43,56 @@ class NoChangePermissionMixin:
         all_affected_users = previous_users.union(map(str, affected_users))
         messages.add_message(request, messages.ERROR, self.message_prefix + self.pretty_join(all_affected_users) + self.message_suffix)
 
+    def notify_outdated(self, request, next_version=None):
+        outdated_message = "This form is outdated and cannot be edited."
+        current_messages = messages.get_messages(request)
+        for message in current_messages:
+            # Remove previous messages
+            if message.level == messages.ERROR and message.message.startswith(outdated_message):
+                message.extra_tags = 'hidden'
+
+        view_next_message = " View the new version <a href={}>here</a>".format(next_version) if next_version else ""
+
+        messages.add_message(request, messages.ERROR, format_html(outdated_message + view_next_message))
+
     class Media:
         css = {
             'all': ('css/hidden_messages.css',)
         }
 
+    def is_outdated(self, obj):
+        if obj:
+            if hasattr(obj, 'form'):
+               return obj.form.outdated
+            else:
+               return obj.outdated
+        return False
+
     def has_change_permission(self, request, obj=None):
-        if obj and obj.affected_customers:
+        has_affected_customers = obj and obj.affected_customers
+        if has_affected_customers:
             affected_users = obj.affected_customers
             self.notify_cant_change(request, affected_users)
-            return not affected_users
+
+        is_outdated = self.is_outdated(obj)
+        if is_outdated:
+            if hasattr(obj, 'next_version'):
+                self.notify_outdated(request, reverse('admin:customers_form_change', args=[obj.next_version.pk]))
+            else:
+                self.notify_outdated(request)
+
+        if obj:
+            return not has_affected_customers and not is_outdated
+
         return super().has_change_permission(request, obj)
 
     def has_delete_permission(self, request, obj=None):
-        if obj and obj.affected_customers:
+        if obj and obj.affected_customers or self.is_outdated(obj):
             return False
         return super().has_delete_permission(request, obj)
 
     def get_readonly_fields(self, request, obj=None):
-        if obj and obj.affected_customers:
+        if obj and obj.affected_customers or self.is_outdated(obj):
             return [f.name for f in self.model._meta.fields]
         return self.readonly_fields
 
@@ -86,12 +117,18 @@ class FormFieldOptionInline(InlineNoChangePermissionMixin, nested_admin.NestedTa
     extra = 0
     classes = ('collapse',)
 
+    def outdated(self, obj):
+        return obj.section.form.outdated
+
 
 class FormFieldInline(InlineNoChangePermissionMixin, nested_admin.NestedTabularInline):
     model = FormField
     extra = 0
     classes = ('collapse',)
     inlines = [FormFieldOptionInline]
+
+    def outdated(self, obj):
+        return obj.form.outdated
 
 
 class FormSectionInline(InlineNoChangePermissionMixin, nested_admin.NestedStackedInline):
@@ -100,11 +137,24 @@ class FormSectionInline(InlineNoChangePermissionMixin, nested_admin.NestedStacke
     inlines = [FormFieldInline]
     classes = ('collapse',)
 
+    def outdated(self, obj):
+        return obj.outdated
+
 
 class FormAdmin(NoChangePermissionMixin, nested_admin.NestedModelAdmin):
-    list_display = ('title', 'short_description')
+    list_display = ('title', 'version', 'short_description', 'finalised', 'new_version')
     inlines = [FormSectionInline]
     show_change_link = True
+    readonly_fields = ('version', 'outdated', 'previous_version')
+
+    def new_version(self, obj):
+        if obj.outdated:
+            return 'Outdated'
+        url = reverse('new_form_version', args=[obj.pk])
+        return format_html('<a class="button" href="{}">New Version</a>', url)
+
+    def outdated(self, obj):
+        return obj.outdated
 
 
 class FormTaskGroupInline(admin.TabularInline):

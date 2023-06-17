@@ -44,6 +44,26 @@ class Form(models.Model):
     short_description = models.CharField(max_length=500, null=True, blank=True)
     instructions = RichTextWithPlugins(config_name='default', null=True, blank=True)
     signature_instructions = models.TextField(null=True, blank=True)
+    outdated = models.BooleanField(default=False)
+    version = models.IntegerField(default=1)
+    previous_version = models.OneToOneField('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='next_version')
+
+    class Meta:
+        ordering = ['outdated', 'title', 'version']
+
+    def get_version(self, ver: int) -> 'Form':
+        if ver == self.version:
+            return self
+        elif ver > self.version:
+            return self.next_version.get_version(ver)
+        else:
+            return self.previous_version.get_version(ver)
+
+    def get_latest_version(self) -> 'Form':
+        if self.next_version:
+            return self.next_version.get_latest_version()
+        else:
+            return self
 
     def __str__(self):
         return self.title
@@ -56,6 +76,48 @@ class Form(models.Model):
     def affected_customers(self):
         return Customer.objects.filter(completed_forms__task__form=self).distinct()
         #return FilledForm.objects.filter(task__form=self)
+
+    @property
+    def finalised(self):
+        return FilledForm.objects.filter(task__form=self).exists()
+
+    def create_new_version(self):
+        self.outdated = True
+        self.unchecked_save()
+
+        # Duplicate form so that it can be edited after it's been finalised
+        new_form = Form.objects.create(
+            title=self.title,
+            short_description=self.short_description,
+            instructions=self.instructions,
+            signature_instructions=self.signature_instructions,
+            version=self.version + 1,
+            previous_version=self,
+        )
+
+        for section in self.sections.all():
+            new_section = FormSection.objects.create(
+                form=new_form,
+                title=section.title,
+                instructions=section.instructions,
+                order=section.order,
+            )
+
+            for field in section.fields.all():
+                new_field = FormField.objects.create(
+                    section=new_section,
+                    title=field.title,
+                    instructions=field.instructions,
+                    required=field.required,
+                    field_type=field.field_type,
+                    order=field.order,
+                )
+
+                for option in field.options.all():
+                    FormFieldOption.objects.create(
+                        field=new_field,
+                        value=option.value,
+                    )
 
     def check_no_affected_customers(self):
         filled_forms = FilledForm.objects.filter(task__form=self)
@@ -73,6 +135,12 @@ class Form(models.Model):
     def save(self, *args, **kwargs):
         self.check_no_affected_customers()
         super().save(*args, **kwargs)
+
+    def unchecked_save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+
+    def get_absolute_url(self):
+        return reverse('view_form_template', kwargs={'pk': self.pk})
 
     @property
     def structured_data(self):
@@ -193,6 +261,10 @@ class FormField(models.Model):
         self.check_no_affected_customers()
         super().save(*args, **kwargs)
 
+    @property
+    def form(self):
+        return self.section.form
+
     class Meta:
         verbose_name = 'Field'
         verbose_name_plural = 'Fields'
@@ -226,6 +298,10 @@ class FormFieldOption(models.Model):
     def save(self, *args, **kwargs):
         self.check_no_affected_customers()
         super().save(*args, **kwargs)
+
+    @property
+    def form(self):
+        return self.field.section.form
 
     class Meta:
         verbose_name = 'Option'

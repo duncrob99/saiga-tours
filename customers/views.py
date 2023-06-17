@@ -320,3 +320,12 @@ def view_form_pdf(request, pk):
 
     return FileResponse(gen_form_pdf(form_data), as_attachment=False, filename=f'{form_data["title"]}.pdf')
 
+def new_form_version(request, form_pk):
+    if not request.user.is_staff:
+        raise Http404
+
+    form = get_object_or_404(Form, pk=form_pk)
+    form.create_new_version()
+
+    return redirect('admin:customers_form_change', form_pk)
+
