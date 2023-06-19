@@ -100,7 +100,7 @@ def front_page(request):
         'testimonials': Testimonial.visible(request.user.is_staff),
         'rows': rows,
         'meta': MetaInfo(
-            request.get_raw_uri(),
+            request.build_absolute_uri(),
             'SAIGA Tours Homepage',
             settings.logo_url,
             description='Come share some tours with us!',
@@ -182,7 +182,7 @@ def destination_overview(request, region_slug, country_slug):
         'details': detail_list,
         'tours': tour_list,
         'meta': MetaInfo(
-            request.get_raw_uri(),
+            request.build_absolute_uri(),
             destination.name,
             destination.card_img.url,
             f'Come look at the tours we offer in {destination.name}!',
@@ -217,7 +217,7 @@ def details_page(request, region_slug, country_slug, detail_slug, detail_type):
     context = {'details': details,
                'form': form,
                'meta': MetaInfo(
-                   url=request.get_raw_uri(),
+                   url=request.build_absolute_uri(),
                    title=details.title,
                    image_url=details.card_img.url,
                    description=details.content[:40]
@@ -299,7 +299,7 @@ def tour(request, slug):
         'position_templates': PositionTemplate.objects.all(),
         'itinerary_templates': ItineraryTemplate.objects.all(),
         'meta': MetaInfo(
-            url=request.get_raw_uri(),
+            url=request.build_absolute_uri(),
             title=tour_obj.name,
             image_url=tour_obj.card_img.url,
             description=tour_obj.excerpt,
@@ -350,7 +350,7 @@ def tours(request):
         'destinations': Destination.visible(request.user.is_staff),
         'query': request.GET.get('q'),
         'meta': MetaInfo(
-            url=request.get_raw_uri(),
+            url=request.build_absolute_uri(),
             title='Tours',
             image_url=settings.logo.url,
             description='Come see all the tours we have on offer!'
@@ -397,7 +397,7 @@ def article(request, slug):
     context = {
         'article': article_obj,
         'form': form,
-        'meta': MetaInfo(request.get_raw_uri(),
+        'meta': MetaInfo(request.build_absolute_uri(),
                          article_obj.title,
                          article_obj.card_img.url,
                          article_obj.excerpt,
@@ -459,7 +459,7 @@ def article_list(request, type, title):
         'checked_authors': checked_authors,
         'checked_tags': checked_tags,
         'meta': MetaInfo(
-            url=request.get_raw_uri(),
+            url=request.build_absolute_uri(),
             title='title',
             image_url=Settings.load().logo.url,
             description=f'See all the {title.lower()} we have on offer!'
@@ -488,7 +488,7 @@ def region(request, slug):
         'destinations': destination_list,
         'tours': tours_list,
         'meta': MetaInfo(
-            url=request.get_raw_uri(),
+            url=request.build_absolute_uri(),
             title=f'{region_obj.name} Guide',
             image_url=Settings.load().logo.url,
             description=f'Learn everything you need to know about {region_obj.name}'
@@ -518,7 +518,7 @@ def page(request, path):
         'page': page_obj,
         'form': form,
         'meta': MetaInfo(
-            request.get_raw_uri(),
+            request.build_absolute_uri(),
             page_obj.title,
             page_obj.card_img.url,
             page_obj.content[:36] + '...',
@@ -559,7 +559,7 @@ def contact(request):
     context = {
         'form': form,
         'meta': MetaInfo(
-            request.get_raw_uri(),
+            request.build_absolute_uri(),
             'Contact Us',
             Settings.load().logo.url,
         )
@@ -588,7 +588,7 @@ def destinations(request):
                   'destinations': Destination.visible(request.user.is_staff),
                   'points': MapPoint.objects.all(),
                   'meta': MetaInfo(
-                      request.get_raw_uri(),
+                      request.build_absolute_uri(),
                       'Destinations',
                       Settings.load().logo.url,
                       "Come and see the destinations we have on offer!"
@@ -613,7 +613,7 @@ def country_tours(request, region_slug, country_slug):
         'details': detail_list,
         'tours': tour_list,
         'meta': MetaInfo(
-            request.get_raw_uri(),
+            request.build_absolute_uri(),
             f'Tours to {destination.name}',
             destination.card_img.url,
             f'Learn more about the tours we offer to {destination.name}'
@@ -637,7 +637,7 @@ def region_tours(request, region_slug):
         'tours': tours,
         'points': points,
         'meta': MetaInfo(
-            request.get_raw_uri(),
+            request.build_absolute_uri(),
             f'Tours to {region_obj.name}',
             Settings.load().logo.url,
             f'Learn more about our tour offerings to {region_obj.name}'
@@ -828,7 +828,7 @@ def testimonials(request):
         'testimonials': Testimonial.objects.filter(approved=True).order_by('?'),
         'form': form,
         'meta': MetaInfo(
-            request.get_raw_uri(),
+            request.build_absolute_uri(),
             "Testimonials",
             Settings.load().logo.url,
             f'See what people have to say about {Settings.load().site_title}',
