@@ -2,7 +2,7 @@ from django.utils.html import strip_tags
 
 import io
 from PIL import Image
-from svglib.svglib import svg2rlg
+from svglib.svglib import svg2rlg, Drawing
 from django_countries import countries
 from datetime import datetime
 
@@ -280,22 +280,30 @@ def gen_form_pdf(form_data):
     set_background(pdf)
 
     # Draw header logo
-    if Settings.load().logo.path.endswith('.svg'):
-        drawing = svg2rlg(Settings.load().logo.path)
-        max_size = 250
-        scale = min(max_size / drawing.width, max_size / drawing.height)
-        drawing.scale(scale, scale)
-        width = drawing.width * scale
-        height = drawing.height * scale
+    image_is_svg = Settings.load().logo.path.endswith('.svg')
+    if image_is_svg:
+        image = svg2rlg(Settings.load().logo.path)
+    else:
+        image = Image.open(Settings.load().logo.path)
+
+    if image is not None:
+        max_width = 250
+        max_height = 150
+        scale = min(max_width / image.width, max_height / image.height)
+        width = int(image.width * scale)
+        height = int(image.height * scale)
 
         x = WIDTH / 2 - width / 2
         y = cursor_pos - height
         cursor_pos -= height + 10
 
-        drawing.drawOn(pdf, x, y)
-    else:
-        image = Image.open(Settings.load().logo.path)
-        pdf.drawInlineImage(image, 30, 800, width=50, height=50)
+        if type(image) is Drawing:
+            image.scale(scale, scale)
+            image.drawOn(pdf, x, y)
+        else:
+            #image.resize((width, height))
+            pdf.drawInlineImage(image, x, y, width, height)
+
 
     # Draw title
     pdf.setFont('Helvetica-Bold', 20)
@@ -433,6 +441,8 @@ def gen_form_pdf(form_data):
 
             elif field['type'] == 'file':
                 filename_text = str(field.get('filename', None)) or 'no file uploaded'
+                pdf.setFillColor(BLACK)
+                pdf.setFont('Helvetica', 12)
                 pdf.drawString(
                     CONTENT_WIDTH * (1 - input_width_fraction) + MARGIN,
                     cursor_pos - 20,
@@ -473,9 +483,9 @@ def gen_form_pdf(form_data):
                 pdf.acroForm.textfield(
                     name=field['name'],
                     tooltip=field['title'],
-                    x=CONTENT_WIDTH * (1 - input_width_fraction) + MARGIN,
-                    y=cursor_pos - 24,
-                    width=CONTENT_WIDTH * input_width_fraction,
+                    x=int(CONTENT_WIDTH * (1 - input_width_fraction) + MARGIN),
+                    y=int(cursor_pos - 24),
+                    width=int(CONTENT_WIDTH * input_width_fraction),
                     height=20,
                     borderStyle='solid',
                     borderColor=BLACK,
