@@ -61,6 +61,21 @@ body {
     font-weight: 700;
 }
 
+.field:not(.required) > label {
+    color: #666;
+}
+
+/*
+.field:not(.required) > label::after {
+    content: " (optional)";
+    font-size: 0.8rem;
+    font-weight: 400;
+    color: #333;
+    position: relative;
+    left: 0.5rem;
+}
+*/
+
 .field textarea {
     grid-area: input;
     border: 1px solid #e6e6e6;
