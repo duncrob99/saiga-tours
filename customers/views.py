@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from django.http import HttpResponse, HttpResponseForbidden, FileResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseForbidden, FileResponse, HttpResponseRedirect, Http404
 from django.contrib.auth import login, authenticate
 from email_validator import validate_email, EmailNotValidError
 from zxcvbn import zxcvbn
@@ -313,7 +313,7 @@ def customer_view_form_pdf(request, pk):
         messages.add_message(request, messages.ERROR, 'You do not have access to this form')
         return redirect_to_login(request)
 
-    return view_form_pdf(request, customer.pk, pk)
+    return view_form_pdf(request, customer, pk)
 
 
 def admin_view_form_pdf(request, customer_pk, task_pk):
