@@ -912,10 +912,11 @@ def invalidate_pages(pages_to_invalidate):
     if pages_to_invalidate == 'all':
         print('Invalidating all pages')
         # Purge all on cloudflare before deleting
-        for page in PageCache.objects.all():
-            page.delete()
-        for page in PageCache.objects.all():
-            purge_cloudflare_page(page.url)
+        #for page in PageCache.objects.all():
+            #page.delete()
+        #for page in PageCache.objects.all():
+            #purge_cloudflare_page(page.url)
+        PageCache.objects.all().delete()
     else:
         print(f'Invalidating {pages_to_invalidate}')
         for page in pages_to_invalidate:
