@@ -1,8 +1,11 @@
 /media/
 /main/migrations/
+*/migrations/
 /db.sqlite3
 /assets/
 /travel_website/.env
 /analytics/migrations/
 *__pycache__*
 /.venv/
+.unlighthouse/
+.vscode/
