@@ -21,14 +21,23 @@ class CacheForUsers:
         bypass_urls = [
             r'^/admin/',
             r'^/static/',
+            r'^/media/',
             r'^/stats/',
             r'^/testimonials/',
             r'^/customer/',
+            r'^/sitemap\.xml',
+            r'^/robots\.txt',
+            r'^/messages'
         ]
-        path = request.get_full_path()
 
-        if request.method == 'GET' and not request.user.is_authenticated and not any(
-                re.match(ignored_path, path) for ignored_path in bypass_urls) and settings.NOCACHE is False:
+        path = request.path
+
+        is_get = request.method == 'GET'
+        has_no_query_params = len(request.GET) == 0
+        is_anonymous = not request.user.is_authenticated
+        not_bypassed_url = not any(re.match(ignored_path, path) for ignored_path in bypass_urls)
+
+        if is_get and is_anonymous and has_no_query_params and not_bypassed_url:# and not settings.NOCACHE:
             # Retrieve response from PageCache if it exists, otherwise store response
             try:
                 try:
