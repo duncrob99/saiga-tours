@@ -23,6 +23,7 @@ import os
 
 from main.models import RichTextWithPlugins
 from .pdf import gen_form_pdf
+from .utils import join_phone_number
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
@@ -489,6 +490,24 @@ class FilledForm(models.Model):
                         completed_field = FilledFormField.objects.create(form=self, field=field, file=files.get(field_name))
                         print("File field path: ", completed_field.file.path)
                     completed_field.save()
+            elif field.field_type == 'tel':
+                if field_name in post:
+                    try:
+                        completed_field = self.fields.get(field=field)
+                        completed_field.value = post.get(field_name)
+                        completed_field.save()
+                    except FilledFormField.DoesNotExist:
+                        FilledFormField.objects.create(form=self, field=field, value=post.get(field_name))
+                elif f'{field_name}-code' in post and f'{field_name}-number' in post:
+                    code = post.get(f'{field_name}-code')
+                    number = post.get(f'{field_name}-number')
+                    phone_number = join_phone_number(code, number)
+                    try:
+                        completed_field = self.fields.get(field=field)
+                        completed_field.value = phone_number
+                        completed_field.save()
+                    except FilledFormField.DoesNotExist:
+                        FilledFormField.objects.create(form=self, field=field, value=phone_number)
             else:
                 if field_name in post:
                     try:

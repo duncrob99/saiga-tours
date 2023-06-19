@@ -483,8 +483,8 @@ def gen_form_pdf(form_data):
                     fillColor=WHITE,
                     textColor=BLACK,
                     forceBorder=True,
-                    value=field.get('value', '') or '',
-                    maxlen=None,
+                    value=field.get('value', '').replace('\u202f', ' ') or '',
+                    #maxlen=None,
                     fieldFlags=DEFAULT_FLAGS,
                 )
                 post_input_cursor_pos = 20

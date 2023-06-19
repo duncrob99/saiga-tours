@@ -44,6 +44,23 @@ body {
     transition: border-color .1s ease-in-out;
 }
 
+.field > .tel-group {
+    grid-area: input;
+    font-size: 1.3em;
+    display: flex;
+    gap: 0.2rem;
+    align-items: center;
+}
+
+.tel-group > .main-number-input {
+    flex-grow: 1;
+    margin-left: 0.5rem;
+}
+
+.field.required > label {
+    font-weight: 700;
+}
+
 .field textarea {
     grid-area: input;
     border: 1px solid #e6e6e6;

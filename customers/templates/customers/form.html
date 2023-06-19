@@ -1,5 +1,6 @@
 {% extends 'registration/base.html' %}
 {% load static %}
+{% load customer_tags %}
 
 {% block head %}
   <link rel="stylesheet" href="{% static 'customers/css/form.css' %}">
@@ -8,15 +9,20 @@
 {% endblock %}
 
 {% block title %}{{ form_data.title }}{% endblock %}
+
 {% block imagecontent %}
-  {% if task.due or form_data.instructions or form_data.finalised %}
+  {% if task.due or form_data.instructions or form_data.finalised or pdf_link %}
     <div class="form-metadata">
       {% if task.due %}
         <p class="due">Due: {{ task.due | date }}</p>
       {% endif %}
       {{ form_data.instructions | safe }}
-      {% if form_data.finalised %}
-      <a class="finalised nice-link" href="{% url 'view_form_pdf' task.pk %}">View your completed form as a PDF</a>
+      {% if form_data.finalised and request.user.is_staff %}
+        <a class="finalised nice-link" href="{% url 'admin_view_form_pdf' user_pk task.pk %}">View the completed form as a PDF</a>
+      {% elif form_data.finalised %}
+        <a class="finalised nice-link" href="{% url 'customer_view_form_pdf' task.pk %}">View your completed form as a PDF</a>
+      {% elif pdf_link %}
+        <a class="finalised nice-link" href="{{ pdf_link }}">View the template as a PDF</a>
       {% endif %}
     </div>
   {% endif %}
@@ -96,6 +102,13 @@
           {% elif field.type == 'telephone' %}
             <input type="tel" id="{{ field.name }}" name="{{ field.name }}" value="{{ field.value|default:"" }}" {% if field.required %}required{% endif %}>
             {% endcomment %}
+          
+          {% elif field.type == 'tel' %}
+            <div class="tel-group">
+                <!--<input type="tel" class="complete-number-input" id="{{ field.name }}" name="{{ field.name }}" value="{{ field.value|default:"" }}" {% if field.required %}required{% endif %} hidden>-->
+                +<input type="tel" class="country-code-input" id="{{ field.name }}-code" {% if field.required %}required{% endif %} size="3" name="{{field.name}}-code" value="{{ field.value | phone_code }}">
+                <input type="tel" class="main-number-input" id="{{ field.name }}-number" {% if field.required %}required{% endif %} name="{{field.name}}-number" value="{{ field.value | phone_number }}">
+            </div>
           {% else %}
             <input type="{% if field.type %}{{ field.type }}{% else %}text{% endif %}" id="{{ field.name }}" name="{{ field.name }}" value="{{ field.value|default:"" }}" {% if field.required %}required{% endif %}>
 
