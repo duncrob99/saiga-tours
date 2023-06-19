@@ -274,7 +274,7 @@ FIXTURE_DIRS = (
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Store session cookie for as long as possible
-SESSION_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = not DEBUG
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 SESSION_COOKIE_AGE = 60 * 60 * 24 * 365 * 1000  # 1000 years
 
@@ -285,6 +285,7 @@ SILKY_IGNORE_PATHS = [
     r'^/stats/',
 ]
 
+SILK_CHECK_PERCENT = 10
 
 def should_intercept(request):
     # Don't intercept if path is in the list of ignored paths
@@ -295,17 +296,18 @@ def should_intercept(request):
     if DEBUG:
         return True
     else:
-        return random() < 0.1
+        return random() < SILK_CHECK_PERCENT / 100
 
 
 SILKY_PYTHON_PROFILER = True
 SILKY_PYTHON_PROFILER_BINARY = True
 SILKY_META = True
-SILKY_MAX_RECORDED_REQUESTS = 100000
-SILKY_MAX_RECORDED_REQUESTS_CHECK_PERCENT = 10
+SILKY_MAX_RECORDED_REQUESTS = 10000
+SILKY_MAX_RECORDED_REQUESTS_CHECK_PERCENT = 5
 SILKY_AUTHENTICATION = True
 SILKY_AUTHORISATION = True
 SILKY_INTERCEPT_FUNC = should_intercept
+SILK_MAX_RESPONSE_BODY_SIZE = 1024
 
 # countries settings
 COUNTRIES_FLAG_URL = STATIC_URL + 'flags/{code}.gif'
@@ -327,7 +329,7 @@ COUNTRIES_FIRST = [
 if DEBUG:
     try:
         import nplusone
-        #nplusone.show_nplusones()
+        nplusone.show_nplusones()
     except ImportError:
         print("nplusone not installed")
 
