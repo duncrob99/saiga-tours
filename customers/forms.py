@@ -4,6 +4,7 @@ from django.contrib.auth.forms import UserCreationForm
 
 from zxcvbn import zxcvbn
 from email_validator import validate_email, EmailNotValidError
+from hcaptcha_field import hCaptchaField
 
 class NewPasswordForm(forms.ModelForm):
     class Meta:
@@ -36,6 +37,8 @@ class NewPasswordForm(forms.ModelForm):
 
 
 class NewUserForm(UserCreationForm):
+    captcha = hCaptchaField()
+
     class Meta:
         model = User
         fields = ['first_name', 'last_name', 'email', 'password1', 'password2']
