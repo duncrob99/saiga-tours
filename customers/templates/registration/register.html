@@ -41,7 +41,7 @@
             </div>
             <div class="field">
                 <label for="{{ form.email.id_for_label }}" hidden>Email: </label>
-                <input type="text" id="{{ form.email.id_for_label }}" name="{{ form.email.name }}" placeholder="Email" required autocomplete="email">
+                <input type="email" id="{{ form.email.id_for_label }}" name="{{ form.email.name }}" placeholder="Email" required autocomplete="email">
                 {{ form.email.errors }}
             </div>
             <div class="field empty_input">
