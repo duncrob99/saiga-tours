@@ -30,6 +30,9 @@
         {% include 'main/navbar.html' %}
         <div id="messages-container"></div>
 
+        {% block top-content %}
+        {% endblock %}
+
         <div class="image-content">
           <h1>{% block title %}{% endblock %}</h1>
           {% block imagecontent %}{% endblock %}

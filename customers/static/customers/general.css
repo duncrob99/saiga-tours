@@ -159,6 +159,7 @@ body:after {
     text-decoration: none;
     transition: background-color .1s ease-in-out, border-color .1s ease-in-out, color .1s ease-in-out;
     width: 100%;
+    white-space: nowrap;
 }
 
 .form-card :is(button, a.btn):disabled {

@@ -3,9 +3,13 @@
 {% load customer_tags %}
 
 {% block head %}
-  <link rel="stylesheet" href="{% static 'customers/css/form.css' %}">
-  <link rel="stylesheet" href="{% static 'css/custom_ckeditor.css' %}">
-  <script defer src="{% static 'js/ckeditor_styling.js' %}"></script>
+<link rel="stylesheet" href="{% static 'customers/css/form.css' %}">
+<link rel="stylesheet" href="{% static 'css/custom_ckeditor.css' %}">
+<script defer src="{% static 'js/ckeditor_styling.js' %}"></script>
+{% if form_data.signature_instructions %}
+<script defer src="{% static 'customers/js/signature_pad.js' %}"></script>
+<script defer src="{% static 'customers/js/form_signature.js' %}"></script>
+{% endif %}
 {% endblock %}
 
 {% block title %}{{ form_data.title }}{% endblock %}
@@ -28,8 +32,20 @@
   {% endif %}
 {% endblock %}
 
-{% block nocard %}
+{% if form_data.signature_instructions %}
+{% block top-content %}
+<div id="fullscreen-signature-pad-wrapper" class="hidden">
+    <canvas id="fullscreen-signature-pad"></canvas>
+    <div class="signature-pad-controls">
+        <button type="button" id="fullscreen-clear-signature" class="btn">Clear</button>
+        <button type="button" id="fullscreen-undo-signature" class="btn">Undo</button>
+        <button type="button" id="fullscreen-fullscreen-signature" class="btn">Exit Fullscreen</button>
+    </div>
+</div>
+{% endblock %}
+{% endif %}
 
+{% block nocard %}
   <form method="post" {% if form_data.finalised %}class="disabled"{% endif %} enctype="multipart/form-data">
     {% csrf_token %}
     {% for section in form_data.sections %}
@@ -47,7 +63,7 @@
 
           {% elif field.type == 'select' %}
             <select id="{{ field.name }}" name="{{ field.name }}" {% if field.required %}required{% endif %}>
-              <option value="" disabled selected>Select an option</option>
+                <option value="" {% if field.required %}disabled {% endif %}selected>Select an option</option>
               {% for option in field.options %}
                 <option value="{{ option.value|default:"" }}" {% if option.value == field.value %}selected{% endif %}>{{ option.value|default:"" }}</option>
               {% endfor %}
@@ -55,7 +71,7 @@
 
           {% elif field.type == 'checkbox' %}
             <div class="checkbox-input">
-              <input type="checkbox" id="{{ field.name }}" name="{{ field.name }}" {% if field.value %}checked{% endif %} {% if field.required %}required{% endif %}>
+              <input type="checkbox" id="{{ field.name }}" name="{{ field.name }}" {% if field.value %}checked{% endif %}>
             </div>
 
           {% elif field.type == 'radio' %}
@@ -80,7 +96,7 @@
 
           {% elif field.type == 'countries' %}
             <select id="{{ field.name }}" name="{{ field.name }}" {% if field.required %}required{% endif %}>
-              <option value="" disabled {% if not field.value %}selected{% endif %}>Select a country</option>
+                <option value="" {% if field.required %}disabled {%endif%}{% if not field.value %}selected{% endif %}>Select a country</option>
               {% for country in form_data.countries %}
                 <option value="{{ country.code }}" {% if country.code == field.value %}selected{% endif %}>{{ country.name }}</option>
               {% endfor %}
@@ -103,8 +119,8 @@
           {% elif field.type == 'tel' %}
             <div class="tel-group">
                 <!--<input type="tel" class="complete-number-input" id="{{ field.name }}" name="{{ field.name }}" value="{{ field.value|default:"" }}" {% if field.required %}required{% endif %} hidden>-->
-                +<input type="tel" class="country-code-input" id="{{ field.name }}-code" {% if field.required %}required{% endif %} size="3" name="{{field.name}}-code" value="{{ field.value | phone_code }}">
-                <input type="tel" class="main-number-input" id="{{ field.name }}-number" {% if field.required %}required{% endif %} name="{{field.name}}-number" value="{{ field.value | phone_number }}">
+                +<input type="tel" class="country-code-input" id="{{ field.name }}-code" {% if field.required %}required{% endif %} size="3" name="{{field.name}}-code" value="{{ field.value | phone_code }}" pattern="[0-9]+">
+                <input type="tel" class="main-number-input" id="{{ field.name }}-number" {% if field.required %}required{% endif %} name="{{field.name}}-number" value="{{ field.value | phone_number }}" pattern="[0-9]+">
             </div>
           {% else %}
             <input type="{% if field.type %}{{ field.type }}{% else %}text{% endif %}" id="{{ field.name }}" name="{{ field.name }}" value="{{ field.value|default:"" }}" {% if field.required %}required{% endif %}>
@@ -114,9 +130,26 @@
         </div>
       {% endfor %}
     {% endfor %}
+    {% if form_data.signature_instructions %}
+    <div class="field signature required">
+        <label>{{ form_data.signature_instructions }}</label>
+        <div class="signature-pad-wrapper">
+            <canvas id="signature-pad" class="signature-pad" width="400" height="200"></canvas>
+            <input type="hidden" id="signature-raw" name="signature-raw" value="{{ form_data.raw_signature|default:"" }}" required>
+            <input type="hidden" id="signature-svg" name="signature-svg" value="" required>
+            <div class="signature-pad-controls">
+                <button type="button" id="clear-signature" class="btn">Clear</button>
+                <button type="button" id="undo-signature" class="btn">Undo</button>
+                <button type="button" id="fullscreen-signature" class="btn">Fullscreen</button>
+            </div>
+        </div>
+    </div>
+    {% endif %}
     <div class="submit">
       <button class="btn" type="submit" name="finalise" value="false" formnovalidate>Save Draft</button>
-      <button class="btn" type="submit" name="finalise" value="true" onclick="return confirm('Are you sure you want to finalise this form? You will not be able to make any changes after this point.');">Submit</button>
+      <div class="finalise-btn-wrapper">
+          <button class="btn finalise-btn" type="submit" name="finalise" value="true" onclick="return confirm('Are you sure you want to finalise this form? You will not be able to make any changes after this point.');">Submit</button>
+      </div>
     </div>
   </form>
 {% endblock %}

@@ -13,6 +13,7 @@ from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.enums import TA_CENTER, TA_RIGHT
 from reportlab.platypus import Paragraph
 from reportlab.pdfgen import canvas
+from reportlab.graphics.shapes import Rect
 
 from main.models import Settings
 
@@ -172,7 +173,7 @@ def print_field_instructions(field, pdf, cursor_pos):
     return cursor_pos
 
 
-def print_date_field(pdf, origin, width, height, name, value=None):
+def print_date_field(pdf, origin, width, height, name, value=None, date=None):
     slash_width = 10
     print("Full width: ", width)
     print("Slash width: ", slash_width)
@@ -239,22 +240,39 @@ def print_signature_instructions(instructions, pdf, cursor_pos):
 
 def print_signature_box(pdf, cursor_pos):
     pdf.saveState()
-    pdf.acroForm.textfield(
-        name='signature',
-        tooltip='Signature',
-        x=MARGIN,
-        y=cursor_pos - 50,
-        borderStyle='inset',
-        borderColor=BLACK,
-        fillColor=WHITE,
-        forceBorder=True,
-        width=CONTENT_WIDTH * 2/3 - 10,
-        height=50,
-        fieldFlags=DEFAULT_FLAGS
-    )
-    cursor_pos -= 50 + 10
+    width = CONTENT_WIDTH * 2/3 - 10
+    height = width / 2
+#    pdf.acroForm.textfield(
+#        name='signature',
+#        tooltip='Signature',
+#        x=MARGIN,
+#        y=cursor_pos - height,
+#        borderStyle='inset',
+#        borderColor=BLACK,
+#        fillColor=WHITE,
+#        forceBorder=True,
+#        width=width,
+#        height=width / 2,
+#        fieldFlags=DEFAULT_FLAGS
+#    )
+    pdf.rect(MARGIN, cursor_pos - height, width, height, stroke=1, fill=0)
+    pdf.setFillColor(WHITE)
+    pdf.rect(MARGIN, cursor_pos - height, width, height, stroke=0, fill=1)
+    cursor_pos -= height + 10
     pdf.restoreState()
     return cursor_pos
+
+def print_signature(pdf, cursor_pos, svg):
+    pdf.saveState()
+    width = CONTENT_WIDTH * 2/3 - 10
+    height = width / 2
+    image = svg2rlg(svg)
+    if image is not None:
+        image.scale(width / image.width, height / image.height)
+        image.drawOn(pdf, MARGIN, cursor_pos - height)
+        cursor_pos -= height + 10
+        pdf.restoreState()
+        return cursor_pos
 
 
 def wrap_signature(instructions, pdf, cursor_pos):
@@ -524,6 +542,7 @@ def gen_form_pdf(form_data):
             20,
             'Date',
             '',
+            form_data.get('finalised_date')
         )
         pdf.setFillColor(BLACK)
         pdf.setFont('Helvetica', 12)
@@ -532,7 +551,11 @@ def gen_form_pdf(form_data):
             cursor_pos - 25,
             'Signed On'
         )
+        pre_box_cursor = cursor_pos
         cursor_pos = print_signature_box(pdf, cursor_pos)
+
+        if form_data.get('svg_signature', None):
+            print_signature(pdf, pre_box_cursor, form_data.get('svg_signature', '').path)
 
     #pdf.setFont('Helvetica', 12)
     #pdf.setFillColor(BLACK)

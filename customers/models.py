@@ -9,12 +9,14 @@ from django.utils.html import strip_tags
 from django.template.loader import render_to_string
 from django.core.exceptions import ValidationError
 from django.core.mail import EmailMultiAlternatives
+from django.core.files.base import ContentFile
 from django import forms
 from django.urls import reverse
 
 from django_countries.fields import CountryField
 from django_countries import countries
 
+import base64
 import uuid as uuid_lib
 import stripe
 import math
@@ -434,6 +436,9 @@ class FilledForm(models.Model):
     customer = models.ForeignKey('Customer', on_delete=models.CASCADE, related_name='completed_forms')
     task = models.ForeignKey(FormTask, on_delete=models.CASCADE, related_name='completed_forms')
     finalised = models.BooleanField(default=False)
+    raw_signature = models.TextField(blank=True, null=True)
+    svg_signature = models.FileField(blank=True, null=True)
+    finalised_date = models.DateTimeField(blank=True, null=True)
 
     @property
     def structured_data(self):
@@ -444,6 +449,8 @@ class FilledForm(models.Model):
             'instructions': self.task.form.instructions,
             'finalised': self.finalised,
             'signature_instructions': self.task.form.signature_instructions,
+            'raw_signature': self.raw_signature,
+            'svg_signature': self.svg_signature,
             'countries': [{
                 'code': country[0],
                 'name': country[1]
@@ -473,11 +480,7 @@ class FilledForm(models.Model):
 
         for field in self.task.form.all_fields:
             field_name = f'{field.section.title}-{field.title}'
-            print(field_name)
             if field.field_type == 'file':
-                print("File field")
-                print("files: ", files)
-                print("field_name: ", field_name)
                 if field_name in files:
                     print("value: ", files.get(field_name))
                     try:
@@ -516,10 +519,19 @@ class FilledForm(models.Model):
                         completed_field.save()
                     except FilledFormField.DoesNotExist:
                         FilledFormField.objects.create(form=self, field=field, value=post.get(field_name))
-        if 'finalise' in post and post.get('finalise') == 'true':
-            self.finalised = True
-            self.save()
 
+        is_finalised = 'finalise' in post and post.get('finalise') == 'true'
+        has_signature = 'signature-raw' in post and post.get('signature-raw') != ''
+        if is_finalised:
+            self.finalised = True
+            self.finalised_date = timezone.now()
+        if has_signature:
+            self.raw_signature = post.get('signature-raw')
+            svg_base64 = post.get('signature-svg').split(',')[1]
+            svg_bytes = base64.b64decode(svg_base64)
+            self.svg_signature = ContentFile(svg_bytes, name=f'{self.uuid}-signature.svg')
+        if is_finalised or has_signature:
+            self.save()
 
     class Meta:
         unique_together = ('customer', 'task')
