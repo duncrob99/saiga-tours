@@ -10,7 +10,7 @@
     font-weight: normal;
 }
 
-.nav-item:hover > * {
+.nav-item:hover > a, .nav-item:hover > span {
     color: var(--accent-hover-background) !important;
 }
 
@@ -287,6 +287,16 @@
     align-items: center;
     padding: 0.5rem 0;
     gap: 1rem;
+}
+
+.offcanvas .login-btns {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+}
+
+.offcanvas .nav-link.btn {
+	width: 100%;
 }
 
 .login-btns a {
