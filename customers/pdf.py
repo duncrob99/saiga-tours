@@ -173,61 +173,32 @@ def print_field_instructions(field, pdf, cursor_pos):
     return cursor_pos
 
 
-def print_date_field(pdf, origin, width, height, name, value=None, date=None):
+def print_date_field(pdf, origin, width, height, name, value=None):
+    pdf.saveState()
     slash_width = 10
     print("Full width: ", width)
     print("Slash width: ", slash_width)
     print("Field width - slash width: ", width - slash_width * 2)
-    field_width = (width - slash_width * 2) / 3
+    field_width = lambda digits: digits * (width - slash_width * 2) / 9 + 5
     print("Field width: ", field_width)
-    value = datetime.strptime(value, '%Y-%m-%d').date() if value else None
-    pdf.acroForm.textfield(
-        name=f'{name}_day',
-        tooltip=f'{name}_day',
-        x=origin[0],
-        y=origin[1] - height,
-        borderStyle='inset',
-        borderColor=BLACK,
-        fillColor=WHITE,
-        forceBorder=True,
-        width=(width - slash_width * 2) / 3,
-        height=height,
-        value=str(value.day) if value else '',
-        fieldFlags=DEFAULT_FLAGS
-    )
-    pdf.acroForm.textfield(
-        name=f'{name}_month',
-        tooltip=f'{name}_month',
-        x=origin[0] + field_width + slash_width,
-        y=origin[1] - height,
-        borderStyle='inset',
-        borderColor=BLACK,
-        fillColor=WHITE,
-        forceBorder=True,
-        width=(width - slash_width * 2) / 3,
-        height=height,
-        value=str(value.month) if value else '',
-        fieldFlags=DEFAULT_FLAGS
-    )
-    pdf.acroForm.textfield(
-        name=f'{name}_year',
-        tooltip=f'{name}_year',
-        x=origin[0] + 2 * (field_width + slash_width),
-        y=origin[1] - height,
-        borderStyle='inset',
-        borderColor=BLACK,
-        fillColor=WHITE,
-        forceBorder=True,
-        width=(width - slash_width * 2) / 3,
-        height=height,
-        value=str(value.year) if value else '',
-        fieldFlags=DEFAULT_FLAGS
-    )
-    pdf.saveState()
+    pdf.setFillColor(WHITE)
+    pdf.rect(origin[0], origin[1] - height, field_width(2), height, fill=1, stroke=1)
+    pdf.rect(origin[0] + field_width(2) + slash_width, origin[1] - height, field_width(2), height, fill=1, stroke=1)
+    pdf.rect(origin[0] + 2 * (field_width(2) + slash_width), origin[1] - height, field_width(4), height, fill=1, stroke=1)
     pdf.setFillColor(BLACK)
     pdf.setFont('Helvetica', height)
-    pdf.drawCentredString(origin[0] + field_width + slash_width / 2, origin[1] - height * 9 / 10, '/')
-    pdf.drawCentredString(origin[0] + 2 * field_width + slash_width * 3/2, origin[1] - height * 9 / 10, '/')
+    pdf.drawCentredString(origin[0] + field_width(2) + slash_width / 2, origin[1] - height * 9 / 10, '/')
+    pdf.drawCentredString(origin[0] + 2 * field_width(2) + slash_width * 3/2, origin[1] - height * 9 / 10, '/')
+
+    print(f"{value=}")
+    if value is not None:
+        date = datetime.strptime(value, '%Y-%m-%d').date() if type(value) == str else value
+        year_string = date.strftime('%Y') if date else ''
+        month_string = date.strftime('%m') if date else ''
+        day_string = date.strftime('%d') if date else ''
+        pdf.drawCentredString(origin[0] + field_width(2) * 0.5, origin[1] - height + 2, day_string)
+        pdf.drawCentredString(origin[0] + field_width(2) * 1.5 + slash_width, origin[1] - height + 2, month_string)
+        pdf.drawCentredString(origin[0] + 2 * (field_width(2) + slash_width) + 0.5 * field_width(4), origin[1] - height + 2, year_string)
 
 
 def print_signature_instructions(instructions, pdf, cursor_pos):
@@ -541,7 +512,6 @@ def gen_form_pdf(form_data):
             CONTENT_WIDTH * 1/3,
             20,
             'Date',
-            '',
             form_data.get('finalised_date')
         )
         pdf.setFillColor(BLACK)

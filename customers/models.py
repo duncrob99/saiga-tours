@@ -448,6 +448,7 @@ class FilledForm(models.Model):
             'short_description': self.task.form.short_description,
             'instructions': self.task.form.instructions,
             'finalised': self.finalised,
+            'finalised_date': self.finalised_date,
             'signature_instructions': self.task.form.signature_instructions,
             'raw_signature': self.raw_signature,
             'svg_signature': self.svg_signature,
