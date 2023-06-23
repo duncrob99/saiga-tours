@@ -6,6 +6,9 @@
 <link rel="stylesheet" href="{% static 'customers/css/form.css' %}">
 <link rel="stylesheet" href="{% static 'css/custom_ckeditor.css' %}">
 <script defer src="{% static 'js/ckeditor_styling.js' %}"></script>
+<link rel="stylesheet" href="https://uicdn.toast.com/tui.date-picker/latest/tui-date-picker.css" />
+<script src="https://uicdn.toast.com/tui.date-picker/latest/tui-date-picker.js"></script>
+<script defer src="{% static 'customers/js/form.js' %}"></script>
 {% if form_data.signature_instructions %}
 <script defer src="{% static 'customers/js/signature_pad.js' %}"></script>
 <script defer src="{% static 'customers/js/form_signature.js' %}"></script>
@@ -112,9 +115,18 @@
                 +<input type="tel" class="country-code-input" id="{{ field.name }}-code" {% if field.required %}required{% endif %} size="3" name="{{field.name}}-code" value="{{ field.value | phone_code }}" pattern="[0-9]+">
                 <input type="tel" class="main-number-input" id="{{ field.name }}-number" {% if field.required %}required{% endif %} name="{{field.name}}-number" value="{{ field.value | phone_number }}" pattern="[0-9]+">
             </div>
+
+            {% elif field.type == 'date' %}
+            <div class="datepicker">
+                <div class="datepicker-input">
+                    <input type="text" id="{{ field.name }}" name="{{ field.name }}" value="{{ field.value|default:"" }}" {% if field.required %}required{% endif %} placeholder="dd/mm/yyyy" pattern="[0-9]{1,2}/[0-9]{1,2}/[0-9]{4}">
+                    <span class="tui-ico-date"></span>
+                </div>
+                <div class="datepicker-container"></div>
+            </div>
+
           {% else %}
             <input type="{% if field.type %}{{ field.type }}{% else %}text{% endif %}" id="{{ field.name }}" name="{{ field.name }}" value="{{ field.value|default:"" }}" {% if field.required %}required{% endif %}>
-
 
           {% endif %}
         </div>

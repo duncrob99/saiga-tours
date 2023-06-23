@@ -420,3 +420,52 @@ form .field :invalid {
 form .field :valid {
     border-bottom: 2px solid var(--accent-foreground);
 }
+
+/** TUI datepicker **/
+.tui-datepicker {
+    z-index: 1000;
+    max-width: 100%;
+}
+
+.datepicker-container {
+    position: relative;
+}
+
+.tui-calendar, .tui-datepicker-body {
+    position: relative;
+    max-width: 100% !important;
+}
+
+.datepicker {
+    grid-area: input;
+    align-self: start;
+}
+
+.datepicker input {
+    flex-grow: 1;
+}
+
+.datepicker-input {
+	flex-grow: 1;
+	display: flex;
+	align-items: center;
+	gap: var(--field-gap);
+}
+
+.tui-ico-date {
+    position: absolute;
+    right: 0.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--accent-foreground);
+    pointer-events: none;
+}
+
+
+/*
+@media (max-width: 700px) {
+    .tui-datepicker {
+        display: none;
+    }
+}
+*/
