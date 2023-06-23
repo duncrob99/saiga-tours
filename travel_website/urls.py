@@ -31,6 +31,8 @@ from main.sitemaps import (TourSitemap,
                            DestinationGuidesMap,
                            StaticPagesMap)
 
+from customers import views
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('ckeditor/', include('ckeditor_uploader.urls')),
@@ -50,9 +52,11 @@ urlpatterns = [
          }},
          name='django.contrib.sitemaps.views.sitemap'),
     path('silk/', include('silk.urls', namespace='silk')),
+    path('media/form_files/<uuid:user_id>/<uuid:form_id>/<str:filename>/', views.form_file, name='form_file'),
+    path('customers/', include('customers.urls')),
+    path('', include('main.urls'))
 ]
 
-urlpatterns.append(path('', include('main.urls')))
 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -16,7 +16,6 @@ urlpatterns = [
     path('new_password/<uuid:uuid>/<uuid:token>/', views.set_new_password, name='new_password'),
     path('send_registration_email/<uuid:uuid>/', views.send_registration_email, name='send_registration_email'),
     path('confirm_email/', views.confirm_email, name='confirm_email'),
-    path('media/form_files/<uuid:user_id>/<uuid:form_id>/<str:filename>', views.form_file, name='form_file'),
     path('form_pdf/<str:pk>', views.customer_view_form_pdf, name='customer_view_form_pdf'),
     path('form_pdf/<str:customer_pk>/<str:task_pk>/', views.admin_view_form_pdf, name='admin_view_form_pdf'),
     path('form_template/<str:pk>/', views.view_form_template, name='view_form_template'),

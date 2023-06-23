@@ -46,7 +46,5 @@ urlpatterns = [
 
     path('robots.txt', TemplateView.as_view(template_name='main/robots.txt', content_type='text/plain'), name='robots'),
 
-    path('customer/', include('customers.urls')),
-
     path('<path:path>/', views.page, name='page')
 ]
