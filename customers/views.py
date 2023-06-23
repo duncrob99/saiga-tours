@@ -340,8 +340,6 @@ def view_form_pdf(request, customer, task_pk):
 
     if filled_form:
         form_data = filled_form.structured_data
-        if form_data['finalised']:
-            customer.send_form_finalised_email(filled_form)
     else:
         form_data = task.form.structured_data
 
