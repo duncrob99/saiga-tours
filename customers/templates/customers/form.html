@@ -50,10 +50,14 @@
     {% csrf_token %}
     {% for section in form_data.sections %}
       <h2 class="section-header">{{ section.title }}</h2>
-      <p>{{ section.instructions | safe }}</p>
+      {% if section.instructions %}<p>{{ section.instructions | safe }}</p>{% endif %}
       {% for field in section.fields %}
-      <div class="field{% if field.required %} required{% endif %}">
-          <label for="{{ field.name }}">{{ field.title }}</label>
+      <div class="field{% if field.required %} required{% endif %}" data-field-type="{{field.type}}">
+          <label for="{{ field.name }}">{{ field.title }}
+          {% if field.instructions %}
+            <p class="instructions">{{ field.instructions }}</p>
+          {% endif %}
+          </label>
 
           {% if field.type == 'text' %}
             <input placeholder="{{ field.instructions | default:" " }}" type="text" id="{{ field.name }}" name="{{ field.name }}" value="{{ field.value|default:"" }}" {% if field.required %}required{% endif %}>
@@ -102,20 +106,6 @@
               {% endfor %}
             </select>
 
-            {% comment %}
-              {% elif field.type == 'date' %}
-                <input type="date" id="{{ field.name }}" name="{{ field.name }}" value="{{ field.value|default:"" }}" {% if field.required %}required{% endif %}>
-
-              {% elif field.type == 'number' %}
-                <input type="number" id="{{ field.name }}" name="{{ field.name }}" value="{{ field.value|default:"" }}" {% if field.required %}required{% endif %}>
-
-              {% elif field.type == 'email' %}
-                <input type="email" id="{{ field.name }}" name="{{ field.name }}" value="{{ field.value|default:"" }}" {% if field.required %}required{% endif %}>
-
-              {% elif field.type == 'url' %}
-                <input type="url" id="{{ field.name }}" name="{{ field.name }}" value="{{ field.value|default:"" }}" {% if field.required %}required{% endif %}>
-            {% endcomment %}
-          
           {% elif field.type == 'tel' %}
             <div class="tel-group">
                 <!--<input type="tel" class="complete-number-input" id="{{ field.name }}" name="{{ field.name }}" value="{{ field.value|default:"" }}" {% if field.required %}required{% endif %} hidden>-->
