@@ -332,7 +332,7 @@ form.disabled button {
     display: flex;
     flex-direction: row;
     justify-content: flex-end;
-    align-items: center;
+    align-items: stretch;
     gap: 0.5rem;
     margin-top: 0.25rem;
 }
