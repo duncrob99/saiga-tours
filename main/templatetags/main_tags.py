@@ -132,9 +132,6 @@ def delay_images(value: str, request):
             img['data-filename'] = img['src']
             # Remove src attribute to avoid loading image
             img.attrs.pop('src')
-        else:
-            # Mark image as not to be minimised
-            img.attrs['data-no-minimise'] = 'true'
 
     # Ensure empty paragraphs and other text tags contain <br> tags
     for p in soup.find_all(['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'li', 'td', 'th', 'div', 'span']):

@@ -218,7 +218,7 @@ if (storageAvailable('sessionStorage')) {
 }
 
 var $buoop = {
-    required: {e: 18, f: 95, o: 80, s: 9, c: 96},
+    required: {e: 105, f: 110, o: 91, s: 16, c: 105},
     insecure: true,
     style: "corner",
     api: 2022.10,
