@@ -24,7 +24,7 @@ class CacheForUsers:
             r'^/media/',
             r'^/stats/',
             r'^/testimonials/',
-            r'^/customer/',
+            r'^/customers/',
             r'^/sitemap\.xml',
             r'^/robots\.txt',
             r'^/messages'
@@ -37,7 +37,7 @@ class CacheForUsers:
         is_anonymous = not request.user.is_authenticated
         not_bypassed_url = not any(re.match(ignored_path, path) for ignored_path in bypass_urls)
 
-        if is_get and is_anonymous and has_no_query_params and not_bypassed_url:# and not settings.NOCACHE:
+        if is_get and is_anonymous and has_no_query_params and not_bypassed_url and not settings.NOCACHE:
             # Retrieve response from PageCache if it exists, otherwise store response
             try:
                 try:
