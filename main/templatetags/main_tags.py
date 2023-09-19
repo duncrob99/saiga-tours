@@ -143,6 +143,10 @@ def delay_images(value: str, request):
     for div in soup.find_all('div', {'class': 'table-holder'}):
         div.unwrap()
 
+    # Ensure nothing is contenteditable
+    for el in soup.find_all(contenteditable=True):
+        el.attrs.pop('contenteditable')
+
     prettified = soup.prettify()
     without_boxes = prettified.replace('<span style="background-color:rgba(220,220,220,0.5)"><img src="data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==" style="height:15px; width:15px" title="Click and drag to move"></span>', '')
 
