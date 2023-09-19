@@ -147,11 +147,12 @@ def delay_images(value: str, request):
     for el in soup.find_all(contenteditable=True):
         el.attrs.pop('contenteditable')
 
-    prettified = soup.prettify()
-    without_boxes = prettified.replace('<span style="background-color:rgba(220,220,220,0.5)"><img src="data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==" style="height:15px; width:15px" title="Click and drag to move"></span>', '')
+    for box in soup.find_all('span'):
+        if box.find('img', {'title': 'Click and drag to move'}):
+            box.decompose()
 
     # print('soupstr: ', soup.str())
-    return mark_safe(without_boxes)
+    return mark_safe(soup.prettify())
     # return mark_safe(value.replace('<img src=', '<img data-filename='))
 
 
