@@ -392,6 +392,7 @@ def tours_json(request):
             'start_date': tour.start_date.strftime('%Y-%m-%d') if tour.start_date else None,
             'duration': tour.duration,
             'price': tour.price,
+            'currency': tour.currency,
         } for tour in tours]
     return JsonResponse(data, safe=False)
 

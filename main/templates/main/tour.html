@@ -45,7 +45,7 @@
         "offers": {
             "@type": "Offer",
             "price": "{{ tour.price }}",
-            "priceCurrency": "USD",
+            "priceCurrency": "{{ tour.currency }}",
             "url": "{{ request.build_absolute_uri }}",
             "availability": "https://schema.org/InStock"
         },
@@ -172,7 +172,7 @@
                     Price
                 </div>
                 <div class="card-body d-flex flex-column justify-content-center">
-                    <div>{{ settings.price_prefix }}<span id="price">{{ tour.price }}</span></div>
+                    <div>{{ tour.currency }}<span id="price">{{ tour.price }}</span></div>
                 </div>
             </div>
         </div>

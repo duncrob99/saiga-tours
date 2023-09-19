@@ -372,6 +372,7 @@ class Tour(DraftHistory):
     banner_y = models.FloatField(null=True, blank=True)
 
     price = models.DecimalField(max_digits=8, decimal_places=2)
+    currency = models.CharField(max_length=5, default='US$')
     state = models.ForeignKey(State, on_delete=models.SET_NULL, null=True, blank=True)
     extensions = models.ManyToManyField('self', blank=True, symmetrical=False)
     display = models.BooleanField(default=True)
@@ -398,7 +399,7 @@ class Tour(DraftHistory):
         return f"Title: {self.name}\n" \
             f"Description: {self.excerpt}\n" \
             f"Duration: {self.duration} days\n" \
-            f"Price: ${self.price}\n" \
+            f"Price: ${self.currency}${self.price}\n" \
             f"Start date: {self.start_date.strftime('%d/%m/%Y') if self.start_date is not None else 'None'}\n" \
             f"Start location: {self.start_location}\n" \
             f"End location: {self.end_location}\n" \
@@ -412,6 +413,7 @@ class Tour(DraftHistory):
             'title': self.name,
             'description': self.excerpt,
             'duration': self.duration,
+            'currency': self.currency,
             'price': float(self.price),
             'start_date': self.start_date.strftime('%Y-%m-%d') if self.start_date is not None else None,
             'start_location': self.start_location,
@@ -764,7 +766,6 @@ class Settings(models.Model):
     facebook_link = models.URLField(blank=True, null=True)
     tiktok_link = models.URLField(blank=True, null=True)
 
-    price_prefix = models.CharField(max_length=10, default='US$')
     rounded_card_headers = models.BooleanField(default=True)
     corner_radius = models.FloatField(default=20)
     contact_form_email = models.EmailField(default='duncrob99@gmail.com')
