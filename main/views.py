@@ -35,6 +35,8 @@ from .images import crop_to_dims, get_image_format
 from .widgets import CountrySelectWidget
 
 
+import torch
+torch.set_num_threads(1)
 
 
 def assert_visible(request, model: DraftHistory):
@@ -296,7 +298,7 @@ def tour(request, slug):
     related_tours = None
     settings = Settings.load()
     if settings.related_tours_active == Settings.ActiveChoices.ACTIVE or settings.related_tours_active == Settings.ActiveChoices.STAFF_ONLY and request.user.is_staff:
-        related_tours = map(lambda result: result.content_object, vectordb.filter(metadata__published=True).search(tour_obj, k=3))
+        related_tours = map(lambda result: result.content_object, vectordb.filter(metadata__published=True, content_type__model='tour').search(tour_obj, k=3))
 
     context = {
         'tour': tour_obj,
