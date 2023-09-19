@@ -1,0 +1,118 @@
+{% load static %}
+
+<dialog id="search-modal">
+<div class="header">
+    <input type="text" placeholder="Search" autofocus>
+    <div class="buttons">
+        {% if settings.ai_chat_active == 'A' or settings.ai_chat_active == 'S' and request.user.is_staff %}
+        <button class="ai-button" type="button" data-state="initial">
+            <div class="ai-hal-wrapper">
+                <img class="ai-hal-loading" src="{% static 'images/HAL9000_loading.gif' %}" alt="HAL9000">
+                <img class="ai-hal-inactive ai-hal-error" src="{% static 'images/HAL9000_inactive.gif' %}" alt="HAL9000">
+                <img class="ai-hal-active" src="{% static 'images/HAL9000_active.gif' %}" alt="HAL9000">
+            </div>
+            Ask HAL
+        </button>
+        {% endif %}
+        <button class="filter-open" type="button">
+            <span class="bi bi-filter"></span>
+            Filter
+        </button>
+        <button class="close search-close" data-close aria-label="Close modal" type="button">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+</div>
+<dialog id="filter-dialog">
+    <div class="header">
+        <h2>Filter</h2>
+        <button class="close filter-close" data-close aria-label="Close modal" type="button">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="body">
+        <h3>Type</h3>
+        <div class="form-row" id="filter-type-checkboxes">
+            <div class="form-group">
+                <label for="filter-articles">Articles</label>
+                <input type="checkbox" id="filter-articles" name="filter-articles" value="articles" checked>
+            </div>
+            <div class="form-group">
+                <label for="filter-pages">Pages</label>
+                <input type="checkbox" id="filter-pages" name="filter-pages" value="pages" checked>
+            </div>
+            <div class="form-group">
+                <label for="filter-tours">Tours</label>
+                <input type="checkbox" id="filter-tours" name="filter-tours" value="tours" checked>
+            </div>
+            <div class="form-group">
+                <label for="filter-destination-guides">Destination Guides</label>
+                <input type="checkbox" id="filter-destination-guides" name="filter-destination-guides" value="destinationdetails" checked>
+            </div>
+        </div>
+    </div>
+</dialog>
+<div class="result-scroll-wrapper">
+    <div class="ai-wrapper" data-state="initial">
+        <div class="ai-answer"></div>
+    </div>
+    <div class="results"></div>
+</div>
+<div class="result-templates">
+    <div class="result card" data-result-type="article">
+        <a href="{url}">
+        </a>
+        <div class="image-wrapper">
+            <img src="{image}" alt="Image alt text">
+        </div>
+        <div class="breadcrumb">
+            {article_type}
+        </div>
+        <div class="content">
+            <h3 class="title">{title}</h3>
+            <p class="description">{description}</p>
+        </div>
+    </div>
+    <div data-result-type="page">
+        <a href="{url}">
+        </a>
+        <div class="image-wrapper">
+            <img src="{image}" alt="Image alt text">
+        </div>
+        <div class="breadcrumb">
+            {breadcrumb}
+        </div>
+        <div class="content">
+            <h3 class="title">{title}</h3>
+            <p class="description">{description}</p>
+        </div>
+    </div>
+    <div data-result-type="destinationdetails">
+        <a href="{url}">
+        </a>
+        <div class="image-wrapper">
+            <img src="{image}" alt="Image alt text">
+        </div>
+        <div class="breadcrumb">
+            {detail_type} > {region} > {destination}
+        </div>
+        <div class="content">
+            <h3 class="title">{title}</h3>
+        </div>
+    </div>
+    <div data-result-type="tour">
+        <a href="{url}">
+        </a>
+        <div class="image-wrapper">
+            <img src="{image}" alt="Image alt text">
+        </div>
+        <div class="breadcrumb">
+            Tours
+        </div>
+        <div class="content">
+            <h3 class="title">{title}</h3>
+            <p class="description">{description}</p>
+        </div>
+    </div>
+</div>
+</dialog>

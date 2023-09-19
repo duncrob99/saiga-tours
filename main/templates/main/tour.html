@@ -228,6 +228,12 @@
         {% endif %}
     {% endif %}
 
+    {% if related_tours %}
+        <hr>
+        <h6 class="display-6">Related Tours</h6>
+        {% include 'main/tours_cards.html' with tours=related_tours uid="related-tours" %}
+    {% endif %}
+
     {% if request.user.is_staff %}
         <div class="offcanvas offcanvas-start" tabindex="-1" id="editor-offcanvas">
             {% if not tour.stops.count %}

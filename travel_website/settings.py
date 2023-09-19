@@ -17,6 +17,7 @@ import environ
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
 from .middleware import CacheControlMiddleware
+import openai
 
 env = environ.Env(
     DEBUG=(bool, False),
@@ -31,6 +32,7 @@ env = environ.Env(
     STRIPE_PUBLIC_KEY=(str, None),
     STRIPE_SECRET_KEY=(str, None),
     ZOHO_PASSWORD=(str, None),
+    OPENAI_API_KEY=(str, None),
 )
 environ.Env.read_env()
 
@@ -38,6 +40,9 @@ CLOUDFLARE_API_TOKEN = env('CLOUDFLARE_API_TOKEN')
 CLOUDFLARE_ZONE_ID = env('CLOUDFLARE_ZONE_ID')
 CLOUDFLARE_DOMAIN = env('CLOUDFLARE_DOMAIN')
 NOCACHE = env('NOCACHE')
+
+OPENAI_API_KEY = env('OPENAI_API_KEY')
+openai.api_key = OPENAI_API_KEY
 
 if env('SENTRY'):
     SENTRY_PROJECT = env('SENTRY_PROJECT')
@@ -82,7 +87,7 @@ DEBUG = env('DEBUG')
 ADMINS = [('Admin', 'admin@saigatours.com')]
 MANAGERS = [('Admin', 'admin@saigatours.com')]
 
-ALLOWED_HOSTS = ["coolwebsite.pythonanywhere.com", "127.0.0.1", "www.saigatours.com", "saigatours.com", "admin.saigatours.com", 'localhost', '192.168.1.16']
+ALLOWED_HOSTS = ["coolwebsite.pythonanywhere.com", "127.0.0.1", "www.saigatours.com", "saigatours.com", "admin.saigatours.com", 'localhost', '192.168.1.16', 'testing.saigatours.com']
 
 # Application definition
 
@@ -109,7 +114,8 @@ INSTALLED_APPS = [
     'silk',
     'django_countries',
     'hcaptcha_field',
-    'nested_admin'
+    'nested_admin',
+    'vectordb',
 ]
 
 SITE_ID = 1

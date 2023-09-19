@@ -4,10 +4,12 @@ import smtplib
 from dataclasses import dataclass
 from datetime import datetime
 from functools import reduce, wraps
-from os import path
-from typing import Dict, List, Any
+from os import path, pwrite
+from typing import Dict, Iterator, List, Any
 from urllib.parse import urlparse
+from llama_cpp import CompletionChunk
 from tabulate import tabulate
+import openai
 
 import ngram
 from bs4 import BeautifulSoup
@@ -25,10 +27,14 @@ from silk.profiling.profiler import silk_profile
 from simple_history.models import HistoricalRecords
 from django.urls import resolve, Resolver404
 
+from vectordb import vectordb
+
 from .forms import *
 from .models import *
 from .images import crop_to_dims, get_image_format
 from .widgets import CountrySelectWidget
+
+
 
 
 def assert_visible(request, model: DraftHistory):
@@ -287,9 +293,15 @@ def tour(request, slug):
         stops_formset = None
         all_tours = None
 
+    related_tours = None
+    settings = Settings.load()
+    if settings.related_tours_active == Settings.ActiveChoices.ACTIVE or settings.related_tours_active == Settings.ActiveChoices.STAFF_ONLY and request.user.is_staff:
+        related_tours = map(lambda result: result.content_object, vectordb.filter(metadata__published=True).search(tour_obj, k=3))
+
     context = {
         'tour': tour_obj,
         'all_tours': all_tours,
+        'related_tours': related_tours,
         'form': form,
         'itinerary_forms': itinerary_formset,
         'stop_forms': stops_formset,
@@ -967,3 +979,140 @@ def list_links(request):
         'internal': link.internal,
         'is_broken': link.is_broken,
     } for link in links]})
+
+
+def search(request):
+    if not request.method == "GET":
+        return JsonResponse({'error': 'Invalid request method'})
+
+    query = request.GET.get('q', None)
+    if query is None:
+        return JsonResponse({'error': 'No query provided'})
+
+    include_articles = request.GET.get('include_articles', False)
+    include_pages = request.GET.get('include_pages', False)
+    include_tours = request.GET.get('include_tours', False)
+    include_destinationdetails = request.GET.get('include_destinationdetails', False)
+
+    results = vectordb.filter(
+        metadata__published=True,
+        content_type__model__in=[
+            'article' if include_articles else '',
+            'page' if include_pages else '',
+            'tour' if include_tours else '',
+            'destinationdetails' if include_destinationdetails else '',
+        ]
+    ).search(query, k=20)
+
+    print(results[0].id)
+    print(results[0].metadata)
+    print(results[0].content_object)
+    print(results[0].content_type.model)
+    print(results[0].__dict__)
+    return JsonResponse({'results': [
+        {
+            'score': result.distance,
+            'type': result.content_type.model,
+            'metadata': result.metadata,
+        } for result in results
+    ]})
+
+
+def generate_completion(text: str) -> str:
+    result = openai.Completion.create(
+       model="text-davinci-003",
+       prompt=text,
+       temperature=0.2,
+       max_tokens=100,
+    )
+
+    completion = result.choices[0].text
+
+#    from llama_cpp import Llama
+#    llm = Llama(model_path="./wizard-vicuna-13B.ggmlv3.q2_K.bin")
+#
+#    result = llm(text, max_tokens=100)
+#    print(result)
+#
+#    if isinstance(result, Iterator):
+#        result = result.__next__()
+#
+#    completion = result.get("choices")[0].get("text")
+
+    return completion
+
+
+def ai_answer(request):
+    if not request.method == "GET":
+        return JsonResponse({'error': 'Invalid request method'})
+
+    query = request.GET.get('q', None)
+    if query is None:
+        return JsonResponse({'error': 'No query provided'})
+
+    context_results = vectordb.filter(metadata__published=True).search(query, k=20)
+
+    completed = False
+    initial_completion = None
+    while not completed:
+        try:
+            context_titles = "\n-----\n".join([(f"ID: {result.id}\nType: {result.content_type.model}\nTitle: {result.metadata['title']}") for result in context_results])
+
+            initial_promt = (f"You are an experienced tour guide with Saiga Tours, "          \
+                             f"which takes tours into Central Asia and the Middle East.\n"  \
+                             f"You are asked the following question by a customer:\n"       \
+                             f"*Question:* '''{query}'''\n"                                 \
+                             f"Which five of the following articles would be most relevant to your answer? " \
+                             f"Answer with a comma separated list of IDs " \
+                             f"ranked in order of relevance.\n\n" \
+                             f"*Relevant articles:*\n{context_titles}" \
+                             f"\n\n*Answer:*")
+
+            initial_completion = generate_completion(initial_promt)
+            completed = True
+        except ValueError:
+            context_results = context_results[:len(context_results) - 1]
+
+    if initial_completion is None:
+        return JsonResponse({'success': False})
+
+    results = list(map(lambda res: int(res.strip()), initial_completion.split(',')))
+
+    completed = False
+    chat_completion = None
+    while not completed:
+        try:
+            #context = "\n".join([f'{result.metadata["url"]}: {result.text[:500]}' for result in context_results if result.id in results])
+            # use AiSummary
+            context = "\n".join([f'{result.metadata["url"]}: {AiSummary.get_or_set_summary(result.content_object).summary}' for result in context_results if result.id in results])
+
+            prompt = (f"*Reference Context:*\n{context}\n\n"                           \
+                      f"*Scenario:*\n"                                                 \
+                      f"You are an experienced tour guide with Saiga Tours, "          \
+                      f"which takes tours into Central Asia and the Middle East.\n"    \
+                      f"You are asked the following question by a customer:\n"         \
+                      f"*Question:* '''{query}'''\n\n"                                 \
+                      f"*Instructions:*\n"                                             \
+                      f"Answer the question in the space below in an interesting "     \
+                      f"and conversational tone. Link to at least one of the articles "\
+                      f"above, with [markdown links](/link/location).\n"\
+                      f"If there insufficient information to answer the question in the reference content, " \
+                      f"link to the [contact page](/contact) and say nothing else. "           \
+                      f"Avoid saying anything absent from the reference material.\n\n"      \
+                      f"*Answer:*\n")
+
+            print(prompt)
+            #return JsonResponse({'answer': prompt})
+
+            chat_completion = generate_completion(prompt)
+
+            completed = True
+        except ValueError:
+            results = results[:len(results) - 1]
+
+    if chat_completion is None:
+        return JsonResponse({'success': False})
+
+    print(chat_completion)
+    return JsonResponse({'answer': chat_completion, 'success': True})
+

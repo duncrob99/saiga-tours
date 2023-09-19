@@ -173,8 +173,13 @@
                     </li>
                 {% endif %}
                 -->
+            {% if settings.ai_search_active == 'A' or settings.ai_search_active == 'S' and request.user.is_staff %}
+              <button class="btn btn-outline-primary toggle-search" type="button">
+                  Search <i class="bi bi-search"></i>
+              </button>
+              {% endif %}
               {% if request.user.is_authenticated %}
-                <li class="nav-item dropdown btn-group user-label navbar-nav">
+                <li class="nav-item dropdown user-label navbar-nav">
                     <input type="checkbox" class="tree-toggle">
                   <span class="nav-link main-nav" role="button"
                      >Hello, {{ request.user.customer.display_name }}
@@ -398,7 +403,15 @@
                 -->
             </ul>
               {% if request.user.is_authenticated %}
-                <div class="nav-item dropdown btn-group user-label navbar-nav">
+              <div class="nav-item navbar-nav">
+            {% if settings.ai_search_active == 'A' or settings.ai_search_active == 'S' and request.user.is_staff %}
+              <div class="login-btns">
+              <button class="btn btn-outline-primary toggle-search" type="button">
+                  <i class="bi bi-search"></i>
+              </button>
+              </div>
+              {% endif %}
+                <div class="dropdown user-label">
                     <div class="nav-link main-nav" role="button">
                         Hello, {{ request.user.customer.display_name }}
                         <i class="bi bi-chevron-down"></i>
@@ -426,8 +439,14 @@
                         </li>
                     </ul>
                 </div>
+              </div>
               {% else %}
                 <div class="login-btns">
+            {% if settings.ai_search_active == 'A' or settings.ai_search_active == 'S' and request.user.is_staff %}
+              <button class="btn btn-outline-primary toggle-search" type="button">
+                  <i class="bi bi-search"></i>
+              </button>
+            {% endif %}
                     <a class="nav-link btn btn-secondary" href="{% url 'register' %}">Register</a>
                     <a class="nav-link btn btn-primary" href="{% url 'login' %}">Login</a>
                 </div>

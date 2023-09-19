@@ -2,6 +2,7 @@ import json
 from datetime import timedelta
 from io import BytesIO
 from typing import Tuple, Optional
+from markdownify import markdownify
 
 import requests
 from bs4 import BeautifulSoup as bs
@@ -28,6 +29,8 @@ from django.db.models.functions import Coalesce
 
 from .images import crop_to_ar, autorotate
 
+import openai
+import hashlib
 
 def clean_html(html: str):
     soup = bs(html, 'html.parser')
@@ -202,6 +205,68 @@ class Destination(DraftHistory):
         unique_together = [['region', 'slug'], ['region', 'name']]
 
 
+class AiSummary(models.Model):
+    model = models.CharField(max_length=100)
+    instance = models.CharField(max_length=100)
+    summary = models.TextField()
+    full_text_hash = models.CharField(max_length=100)
+
+    def __str__(self):
+        return f"Summary of {self.instance} ({self.model})"
+
+    @classmethod
+    def get_summary(cls, instance) -> 'AiSummary' or None:
+        try:
+            return cls.objects.get(instance=instance.__str__(), model=instance.__class__.__name__)
+        except cls.DoesNotExist:
+            return None
+
+    @classmethod
+    def set_summary(cls, instance, full_text = None):
+        summary = cls.get_summary(instance)
+        if summary is None:
+            summary = cls.objects.create(instance=instance.__str__(), model=instance.__class__.__name__)
+        full_text = full_text or instance.get_vectordb_text()
+        summary.full_text_hash = hashlib.sha256(full_text.encode('utf-8')).hexdigest()
+        summary.summary = cls.generate_summary(full_text)
+        summary.save()
+
+    @classmethod
+    def get_or_set_summary(cls, instance) -> 'AiSummary':
+        summary = cls.get_summary(instance)
+        full_text = instance.get_vectordb_text()
+        if summary is None or summary.full_text_hash != hashlib.sha256(full_text.encode('utf-8')).hexdigest():
+            cls.set_summary(instance, full_text)
+
+        summary = cls.get_summary(instance)
+        if summary is None:
+            raise Exception("Summary could not be generated")
+
+        return summary
+
+    @classmethod
+    def generate_summary(cls, source: str or models.Model):
+        if isinstance(source, str):
+            full_text = source
+        else:
+            full_text = source.get_vectordb_text()
+        prompt = (f"Summarise this text such that it still contains all the "  \
+                  f"information that could be used to "                        \
+                  f"answer questions about the text.\n\n"                      \
+                  f"{full_text}\n\n" \
+                  f"Summary:")[:2048]
+
+        completion = openai.Completion.create(
+            model="text-davinci-003",
+            prompt=prompt,
+            temperature=0,
+            max_tokens=512
+        )
+
+        print(completion)
+        return completion.choices[0].text
+
+
 class DestinationDetails(DraftHistory):
     TOURS = 't'
     GUIDE = 'g'
@@ -222,6 +287,21 @@ class DestinationDetails(DraftHistory):
     banner_img = models.ImageField(null=True, blank=True)
     banner_x = models.FloatField(default=50)
     banner_y = models.FloatField(default=50)
+
+    def get_vectordb_text(self):
+        return f"Title: {self.title} for {self.destination}\n" \
+            f"{markdownify(self.content)}"
+
+    def get_vectordb_metadata(self):
+        return {
+            'title': self.title,
+            'destination': self.destination.name,
+            'region': self.destination.region.name,
+            'type': self.type,
+            'url': self.get_absolute_url(),
+            'image': self.card_img.url,
+            'published': self.published,
+        }
 
     def get_caches_to_invalidate(self, previous):
         return 'all'
@@ -313,6 +393,36 @@ class Tour(DraftHistory):
         detail_paths = [reverse('tours', args=[d.destination.region.slug, d.destination.slug, d.slug]) for d in changed_details]
         tours_path = reverse('tours')
         return destination_paths + region_paths + detail_paths + [tours_path, self.get_absolute_url()]
+
+    def get_vectordb_text(self):
+        return f"Title: {self.name}\n" \
+            f"Description: {self.excerpt}\n" \
+            f"Duration: {self.duration} days\n" \
+            f"Price: ${self.price}\n" \
+            f"Start date: {self.start_date.strftime('%d/%m/%Y') if self.start_date is not None else 'None'}\n" \
+            f"Start location: {self.start_location}\n" \
+            f"End location: {self.end_location}\n" \
+            f"Keywords: {self.keywords}\n" \
+            f"Destinations: {', '.join([d.name for d in self.destinations.all()])}\n" \
+            f"State: {self.state.text if self.state is not None else 'None'}\n" \
+            f"Description: {markdownify(self.description)}" \
+
+    def get_vectordb_metadata(self):
+        return {
+            'title': self.name,
+            'description': self.excerpt,
+            'duration': self.duration,
+            'price': float(self.price),
+            'start_date': self.start_date.strftime('%Y-%m-%d') if self.start_date is not None else None,
+            'start_location': self.start_location,
+            'end_location': self.end_location,
+            'keywords': self.keywords,
+            'destinations': [d.name for d in self.destinations.all()],
+            'state': self.state.text if self.state is not None else None,
+            'url': self.get_absolute_url(),
+            'image': self.card_img.url,
+            'published': self.published,
+        }
 
     @property
     def dated(self):
@@ -485,6 +595,24 @@ class Article(DraftHistory):
     def get_absolute_url(self):
         return reverse('article', args=[self.slug])
 
+    def get_vectordb_text(self):
+        return f'Title: {self.title}\nTags:{self.tag_list()}\nDescription:{self.excerpt}\n{markdownify(self.content)}'
+
+    def get_vectordb_metadata(self):
+        date = self.date
+        return {
+            'title': self.title,
+            'author': self.author.name if self.author else None,
+            'description': self.excerpt,
+            'tags': self.tag_list(),
+            'url': self.get_absolute_url(),
+            'image': self.card_img.url if self.card_img else None,
+            'date': date.strftime('%Y-%m-%d') if date else None,
+            'state': self.state.text if self.state else None,
+            'type': self.type,
+            'published': self.published,
+        }
+
 
 class Page(DraftHistory):
     slug = models.SlugField()
@@ -506,6 +634,26 @@ class Page(DraftHistory):
     class Meta:
         unique_together = [['parent', 'slug']]
         ordering = ['title', 'slug']
+
+    @property
+    def breadcrumb(self):
+        if self.parent:
+            return self.parent.breadcrumb + ' > ' + self.title
+        else:
+            return self.title
+
+    def get_vectordb_text(self):
+        return f'Title: {self.title}\nBreadcrumb: {self.breadcrumb}\n{markdownify(self.content)}'
+
+    def get_vectordb_metadata(self):
+        return {
+            'title': self.title,
+            'description': self.subtitle,
+            'breadcrumb': self.breadcrumb,
+            'url': self.get_absolute_url(),
+            'image': self.card_img.url,
+            'published': self.published,
+        }
 
     @property
     def card_img_url(self):
@@ -644,6 +792,15 @@ class Settings(models.Model):
     testimonials_navbar_pos = models.PositiveSmallIntegerField(default=1)
     testimonials_frontpage_pos = models.PositiveSmallIntegerField(default=6, null=True, blank=True)
 
+    class ActiveChoices(models.TextChoices):
+        INACTIVE = 'I'
+        STAFF_ONLY = 'S'
+        ACTIVE = 'A'
+
+    ai_search_active = models.CharField(max_length=1, choices=ActiveChoices.choices, default=ActiveChoices.INACTIVE)
+    ai_chat_active = models.CharField(max_length=1, choices=ActiveChoices.choices, default=ActiveChoices.INACTIVE)
+    related_tours_active = models.CharField(max_length=1, choices=ActiveChoices.choices, default=ActiveChoices.INACTIVE)
+
     history = HistoricalRecords(excluded_fields=('active',))
 
     def get_caches_to_invalidate(self, previous):
@@ -675,11 +832,12 @@ class Settings(models.Model):
                 print(e)
 
     @classmethod
-    def load(cls):
+    def load(cls) -> 'Settings':
         try:
             obj, _ = cls.objects.get_or_create(active=True)
         except cls.MultipleObjectsReturned:
             obj = cls.objects.filter(active=True).first()
+            assert(obj is not None)
             cls.objects.filter(active=True).exclude(pk=obj.pk).update(active=False)
         return obj
 

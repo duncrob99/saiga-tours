@@ -1,0 +1,270 @@
+dialog::backdrop {
+    background: transparent;
+    transform: translateY(-900px);
+    transition: background var(--transition-duration) ease-in-out,
+        backdrop-filter var(--transition-duration) ease-in-out,
+        transform var(--transition-duration) ease-in-out;
+}
+
+dialog.show::backdrop {
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(0, 0, 0, 0.2),
+    rgba(0, 0, 0, 0.2) 1px,
+    rgba(0, 0, 0, 0.3) 1px,
+    rgba(0, 0, 0, 0.3) 20px
+  );
+  transform: translateY(0);
+  backdrop-filter: blur(3px);
+}
+
+dialog {
+    --transition-duration: 0.2s;
+    --base-margin: min(1rem, 1vw);
+    --margin: calc(var(--base-margin) * 2);
+    width: min(calc(100% - var(--margin) * 2), 80rem);
+    height: min(calc(100% - var(--margin) * 2), 80rem);
+    background: var(--accent-background);
+    border-radius: 0.5rem;
+    border: 1px solid rgba(0, 0, 0, 0.3);
+    box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.3);
+    padding: 1rem;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    opacity: 0;
+    transform: scale(0.7);
+    transform-origin: top;
+    pointer-events: none;
+    transition: opacity var(--transition-duration) ease-in-out,
+        transform var(--transition-duration) ease-in-out;
+}
+
+#filter-dialog {
+    --margin: calc(var(--base-margin) * 4);
+}
+
+dialog.show {
+    transform: scale(1);
+    opacity: 1;
+    pointer-events: all;
+}
+
+dialog .header {
+    display: flex;
+    align-items: center;
+    justify-content: end;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.3);
+    gap: 1rem;
+    padding-bottom: 1rem;
+    flex-wrap: wrap;
+}
+
+dialog .header .buttons {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+dialog .header button {
+    cursor: pointer;
+    border-radius: 0.5rem;
+    border: 1px solid rgba(0, 0, 0, 0.3);
+    box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.3);
+    background: var(--accent-background);
+    padding: 0.5rem;
+    transition: background 0.2s ease-in-out;
+}
+
+dialog .header button.close {
+    font-size: 2rem;
+}
+
+#search-modal input {
+    max-width: 100%;
+    padding: 1rem;
+    font-size: 1.5rem;
+    border-radius: 0.5rem;
+    border: 1px solid rgba(0, 0, 0, 0.3);
+    box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.3);
+    flex-grow: 1;
+}
+
+#search-modal input:focus {
+    outline: none;
+    border-color: var(--accent-foreground);
+}
+
+#search-modal .result-templates {
+    display: none;
+}
+
+#search-modal .result-scroll-wrapper {
+    height: 100%;
+    overflow-y: auto;
+}
+
+#search-modal .results {
+    display: grid;
+    gap: 1rem;
+    padding: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(min(20rem,100%), 1fr));
+}
+
+#search-modal .results > * {
+    border-radius: 0.5rem;
+    border: 1px solid rgba(0, 0, 0, 0.3);
+    box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.3);
+    padding: 1rem;
+    position: relative;
+    background: white;
+}
+
+#search-modal .results a {
+    inset: 0;
+    position: absolute;
+    z-index: 1;
+}
+
+#search-modal .results .image-wrapper {
+    overflow: hidden;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+#search-modal .results img {
+    transition: transform 0.3s ease-in-out;
+}
+
+#search-modal .results > *:hover img {
+    transform: scale(1.1);
+}
+
+#search-modal .results img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    border-radius: 0.5rem;
+}
+
+#search-modal .results * {
+    text-decoration: none;
+    color: inherit;
+}
+
+#search-modal .results .breadcrumb {
+    font-size: 0.8rem;
+    margin: 0;
+}
+
+#search-modal .ai-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    height: min-content;
+    width: 100%;
+    padding: 1rem;
+    text-align: center;
+}
+
+#search-modal .ai-hal-wrapper {
+    --size: 50px;
+    width: var(--size);
+    height: var(--size);
+    box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.3);
+    border-radius: 50%;
+    position: relative;
+    flex-shrink: 0;
+}
+
+#search-modal button.ai-button {
+    border-radius: 0.5rem;
+    border: 1px solid rgba(0, 0, 0, 0.3);
+    box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.3);
+    background: var(--accent-background);
+    transition: background 0.2s ease-in-out;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    height: 100%;
+    white-space: nowrap;
+    padding-inline: 1rem;
+}
+
+#search-modal .header button:hover {
+    background: var(--accent-hover-background);
+}
+
+#search-modal .ai-hal-wrapper img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    border-radius: 50%;
+    position: absolute;
+    inset: 0;
+    transition: opacity 1s ease-out;
+} 
+
+#search-modal .ai-button[data-state="loading"] .ai-hal-wrapper img:not(.ai-hal-loading) {
+    opacity: 0;
+}
+
+#search-modal .ai-button[data-state="initial"] .ai-hal-wrapper img:not(.ai-hal-inactive) {
+    opacity: 0;
+}
+
+#search-modal .ai-button[data-state="loaded"] .ai-hal-wrapper img:not(.ai-hal-active) {
+    opacity: 0;
+}
+
+#search-modal .ai-button[data-state="error"] .ai-hal-wrapper img:not(.ai-hal-error) {
+    opacity: 0;
+}
+
+#search-modal .ai-wrapper[data-state="initial"] {
+    display: none;
+}
+
+#search-modal .ai-wrapper[data-state="loading"] {
+    display: none;
+}
+
+#search-modal .ai-wrapper[data-state="loaded"] {
+    display: block;
+}
+
+#search-modal .ai-wrapper[data-state="error"] {
+    display: none;
+}
+
+#search-modal .ai-wrapper[data-state="error"] .ai-answer::before {
+    content: "Sorry, I couldn't find an answer to your question.";
+    display: block;
+    text-align: justify;
+}
+
+#search-modal .ai-answer {
+    margin: 0;
+    text-align: justify;
+}
+
+#filter-dialog .form-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    justify-content: space-around;
+}
+
+#filter-dialog h3 {
+    width: 100%;
+    text-align: right;
+    padding-top: 0.5rem;
+    text-decoration: underline;
+    font-size: 3em;
+    color: var(--accent-foreground);
+}
