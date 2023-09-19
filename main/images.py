@@ -5,7 +5,7 @@ from django.http import HttpResponse
 from ua_parser import user_agent_parser
 
 
-def crop_center(pil_img: Image, crop_width: int, crop_height: int) -> Image:
+def crop_center(pil_img: Image.Image, crop_width: int, crop_height: int) -> Image.Image:
     img_width, img_height = pil_img.size
     return pil_img.crop(((img_width - crop_width) // 2,
                          (img_height - crop_height) // 2,
@@ -13,7 +13,7 @@ def crop_center(pil_img: Image, crop_width: int, crop_height: int) -> Image:
                          (img_height + crop_height) // 2))
 
 
-def crop_to_ar(image: Image, ar: float) -> Image:
+def crop_to_ar(image: Image.Image, ar: float) -> Image.Image:
     (old_width, old_height) = image.size
 
     original_ar = old_width / old_height
@@ -30,7 +30,7 @@ def crop_to_ar(image: Image, ar: float) -> Image:
     return crop_center(image, crop_width, crop_height)
 
 
-def crop_to_dims(image: Image, width: int, height: int) -> Image:
+def crop_to_dims(image: Image.Image, width: int, height: int) -> Image.Image:
     if width is not None or height is not None:
         (old_width, old_height) = image.size
         old_ar = old_width / old_height
@@ -51,7 +51,7 @@ def crop_to_dims(image: Image, width: int, height: int) -> Image:
     return image
 
 
-def autorotate(img: Image) -> Image:
+def autorotate(img: Image.Image) -> Image.Image:
     """
     Rotate a Pillow image based on exif data.
     Returns new Pillow image.
@@ -63,9 +63,9 @@ def autorotate(img: Image) -> Image:
         orientation = exif[orientation_key]
 
         rotate_values = {
-            3: Image.ROTATE_180,
-            6: Image.ROTATE_270,
-            8: Image.ROTATE_90
+            3: Image.Transpose.ROTATE_180,
+            6: Image.Transpose.ROTATE_270,
+            8: Image.Transpose.ROTATE_90
         }
 
         if orientation in rotate_values:
