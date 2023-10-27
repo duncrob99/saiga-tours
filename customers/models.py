@@ -743,7 +743,7 @@ class Customer(models.Model):
             f'Form completed by {self.full_name} - {form_title}',
             strip_tags(admin_message),
             from_email,
-            ['tours@saigatours.com'],
+            [settings.ADMIN_EMAIL],
         )
 
         admin_email.attach_alternative(admin_message, "text/html")

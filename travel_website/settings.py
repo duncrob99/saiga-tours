@@ -33,6 +33,7 @@ env = environ.Env(
     STRIPE_SECRET_KEY=(str, None),
     ZOHO_PASSWORD=(str, None),
     OPENAI_API_KEY=(str, None),
+    ADMIN_EMAIL=(str, 'admin@saigatours.com'),
 )
 environ.Env.read_env()
 
@@ -251,6 +252,7 @@ EMAIL_HOST_USER = 'admin@saigatours.com'
 EMAIL_HOST_PASSWORD = env("ZOHO_PASSWORD")
 SERVER_EMAIL = 'admin@saigatours.com'
 DEFAULT_FROM_EMAIL = 'admin@saigatours.com'
+ADMIN_EMAIL = env("ADMIN_EMAIL")
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field

@@ -83,11 +83,16 @@ def view_form(request, pk):
         elif filled_form is None:
             filled_form = FilledForm.objects.create(task=task, customer=customer)
             filled_form.update_from_post(request.POST, request.FILES)
-            if task.due:
-                messages.add_message(request, messages.SUCCESS, f'Thanks for starting this task, please complete it by {task.due.strftime("%d %b.")}')
+            if filled_form.finalised:
+                messages.add_message(request, messages.SUCCESS, 'Form has been finalised')
+                request.user.customer.send_form_finalised_email(filled_form)
+                return redirect('dashboard')
             else:
-                messages.add_message(request, messages.SUCCESS, 'Thanks for starting this task.')
-            return redirect('view_form', pk=pk)
+                if task.due:
+                    messages.add_message(request, messages.SUCCESS, f'Thanks for starting this task, please complete it by {task.due.strftime("%d %b.")}')
+                else:
+                    messages.add_message(request, messages.SUCCESS, 'Thanks for starting this task.')
+                return redirect('view_form', pk=pk)
         elif filled_form.finalised:
             messages.add_message(request, messages.ERROR, 'This form has already been finalised')
             return redirect('dashboard')
