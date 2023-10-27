@@ -27,7 +27,8 @@ class CacheForUsers:
             r'^/customers/',
             r'^/sitemap\.xml',
             r'^/robots\.txt',
-            r'^/messages'
+            r'^/messages',
+            r'^/account/',
         ]
 
         path = request.path
