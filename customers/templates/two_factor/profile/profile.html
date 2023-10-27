@@ -1,0 +1,67 @@
+{% extends "two_factor/_base.html" %}
+{% load two_factor_tags %}
+{% load static %}
+
+{% block head %}
+    <link rel="stylesheet" href="{% static 'two_factor/small_title.css' %}">
+{% endblock %}
+
+<h1>{% block title %}Account Security{% endblock %}</h1>
+
+{% block form %}
+  {% if default_device %}
+    <p>Primary 2FA method: {{ default_device|as_action }}</p>
+
+    {% if available_phone_methods %}
+      <h2>Backup Phone Numbers</h2>
+      <p>If your primary method is not available, we are able to
+        send backup tokens to the phone numbers listed below.</p>
+      <ul>
+        {% for phone in backup_phones %}
+          <li>
+            {{ phone|as_action }}
+            <form method="post" action="{% url 'two_factor:phone_delete' phone.id %}"
+                  onsubmit="return confirm(Are you sure?)">
+              {% csrf_token %}
+              <button class="btn btn-sm btn-warning"
+                      type="submit">Unregister</button>
+            </form>
+          </li>
+        {% endfor %}
+      </ul>
+      <p><a href="{% url 'two_factor:phone_create' %}"
+        class="btn btn-info">Add Phone Number</a></p>
+    {% endif %}
+
+    <h2>Backup Tokens</h2>
+    <p>
+      If you don't have any device with you, you can access
+        your account using backup tokens.
+      {% if backup_tokens == 1 %}
+        You have only one backup token remaining.
+      {% elif backup_tokens > 1 %}
+        You have {{ backup_tokens }} backup tokens remaining.
+      {% else %}
+        You have no backup tokens remaining.
+      {% endif %}
+    </p>
+    <p><a href="{% url 'two_factor:backup_tokens' %}"
+          class="btn primary">Show Codes</a></p>
+
+    <h3>Disable Two-Factor Authentication</h3>
+    <p>We recommend you only do this in order to change authentication method, or if you lost access to your authentication method and had to use one of your backup tokens.</p>
+    <p>You will be unable to submit any forms or documents until it is reenabled.</p>
+    <p><a class="btn btn-secondary" href="{% url 'two_factor:disable' %}">
+      Disable Two-Factor Authentication</a></p>
+  {% else %}
+    <p>Two-factor authentication is not enabled for your
+      account. Enable two-factor authentication for enhanced account
+      security.</p>
+    <p><a href="{% url 'two_factor:setup' %}" class="btn secondary">
+      Enable Two-Factor Authentication</a>
+    </p>
+  {% endif %}
+
+  <p><a href="{% url 'dashboard' %}" class="btn primary">
+    Back to Dashboard</a></p>
+{% endblock %}

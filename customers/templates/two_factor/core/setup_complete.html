@@ -1,0 +1,25 @@
+{% extends "two_factor/_base.html" %}
+{% load static %}
+
+{% block head %}
+    <link rel="stylesheet" href="{% static 'two_factor/small_title.css' %}">
+{% endblock %}
+
+{% block title %}Enable Two-Factor Authentication{% endblock %}
+
+{% block form %}
+  <p>Congratulations, you've successfully enabled two-factor authentication.</p>
+
+  {% if not phone_methods %}
+    <p><a href="{% url 'two_factor:profile' %}"
+        class="btn btn-block btn-secondary">Back to Account Security</a></p>
+  {% else %}
+    <p>However, it might happen that you don't have access to your primary token device. To enable account recovery, add a phone number.</p>
+
+    <a href="{% url 'two_factor:profile' %}"
+        class="float-right btn btn-link">Back to Account Security</a>
+    <p><a href="{% url 'two_factor:phone_create' %}"
+        class="btn btn-success">Add Phone Number</a></p>
+  {% endif %}
+
+{% endblock %}

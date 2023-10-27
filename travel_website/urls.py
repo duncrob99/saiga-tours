@@ -20,6 +20,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.contrib.sitemaps.views import sitemap
 from django.views.generic import TemplateView
+from two_factor.urls import urlpatterns as tf_urls
 
 from main.sitemaps import (TourSitemap,
                            PageSitemap,
@@ -53,7 +54,9 @@ urlpatterns = [
          name='django.contrib.sitemaps.views.sitemap'),
     path('silk/', include('silk.urls', namespace='silk')),
     path('media/form_files/<uuid:user_id>/<uuid:form_id>/<str:filename>/', views.form_file, name='form_file'),
+    path('', include(tf_urls)),
     path('customers/', include('customers.urls')),
+    path('account/', include('django.contrib.auth.urls')),
     path('', include('main.urls'))
 ]
 

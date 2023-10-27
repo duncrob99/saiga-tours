@@ -1,0 +1,15 @@
+#id_method-method label {
+    display: flex;
+    align-items: center;
+}
+
+.form-card input {
+    width: unset;
+    margin-inline-end: 0.5em;
+}
+
+.form-card img {
+    left: 50%;
+    transform: translateX(-50%);
+    position: relative;
+}

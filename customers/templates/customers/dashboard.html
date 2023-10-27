@@ -38,10 +38,17 @@
                 <div class="tasks-container">
                     <div class="tasks">
                         {% if not request.user.customer.email_confirmed %}
-                            <div class="task">
+                            <div class="task urgent">
                                 <h2>Confirm your email</h2>
                                 <p>Confirm your email so we know we can contact you.</p>
                                 <a href="{% url 'confirm_email' %}" class="btn accent hoverable-accent">Confirm email</a>
+                            </div>
+                        {% endif %}
+                        {% if not request.user.is_verified %}
+                            <div class="task urgent">
+                                <h2>Setup Multi-Factor Authentication</h2>
+                                <p>Setup MFA so any sensitive information you provide us can be securely stored</p>
+                                <a href="{% url 'two_factor:setup' %}" class="btn accent hoverable-accent">Setup MFA</a>
                             </div>
                         {% endif %}
                         {% for task in request.user.customer.annotated_incomplete_tasks %}
@@ -80,6 +87,13 @@
                                 <a href="{% url 'view_form' task.pk %}" class="btn">View Your Response</a>
                             </div>
                         {% endfor %}
+                        {% if request.user.is_verified %}
+                            <div class="task complete">
+                                <h2>View Multi-Factor Authentication</h2>
+                                <p>View current MFA settings, create backup codes, or alter MFA method.</p>
+                                <a href="{% url 'two_factor:profile' %}" class="btn accent hoverable-accent">View MFA</a>
+                            </div>
+                        {% endif %}
                         {% comment %}
                         {% for task in request.user.customer.in_progress_tasks.all %}
                         <div class="task {% if task.due_in.days < 0 %}overdue{% elif task.due_in.days < 7 %}urgent{% elif task.due_in.days < 14 %}important{% endif %}">

@@ -1,0 +1,50 @@
+{% load static %}
+{% load django_bootstrap5 %}
+{% load settings %}
+
+<html>
+    <head>
+        {% set_colors %}
+        {% bootstrap_css %}
+        <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
+        <link href="{% static 'customers/general.css' %}" rel="stylesheet" />
+        <link rel="stylesheet" type="text/css" href="{% static 'css/navbar.css' %}">
+        <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.0/font/bootstrap-icons.css">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <style>
+            @font-face {
+                font-family: "Burford Rustic Book";
+                src: url("{% static 'fonts/Burford Rustic/BurfordRusticBook-Regular2.otf' %}");
+            }
+        </style>
+        <script defer src="{% static 'js/navbar.js' %}"></script>
+        <script defer src="{% static 'js/messages.js' %}"></script>
+        <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
+            crossorigin="anonymous"></script>
+        {% block head %}
+        {% endblock %}
+    </head>
+
+    <body>
+        {% include 'main/navbar.html' %}
+        <div id="messages-container"></div>
+
+        {% block top-content %}
+        {% endblock %}
+
+        <div class="image-content">
+          <h1>{% block title %}{% endblock %}</h1>
+          {% block imagecontent %}{% endblock %}
+        </div>
+        <div class="form-col-background"></div>
+        <div class="form-col">
+            <div class="form-card">{% block form %}{% endblock %}</div>
+            {% block extra %}
+            {% endblock %}
+            {% block nocard %}
+            {% endblock %}
+        </div>
+    </body>
+
+</html>

@@ -78,7 +78,9 @@ def view_form(request, pk):
         filled_form = None
 
     if request.method == 'POST':
-        if filled_form is None:
+        if not request.user.is_verified():  # Use hasn't turned on MFA
+            pass
+        elif filled_form is None:
             filled_form = FilledForm.objects.create(task=task, customer=customer)
             filled_form.update_from_post(request.POST, request.FILES)
             if task.due:
@@ -105,6 +107,10 @@ def view_form(request, pk):
             messages.add_message(request, messages.INFO, 'This form has been finalised. If you need to make changes, please contact us.')
     else:
         form_data = task.form.structured_data
+
+    if not request.user.is_verified():
+        form_data['mfa_required'] = True
+        messages.add_message(request, messages.ERROR, f'You must enable MFA before you can submit forms. To do so, go to <a href="{reverse("two_factor:setup")}">this page</a>.', extra_tags='safe')
 
     return render(request, 'customers/form.html', {
         'form_data': form_data,

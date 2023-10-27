@@ -116,6 +116,11 @@ INSTALLED_APPS = [
     'hcaptcha_field',
     'nested_admin',
     'vectordb',
+    'django_otp',
+    'django_otp.plugins.otp_static',
+    'django_otp.plugins.otp_totp',
+    'two_factor',
+    'two_factor.plugins.webauthn',
 ]
 
 SITE_ID = 1
@@ -131,8 +136,10 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django_otp.middleware.OTPMiddleware',
     'travel_website.middleware.CacheControlMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    'customers.middleware.Enforce2FAForAdminsMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'simple_history.middleware.HistoryRequestMiddleware',
     # 'travel_website.middleware.StatsMiddleware'
@@ -347,4 +354,7 @@ if env('HCAPTCHA_SITEKEY') and env('HCAPTCHA_SECRET'):
 STRIPE_PUBLIC_KEY = env("STRIPE_PUBLIC_KEY")
 STRIPE_SECRET_KEY = env("STRIPE_SECRET_KEY")
 
+LOGIN_URL = 'two_factor:login'
 LOGIN_REDIRECT_URL = 'dashboard'
+
+TWO_FACTOR_WEBAUTHN_RP_NAME = 'SAIGA Tours'
