@@ -62,10 +62,13 @@ class NoChangePermissionMixin:
 
     def is_outdated(self, obj):
         if obj:
-            if hasattr(obj, 'form'):
-               return obj.form.outdated
-            else:
-               return obj.outdated
+            try:
+                return obj.form.outdated
+            except AttributeError:
+                try:
+                    return obj.outdated
+                except AttributeError:
+                    return False
         return False
 
     def has_change_permission(self, request, obj=None):
