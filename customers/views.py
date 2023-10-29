@@ -125,7 +125,7 @@ def view_form(request, pk):
 
 def view_form_template(request, pk):
     if not request.user.is_staff:
-        return Http404
+        raise Http404
 
     form = get_object_or_404(Form, pk=pk)
 
@@ -181,7 +181,7 @@ def activate(request, uuid, token):
 
 def send_registration_email(request, uuid):
     if not request.user.is_staff or not request.user.is_superuser:
-        return Http404
+        raise Http404
 
     customer = get_object_or_404(Customer, uuid=uuid)
     customer.send_new_password_request()
@@ -359,7 +359,7 @@ def view_form_pdf(request, customer, task_pk):
 
 def view_form_template_pdf(request, pk):
     if not request.user.is_staff:
-        return Http404
+        raise Http404
 
     form = get_object_or_404(Form, pk=pk)
 

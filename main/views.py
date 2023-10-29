@@ -703,7 +703,7 @@ def view_document(request, slug: str):
 
 def modify_position_template(request, pk):
     if not request.user.is_staff or not request.method == 'POST':
-        return Http404
+        raise Http404
 
     position_template = get_object_or_404(PositionTemplate, pk=pk)
 
@@ -730,7 +730,7 @@ def modify_position_template(request, pk):
 
 def create_position_template(request):
     if not request.user.is_staff or not request.method == 'POST':
-        return Http404
+        raise Http404
 
     position_template = PositionTemplate.objects.create(x=request.POST.get('x'), y=request.POST.get('y'),
                                                         name=request.POST.get('name'))
@@ -746,7 +746,7 @@ def create_position_template(request):
 
 def create_itinerary_template(request):
     if not request.user.is_staff or not request.method == 'POST':
-        return Http404
+        raise Http404
 
     template = ItineraryTemplate.objects.create(title=request.POST.get('title'),
                                                 body=request.POST.get('body'))
