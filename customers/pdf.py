@@ -179,7 +179,8 @@ def print_date_field(pdf, origin, width, height, name, value=None):
     print("Full width: ", width)
     print("Slash width: ", slash_width)
     print("Field width - slash width: ", width - slash_width * 2)
-    field_width = lambda digits: digits * (width - slash_width * 2) / 9 + 5
+    total_field_width = width - slash_width * 2
+    field_width = lambda digits: digits * total_field_width // 8
     print("Field width: ", field_width)
     pdf.setFillColor(WHITE)
     pdf.rect(origin[0], origin[1] - height, field_width(2), height, fill=1, stroke=1)
