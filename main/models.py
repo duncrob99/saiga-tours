@@ -276,6 +276,7 @@ class DestinationDetails(DraftHistory):
     )
 
     title = models.CharField(max_length=100)
+    linking_word = models.CharField(max_length=100, default='for')
     slug = models.SlugField()
     content = RichTextWithPlugins(config_name='default')
     order = models.IntegerField()
@@ -289,7 +290,7 @@ class DestinationDetails(DraftHistory):
     banner_y = models.FloatField(default=50)
 
     def get_vectordb_text(self):
-        return f"Title: {self.title} for {self.destination}\n" \
+        return f"Title: {self.title} {self.linking_word} {self.destination}\n" \
             f"{markdownify(self.content)}"
 
     def get_vectordb_metadata(self):
@@ -322,7 +323,7 @@ class DestinationDetails(DraftHistory):
         ordering = ['destination', 'order', 'slug']
 
     def __str__(self):
-        return f'{self.title} for {self.destination.name}'
+        return f'{self.title} {self.linking_word} {self.destination.name}'
 
     def get_absolute_url(self):
         view = 'tours' if self.type == self.TOURS else 'destination-details'
