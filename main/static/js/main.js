@@ -219,9 +219,10 @@ if (storageAvailable('sessionStorage')) {
 
 var $buoop = {
     required: {e: 105, f: 110, o: 91, s: 16, c: 105},
+    test: false,
     insecure: true,
     style: "corner",
-    api: 2022.10,
+    api: 2023.10,
     text: {
         'msgmore': 'Update your browser for more security, speed and the best experience on our website.',
     },

@@ -8,6 +8,7 @@
 {% endblock %}
 
 {% block extrahead %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/article.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/custom_ckeditor.css' %}">
     {% if article.banner_img %}
         <style>
@@ -106,18 +107,16 @@
     </div>
 
     {% if article.author %}
-        <div class="row">
-            <div class="col-6">
-                <div class="card">
-                    <div class="card-body d-flex">
-                        <img src="{{ article.author.picture.url }}" height="200px"
-                             style="border-radius: 500px; margin-right: 20px;" alt="{{ article.author }}">
-                        <div>
-                            <h3>{{ article.author }}</h3>
-                            {{ article.author.blurb | delay_images:request }}
-                            <a href="/{% if article.type == 'n' %}news{% else %}blog{% endif %}/?author={{ article.author }}">Read
-                                more from {{ article.author }}</a>
-                        </div>
+        <div class="row author">
+            <div class="card">
+                <div class="card-body d-flex">
+                    <img src="{{ article.author.picture.url }}" height="200px"
+                                                                style="border-radius: 500px; margin-right: 20px;" alt="{{ article.author }}">
+                    <div>
+                        <h3>{{ article.author }}</h3>
+                        {{ article.author.blurb | delay_images:request }}
+                        <a href="/{% if article.type == 'n' %}news{% else %}blog{% endif %}/?author={{ article.author }}">Read
+                            more from {{ article.author }}</a>
                     </div>
                 </div>
             </div>
