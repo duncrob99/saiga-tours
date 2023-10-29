@@ -192,7 +192,7 @@ def print_date_field(pdf, origin, width, height, name, value=None):
 
     print(f"{value=}")
     if value is not None:
-        date = datetime.strptime(value, '%Y-%m-%d').date() if type(value) == str else value
+        date = datetime.strptime(value, '%Y-%m-%d').date() if type(value) == str and value else value
         year_string = date.strftime('%Y') if date else ''
         month_string = date.strftime('%m') if date else ''
         day_string = date.strftime('%d') if date else ''
