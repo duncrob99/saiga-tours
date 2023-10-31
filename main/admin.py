@@ -149,6 +149,11 @@ class TestimonialAdmin(admin.ModelAdmin):
     list_editable = ('approved',)
 
 
+class StopAdmin(admin.ModelAdmin):
+    list_display = ('tour', 'name', 'template', 'day', 'order', 'marked')
+    list_filter = ('tour', 'template', 'day', 'marked')
+
+
 # Register your models here.
 admin.site.register(Destination, DestinationAdmin)
 admin.site.register(DestinationDetails, DestinationDetailsAdmin)
@@ -162,7 +167,7 @@ admin.site.register(Settings, SettingsAdmin)
 admin.site.register(ContactSubmission, ContactSubmissionAdmin)
 admin.site.register(BannerPhoto, BannerPhotoAdmin)
 admin.site.register(Tag)
-admin.site.register(Stop)
+admin.site.register(Stop, StopAdmin)
 admin.site.register(MapPoint)
 admin.site.register(PositionTemplate)
 admin.site.register(ItineraryTemplate)
