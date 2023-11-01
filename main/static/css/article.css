@@ -10,7 +10,7 @@
     object-fit: contain;
 }
 
-@container author-card (max-width: 50ch) {
+@container author-card (max-width: 60ch) {
     .row.author .card .card-body {
         flex-direction: column;
         align-items: center;
