@@ -410,7 +410,7 @@ class FormTask(models.Model):
 
         return self.due
 
-    def absolute_due_in(self, customer: 'Customer') -> datetime.timedelta | None:
+    def absolute_due_in(self, customer: 'Customer'):
         if not self.absolute_due(customer):
             return None
 
