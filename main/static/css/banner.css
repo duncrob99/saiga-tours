@@ -17,7 +17,6 @@
 .banner-img.left {
     transform: translateX(-100%);
     z-index: -1;
-    visibility: hidden;
 }
 
 .banner-img.right {
