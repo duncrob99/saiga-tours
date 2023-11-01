@@ -4,8 +4,8 @@ from django.utils import timezone
 from django.urls import reverse, resolve
 from django.contrib import messages
 
-
 import nested_admin
+from hijack.contrib.admin import HijackUserAdminMixin
 
 from .models import *
 
@@ -188,7 +188,7 @@ class FormGroupAssignmentInline(admin.TabularInline):
     extra = 0
 
 
-class CustomerAdmin(admin.ModelAdmin):
+class CustomerAdmin(HijackUserAdminMixin, admin.ModelAdmin):
     form = CustomerForm
     list_display = ('email', 'full_name', 'password_set', 'run_send_registration_email')
     readonly_fields = ('email_confirmed', 'uuid', 'stripe_customer_id', 'added')
@@ -212,6 +212,30 @@ class CustomerAdmin(admin.ModelAdmin):
             customer.send_email_confirmation()
 
     actions = ['send_registration_email']
+
+    def get_hijack_user(self, obj):
+        return obj.user
+
+    def hijack_button(self, request, obj):
+        """
+        Render hijack button.
+
+        Should the user only be a related object we include the username in the button
+        to ensure deliberate action. However, the name is omitted in the user admin,
+        as the table layout suggests that the button targets the current user.
+        """
+        user = self.get_hijack_user(obj)
+        return render_to_string(
+            "hijack/contrib/admin/button.html",
+            {
+                "request": request,
+                "another_user": user,
+                "username": obj.full_name,
+                "is_user_admin": self.model == type(user),
+                "next": self.get_hijack_success_url(request, obj),
+            },
+            request=request,
+        )
 
 
 class FormTaskAdmin(admin.ModelAdmin):

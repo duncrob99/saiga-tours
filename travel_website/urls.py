@@ -57,6 +57,9 @@ urlpatterns = [
     path('', include(tf_urls)),
     path('customers/', include('customers.urls')),
     path('account/', include('django.contrib.auth.urls')),
+
+    path('hijack/', include('hijack.urls')),
+
     path('', include('main.urls'))
 ]
 

@@ -122,6 +122,8 @@ INSTALLED_APPS = [
     'django_otp.plugins.otp_totp',
     'two_factor',
     'two_factor.plugins.webauthn',
+    'hijack',
+    'hijack.contrib.admin',
 ]
 
 SITE_ID = 1
@@ -143,8 +145,9 @@ MIDDLEWARE = [
     'customers.middleware.Enforce2FAForAdminsMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'simple_history.middleware.HistoryRequestMiddleware',
-    # 'travel_website.middleware.StatsMiddleware'
-    'main.middleware.CacheForUsers'
+    # 'travel_website.middleware.StatsMiddleware',
+    'main.middleware.CacheForUsers',
+    'hijack.middleware.HijackUserMiddleware',
 ]
 
 if DEBUG:
@@ -360,3 +363,4 @@ LOGIN_URL = 'two_factor:login'
 LOGIN_REDIRECT_URL = 'dashboard'
 
 TWO_FACTOR_WEBAUTHN_RP_NAME = 'SAIGA Tours'
+HIJACK_PERMISSION_CHECK = "hijack.permissions.superusers_and_staff"
