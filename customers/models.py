@@ -22,6 +22,7 @@ import stripe
 import math
 from re import sub
 import os
+import datetime
 
 from main.models import RichTextWithPlugins
 from .pdf import gen_form_pdf
@@ -316,9 +317,28 @@ class FormFieldOption(models.Model):
 class FormGroup(models.Model):
     uuid = models.UUIDField(default=uuid_lib.uuid4, editable=False, unique=True, primary_key=True)
     title = models.CharField(max_length=200)
+    reference_date = models.DateTimeField(blank=True, null=True)
+    reference_meaning = models.CharField(max_length=200, blank=True, null=True)
 
     def __str__(self):
         return self.title
+
+
+class FormGroupAssignment(models.Model):
+    group = models.ForeignKey(FormGroup, on_delete=models.CASCADE, related_name='customer_assignments')
+    customer = models.ForeignKey('Customer', on_delete=models.CASCADE, related_name='formgroup_assignments')
+    reference_date = models.DateTimeField(blank=True, null=True)
+
+    # Ensure reference date is only set if group has a reference date
+    def clean(self):
+        if self.reference_date and not self.group.reference_date:
+            raise ValidationError('This form group does not have a reference date, so you cannot set a reference date for this assignment.')
+
+    class Meta:
+        verbose_name = 'Form Group Assignment'
+        verbose_name_plural = 'Form Group Assignments'
+        unique_together = ('group', 'customer')
+
 
 def pretty_timedelta(td):
     if td.days > 365:
@@ -375,23 +395,37 @@ class FormTask(models.Model):
     group = models.ForeignKey(FormGroup, on_delete=models.CASCADE, related_name='tasks', blank=True, null=True)
     customer = models.ForeignKey('Customer', on_delete=models.CASCADE, related_name='tasks', blank=True, null=True)
 
-    @property
-    def due_in(self):
-        if self.due:
-            return self.due - timezone.now()
-        else:
+    def absolute_due(self, customer: 'Customer') -> datetime.datetime:
+        if self.group and self.group.reference_date and self.due:
+            try:
+                assignment = FormGroupAssignment.objects.get(group=self.group, customer=customer)
+
+                relative_date = self.due - self.group.reference_date
+                return assignment.reference_date + relative_date
+
+            except FormGroupAssignment.DoesNotExist:
+                pass
+            except FormGroupAssignment.MultipleObjectsReturned:
+                pass
+
+        return self.due
+
+    def absolute_due_in(self, customer: 'Customer') -> datetime.timedelta | None:
+        if not self.absolute_due(customer):
             return None
 
-    @property
-    def pretty_due_in(self):
-        if self.due:
-            due_in = self.due_in
-            if due_in.days > 0 or due_in.days == 0 and due_in.seconds > 60:
-                return f'Due in {pretty_timedelta(due_in)}'
-            elif abs(due_in.seconds < 60):
-                return 'Due now'
-            else:
-                return f'Overdue by {pretty_timedelta(due_in * -1)}'
+        return self.absolute_due(customer) - timezone.now()
+
+    def absolute_pretty_due_in(self, customer: 'Customer') -> str:
+        due_in = self.absolute_due_in(customer)
+        if not due_in:
+            return 'No due date'
+        if due_in.days > 0 or due_in.days == 0 and due_in.seconds > 60:
+            return f'Due in {pretty_timedelta(due_in)}'
+        elif abs(due_in.seconds < 60):
+            return 'Due now'
+        else:
+            return f'Overdue by {pretty_timedelta(due_in * -1)}'
 
 
     def __str__(self):
@@ -568,7 +602,6 @@ class Customer(models.Model):
     last_name = models.CharField(max_length=30, blank=True, null=True, verbose_name='Last name')
     added = models.DateTimeField(auto_now_add=True)
     stripe_customer_id = models.CharField(max_length=500, blank=True, null=True, verbose_name='Stripe customer ID')
-    assigned_formgroups = models.ManyToManyField('FormGroup', blank=True, related_name='assigned_customers')
     email_confirmed = models.BooleanField(default=False)
     verification_token = models.UUIDField(default=uuid_lib.uuid4, editable=False, unique=True)
     verification_token_expiry = models.DateTimeField(blank=True, null=True)
@@ -621,8 +654,20 @@ class Customer(models.Model):
     def all_tasks(self):
         # Combine all forms from assigned formgroups and forms assigned directly to customer
         return FormTask.objects.filter(
-            Q(group__in=self.assigned_formgroups.all()) | Q(customer=self)
+            Q(group__customer_assignments__customer=self) | Q(customer=self)
         ).distinct()
+
+    def annotate_due_dates(self, tasks):
+        # Add due_in and pretty_due_in from task.absolute_due_in and task.absolute_pretty_due_in
+        return [
+            {
+                'task': task,
+                'due_in': task.absolute_due_in(self),
+                'pretty_due_in': task.absolute_pretty_due_in(self),
+                'due': task.absolute_due(self),
+            }
+            for task in tasks
+        ]
 
     @property
     def annotated_tasks(self):
@@ -633,7 +678,6 @@ class Customer(models.Model):
                 # Customer has filled form and it is not finalised
                 When(completed_forms__finalised=False, completed_forms__customer=self, then=Value('in_progress')),
                 # Customer has no filled form
-                When(completed_forms__customer__in=Customer.objects.exclude(pk=self.pk), then=Value(None)),
                 default=Value('unstarted'),
                 output_field=CharField(),
             )

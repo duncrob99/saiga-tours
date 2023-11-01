@@ -34,7 +34,7 @@
         <div class="content-container">
             <div class="content">
                 <h1>My Dashboard</h1>
-                
+
                 <div class="tasks-container">
                     <div class="tasks">
                         {% if not request.user.customer.email_confirmed %}
@@ -51,41 +51,45 @@
                                 <a href="{% url 'two_factor:setup' %}" class="btn accent hoverable-accent">Setup MFA</a>
                             </div>
                         {% endif %}
-                        {% for task in request.user.customer.annotated_incomplete_tasks %}
-                            <div class="task {% if task.due_in.days < 0 %}overdue{% elif task.due_in.days < 7 %}urgent{% endif %}">
-                                <h2>{{ task.form.title }}</h2>
-                                <p>
-                                    {% if task.form.short_description %}
-                                        {{ task.form.short_description }}
+                        {% for task_details in tasks.incomplete %}
+                            {% with task=task_details.task %}
+                                <div class="task {% if task_details.due_in.days < 0 %}overdue{% elif task_details.due_in.days < 7 %}urgent{% endif %}">
+                                    <h2>{{ task.form.title }}</h2>
+                                    <p>
+                                        {% if task.form.short_description %}
+                                            {{ task.form.short_description }}
+                                        {% endif %}
+                                    </p>
+                                    {% if task_details.due_in %}
+                                        <div class="due">
+                                            <p>{{ task_details.pretty_due_in }}</p>
+                                        </div>
                                     {% endif %}
-                                </p>
-                                {% if task.due %}
-                                    <div class="due">
-                                        <p>{{ task.pretty_due_in }}</p>
-                                    </div>
-                                {% endif %}
-                                <a href="{% url 'view_form' task.pk %}" class="btn">
-                                    {% if task.progress == "complete" %}
-                                        View Your Response
-                                    {% elif task.progress == "in_progress" %}
-                                        Continue With Draft
-                                    {% else %}
-                                        Start Filling In
-                                    {% endif %}
-                                </a>
-                            </div>
-                        {% endfor %}
-                        {% for task in request.user.customer.completed_tasks.all %}
-                            <div class="task complete">
-                                <h2>{{ task.form.title }}</h2>
-                                {% if task.form.short_description %}
-                                    <p>{{ task.form.short_description }}</p>
-                                {% endif %}
-                                <div class="due">
-                                    <p>Completed</p>
+                                    <a href="{% url 'view_form' task.pk %}" class="btn">
+                                        {% if task.progress == "complete" %}
+                                            View Your Response
+                                        {% elif task.progress == "in_progress" %}
+                                            Continue With Draft
+                                        {% else %}
+                                            Start Filling In
+                                        {% endif %}
+                                    </a>
                                 </div>
-                                <a href="{% url 'view_form' task.pk %}" class="btn">View Your Response</a>
-                            </div>
+                            {% endwith %}
+                        {% endfor %}
+                        {% for task_details in tasks.complete %}
+                            {% with task=task_details.task %}
+                                <div class="task complete">
+                                    <h2>{{ task.form.title }}</h2>
+                                    {% if task.form.short_description %}
+                                        <p>{{ task.form.short_description }}</p>
+                                    {% endif %}
+                                    <div class="due">
+                                        <p>Completed</p>
+                                    </div>
+                                    <a href="{% url 'view_form' task.pk %}" class="btn">View Your Response</a>
+                                </div>
+                            {% endwith %}
                         {% endfor %}
                         {% if request.user.is_verified %}
                             <div class="task complete">

@@ -26,23 +26,25 @@
             {% for customer, task_info in customer_tasks.items %}
                 {% with tasks=task_info.tasks %}
                     <tr>
-                        <td rowspan={{ tasks.count | add:1 }}>{{ customer }}<br>Outstanding: {{ task_info.outstanding_count }}</td>
+                        <td rowspan={{ task_info.count | add:1 }}>{{ customer }}<br>Outstanding: {{ task_info.outstanding_count }}</td>
                         <td></td>
                         <td></td>
                         <td></td>
                     </tr>
-                    {% for task in tasks %}
-                        <tr {% if task.progress != 'unstarted' %}onclick="location.href='{% url 'view_filled_form' customer.pk task.pk %}';" class="row-link"{% endif %}>
-                            <td>{{ task }}</td>
-                            <td>{{ task.due }}</td>
-                            <td class="task-progress {{task.progress}}">
-                                {% if task.progress == 'unstarted' %}Unstarted
-                                {% elif task.progress == 'in_progress' %}In Progress
-                                {% elif task.progress == 'complete' %}Complete
-                                {% else %}{{ task.progress }}
-                                {% endif %}
-                            </td>
-                        </tr>
+                    {% for task_details in tasks %}
+                        {% with task=task_details.task %}
+                            <tr {% if task.progress != 'unstarted' %}onclick="location.href='{% url 'view_filled_form' customer.pk task.pk %}';" class="row-link"{% endif %}>
+                                <td>{{ task }}</td>
+                                <td>{{ task_details.due }}</td>
+                                <td class="task-progress {{task.progress}}">
+                                    {% if task.progress == 'unstarted' %}Unstarted
+                                    {% elif task.progress == 'in_progress' %}In Progress
+                                    {% elif task.progress == 'complete' %}Complete
+                                    {% else %}{{ task.progress }}
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endwith %}
                     {% endfor %}
                     {% if tasks.count == 0 %}
                         <tr>

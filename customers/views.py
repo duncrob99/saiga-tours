@@ -219,6 +219,7 @@ def set_new_password(request, uuid, token):
 class CustomerTasks:
     tasks: QuerySet[FormTask]
     outstanding_count: int
+    count: int
 
 
 def tasks_by_customer() -> Dict[Customer, CustomerTasks]:
@@ -229,8 +230,9 @@ def tasks_by_customer() -> Dict[Customer, CustomerTasks]:
 
     return {
         customer: CustomerTasks(
-            tasks=tasks,
-            outstanding_count=tasks.filter(~Q(progress='complete')).count()
+            tasks=customer.annotate_due_dates(tasks),
+            outstanding_count=tasks.filter(~Q(progress='complete')).count(),
+            count=tasks.count()
         )
     for customer, tasks in tasks_by_customer.items()}
 
@@ -238,7 +240,6 @@ def tasks_by_customer() -> Dict[Customer, CustomerTasks]:
 def dashboard(request):
     if request.user.is_staff:
         customer_tasks = tasks_by_customer()
-        print(customer_tasks)
         return render(request, 'customers/admin_dashboard.html', {
             'customer_tasks': customer_tasks,
         })
@@ -246,11 +247,15 @@ def dashboard(request):
         messages.add_message(request, messages.ERROR, 'You must be logged in to view your dashboard')
         return redirect_to_login(request)
 
-    annotated_tasks = request.user.customer.annotated_tasks
-    complete_tasks = annotated_tasks.filter(progress='complete')
-    incomplete_tasks = annotated_tasks.filter(~Q(progress='complete'))
+    customer = request.user.customer
+    tasks = {
+        'incomplete': customer.annotate_due_dates(customer.annotated_incomplete_tasks.all()),
+        'complete': customer.annotate_due_dates(customer.completed_tasks.all()),
+    }
 
-    return render(request, 'customers/dashboard.html')
+    return render(request, 'customers/dashboard.html', {
+        'tasks': tasks,
+    })
 
 
 def confirm_email(request):

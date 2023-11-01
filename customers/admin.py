@@ -183,11 +183,16 @@ class CustomerForm(forms.ModelForm):
         return self.cleaned_data['email']
 
 
+class FormGroupAssignmentInline(admin.TabularInline):
+    model = FormGroupAssignment
+    extra = 0
+
+
 class CustomerAdmin(admin.ModelAdmin):
     form = CustomerForm
     list_display = ('email', 'full_name', 'password_set', 'run_send_registration_email')
     readonly_fields = ('email_confirmed', 'uuid', 'stripe_customer_id', 'added')
-    inlines = [FormTaskCustomerInline]
+    inlines = [FormTaskCustomerInline, FormGroupAssignmentInline]
 
     def password_set(self, obj):
         return obj.user.has_usable_password()
@@ -209,8 +214,13 @@ class CustomerAdmin(admin.ModelAdmin):
     actions = ['send_registration_email']
 
 
+class FormTaskAdmin(admin.ModelAdmin):
+    list_display = ('form', 'due', 'group', 'customer')
+    #readonly_fields = ('customer', 'form', 'group', 'status', 'completed')
+    #list_filter = ('status', 'completed')
+
 # Register your models here.
 admin.site.register(Customer, CustomerAdmin)
 admin.site.register(Form, FormAdmin)
 admin.site.register(FormGroup, FormGroupAdmin)
-admin.site.register(FormTask)
+admin.site.register(FormTask, FormTaskAdmin)
