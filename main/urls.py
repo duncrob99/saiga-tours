@@ -49,5 +49,7 @@ urlpatterns = [
     path('api/search/', views.search, name='search'),
     path('api/ai_answer/', views.ai_answer, name='answer'),
 
-    path('<path:path>/', views.page, name='page')
+    path('shop/', views.shop, name='shop'),
+
+    path('<path:path>/', views.page, name='page'),
 ]

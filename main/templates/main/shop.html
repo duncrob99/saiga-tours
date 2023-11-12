@@ -1,0 +1,19 @@
+{% extends 'main/main.html' %}
+{% load static %}
+{% load django_bootstrap5 %}
+{% load main_tags %}
+
+{% block extrahead %}
+    <script defer src="{% static 'js/shop.js' %}"></script>
+    <script defer type="text/javascript" src="https://saiga-shop.myspreadshop.com/js/shopclient.nocache.js"></script>
+{% endblock %}
+
+{% block title %}
+    Shop
+{% endblock %}
+
+{% block content %}
+<div id="spreadsheet-shop">
+    <div id="shop-loading-spinner">Loading shop...</div>
+</div>
+{% endblock %}

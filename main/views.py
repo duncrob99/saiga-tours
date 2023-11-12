@@ -1119,3 +1119,7 @@ def ai_answer(request):
     print(chat_completion)
     return JsonResponse({'answer': chat_completion, 'success': True})
 
+
+def shop(request):
+    return render(request, 'main/shop.html', {})
+
