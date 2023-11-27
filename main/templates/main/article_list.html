@@ -21,6 +21,13 @@
             object-fit: cover;
             position: absolute;
             z-index: -1;
+            {% if title == 'Blog Posts' %}
+                object-position: {{ settings.blog_posts_header_x_pos }}% {{ settings.blog_posts_header_y_pos }}%;
+            {% elif title == 'News Posts' %}
+                object-position: {{ settings.news_posts_header_x_pos }}% {{ settings.news_posts_header_y_pos }}%;
+            {% else %}
+                object-position: 50% 50%;
+            {% endif %}
         }
 
         #header-banner.blog-banner {
@@ -60,9 +67,17 @@
 
 {% block banner %}
     {% if title == 'Blog Posts' %}
-        <img src="{% static 'images/blog_banner.jpg' %}" class="blog-banner" id="header-banner"/>
+        {% if settings.blog_posts_header_image %}
+            <img src="{{ settings.blog_posts_header_image.url }}" class="blog-banner" id="header-banner"/>
+        {% else %}
+            <img src="{% static 'images/blog_banner.jpg' %}" class="blog-banner" id="header-banner"/>
+        {% endif %}
     {% else %}
-        <img src="{% static 'images/news_banner.jfif' %}" class="news-banner" id="header-banner"/>
+        {% if settings.news_posts_header_image %}
+            <img src="{{ settings.news_posts_header_image.url }}" class="news-banner" id="header-banner"/>
+        {% else %}
+            <img src="{% static 'images/news_banner.jfif' %}" class="news-banner" id="header-banner"/>
+        {% endif %}
     {% endif %}
 {% endblock %}
 

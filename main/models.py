@@ -778,6 +778,16 @@ class Settings(models.Model):
     pagination_outer_size = models.PositiveSmallIntegerField(default=2)
     articles_per_page = models.PositiveIntegerField(default=10)
 
+    contact_page_header_image = models.ImageField(null=True, blank=True)
+    contact_page_header_x_pos = models.SmallIntegerField(default=50)
+    contact_page_header_y_pos = models.SmallIntegerField(default=50)
+    blog_posts_header_image = models.ImageField(null=True, blank=True)
+    blog_posts_header_x_pos = models.SmallIntegerField(default=50)
+    blog_posts_header_y_pos = models.SmallIntegerField(default=50)
+    news_posts_header_image = models.ImageField(null=True, blank=True)
+    news_posts_header_x_pos = models.SmallIntegerField(default=50)
+    news_posts_header_y_pos = models.SmallIntegerField(default=50)
+
     frontpage_map_pos = models.PositiveSmallIntegerField(default=1)
     frontpage_highlights_pos = models.PositiveSmallIntegerField(default=2)
     frontpage_tours_pos = models.PositiveSmallIntegerField(default=3)

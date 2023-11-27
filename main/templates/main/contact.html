@@ -14,7 +14,7 @@
             height: 356px;
             object-fit: cover;
             position: absolute;
-            object-position: 50% 50%;
+            object-position: {{ settings.contact_page_header_x_pos }}% {{ settings.contact_page_header_y_pos }}%;
             z-index: -1;
         }
 
@@ -57,7 +57,11 @@
     </style>
 {% endblock %}
 {% block banner %}
-    <img src="{% static 'images/contact_banner.jpg' %}" id="header-banner"/>
+    {% if settings.contact_page_header_image %}
+        <img src="{{ settings.contact_page_header_image.url  }}" id="header-banner"/>
+    {% else %}
+        <img src="{% static 'images/contact_banner.jpg' %}" id="header-banner"/>
+    {% endif %}
 {% endblock %}
 
 {% block content %}
