@@ -228,7 +228,7 @@ def details_page(request, region_slug, country_slug, detail_slug, detail_type):
                    url=request.build_absolute_uri(),
                    title=details.title,
                    image_url=details.card_img.url,
-                   description=details.content[:40]
+                   description=details.excerpt or markdownify(details.content.strip())[:260]
                )}
 
     return render(request, 'main/destination_details.html', context)

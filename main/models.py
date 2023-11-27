@@ -284,6 +284,7 @@ class DestinationDetails(DraftHistory):
     type = models.CharField(max_length=1, choices=TYPE_CHOICES)
     card_img = models.ImageField()
     linked_tours = models.ManyToManyField('Tour', blank=True)
+    excerpt = models.TextField(null=True, blank=True, max_length=400)
 
     banner_img = models.ImageField(null=True, blank=True)
     banner_x = models.FloatField(default=50)
