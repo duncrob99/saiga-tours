@@ -11,6 +11,7 @@ from django.utils.html import strip_tags
 from django.urls import reverse
 from django.shortcuts import get_object_or_404
 from django.db.models import Q, QuerySet
+from django.db.utils import IntegrityError
 
 from typing import Dict
 from dataclasses import dataclass
@@ -32,10 +33,14 @@ def register(request):
         form.fields['username'].initial = request.GET.get('cid')
 
     if request.method == 'POST' and form.is_valid():
-        user = form.save()
-        user.refresh_from_db()
-        user.username = user.email
-        user.save()
+        try:
+            user = form.save()
+            user.refresh_from_db()
+            user.username = user.email
+            user.save()
+        except IntegrityError:
+            messages.add_message(request, messages.ERROR, f'An account with that email address already exists. Please <a href="{reverse("login")}" class="nice-link">log in</a> or <a href="{reverse("password_reset")}" class="nice-link">reset your password</a>')
+            return render(request, 'registration/register.html', {'form': form})
 
         user = authenticate(username=user.username, password=form.cleaned_data['password1'])
         login(request, user)
