@@ -224,10 +224,12 @@
                     </ul>
                 </li>
               {% else %}
-                <div class="login-btns">
-                    <a class="nav-link btn btn-secondary" href="{% url 'register' %}">Register</a>
-                    <a class="nav-link btn btn-primary" href="{% url 'login' %}">Login</a>
-                </div>
+                  {% if admin_subdomain %}
+                      <div class="login-btns">
+                          <a class="nav-link btn btn-secondary" href="{% url 'register' %}">Register</a>
+                          <a class="nav-link btn btn-primary" href="{% url 'login' %}">Login</a>
+                      </div>
+                  {% endif %}
               {% endif %}
           </ul>
       </div>
@@ -487,9 +489,11 @@
                   <i class="bi bi-search"></i>
               </button>
             {% endif %}
+                {% if admin_subdomain %}
                     <a class="nav-link btn btn-secondary" href="{% url 'register' %}">Register</a>
                     <a class="nav-link btn btn-primary" href="{% url 'login' %}">Login</a>
                 </div>
+                {% endif %}
               {% endif %}
         </div>
 

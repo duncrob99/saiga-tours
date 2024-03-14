@@ -124,7 +124,7 @@ class FooterLink:
     children: Optional[List['FooterLink']] = None
 
 
-def global_context(request):
+def global_context(request: HttpRequest) -> Dict[str, Any]:
     footer_links = [FooterLink(page.title, f'/{page.full_path}', [
         FooterLink(subpage.title, '/' + subpage.full_path)
         for subpage in page.children.visible(request.user.is_staff)
@@ -160,6 +160,7 @@ def global_context(request):
         'settings': Settings.load(),
         'footer_links': footer_links,
         'testing': request.COOKIES.get('testing', 'false') == 'true' and request.user.is_staff,
+        'admin_subdomain': request.get_host().startswith('admin')
     }
     return context
 
