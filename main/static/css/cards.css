@@ -125,6 +125,7 @@ h5.card-title {
 .text-card .card-body .tour-excerpt {
     font-size: 0.875rem;
     color: darkgrey;
+    text-align: justify;
 }
 
 .card .table, .card hr {
