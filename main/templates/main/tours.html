@@ -116,7 +116,7 @@ Tours
     {% if grouped_tours %}
         <div id="progress-indicator" class="hidden">
             <div id="progress-bar"></div>
-            <table id="progress-checkpoints">
+            <table class="no-table-holder" id="progress-checkpoints">
                 {% for year, year_tours in grouped_tours.items %}
                     {% for month in year_tours %}
                         <tr class="progress-indicator-checkpoint">

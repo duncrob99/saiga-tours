@@ -242,9 +242,10 @@ try {
 }
 
 (function() {
-    // Surround all tables in table-holder
+    // Surround all non-excluded tables in table-holder
     let tables = document.querySelectorAll('table');
     tables.forEach(table => {
+        if (table.classList.contains('no-table-holder')) return;
         let wrapper = document.createElement('div');
         wrapper.classList.add('table-holder');
         table.parentNode.insertBefore(wrapper, table);

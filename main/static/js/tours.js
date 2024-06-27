@@ -1,4 +1,4 @@
-HTMLElement.prototype.isInvisible = function () {
+HTMLElement.prototype.isInvisible = function() {
     if (this.style.display === 'none') return true;
     if (getComputedStyle(this).display === 'none') return true;
     if (this.parentNode.isInvisible) return this.parentNode.isInvisible();
@@ -137,7 +137,7 @@ function setVisibleTours() {
     let end_date_lim = new Date(end_date_input.value);
 
     let allowed_destinations = [];
-    destination_checkboxes.forEach(function (dest_cb) {
+    destination_checkboxes.forEach(function(dest_cb) {
         if (dest_cb.checked) {
             allowed_destinations.push(dest_cb.id.replace('filter-destination-', ''));
         }
@@ -169,7 +169,7 @@ function setVisibleTours() {
         search_passed_cols.push(result['item']['col_element']);
     })
 
-    tour_cols.forEach(function (el) {
+    tour_cols.forEach(function(el) {
         let data = el.querySelector('.tour-data');
 
         let duration = parseInt(data.getAttribute('duration'));
@@ -201,7 +201,7 @@ function hideTour(col_el) {
     col_el.classList.add('should-hide');
     if (!(col_el.classList.contains('hide'))) {
         col_el.classList.add('hide-visually');
-        col_el.addEventListener('transitionend', function (el) {
+        col_el.addEventListener('transitionend', function(el) {
             if (col_el.classList.contains('should-hide')) {
                 col_el.classList.add('hide');
             }
@@ -234,13 +234,13 @@ function mergeTooltips(slider, threshold, separator, boundingElement) {
     var origins = slider.noUiSlider.getOrigins();
 
     // Move tooltips into the origin element. The default stylesheet handles this.
-    tooltips.forEach(function (tooltip, index) {
+    tooltips.forEach(function(tooltip, index) {
         if (tooltip) {
             origins[index].appendChild(tooltip);
         }
     });
 
-    slider.noUiSlider.on('update', function (values, handle, unencoded, tap, positions) {
+    slider.noUiSlider.on('update', function(values, handle, unencoded, tap, positions) {
 
         var pools = [[]];
         var poolPositions = [[]];
@@ -269,7 +269,7 @@ function mergeTooltips(slider, threshold, separator, boundingElement) {
             }
         }
 
-        pools.forEach(function (pool, poolIndex) {
+        pools.forEach(function(pool, poolIndex) {
             var handlesInPool = pool.length;
 
             for (var j = 0; j < handlesInPool; j++) {
@@ -278,7 +278,7 @@ function mergeTooltips(slider, threshold, separator, boundingElement) {
                 if (j === handlesInPool - 1) {
                     var offset = 0;
 
-                    poolPositions[poolIndex].forEach(function (value) {
+                    poolPositions[poolIndex].forEach(function(value) {
                         offset += 1000 - value;
                     });
 
@@ -349,8 +349,10 @@ start_picker.on('show', el => {
 // })
 
 
-(function () {
-    let navbar_height = document.querySelector('nav.navbar').getBoundingClientRect().height;
+(function() {
+    let navbar = document.querySelector('nav.navbar');
+    let navbar_height = navbar.getBoundingClientRect().height;
+    let banner = document.querySelector('#header-banner');
     let progress_indicator = document.querySelector('#progress-indicator');
     if (progress_indicator === null) return;
 
@@ -361,6 +363,7 @@ start_picker.on('show', el => {
     let indicator_visibility = true;
 
     function set_progress() {
+        progress_indicator.style.transform = 'translateY(0)';
         let checkpoint_height = checkpoints[0].getBoundingClientRect().height;
         let progress_indicator_height = progress_indicator.getBoundingClientRect().height;
         if (!indicator_visibility) return;
@@ -381,15 +384,34 @@ start_picker.on('show', el => {
             // let distance_past_last = document.body.getBoundingClientRect().bottom - month_marker.getBoundingClientRect().top - window.innerHeight;
             let distance_past_last = document.getElementById("content-container").getBoundingClientRect().bottom - month_marker.getBoundingClientRect().top - document.documentElement.clientHeight;
             let perc_after = (scroll_past / distance_past_last);
-            progress_indicator.style.setProperty('--bar-height', `${progress_indicator_height - (1 - perc_after) * checkpoint_height/2}px`);
+            progress_indicator.style.setProperty('--bar-height', `${progress_indicator_height - (1 - perc_after) * checkpoint_height / 2}px`);
         } else {
             let percent_complete = (month_markers.indexOf(month_marker) + 1) / month_markers.length;
             let distance_between = month_markers[month_markers.indexOf(month_marker) + 1].getBoundingClientRect().top - month_markers[month_markers.indexOf(month_marker)].getBoundingClientRect().top;
             let perc_between = Math.abs(month_marker.getBoundingClientRect().top - navbar_height) / distance_between;
-            progress_indicator.style.setProperty('--bar-height', `${progress_indicator_height * percent_complete - checkpoint_height/2 + perc_between * checkpoint_height}px`);
+            progress_indicator.style.setProperty('--bar-height', `${progress_indicator_height * percent_complete - checkpoint_height / 2 + perc_between * checkpoint_height}px`);
         }
 
+        const margin = 20;
+        const distance_to_banner = progress_indicator.getBoundingClientRect().top - banner.getBoundingClientRect().bottom;
+        const distance_to_navbar = progress_indicator.getBoundingClientRect().top - navbar.getBoundingClientRect().bottom;
+        const distance_to_footer = document.querySelector('.footer').getBoundingClientRect().top - progress_indicator.getBoundingClientRect().bottom;
+        const progress_fraction = (distance_to_banner - distance_to_navbar) / (distance_to_footer - distance_to_navbar + distance_to_banner);
+        const top_offset = Math.max(-1 * Math.min(distance_to_banner, distance_to_navbar) + margin, 0);
+        console.log(top_offset);
+        const bottom_offset = distance_to_footer;
+        const offset = Math.min(top_offset - progress_fraction * top_offset, bottom_offset);
+        progress_indicator.style.transform = `translateY(${offset}px)`;
+        /* Fixed at margins
+        if (distance_to_footer < -1 * Math.min(0, distance_to_banner, distance_to_navbar) + margin) {
+            progress_indicator.style.transform = `translateY(${distance_to_footer}px)`;
+        } else {
+            progress_indicator.style.transform = `translateY(${-1 * Math.min(distance_to_banner, distance_to_navbar, 0) + margin}px)`;
+        }
+        */
+
         progress_indicator.classList.add('fixed');
+        /*
         let contents = document.querySelector('#content-container').getBoundingClientRect();
         let dist_past_end = window.innerHeight - contents.bottom;
         if (dist_past_end > 0) {
@@ -401,6 +423,8 @@ start_picker.on('show', el => {
             progress_indicator.classList.add('fixed');
             progress_indicator.style.bottom = 0;
         }
+        */
+
     }
 
     function set_visibility() {
@@ -413,11 +437,12 @@ start_picker.on('show', el => {
         } else {
             indicator_visibility = true;
             progress_indicator.classList.remove('hidden');
-            progress_indicator.style.left = `${(content_left - indicator_width)/2}px`;
+            progress_indicator.style.left = `${(content_left - indicator_width) / 2}px`;
         }
     }
 
     document.body.addEventListener('scroll', set_progress);
+    window.addEventListener('resize', set_progress);
     set_progress();
 
     window.addEventListener('resize', set_visibility);
