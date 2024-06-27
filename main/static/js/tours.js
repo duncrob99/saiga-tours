@@ -447,4 +447,5 @@ start_picker.on('show', el => {
 
     window.addEventListener('resize', set_visibility);
     set_visibility();
+    set_progress();
 })();
