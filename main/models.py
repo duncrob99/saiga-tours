@@ -106,7 +106,7 @@ class DraftHistoryManager(models.Manager):
 
 
 class DraftHistory(models.Model):
-    history = HistoricalRecords(inherit=True, excluded_fields=['published'])
+    history = HistoricalRecords(inherit=True, excluded_fields=['published_bool', 'published_date'])
     published_bool = models.BooleanField(default=False)
     published_date = models.DateTimeField(null=True, blank=True)
     objects = DraftHistoryManager()

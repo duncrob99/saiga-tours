@@ -16,7 +16,7 @@ class DiffHistoryAdmin(SimpleHistoryAdmin):
             if obj.prev_record:
                 delta = obj.diff_against(obj.prev_record)
                 return ", ".join(delta.changed_fields)
-        except FieldDoesNotExist:
+        except (FieldDoesNotExist, KeyError):
             return "unknown"
 
         return None
@@ -170,7 +170,7 @@ admin.site.register(Tag)
 admin.site.register(Stop, StopAdmin)
 admin.site.register(MapPoint)
 admin.site.register(PositionTemplate)
-admin.site.register(ItineraryTemplate)
+admin.site.register(ItineraryTemplate, SimpleHistoryAdmin)
 admin.site.register(Author, DiffHistoryAdmin)
 admin.site.register(HightlightBox, DiffHistoryAdmin)
 admin.site.register(FileUpload, FileUploadAdmin)

@@ -6,9 +6,10 @@ class MainConfig(AppConfig):
     name = 'main'
 
     def ready(self):
-        from .models import Article
-        from vectordb.shortcuts import autosync_model_to_vectordb
+        #from .models import Article
+        #from vectordb.shortcuts import autosync_model_to_vectordb
 
-        autosync_model_to_vectordb(Article)
+        #autosync_model_to_vectordb(Article)
 
-        import main.signals
+        #import main.signals
+        pass
