@@ -319,9 +319,7 @@ class Command(BaseCommand):
                     if count_only:
                         yield queryset.order_by().count()
                     else:
-                        chunk_size = (
-                            2000 if queryset._prefetch_related_lookups else None
-                        )
+                        chunk_size = 2000
                         yield from queryset.iterator(chunk_size=chunk_size)
 
         try:
