@@ -3,7 +3,7 @@
 {% load static %}
 
 {% block title %}
-    {{ region.name }} Tours
+    {{ title }}
 {% endblock %}
 
 {% block extrahead %}
@@ -17,7 +17,7 @@
     {% if countries and region.tour_blurb or countries and tours %}
         <hr>
     {% endif %}
-    <h1 class="section-title">{{ region.name }} Tours</h1>
+    <h1 class="section-title">{{ title }}</h1>
     {{ region.tour_blurb | delay_images:request }}
     {% if region.tour_blurb and tours %}
         <hr>

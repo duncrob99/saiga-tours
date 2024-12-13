@@ -649,6 +649,7 @@ def region_tours(request, region_slug):
 
     context = {
         'region': region_obj,
+        'title': region_obj.name if region_obj.name.lower().endswith("tours") else f'{region_obj.name} Tours',
         'countries': countries,
         'tours': tours,
         'points': points,
