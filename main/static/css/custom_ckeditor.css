@@ -219,3 +219,8 @@ div.split-section div.hidden {
     grid-template-columns: 1fr max-content 1fr;
     grid-template-areas: '. table .';
 }
+
+img {
+    max-width: 100%;
+    object-fit: contain;
+}
