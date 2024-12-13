@@ -116,7 +116,7 @@
     }
 
     #footer-content > div {
-        gap: 50px;
+        gap: 10px;
     }
 
     #main-footer .container {
@@ -149,10 +149,10 @@
 
     <div class="main-footer">
         <div class="container pt-5 px-3 pb-3">
-            <div class="d-flex justify-content-start" id="footer-content">
+            <div class="d-flex flex-column justify-content-start" id="footer-content">
                 <div class="d-flex flex-column justify-content-around">
                     <img alt="logo" data-no-minimise src="{{ settings.logo_url }}" class="logo">
-                    <ul class="list-unstyled d-flex">
+                    <ul class="list-unstyled d-flex justify-content-center gap-4">
                         {% if settings.twitter_link %}
                             <li class="ms-3"><a aria-label="twitter" href="{{ settings.twitter_link }}"><i
                                     class="bi bi-twitter"></i></a></li>
