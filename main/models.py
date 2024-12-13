@@ -928,7 +928,10 @@ class Stop(models.Model):
     template = models.ForeignKey(PositionTemplate, on_delete=models.SET_NULL, null=True, blank=True)
 
     def get_caches_to_invalidate(self, previous):
-        return [reverse("tour", args=[self.tour.slug])]
+        try:
+            return [reverse("tour", args=[self.tour.slug])]
+        except Tour.DoesNotExist:
+            return []
 
     def __str__(self):
         return f'Stop {self.name} in {self.tour}'
@@ -966,7 +969,10 @@ class MapPoint(models.Model):
 @receiver(post_save, sender=Stop)
 @receiver(post_save, sender=PositionTemplate)
 def update_position_template(sender, instance, **kwargs):
-    template = instance.template if hasattr(instance, 'template') else instance
+    try:
+        template = instance.template if hasattr(instance, 'template') else instance
+    except PositionTemplate.DoesNotExist:
+        return
     if template is not None and (template.x is None or template.y is None):
         map_points = template.mappoint_set.all()
         tour_stops = template.stop_set.all()
@@ -1044,6 +1050,7 @@ class PageCache(models.Model):
 def purge_cloudflare_page(path):
     if not settings.PRODUCTION or settings.CLOUDFLARE_API_TOKEN is None:
         return
+    print(f'Invalidating {path} on Cloudflare')
     purge_url = f'https://api.cloudflare.com/client/v4/zones/{settings.CLOUDFLARE_ZONE_ID}/purge_cache'
     headers = {
         'Authorization': f'Bearer {settings.CLOUDFLARE_API_TOKEN}',
@@ -1063,6 +1070,7 @@ def purge_cloudflare_page(path):
 def purge_cloudflare_pages(paths):
     if not settings.PRODUCTION or settings.CLOUDFLARE_API_TOKEN is None:
         return
+    print(f'Invalidating {paths} on Cloudflare')
     purge_url = f'https://api.cloudflare.com/client/v4/zones/{settings.CLOUDFLARE_ZONE_ID}/purge_cache'
     headers = {
         'Authorization': f'Bearer {settings.CLOUDFLARE_API_TOKEN}',
@@ -1089,13 +1097,12 @@ def invalidate_pages(pages_to_invalidate):
             #purge_cloudflare_page(page.url)
         PageCache.objects.all().delete()
     else:
-        print(f'Invalidating {pages_to_invalidate}')
+        print(f'Invalidating {pages_to_invalidate} locally')
         for page in pages_to_invalidate:
             # Remove all PageCaches that begin with the page
             for cache in PageCache.objects.filter(url__startswith=page):
                 cache.delete()
-        print(f'Invalidating {pages_to_invalidate} on Cloudflare')
-        purge_cloudflare_page(pages_to_invalidate)
+        purge_cloudflare_pages(pages_to_invalidate)
 
 
 # Invalidate pagecache on model save
