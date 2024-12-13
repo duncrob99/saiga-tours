@@ -136,6 +136,7 @@ class DraftHistory(models.Model):
 class Region(DraftHistory):
     name = models.CharField(max_length=400)
     slug = models.SlugField(primary_key=True)
+    guide_blurb = RichTextWithPlugins(config_name='default', null=True, blank=True)
     tour_blurb = RichTextWithPlugins(config_name='default', null=True, blank=True)
 
     banner_img = models.ImageField(null=True, blank=True)

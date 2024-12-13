@@ -1,5 +1,6 @@
 {% extends 'main/main.html' %}
 {% load static %}
+{% load main_tags %}
 
 {% block title %}
     {{ region.name }} Guides
@@ -96,6 +97,12 @@
             <div></div>
         </div>
     {% endif %}
+
+    {% if region.guide_blurb %}
+        {{ region.guide_blurb | delay_images:request }}
+        <hr>
+    {% endif %}
+
     {% if destinations.count > 0 %}
         <h3 class="display-5">Countries</h3>
         <div class="row">
