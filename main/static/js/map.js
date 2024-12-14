@@ -154,19 +154,26 @@ let map_centre;
 let arrow_instances = [];
 const zoom_transition = 2000;
 
-function minBBox(bbox1, bbox2) {
-    let right1 = bbox1.x + bbox1.width;
-    let right2 = bbox2[0] + bbox2[2];
-    let top1 = bbox1.y + bbox1.height;
-    let top2 = bbox2[1] + bbox2[3];
+function get_route_scale() {
+    return tour_scale * map_content_width * 1.8703987046611592;
+}
 
-    let x = Math.min(bbox1.x, bbox2[0]);
-    let y = Math.min(bbox1.y, bbox2[1]);
+function minBBox(bbox1, bbox2) {
+    if (bbox1 === undefined) return bbox2;
+    if (bbox2 === undefined) return bbox1;
+
+    let right1 = bbox1.x + bbox1.width;
+    let right2 = bbox2.x + bbox2.width;
+    let top1 = bbox1.y + bbox1.height;
+    let top2 = bbox2.y + bbox2.height;
+
+    let x = Math.min(bbox1.x, bbox2.x);
+    let y = Math.min(bbox1.y, bbox2.y);
 
     let width = Math.max(right1, right2) - x;
     let height = Math.max(top1, top2) - y;
 
-    return [x, y, width, height];
+    return {x, y, width, height};
 }
 
 let map_settings;
@@ -182,21 +189,16 @@ function make_map_work(destinations, width, height, hoverable, stops, editable, 
         points: points
     }
 
-    resize_map_to_countries(destinations, width, height, hoverable);
+    if (stops === undefined || stops.length === 0) {
+        setCountryNames(destinations, editable);
+    }
+
+    resize_map_to_countries(destinations, width, height);
     if (stops !== undefined) {
         resize_map_to_stops(stops, width, height);
     }
 
     if (stops !== undefined) {
-        // stops = stops.map(stop => {
-        //     if (stop.x !== undefined && stop.y !== undefined) {
-        //         return stop;
-        //     } else {
-        //         stop.x = map_centre.x;
-        //         stop.y = map_centre.y;
-        //         return stop;
-        //     }
-        // })
         stops.forEach(stop => {
             if (stop.x === undefined) {
                 stop.x = map_centre.x;
@@ -213,13 +215,13 @@ function make_map_work(destinations, width, height, hoverable, stops, editable, 
         createPoints(points);
     }
 
-    document.querySelectorAll('.pre-load').forEach((el) => el.classList.remove('pre-load'));
+    //document.querySelectorAll('.pre-load').forEach((el) => el.classList.remove('pre-load'));
 
-    if (stops === undefined || stops.length === 0) {
-        setTimeout(() => {
-            setCountryNames(destinations, editable);
-        }, zoom_transition * 1.1);
-        // setCountryNames(destinations, editable);
+    setup_country_links(destinations, hoverable);
+
+    resize_map_to_countries(destinations, width, height);
+    if (stops !== undefined) {
+        resize_map_to_stops(stops, width, height);
     }
 
     if (stops === undefined) {
@@ -288,283 +290,205 @@ function setCountryNames(destinations, editable) {
 
     for (let [pk, country] of Object.entries(destinations)) {
         let path_el = SVG(`[title="${country.name}"]`);
-        if (path_el !== null) {
-            let {com, area} = findCentroid(path_el, country.name);
+        if (path_el === null) continue;
 
-            destinations[pk].moveTo = function(x, y) {
-                country.curve_length = country.curve_length ?? destinations[pk].text_el.bbox().width;
-                let curve_height = country.title_pos.curve ?? 0;
-                let cos = Math.cos(Math.PI * (country.title_pos.rotation ?? 0)/180);
-                let sin = Math.sin(Math.PI * (country.title_pos.rotation ?? 0)/180);
-                destinations[pk].text_path.plot(`M${(x ?? com.x) - cos*country.curve_length/2} ${(y ?? com.y) - sin*country.curve_length/2} s ${cos*country.curve_length/2 + sin*curve_height} ${sin*country.curve_length/2 - curve_height * cos} ${cos*country.curve_length} ${sin * country.curve_length}`)
-            }
+        let {com, area} = findCentroid(path_el, country.name);
 
-            destinations[pk].draw = function() {
-                if (destinations[pk].text_el) destinations[pk].text_el.remove();
-                // if (destinations[pk].text_path) destinations[pk].text_path.remove();
-                destinations[pk].text_el = svg_map.text(country.name.toUpperCase())
-                    .font('size', 5*(country.title_pos.scale ?? 1))
-                    .cx(country.title_pos.x ?? com.x)
-                    .cy(country.title_pos.y ?? com.y)
-                    .transform({
-                        rotate: country.title_pos.rotation
-                    })
-                    .css('pointer-events', 'none')
-                    .fill('black')
-                    .stroke('none')
-                    .addClass('country-name');
-                // country.curve_length = country.curve_length ?? destinations[pk].text_el.bbox().width;
-                // if (country.name === 'Kazakhstan') console.log('curve length: ', country.curve_length);
-                // let curve_height = country.title_pos.curve ?? 0;
-                // let curve_height = 0;
-                // let cos = Math.cos(Math.PI * (country.title_pos.rotation ?? 0)/180);
-                // let sin = Math.sin(Math.PI * (country.title_pos.rotation ?? 0)/180);
-                // destinations[pk].text_path = destinations[pk].text_el.path(`M${(country.title_pos.x ?? com.x) - cos*country.curve_length/2} ${(country.title_pos.y ?? com.y) - sin*country.curve_length/2} s ${cos*country.curve_length/2 + sin*curve_height} ${sin*country.curve_length/2 - curve_height * cos} ${cos*country.curve_length} ${sin * country.curve_length}`)
-                //     .font('size', 5*(country.title_pos.scale ?? 1))
-                //     .transform({
-                //         rotate: country.title_pos.rotation
-                //     })
-                //     .css('pointer-events', 'none')
-                //     .fill('black')
-                //     .stroke('none')
-                //     .addClass('country-name');
-            }
-
-            country.draw();
-
-            // country.determine_length = function (accuracy) {
-            //     country.curve_length = undefined;
-            //     country.draw();
-            //     let prev_length = 0;
-            //     let changed = true;
-            //     let text_length = destinations[pk].text_el.length();
-            //     while (changed) {
-            //         let startpoint = destinations[pk].text_path.track().pointAt(0)
-            //         let endpoint = destinations[pk].text_path.track().pointAt(text_length);
-            //         country.curve_length = Math.sqrt((endpoint.x - startpoint.x) ** 2 + (endpoint.y - startpoint.y) ** 2);
-            //         changed = Math.abs(country.curve_length - prev_length) > (accuracy ?? 1e-1);
-            //         prev_length = country.curve_length;
-            //         destinations[pk].draw();
-            //     }
-            //     destinations[pk].draw();
-            // }
-            //
-            // country.determine_length();
+        country.moveTo = function(x, y) {
+            country.curve_length = country.curve_length ?? destinations[pk].text_el.bbox().width;
+            let curve_height = country.title_pos.curve ?? 0;
+            let cos = Math.cos(Math.PI * (country.title_pos.rotation ?? 0)/180);
+            let sin = Math.sin(Math.PI * (country.title_pos.rotation ?? 0)/180);
+            destinations[pk].text_path.plot(`M${(x ?? com.x) - cos*country.curve_length/2} ${(y ?? com.y) - sin*country.curve_length/2} s ${cos*country.curve_length/2 + sin*curve_height} ${sin*country.curve_length/2 - curve_height * cos} ${cos*country.curve_length} ${sin * country.curve_length}`)
         }
+
+        country.draw = function() {
+            if (destinations[pk].text_el) destinations[pk].text_el.remove();
+            // if (destinations[pk].text_path) destinations[pk].text_path.remove();
+            destinations[pk].text_el = svg_map.text(country.name.toUpperCase())
+                .font('size', 5*(country.title_pos.scale ?? 1))
+                .cx(country.title_pos.x ?? com.x)
+                .cy(country.title_pos.y ?? com.y)
+                .transform({
+                    rotate: country.title_pos.rotation
+                })
+                .css('pointer-events', 'none')
+                .fill('black')
+                .stroke('none')
+                .addClass('country-name');
+        }
+
+        country.draw();
     }
 
+    if (!editable) return;
     let selected_country;
     for (let [pk, country] of Object.entries(destinations)) {
         let text_el = country.text_el;
-        if (editable) {
-            let handle_size = 0.3;
-            let bbox = SVG('.map svg').rect(text_el.bbox().width, text_el.bbox().height)
-                .cx(text_el.cx())
-                .cy(text_el.cy())
+        let handle_size = 0.3;
+        let bbox = SVG('.map svg').rect(text_el.bbox().width, text_el.bbox().height)
+            .cx(text_el.cx())
+            .cy(text_el.cy())
+            .rotate(country.title_pos.rotation)
+            .stroke('blue')
+            .fill('rgba(0, 0, 0, 0.0001)');
+        let resize_rect = svg_map.rect(handle_size * text_el.bbox().height, handle_size * text_el.bbox().height)
+            .center(text_el.cx(), text_el.cy())
+            .rotate(country.title_pos.rotation)
+            .cx(text_el.cx() + text_el.bbox().width/2)
+            .cy(text_el.cy()).stroke('none')
+            .fill('rgba(0, 0, 0, 0.0001)');
+        let rotate_rect = svg_map.rect(handle_size * text_el.bbox().height, handle_size * text_el.bbox().height)
+            .center(text_el.cx(), text_el.cy())
+            .rotate(country.title_pos.rotation)
+            .cx(text_el.cx() + text_el.bbox().width/2)
+            .cy(text_el.cy() - text_el.bbox().height/2)
+            .stroke('none').fill('rgba(0, 0, 0, 0.0001)');
+        // let curve_rect = svg_map.rect(2, 2).cx(text_el.cx()).cy(text_el.cy() - text_el.bbox().height/2).stroke('none').fill('rgba(0, 0, 0, 0.0001)');
+
+        let current_angle = country.title_pos.rotation;
+        country.redraw_controls = function () {
+            bbox.rotate(-current_angle)
+                .cx(country.text_el.cx())
+                .cy(country.text_el.cy())
                 .rotate(country.title_pos.rotation)
-                .stroke('blue')
-                .fill('rgba(0, 0, 0, 0.0001)');
-            let resize_rect = svg_map.rect(handle_size * text_el.bbox().height, handle_size * text_el.bbox().height)
-                .center(text_el.cx(), text_el.cy())
+                .width(country.text_el.bbox().width)
+                .height(country.text_el.bbox().height);
+            resize_rect
+                .center(country.text_el.cx(), country.text_el.cy())
+                .rotate(-current_angle)
                 .rotate(country.title_pos.rotation)
-                .cx(text_el.cx() + text_el.bbox().width/2)
-                .cy(text_el.cy()).stroke('none')
-                .fill('rgba(0, 0, 0, 0.0001)');
-            let rotate_rect = svg_map.rect(handle_size * text_el.bbox().height, handle_size * text_el.bbox().height)
-                .center(text_el.cx(), text_el.cy())
+                .cx(country.text_el.cx() + country.text_el.bbox().width/2)
+                .cy(country.text_el.cy());
+            rotate_rect
+                .center(country.text_el.cx(), country.text_el.cy())
+                .rotate(-current_angle)
                 .rotate(country.title_pos.rotation)
-                .cx(text_el.cx() + text_el.bbox().width/2)
-                .cy(text_el.cy() - text_el.bbox().height/2)
-                .stroke('none').fill('rgba(0, 0, 0, 0.0001)');
-            // let curve_rect = svg_map.rect(2, 2).cx(text_el.cx()).cy(text_el.cy() - text_el.bbox().height/2).stroke('none').fill('rgba(0, 0, 0, 0.0001)');
-
-            let current_angle = country.title_pos.rotation;
-            country.redraw_controls = function () {
-                bbox.rotate(-current_angle)
-                    .cx(country.text_el.cx())
-                    .cy(country.text_el.cy())
-                    .rotate(country.title_pos.rotation)
-                    .width(country.text_el.bbox().width)
-                    .height(country.text_el.bbox().height);
-                resize_rect
-                    .center(country.text_el.cx(), country.text_el.cy())
-                    .rotate(-current_angle)
-                    .rotate(country.title_pos.rotation)
-                    .cx(country.text_el.cx() + country.text_el.bbox().width/2)
-                    .cy(country.text_el.cy());
-                rotate_rect
-                    .center(country.text_el.cx(), country.text_el.cy())
-                    .rotate(-current_angle)
-                    .rotate(country.title_pos.rotation)
-                    .cx(country.text_el.cx() + country.text_el.bbox().width/2)
-                    .cy(country.text_el.cy() - country.text_el.bbox().height/2);
-                current_angle = country.title_pos.rotation;
-                // curve_rect.cx(country.text_el.cx())
-                //     .cy(country.text_el.cy() - country.text_el.bbox().height/2);
-            }
-
-            country.hide_controls = function () {
-                bbox.stroke({color: 'blue', width: 0.1});
-                resize_rect.stroke('none');
-                rotate_rect.stroke('none');
-                // curve_rect.stroke('none');
-            }
-
-            country.start_editing = function () {
-                if (selected_country) selected_country.stop_editing();
-                selected_country = country;
-                setMapZooming(false);
-                bbox.stroke({color: 'red', width: 0.5});
-                for (let [_, country] of Object.entries(destinations)) {
-                    country.text_el.node.removeEventListener('click', country.text_el.start_editing);
-                }
-                setTimeout(() => window.addEventListener('mousedown', country.second_click), 100);
-
-                resize_rect.stroke('red');
-                rotate_rect.stroke('red');
-                // curve_rect.stroke('red');
-            }
-
-            country.stop_editing = function (click) {
-                if (selected_country === country) {
-                    selected_country = undefined;
-                }
-                window.removeEventListener('click', country.second_click);
-                bbox.stroke({color: 'blue', width: 0.1});
-                country.hide_controls();
-                setMapZooming(true);
-            }
-
-            country.second_click = function (click) {
-                click.preventDefault();
-                let {x: click_x, y: click_y} = bbox.point(click.pageX, click.pageY);
-
-                if (resize_rect.inside(click_x, click_y)) {
-                    let init_scale = country.title_pos.scale ?? 1;
-                    let init_width = country.text_el.bbox().width;
-
-                    function resize_move(move) {
-                        let {x: move_x, y: move_y} = bbox.point(move.pageX, move.pageY);
-                        let change = 1 + (move_x - click_x) / init_width;
-                        country.title_pos.scale = change * init_scale;
-                        // country.title_pos.scale = ;
-                        document.querySelector(`[name=countries-${country.form_ix}-title_scale]`).value = country.title_pos.scale;
-                        bbox.cx(country.text_el.cx())
-                            .cy(country.text_el.cy());
-                        resize_rect.cx(country.text_el.cx() + country.text_el.bbox().width / 2)
-                            .cy(country.text_el.cy())
-                        country.draw();
-                        country.redraw_controls();
-                    }
-
-                    function stop_resize() {
-                        svg_map.off('mousemove', resize_move);
-                        svg_map.off('mouseup', stop_resize);
-                    }
-
-                    svg_map.on('mousemove', resize_move);
-                    svg_map.on('mouseup', stop_resize);
-                } else if (rotate_rect.inside(click_x, click_y)) {
-                    function rotate_move(move) {
-                        move.preventDefault();
-                        let {x: move_x, y: move_y} = svg_map.point(move.pageX, move.pageY);
-                        let angle = Math.atan2(move_y - country.text_el.cy(), move_x - country.text_el.cx()) * 180/Math.PI;
-                        angle += Math.tan(country.text_el.bbox().height/country.text_el.bbox().width) * 180/Math.PI;
-                        country.title_pos.rotation = angle;
-                        document.querySelector(`[name=countries-${country.form_ix}-title_rotation]`).value = country.title_pos.rotation;
-                        country.draw();
-                        country.redraw_controls();
-                    }
-
-                    function stop_rotate() {
-                        svg_map.off('mousemove', rotate_move);
-                        svg_map.off('mouseup', stop_rotate);
-                    }
-
-                    svg_map.on('mousemove', rotate_move);
-                    svg_map.on('mouseup', stop_rotate);
-                } else if (bbox.inside(click_x, click_y)) {
-                    let start_x = country.text_el.cx();
-                    let start_y = country.text_el.cy();
-                    let rel_x = click_x - start_x;
-                    let rel_y = click_y - start_y;
-                    console.log(rel_x, rel_y);
-
-                    function mousemove(move) {
-                        move.preventDefault();
-                        let {x: move_x, y: move_y} = bbox.point(move.pageX, move.pageY);
-                        let svg_scale = (svg_map.point(5, 0).x - svg_map.point(0, 0).x)/5;
-                        country.title_pos.x = start_x + (move.pageX - click.pageX) * svg_scale;
-                        country.title_pos.y = start_y + (move.pageY - click.pageY) * svg_scale;
-
-                        // country.title_pos.x = move_x - rel_x;
-                        // country.title_pos.y = move_y - rel_y;
-                        country.draw();
-                        country.redraw_controls();
-
-                        document.querySelector(`[name=countries-${country.form_ix}-title_x]`).value = country.title_pos.x;
-                        document.querySelector(`[name=countries-${country.form_ix}-title_y]`).value = country.title_pos.y;
-                    }
-
-                    function mouseup() {
-                        svg_map.off('mousemove', mousemove);
-                        svg_map.off('mouseup', mouseup);
-                    }
-
-                    svg_map.on('mousemove', mousemove);
-                    svg_map.on('mouseup', mouseup);
-                } else {
-                    country.stop_editing();
-                }
-            }
-
-            // text_el.node.addEventListener('click', start_editing);
-            bbox.click(country.start_editing);
+                .cx(country.text_el.cx() + country.text_el.bbox().width/2)
+                .cy(country.text_el.cy() - country.text_el.bbox().height/2);
+            current_angle = country.title_pos.rotation;
+            // curve_rect.cx(country.text_el.cx())
+            //     .cy(country.text_el.cy() - country.text_el.bbox().height/2);
         }
+
+        country.hide_controls = function () {
+            bbox.stroke({color: 'blue', width: 0.1});
+            resize_rect.stroke('none');
+            rotate_rect.stroke('none');
+            // curve_rect.stroke('none');
+        }
+
+        country.start_editing = function () {
+            if (selected_country) selected_country.stop_editing();
+            selected_country = country;
+            setMapZooming(false);
+            bbox.stroke({color: 'red', width: 0.5});
+            for (let [_, country] of Object.entries(destinations)) {
+                country.text_el.node.removeEventListener('click', country.text_el.start_editing);
+            }
+            setTimeout(() => window.addEventListener('mousedown', country.second_click), 100);
+
+            resize_rect.stroke('red');
+            rotate_rect.stroke('red');
+            // curve_rect.stroke('red');
+        }
+
+        country.stop_editing = function (click) {
+            if (selected_country === country) {
+                selected_country = undefined;
+            }
+            window.removeEventListener('click', country.second_click);
+            bbox.stroke({color: 'blue', width: 0.1});
+            country.hide_controls();
+            setMapZooming(true);
+        }
+
+        country.second_click = function (click) {
+            click.preventDefault();
+            let {x: click_x, y: click_y} = bbox.point(click.pageX, click.pageY);
+
+            if (resize_rect.inside(click_x, click_y)) {
+                let init_scale = country.title_pos.scale ?? 1;
+                let init_width = country.text_el.bbox().width;
+
+                function resize_move(move) {
+                    let {x: move_x, y: move_y} = bbox.point(move.pageX, move.pageY);
+                    let change = 1 + (move_x - click_x) / init_width;
+                    country.title_pos.scale = change * init_scale;
+                    // country.title_pos.scale = ;
+                    document.querySelector(`[name=countries-${country.form_ix}-title_scale]`).value = country.title_pos.scale;
+                    bbox.cx(country.text_el.cx())
+                        .cy(country.text_el.cy());
+                    resize_rect.cx(country.text_el.cx() + country.text_el.bbox().width / 2)
+                        .cy(country.text_el.cy())
+                    country.draw();
+                    country.redraw_controls();
+                }
+
+                function stop_resize() {
+                    svg_map.off('mousemove', resize_move);
+                    svg_map.off('mouseup', stop_resize);
+                }
+
+                svg_map.on('mousemove', resize_move);
+                svg_map.on('mouseup', stop_resize);
+            } else if (rotate_rect.inside(click_x, click_y)) {
+                function rotate_move(move) {
+                    move.preventDefault();
+                    let {x: move_x, y: move_y} = svg_map.point(move.pageX, move.pageY);
+                    let angle = Math.atan2(move_y - country.text_el.cy(), move_x - country.text_el.cx()) * 180/Math.PI;
+                    angle += Math.tan(country.text_el.bbox().height/country.text_el.bbox().width) * 180/Math.PI;
+                    country.title_pos.rotation = angle;
+                    document.querySelector(`[name=countries-${country.form_ix}-title_rotation]`).value = country.title_pos.rotation;
+                    country.draw();
+                    country.redraw_controls();
+                }
+
+                function stop_rotate() {
+                    svg_map.off('mousemove', rotate_move);
+                    svg_map.off('mouseup', stop_rotate);
+                }
+
+                svg_map.on('mousemove', rotate_move);
+                svg_map.on('mouseup', stop_rotate);
+            } else if (bbox.inside(click_x, click_y)) {
+                let start_x = country.text_el.cx();
+                let start_y = country.text_el.cy();
+                let rel_x = click_x - start_x;
+                let rel_y = click_y - start_y;
+                console.log(rel_x, rel_y);
+
+                function mousemove(move) {
+                    move.preventDefault();
+                    let {x: move_x, y: move_y} = bbox.point(move.pageX, move.pageY);
+                    let svg_scale = (svg_map.point(5, 0).x - svg_map.point(0, 0).x)/5;
+                    country.title_pos.x = start_x + (move.pageX - click.pageX) * svg_scale;
+                    country.title_pos.y = start_y + (move.pageY - click.pageY) * svg_scale;
+
+                    // country.title_pos.x = move_x - rel_x;
+                    // country.title_pos.y = move_y - rel_y;
+                    country.draw();
+                    country.redraw_controls();
+
+                    document.querySelector(`[name=countries-${country.form_ix}-title_x]`).value = country.title_pos.x;
+                    document.querySelector(`[name=countries-${country.form_ix}-title_y]`).value = country.title_pos.y;
+                }
+
+                function mouseup() {
+                    svg_map.off('mousemove', mousemove);
+                    svg_map.off('mouseup', mouseup);
+                }
+
+                svg_map.on('mousemove', mousemove);
+                svg_map.on('mouseup', mouseup);
+            } else {
+                country.stop_editing();
+            }
+        }
+
+        // text_el.node.addEventListener('click', start_editing);
+        bbox.click(country.start_editing);
     }
-
-    // text_els.forEach(el => {
-    //     el.remember('orig_x', el.cx());
-    //     el.remember('orig_y', el.cy());
-    //
-    //     el.moved = () => dist(el.cx(), el.cy(), el.remember('orig_x'), el.remember('orig_y'));
-    //
-    // });
-    //
-    // let change = true;
-    // let x_margin = 5;
-    // let y_margin = 1;
-    // let margin = 5;
-    // while (change) {
-    //     change = false;
-    //     for (let text_el of text_els) {
-    //         let other_els = text_els.filter(el => el !== text_el);
-    //         for (let other_el of other_els) {
-    //             if (text_el.bbox().x < other_el.bbox().x2 + x_margin && text_el.bbox().x2 + x_margin > other_el.bbox().x && (text_el.bbox().y < other_el.bbox().y2 + y_margin && text_el.bbox().y2 + y_margin > other_el.bbox().y)) {
-    //                 // if (rect_distance(text_el.bbox(), other_el.bbox()) <= margin) {
-    //                 let direction = {
-    //                     x: text_el.bbox().cx - other_el.bbox().cx,
-    //                     y: text_el.bbox().cy - other_el.bbox().cy
-    //                 };
-    //                 let mag = Math.sqrt(direction.x ** 2 + direction.y ** 2);
-    //                 direction = {x: direction.x / mag, y: direction.y / mag};
-    //
-    //                 if (text_el.moved() <= other_el.moved()) {
-    //                     text_el.dmove(direction.x, direction.y);
-    //                 }
-    //                 other_el.dmove(-direction.x, -direction.y);
-    //
-    //                 change = true;
-    //             }
-    //         }
-    //     }
-    // }
-
-    // for (let text_el of text_els) {
-    // SVG('.map svg').rect(text_el.bbox().width + margin, text_el.bbox().height + margin).cx(text_el.cx()).cy(text_el.cy()).stroke('red').fill('none');
-    // SVG('.map svg').rect(text_el.bbox().width + x_margin, text_el.bbox().height + y_margin).cx(text_el.cx()).cy(text_el.cy()).stroke('red').fill('none');
-    // SVG('.map svg').rect(text_el.bbox().width, text_el.bbox().height).cx(text_el.cx()).cy(text_el.cy()).stroke('blue').fill('none');
-    // }
 }
 
 //function rect_distance(x1, y1, x1b, y1b, x2, y2, x2b, y2b) {
@@ -812,7 +736,7 @@ function updatePath(stops) {
     if (stops.length < 2) return;
     let map_svg = SVG(document.querySelector('.map svg'));
 
-    let path_width = tour_scale * map_content_width * 0.006;
+    let path_width = get_route_scale() * 0.006;
 
     let x = [];
     let y = [];
@@ -865,7 +789,7 @@ function updatePath(stops) {
         arrow_instances.push(map_svg.path('M-1 0 L0 1 L1 0').cx(point.x).cy(point.y).fill('none').stroke({
             width: 0.3,
             color: '#106e2e'
-        }).rotate(angle).scale(0.3 * tour_scale * map_content_width / 18.5084228515625));
+        }).rotate(angle).scale(0.3 * get_route_scale() / 18.5084228515625));
         tot_len += broken_segment_lengths[i] / 2 + broken_segment_lengths[i + 1] / 2;
     }
 }
@@ -873,8 +797,8 @@ function updatePath(stops) {
 function updateStops(stops, editable) {
     let map_svg = document.querySelector('.map svg');
 
-    let text_size = tour_scale * map_content_width * 0.04;
-    let pointer_size = tour_scale * map_content_width * 0.004;
+    let text_size = get_route_scale() * 0.04;
+    let pointer_size = get_route_scale() * 0.004;
 
     updatePath(stops);
 
@@ -942,7 +866,7 @@ function updateStops(stops, editable) {
             });
         } else if (editable) {
             point_svg = SVG(map_svg)
-                .circle(tour_scale * map_content_width / 55)
+                .circle(get_route_scale() / 55)
                 .cx(stop.x)
                 .cy(stop.y)
                 .fill(stop.template ? 'green' : 'grey')
@@ -1452,7 +1376,8 @@ function pathString(x, y, prestrength, poststrength) {
     return str;
 }
 
-function resize_map_to_countries(destinations, width, height, hoverable) {
+function resize_map_to_bbox(min_bbox, width, height, margin_factor) {
+    map_content_width = min_bbox.width;
     if (width === undefined) {
         width = document.querySelector('#content-container').getBoundingClientRect().width;
     }
@@ -1460,78 +1385,61 @@ function resize_map_to_countries(destinations, width, height, hoverable) {
         let navbar_height = document.querySelector('.navbar').getBoundingClientRect().height;
         height = document.documentElement.clientHeight - navbar_height;
     }
-    if (hoverable === undefined) {
-        hoverable = true;
-    }
-
     let ar = width / height;
 
-    let dest_path;
-    let min_bbox = [999999, 999999, -999999, -999999];
-    for (let [pk, data] of Object.entries(destinations)) {
-        //dest_path = document.querySelector('#' + destinations[i][0]);
-        dest_path = document.querySelector(`[title="${data.name}"]`);
-        if (dest_path !== null) {
-            if (hoverable) {
-                dest_path.classList.add('available')
-                let start_ev;
-                dest_path.addEventListener('mousedown', (ev) => {
-                    start_ev = ev
-                })
-                dest_path.addEventListener('mouseup', (end_ev) => {
-                    if (start_ev !== undefined && !map_settings.editable) {
-                        if ((start_ev.x - end_ev.x) ** 2 + (start_ev.y - end_ev.y) ** 2 < 10 ** 2) {
-                            window.location.href = data.url;
-                        }
-                        start_ev = undefined;
-                    }
-                })
-            }
+    margin_factor = margin_factor || 0.2;
 
-            min_bbox = minBBox(dest_path.getBBox(), min_bbox);
-        }
-    }
-
-    map_content_width = min_bbox[2];
-    map_centre = {x: min_bbox[0] + min_bbox[2] / 2, y: min_bbox[1] + min_bbox[3] / 2};
-    let margin_factor = 0.2;
-    min_bbox = [min_bbox[0] - margin_factor / 2 * min_bbox[2], min_bbox[1] - margin_factor / 2 * min_bbox[3], min_bbox[2] * (1 + margin_factor), min_bbox[3] * (1 + margin_factor)];
     if (ar !== undefined) {
-        let cur_ar = min_bbox[2] / min_bbox[3];
+        let cur_ar = min_bbox.width / min_bbox.height;
         if (cur_ar > ar) {
-            min_bbox[1] -= min_bbox[3] * (cur_ar / ar - 1) / 2;
-            min_bbox[3] *= (cur_ar / ar);
+            min_bbox.y -= min_bbox.height * (cur_ar / ar - 1) / 2;
+            min_bbox.height *= (cur_ar / ar);
         } else {
-            min_bbox[0] -= min_bbox[2] * (ar / cur_ar - 1) / 2;
-            min_bbox[2] *= (ar / cur_ar);
+            min_bbox.x -= min_bbox.width * (ar / cur_ar - 1) / 2;
+            min_bbox.width *= (ar / cur_ar);
         }
     }
+
+    map_centre = {x: min_bbox.x + min_bbox.width / 2, y: min_bbox.y + min_bbox.height / 2};
+    min_bbox = {x:      min_bbox.x - margin_factor / 2 * min_bbox.width,
+                y:      min_bbox.y - margin_factor / 2 * min_bbox.height,
+                width:  min_bbox.width * (1 + margin_factor),
+                height: min_bbox.height * (1 + margin_factor)};
+
     if (typeof Visibility !== "undefined") {
         Visibility.onVisible(() => {
             map_svg.animate({
                 when: 'now',
                 duration: zoom_transition
-            }).ease('quartInOut').viewbox(`${min_bbox[0]} ${min_bbox[1]} ${min_bbox[2]} ${min_bbox[3]}`);
+            }).ease('quartInOut').viewbox(`${min_bbox.x} ${min_bbox.y} ${min_bbox.width} ${min_bbox.height}`);
         })
     } else {
         map_svg.animate({
             when: 'now',
             duration: zoom_transition
-        }).ease('quartInOut').viewbox(`${min_bbox[0]} ${min_bbox[1]} ${min_bbox[2]} ${min_bbox[3]}`);
+        }).ease('quartInOut').viewbox(`${min_bbox.x} ${min_bbox.y} ${min_bbox.width} ${min_bbox.height}`);
     }
 }
 
-function resize_map_to_stops(stops, width, height) {
-    if (stops.length < 2 || stops.reduce((prev_undefined, stop) => prev_undefined || stop.x === undefined || stop.y === undefined, false)) return;
-    if (width === undefined) {
-        width = document.querySelector('#content-container').getBoundingClientRect().width;
-    }
-    if (height === undefined) {
-        let navbar_height = document.querySelector('.navbar').getBoundingClientRect().height;
-        height = document.documentElement.clientHeight - navbar_height;
-    }
+function get_countries_bbox(destinations) {
+    let min_bbox = Object.values(destinations)
+        .map(dest => document.querySelector(`[title="${dest.name}"]`))
+        .map(dest_path => dest_path?.getBBox()) // Note: the dest_path may be null for destinations such as "5 Stans"
+        .reduce(minBBox);
 
-    let ar = width / height;
+    return min_bbox;
+}
+
+function get_country_labels_bbox(destinations) {
+    let min_bbox = Object.values(destinations)
+        .map(dest => dest.text_el?.bbox())
+        .reduce(minBBox);
+
+    return min_bbox;
+}
+
+function get_stops_bbox(stops) {
+    if (stops.length < 2 || stops.reduce((prev_undefined, stop) => prev_undefined || stop.x === undefined || stop.y === undefined, false)) return;
 
     let min_space = {left: 9e10, right: -9e10, top: 9e10, bottom: -9e10};
     for (stop of stops) {
@@ -1549,63 +1457,57 @@ function resize_map_to_stops(stops, width, height) {
         }
     }
 
-    let min_bbox = [min_space.left, min_space.top, min_space.right - min_space.left, min_space.bottom - min_space.top];
+    let min_bbox = {
+        x:      min_space.left,
+        y:      min_space.top,
+        width:  min_space.right - min_space.left,
+        height: min_space.bottom - min_space.top
+    };
 
-    let margin_factor = 0.2;
-    min_bbox = [min_bbox[0] - margin_factor / 2 * min_bbox[2], min_bbox[1] - margin_factor / 2 * min_bbox[3], min_bbox[2] * (1 + margin_factor), min_bbox[3] * (1 + margin_factor)];
-    if (ar !== undefined) {
-        let cur_ar = min_bbox[2] / min_bbox[3];
-        if (cur_ar > ar) {
-            min_bbox[1] -= min_bbox[3] * (cur_ar / ar - 1) / 2;
-            min_bbox[3] *= (cur_ar / ar);
-        } else {
-            min_bbox[0] -= min_bbox[2] * (ar / cur_ar - 1) / 2;
-            min_bbox[2] *= (ar / cur_ar);
-        }
-    }
-    if (typeof Visibility !== "undefined") {
-        Visibility.onVisible(() => {
-            map_svg.animate({
-                when: 'now',
-                duration: zoom_transition
-            }).ease('quartInOut').viewbox(`${min_bbox[0]} ${min_bbox[1]} ${min_bbox[2]} ${min_bbox[3]}`);
+    return min_bbox;
+}
+
+function setup_country_links(destinations, hoverable) {
+    hoverable = hoverable ?? true;
+    if (!hoverable) return;
+
+    for (let [pk, data] of Object.entries(destinations)) {
+        dest_path = document.querySelector(`[title="${data.name}"]`);
+        if (dest_path === null) continue;
+
+        dest_path.classList.add('available')
+        let start_ev;
+        dest_path.addEventListener('mousedown', (ev) => {
+            start_ev = ev
         })
-    } else {
-        map_svg.animate({
-            when: 'now',
-            duration: zoom_transition
-        }).ease('quartInOut').viewbox(`${min_bbox[0]} ${min_bbox[1]} ${min_bbox[2]} ${min_bbox[3]}`);
+        dest_path.addEventListener('mouseup', (end_ev) => {
+            if (start_ev !== undefined && !map_settings.editable) {
+                if ((start_ev.x - end_ev.x) ** 2 + (start_ev.y - end_ev.y) ** 2 < 10 ** 2) {
+                    window.location.href = data.url;
+                }
+                start_ev = undefined;
+            }
+        })
     }
+}
+
+function resize_map_to_countries(destinations, width, height) {
+    let countries_bbox = get_countries_bbox(destinations);
+    let labels_bbox = get_country_labels_bbox(destinations);
+    let min_bbox = minBBox(countries_bbox, labels_bbox);
+
+    resize_map_to_bbox(min_bbox, width, height);
+}
+
+function resize_map_to_stops(stops, width, height) {
+    let min_bbox = get_stops_bbox(stops);
+    resize_map_to_bbox(min_bbox, width, height);
 }
 
 function resize_map_to_content(stops, width, height) {
     if (stops.length < 2 || stops.reduce((prev_undefined, stop) => prev_undefined || stop.x === undefined || stop.y === undefined, false)) return;
-    if (width === undefined) {
-        width = document.querySelector('#content-container').getBoundingClientRect().width;
-    }
-    if (height === undefined) {
-        let navbar_height = document.querySelector('.navbar').getBoundingClientRect().height;
-        height = document.documentElement.clientHeight - navbar_height;
-    }
 
-    let ar = width / height;
-
-    let min_space = {left: 9e10, right: -9e10, top: 9e10, bottom: -9e10};
-    for (let stop of stops) {
-        if (stop.x < min_space.left) {
-            min_space.left = stop.x;
-        }
-        if (stop.y < min_space.top) {
-            min_space.top = stop.y;
-        }
-        if (stop.x > min_space.right) {
-            min_space.right = stop.x;
-        }
-        if (stop.y > min_space.bottom) {
-            min_space.bottom = stop.y;
-        }
-    }
-    let min_bbox = [min_space.left, min_space.top, min_space.right - min_space.left, min_space.bottom - min_space.top];
+    let min_bbox = get_stops_bbox(stops);
 
     for (let pointer_text of document.querySelectorAll('.pointer-text')) {
         min_bbox = minBBox(pointer_text.getBBox(), min_bbox);
@@ -1616,32 +1518,7 @@ function resize_map_to_content(stops, width, height) {
         min_bbox = minBBox(stop_path.getBBox(), min_bbox);
     }
 
-    map_centre = {x: min_bbox[0] + min_bbox[2] / 2, y: min_bbox[1] + min_bbox[3] / 2};
-    let margin_factor = 0.2;
-    min_bbox = [min_bbox[0] - margin_factor / 2 * min_bbox[2], min_bbox[1] - margin_factor / 2 * min_bbox[3], min_bbox[2] * (1 + margin_factor), min_bbox[3] * (1 + margin_factor)];
-    if (ar !== undefined) {
-        let cur_ar = min_bbox[2] / min_bbox[3];
-        if (cur_ar > ar) {
-            min_bbox[1] -= min_bbox[3] * (cur_ar / ar - 1) / 2;
-            min_bbox[3] *= (cur_ar / ar);
-        } else {
-            min_bbox[0] -= min_bbox[2] * (ar / cur_ar - 1) / 2;
-            min_bbox[2] *= (ar / cur_ar);
-        }
-    }
-    if (typeof Visibility !== "undefined") {
-        Visibility.onVisible(() => {
-            map_svg.animate({
-                when: 'now',
-                duration: zoom_transition
-            }).ease('quartInOut').viewbox(`${min_bbox[0]} ${min_bbox[1]} ${min_bbox[2]} ${min_bbox[3]}`);
-        })
-    } else {
-        map_svg.animate({
-            when: 'now',
-            duration: zoom_transition
-        }).ease('quartInOut').viewbox(`${min_bbox[0]} ${min_bbox[1]} ${min_bbox[2]} ${min_bbox[3]}`);
-    }
+    resize_map_to_bbox(min_bbox, width, height);
 }
 
 function edit_position_template(pk, data) {
