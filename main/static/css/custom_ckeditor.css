@@ -219,7 +219,7 @@ div.split-section div.hidden {
     grid-template-areas: '. table .';
 }
 
-img {
+img:not(.image-fan *) {
     max-width: 100%;
     object-fit: contain;
 }

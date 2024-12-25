@@ -64,6 +64,7 @@ h5.card-title {
 
 .img-card img {
     transition: transform .5s;
+    aspect-ratio: 1.5;
 }
 
 .img-card img[data-full-size-loaded="true"] {
