@@ -133,6 +133,10 @@ def delay_images(value: str, request):
             # Remove src attribute to avoid loading image
             img.attrs.pop('src')
 
+            src_filename = (img.get('src') or img.get('data-cke-saved-src') or img.get('data-filename')).replace('/media/media/', 'media/')
+            downscaled = downscaled_image(None, settings.MEDIA_ROOT / src_filename)
+            img['src'] = downscaled
+
     # Ensure empty paragraphs and other text tags contain <br> tags
     for p in soup.find_all(['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'li', 'td', 'th', 'div', 'span']):
         if is_empty_element(p):
@@ -173,7 +177,11 @@ def downscaled_image(context, img: ImageField, width: int = 10):
 
     cropped_image = crop_to_dims(image, width, math.ceil(width * image.height / image.width))
 
-    img_format, save_func = get_image_format(context.request, image)
+    if context is not None:
+        img_format, save_func = get_image_format(context.request, image)
+    else:
+        img_format = 'png'
+        save_func = lambda img, loc: img.save(loc, img_format)
 
     buff = BytesIO()
     # cropped_image.save(buff, format=img_format)
