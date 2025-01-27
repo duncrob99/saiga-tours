@@ -1068,24 +1068,36 @@ def purge_cloudflare_page(path):
         raise Exception(f'Cloudflare purge of {path} failed with status code {response.status_code} and message {response.text}')
 
 
+def chunked_list(lst, n):
+    """Yields chunks of lst of length n"""
+    for i in range(0, len(lst), n):
+        yield lst[i:i + n]
+
+
 def purge_cloudflare_pages(paths):
     if not settings.PRODUCTION or settings.CLOUDFLARE_API_TOKEN is None:
         return
-    print(f'Invalidating {paths} on Cloudflare')
-    purge_url = f'https://api.cloudflare.com/client/v4/zones/{settings.CLOUDFLARE_ZONE_ID}/purge_cache'
-    headers = {
-        'Authorization': f'Bearer {settings.CLOUDFLARE_API_TOKEN}',
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-    }
-    data = {
-        'files': [f'https://{settings.CLOUDFLARE_DOMAIN}{path}' for path in paths]
-    }
-    print(f'Purging {paths} from Cloudflare using url: {purge_url}, headers: {headers}, data: {data}')
-    response = requests.post(purge_url, headers=headers, data=json.dumps(data))
-    print(f'Cloudflare response: {response.text}')
-    if response.status_code != 200:
-        raise Exception(f'Cloudflare purge of {paths} failed with status code {response.status_code} and message {response.text}')
+
+    paths_per_call = 29 # Cloudflare will only purge 30 paths at a time, use 29 for off-by-one safety
+    for paths_chunk in chunked_list(paths, paths_per_call):
+
+        print(f'Invalidating {paths_chunk} on Cloudflare')
+        purge_url = f'https://api.cloudflare.com/client/v4/zones/{settings.CLOUDFLARE_ZONE_ID}/purge_cache'
+        headers = {
+            'Authorization': f'Bearer {settings.CLOUDFLARE_API_TOKEN}',
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        }
+
+        data = {
+            'files': [f'https://{settings.CLOUDFLARE_DOMAIN}{path}' for path in paths_chunk]
+        }
+
+        print(f'Purging {paths_chunk} from Cloudflare using url: {purge_url}, headers: {headers}, data: {data}')
+        response = requests.post(purge_url, headers=headers, data=json.dumps(data))
+        print(f'Cloudflare response: {response.text}')
+        if response.status_code != 200:
+            raise Exception(f'Cloudflare purge of {paths_chunk} failed with status code {response.status_code} and message {response.text}')
 
 
 def invalidate_pages(pages_to_invalidate):
