@@ -3,7 +3,7 @@
 {% load main_tags %}
 
 {% block title %}
-    {{ destination.name }} Tours
+    {{ destination.name }} Group Tours
 {% endblock %}
 
 {% block extrahead %}
@@ -24,7 +24,7 @@
 
 {% block content %}
     {% if not destination.tour_banner %}
-        <h1 class="display-1">{{ destination.name }}</h1>
+        <h1 class="display-1">{{ destination.name }} Group Tours</h1>
         <hr>
     {% else %}
         <div id="header-content" class="d-flex flex-column justify-content-between">

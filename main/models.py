@@ -174,6 +174,7 @@ class Destination(DraftHistory):
     tour_blurb = RichTextWithPlugins(config_name='default', null=True, blank=True)
     map_colour = ColorField(null=True, blank=True)
 
+    tour_meta = models.TextField(null=True, blank=True, max_length=400)
     title_x = models.FloatField(null=True, blank=True)
     title_y = models.FloatField(null=True, blank=True)
     title_scale = models.FloatField(null=True, blank=True)
