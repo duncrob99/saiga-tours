@@ -630,9 +630,9 @@ def country_tours(request, region_slug, country_slug):
         'tours': tour_list,
         'meta': MetaInfo(
             request.build_absolute_uri(),
-            f'Tours to {destination.name}',
+            f'{destination.name} Group Tours',
             destination.card_img.url,
-            f'Learn more about the tours we offer to {destination.name}'
+            destination.tour_meta or f'Learn more about the tours we offer to {destination.name}'
         )
     }
 
