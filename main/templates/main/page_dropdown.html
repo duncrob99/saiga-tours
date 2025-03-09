@@ -7,8 +7,7 @@
     {% else %}
         <li>
             <a class="dropdown-item d-flex justify-content-between"
-               href="{% url 'page' page.full_path %}">{{ page.title }} <i
-                    class="bi bi-chevron-right"></i></a>
+               href="{% url 'page' page.full_path %}">{{ page.title }}</a>
             <ul class="dropdown-menu dropdown-submenu" aria-labelledby="dropdownMenuButton">
                 {% for child_page in page.children.all %}
                     {% include 'main/page_dropdown.html' with page=child_page %}
@@ -25,8 +24,7 @@
     {% else %}
         <li>
             <a class="dropdown-item d-flex justify-content-between"
-               href="{% url 'page' page.full_path %}">{{ page.title }} <i
-                    class="bi bi-chevron-right"></i></a>
+               href="{% url 'page' page.full_path %}">{{ page.title }}</a>
             <ul class="dropdown-menu dropdown-submenu" aria-labelledby="dropdownMenuButton">
                 {% for child_page in page.children.all_published %}
                     {% include 'main/page_dropdown.html' with page=child_page %}
