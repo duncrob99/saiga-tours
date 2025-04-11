@@ -23,7 +23,6 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.functional import classproperty
 from simple_history.models import HistoricalRecords
-from django.contrib.sitemaps import ping_google
 from django.conf import settings
 from django.db.models.functions import Coalesce
 
@@ -152,11 +151,6 @@ class Region(DraftHistory):
 
     def save(self, *args, **kwargs):
         super(Region, self).save(*args, **kwargs)
-        if not settings.PRODUCTION:
-            try:
-                ping_google()
-            except Exception as e:
-                print(e)
 
     def __str__(self):
         return self.name
@@ -313,11 +307,6 @@ class DestinationDetails(DraftHistory):
 
     def save(self, *args, **kwargs):
         super(DestinationDetails, self).save(*args, **kwargs)
-        if not settings.PRODUCTION:
-            try:
-                ping_google()
-            except Exception as e:
-                print(e)
 
     class Meta:
         verbose_name_plural = 'Destination details'
@@ -465,11 +454,6 @@ class Tour(DraftHistory):
 
     def save(self, *args, **kwargs):
         super(Tour, self).save(*args, **kwargs)
-        if not settings.PRODUCTION:
-            try:
-                ping_google()
-            except Exception as e:
-                print(e)
 
     class Meta:
         ordering = [Coalesce('state__priority', 0).desc(), 'start_date', 'price']
@@ -587,11 +571,6 @@ class Article(DraftHistory):
 
     def save(self, *args, **kwargs):
         super(Article, self).save(*args, **kwargs)
-        if not settings.PRODUCTION:
-            try:
-                ping_google()
-            except Exception as e:
-                print(e)
 
     class Meta:
         ordering = [Coalesce('state__priority', 0).desc(), '-order', '-creation', 'title']
@@ -680,11 +659,6 @@ class Page(DraftHistory):
 
     def save(self, *args, **kwargs):
         super(Page, self).save(*args, **kwargs)
-        if not settings.PRODUCTION:
-            try:
-                ping_google()
-            except Exception as e:
-                print(e)
 
     @property
     def full_path(self):
@@ -841,11 +815,6 @@ class Settings(models.Model):
             Settings.objects.exclude(pk=self.pk).update(active=False)
         super(Settings, self).save(*args, **kwargs)
 
-        if not settings.PRODUCTION:
-            try:
-                ping_google()
-            except Exception as e:
-                print(e)
     @classmethod
     def load(cls) -> 'Settings':
         try:
