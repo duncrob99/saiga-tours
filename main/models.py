@@ -175,6 +175,7 @@ class Destination(DraftHistory):
     map_colour = ColorField(null=True, blank=True)
 
     tour_meta = models.TextField(null=True, blank=True, max_length=400)
+
     title_x = models.FloatField(null=True, blank=True)
     title_y = models.FloatField(null=True, blank=True)
     title_scale = models.FloatField(null=True, blank=True)
@@ -845,7 +846,6 @@ class Settings(models.Model):
                 ping_google()
             except Exception as e:
                 print(e)
-
     @classmethod
     def load(cls) -> 'Settings':
         try:
@@ -1076,10 +1076,17 @@ def chunked_list(lst, n):
 
 
 def purge_cloudflare_pages(paths):
+    if settings.NO_CACHE_INVALIDATION:
+        return
+
     if not settings.PRODUCTION or settings.CLOUDFLARE_API_TOKEN is None:
         return
 
     paths_per_call = 29 # Cloudflare will only purge 30 paths at a time, use 29 for off-by-one safety
+    if len(paths) > paths_per_call:
+        print("Chunking paths, as too many to invalidate at once")
+        print("Chunked paths: ", chunked_list(paths, paths_per_call))
+
     for paths_chunk in chunked_list(paths, paths_per_call):
 
         print(f'Invalidating {paths_chunk} on Cloudflare')
@@ -1123,6 +1130,7 @@ def invalidate_pages(pages_to_invalidate):
 @receiver(post_save)
 def invalidate_page_cache(sender, instance, **kwargs):
     if hasattr(instance, 'get_caches_to_invalidate'):
+        #print("Postsave cache invalidation from sender ", sender, ", and instance ", instance)
         pages_to_invalidate = instance.get_caches_to_invalidate(sender.objects.get(pk=instance.pk) if instance.pk else None)
         invalidate_pages(pages_to_invalidate)
 
