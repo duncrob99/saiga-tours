@@ -59,6 +59,6 @@ class CacheForUsers:
                 response['DB-cache-status'] = 'MISS'
         else:
             response = self.get_response(request)
-            response['DB-cache-status'] = 'NO-CACHE'
+            response['DB-cache-status'] = 'NO-CACHE' + (';is-not-get' if not is_get else '') + (';has-query' if not has_no_query_params else '') + (';authed' if not is_anonymous else '') + (';bypassed-url' if not not_bypassed_url else '') + (';nocache-env' if settings.NOCACHE else '')
 
         return response
