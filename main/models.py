@@ -27,6 +27,7 @@ from django.conf import settings
 from django.db.models.functions import Coalesce
 
 from .images import crop_to_ar, autorotate
+import job_queue.utils as queue
 
 import openai
 import hashlib
@@ -1099,9 +1100,10 @@ def invalidate_pages(pages_to_invalidate):
 @receiver(post_save)
 def invalidate_page_cache(sender, instance, **kwargs):
     if hasattr(instance, 'get_caches_to_invalidate'):
-        #print("Postsave cache invalidation from sender ", sender, ", and instance ", instance)
+        print("Postsave cache invalidation from sender ", sender, ", and instance ", instance)
         pages_to_invalidate = instance.get_caches_to_invalidate(sender.objects.get(pk=instance.pk) if instance.pk else None)
-        invalidate_pages(pages_to_invalidate)
+        #invalidate_pages(pages_to_invalidate)
+        queue.add_task("invalidate_pages", pages_to_invalidate)
 
 
 class Testimonial(models.Model):
