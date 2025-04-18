@@ -1,9 +1,9 @@
 import re
-from functools import wraps
-
 from bs4 import BeautifulSoup
+from typing import Any, Dict
+
 from django.conf import settings
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpRequest
 
 from main.models import PageCache
 
@@ -49,13 +49,16 @@ class CacheForUsers:
                     response = HttpResponse(cache.content)
                     # Delete duplicates other than the one we retrieved
                     PageCache.objects.filter(url=path).exclude(id=cache.id).delete()
+                response['DB-cache-status'] = 'HIT'
             except PageCache.DoesNotExist:
                 response = self.get_response(request)
                 if isinstance(response, HttpResponse) and response.status_code == 200 and response.get("Content-Type", "").startswith("text/html"):
                     # Minify HTML response
                     minified = minify_html(response.content)
                     PageCache.objects.create(url=path, content=minified)
+                response['DB-cache-status'] = 'MISS'
         else:
             response = self.get_response(request)
+            response['DB-cache-status'] = 'NO-CACHE' + (';is-not-get' if not is_get else '') + (';has-query' if not has_no_query_params else '') + (';authed' if not is_anonymous else '') + (';bypassed-url' if not not_bypassed_url else '') + (';nocache-env' if settings.NOCACHE else '')
 
         return response

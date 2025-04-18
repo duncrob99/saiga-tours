@@ -23,11 +23,11 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.functional import classproperty
 from simple_history.models import HistoricalRecords
-from django.contrib.sitemaps import ping_google
 from django.conf import settings
 from django.db.models.functions import Coalesce
 
 from .images import crop_to_ar, autorotate
+import job_queue.utils as queue
 
 import openai
 import hashlib
@@ -152,11 +152,6 @@ class Region(DraftHistory):
 
     def save(self, *args, **kwargs):
         super(Region, self).save(*args, **kwargs)
-        if not settings.PRODUCTION:
-            try:
-                ping_google()
-            except Exception as e:
-                print(e)
 
     def __str__(self):
         return self.name
@@ -175,6 +170,7 @@ class Destination(DraftHistory):
     map_colour = ColorField(null=True, blank=True)
 
     tour_meta = models.TextField(null=True, blank=True, max_length=400)
+
     title_x = models.FloatField(null=True, blank=True)
     title_y = models.FloatField(null=True, blank=True)
     title_scale = models.FloatField(null=True, blank=True)
@@ -312,11 +308,6 @@ class DestinationDetails(DraftHistory):
 
     def save(self, *args, **kwargs):
         super(DestinationDetails, self).save(*args, **kwargs)
-        if not settings.PRODUCTION:
-            try:
-                ping_google()
-            except Exception as e:
-                print(e)
 
     class Meta:
         verbose_name_plural = 'Destination details'
@@ -464,11 +455,6 @@ class Tour(DraftHistory):
 
     def save(self, *args, **kwargs):
         super(Tour, self).save(*args, **kwargs)
-        if not settings.PRODUCTION:
-            try:
-                ping_google()
-            except Exception as e:
-                print(e)
 
     class Meta:
         ordering = [Coalesce('state__priority', 0).desc(), 'start_date', 'price']
@@ -586,11 +572,6 @@ class Article(DraftHistory):
 
     def save(self, *args, **kwargs):
         super(Article, self).save(*args, **kwargs)
-        if not settings.PRODUCTION:
-            try:
-                ping_google()
-            except Exception as e:
-                print(e)
 
     class Meta:
         ordering = [Coalesce('state__priority', 0).desc(), '-order', '-creation', 'title']
@@ -679,11 +660,6 @@ class Page(DraftHistory):
 
     def save(self, *args, **kwargs):
         super(Page, self).save(*args, **kwargs)
-        if not settings.PRODUCTION:
-            try:
-                ping_google()
-            except Exception as e:
-                print(e)
 
     @property
     def full_path(self):
@@ -839,12 +815,6 @@ class Settings(models.Model):
         if self.active:
             Settings.objects.exclude(pk=self.pk).update(active=False)
         super(Settings, self).save(*args, **kwargs)
-
-        if not settings.PRODUCTION:
-            try:
-                ping_google()
-            except Exception as e:
-                print(e)
 
     @classmethod
     def load(cls) -> 'Settings':
@@ -1076,10 +1046,17 @@ def chunked_list(lst, n):
 
 
 def purge_cloudflare_pages(paths):
+    if settings.NO_CACHE_INVALIDATION:
+        return
+
     if not settings.PRODUCTION or settings.CLOUDFLARE_API_TOKEN is None:
         return
 
     paths_per_call = 29 # Cloudflare will only purge 30 paths at a time, use 29 for off-by-one safety
+    if len(paths) > paths_per_call:
+        print("Chunking paths, as too many to invalidate at once")
+        print("Chunked paths: ", chunked_list(paths, paths_per_call))
+
     for paths_chunk in chunked_list(paths, paths_per_call):
 
         print(f'Invalidating {paths_chunk} on Cloudflare')
@@ -1123,8 +1100,10 @@ def invalidate_pages(pages_to_invalidate):
 @receiver(post_save)
 def invalidate_page_cache(sender, instance, **kwargs):
     if hasattr(instance, 'get_caches_to_invalidate'):
+        print("Postsave cache invalidation from sender ", sender, ", and instance ", instance)
         pages_to_invalidate = instance.get_caches_to_invalidate(sender.objects.get(pk=instance.pk) if instance.pk else None)
-        invalidate_pages(pages_to_invalidate)
+        #invalidate_pages(pages_to_invalidate)
+        queue.add_task("invalidate_pages", pages_to_invalidate)
 
 
 class Testimonial(models.Model):

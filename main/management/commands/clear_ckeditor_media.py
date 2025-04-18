@@ -18,7 +18,6 @@ class Command(BaseCommand):
     verbosity = 1
 
     def add_arguments(self, parser):
-
         parser.add_argument('--noinput', '--no-input',
                             dest='interactive',
                             action='store_false',
@@ -69,7 +68,6 @@ class Command(BaseCommand):
         self.info('Total files will be removed: {}, clearing {}'.format(len(unused_media), bytes2human(tot_size)))
 
     def handle(self, *args, **options):
-
         if 'verbosity' in options:
             self.verbosity = options['verbosity']
 
