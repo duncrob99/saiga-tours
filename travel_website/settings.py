@@ -97,6 +97,7 @@ ALLOWED_HOSTS = ["coolwebsite.pythonanywhere.com", "127.0.0.1", "www.saigatours.
 INSTALLED_APPS = [
     'customers',
     'admin_interface',
+    'job_queue',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
