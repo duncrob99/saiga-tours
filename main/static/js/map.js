@@ -1501,6 +1501,8 @@ function resize_map_to_countries(destinations, width, height) {
 
 function resize_map_to_stops(stops, width, height) {
     let min_bbox = get_stops_bbox(stops);
+    if (min_bbox === undefined) return;
+
     resize_map_to_bbox(min_bbox, width, height);
 }
 
