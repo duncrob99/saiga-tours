@@ -349,3 +349,29 @@ function create_itinerary_template(input) {
         }
     })
 }
+
+const form = document.querySelector("#editor-form");
+form.addEventListener("submit", async ev => {
+    ev.preventDefault();
+    const formData = new FormData(form);
+    console.log("Sending form with data: ", formData);
+    show_spinner();
+
+    try {
+        const response = await fetch('', {
+            method: "POST",
+            body: formData,
+        });
+        console.log("Form submission response: ", response);
+        hide_spinner();
+        if (response.ok) {
+            show_message('Successfully saved, <a href="#" target="_blank" class="nice-link">check it\'s correct by clicking here to reload</a>', "info");
+        } else {
+            show_message(`Saving error (${response.status}): ${response.statusText}`, "danger");
+        }
+    } catch (e) {
+        console.error(e);
+        hide_spinner();
+        show_message(`Saving error: ${e}`, "danger");
+    }
+});

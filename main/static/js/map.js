@@ -743,8 +743,8 @@ function updatePath(stops) {
     let prestrength = [];
     let poststrength = [];
     for (let i = 0; i < stops.length; i++) {
-        x.push(stops[i].x);
-        y.push(stops[i].y);
+        x.push(stops[i].x ?? 0);
+        y.push(stops[i].y ?? 0);
         prestrength.push(stops[i].prestrength);
         poststrength.push(stops[i].poststrength);
     }

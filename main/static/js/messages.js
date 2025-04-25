@@ -11,6 +11,7 @@
 
         message_container.append(wrapper)
     }
+    window.show_message = alert;
 
 
     // Fetch messages from the server

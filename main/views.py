@@ -245,6 +245,7 @@ def navbar(request):
 
 
 # @cache_for_users
+@silk_profile(name="tour page")
 def tour(request, slug):
     tour_obj = get_object_or_404(Tour, slug=slug)
     assert_visible(request, tour_obj)
@@ -286,6 +287,7 @@ def tour(request, slug):
             stops_formset = stops_formset_factory(None, instance=tour_obj)
             itinerary_formset = itinerary_formset_factory(None, request.FILES or None,
                                                           instance=tour_obj)
+            return JsonResponse({"success": True})
         elif request.method == 'POST':
             print(form.errors)
 

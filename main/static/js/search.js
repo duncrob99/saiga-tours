@@ -176,7 +176,6 @@
     }
 
     function close_modal(el) {
-        console.log(modal_open);
         if (!modal_open[el.id]) return;
         el.classList.remove('show');
         clearTimeout(transition_timeout[el.id]);
