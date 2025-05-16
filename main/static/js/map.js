@@ -806,6 +806,8 @@ function updateStops(stops, editable) {
     document.querySelectorAll('.stop-pointer').forEach(el => el.remove());
     document.querySelectorAll('.pointer-text').forEach(el => el.remove());
     menu_instances.forEach(instance => instance.destroy());
+    document.querySelectorAll('.bootstrapMenu').forEach(el => el.remove());
+    menu_instances = [];
 
     // Create stop pointers
     for (let strIx in stops) {
@@ -871,7 +873,7 @@ function updateStops(stops, editable) {
                 .cy(stop.y)
                 .fill(stop.template ? 'green' : 'grey')
                 .addClass('stop-pointer')
-                .id(`pointer-${i}`);
+                .id(`pointer-${stop.form_ix}`);
 
             point_el = point_svg.node;
         }

@@ -125,6 +125,25 @@
     {% block extrahead %}
     {% endblock %}
 
+    <script
+      src="https://js.sentry-cdn.com/1f5ae5931ba8a0f23daeb6eb0ac4671e.min.js"
+      crossorigin="anonymous"
+    ></script>
+    <script>
+      console.log("Loading sentry");
+      Sentry.onLoad(function() {
+        Sentry.init({
+            // You can add any additional configuration here
+          integrations: [
+            Sentry.replayIntegration(),
+          ],
+          // Session Replay
+          replaysSessionSampleRate: 0.1, // This sets the sample rate at 10%. You may want to change it to 100% while in development and then sample at a lower rate in production.
+          replaysOnErrorSampleRate: 1.0, // If you're not already sampling the entire session, change the sample rate to 100% when sampling sessions where errors occur.
+          });
+    
+      });
+    </script>
     <script defer src="{% static 'js/main.js' %}"></script>
     <script defer src="{% static 'js/messages.js' %}"></script>
     <script defer src="{% static 'js/spinner.js' %}"></script>
