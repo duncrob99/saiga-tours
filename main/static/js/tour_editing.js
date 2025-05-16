@@ -353,9 +353,11 @@ function create_itinerary_template(input) {
 const form = document.querySelector("#editor-form");
 form.addEventListener("submit", async ev => {
     ev.preventDefault();
+    deactivateEditor();
+    editing.checked = false;
+    show_spinner();
     const formData = new FormData(form);
     console.log("Sending form with data: ", formData);
-    show_spinner();
 
     try {
         const response = await fetch('', {
