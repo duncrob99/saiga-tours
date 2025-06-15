@@ -50,10 +50,15 @@
             return element;
         }
     }
+
+    let fetch_controller = new AbortController();
     
     let last_search_time; // Used to prevent search spamming
     let last_search;
     async function search() {
+        console.log("controller state: ", fetch_controller.signal);
+        fetch_controller.abort();
+        fetch_controller = new AbortController();
         try {
         const time_since_last_search = Date.now() - last_search_time;
         if (time_since_last_search < 500) return;
@@ -69,7 +74,7 @@
         const search_string = filter_string ? `/api/search?q=${query}&${filter_string}` : `/api/search?q=${query}`;
         console.log(search_string);
         last_search = search_string;
-        const response = await fetch(search_string);
+        const response = await fetch(search_string, {signal: fetch_controller.signal});
 
         if (!response.ok) {
             throw new Error(`Response status: ${response.status}`);
@@ -89,9 +94,15 @@
             search_results.insertAdjacentHTML("beforeend", element);
         }
         search_input.classList.remove("searching");
-        } catch {
+        } catch (error) {
+            if (error.name === "AbortError") {
+                console.log("aborting search");
+                return;
+            }
             search_input.classList.remove("searching");
+            search_input.classList.remove("failed");
             search_input.classList.add("failed");
+            console.error(error);
         }
     }
     
