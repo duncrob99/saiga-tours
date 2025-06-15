@@ -258,15 +258,15 @@ body * {
     left: 50vw;
     transform: translate(-50%, -50%);
     top: 50vh;
-    height: 80px;
-    width: 80px;
+    height: var(--size, 80px);
+    width: var(--size, 80px);
 }
 
 .spinner .lds-ripple {
   display: inline-block;
   position: relative;
-  width: 80px;
-  height: 80px;
+  width: var(--size, 80px);
+  height: var(--size, 80px);
 }
 .spinner .lds-ripple div {
   position: absolute;
@@ -280,8 +280,8 @@ body * {
 }
 @keyframes lds-ripple {
   0% {
-    top: 36px;
-    left: 36px;
+    top: calc(var(--size, 80px) / 2);
+    left: calc(var(--size, 80px) / 2);
     width: 0;
     height: 0;
     opacity: 1;
@@ -289,8 +289,8 @@ body * {
   100% {
     top: 0;
     left: 0;
-    width: 72px;
-    height: 72px;
+    width: var(--size, 80px);
+    height: var(--size, 80px);
     opacity: 0;
   }
 }

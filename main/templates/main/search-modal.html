@@ -3,6 +3,11 @@
 <dialog id="search-modal">
 <div class="header">
     <input type="text" placeholder="Search" autofocus>
+    <div class="searching-indicator">
+    <div class="spinner">
+        <div class="lds-ripple"><div></div><div></div></div>
+    </div>
+    </div>
     <div class="buttons">
         {% if settings.ai_chat_active == 'A' or settings.ai_chat_active == 'S' and request.user.is_staff %}
         <button class="ai-button" type="button" data-state="initial">
@@ -59,11 +64,13 @@
     <div class="results"></div>
 </div>
 <div class="result-templates">
-    <div class="result card" data-result-type="article">
+    <template data-result-type="article">
+    <div class="result card article">
         <a href="{url}">
         </a>
         <div class="image-wrapper">
-            <img src="{image}" alt="Image alt text">
+            <img src="{thumb_image}" class="thumbnail" alt="Image thumbnail">
+            <img src="{image}" alt="Image alt text" onload="mark_loaded(this)">
         </div>
         <div class="breadcrumb">
             {article_type}
@@ -73,11 +80,14 @@
             <p class="description">{description}</p>
         </div>
     </div>
-    <div data-result-type="page">
+    </template>
+    <template data-result-type="page">
+    <div class="result card page">
         <a href="{url}">
         </a>
         <div class="image-wrapper">
-            <img src="{image}" alt="Image alt text">
+            <img src="{thumb_image}" class="thumbnail" alt="Image thumbnail">
+            <img src="{image}" alt="Image alt text" onload="mark_loaded(this)">
         </div>
         <div class="breadcrumb">
             {breadcrumb}
@@ -87,11 +97,14 @@
             <p class="description">{description}</p>
         </div>
     </div>
-    <div data-result-type="destinationdetails">
+    </template>
+    <template data-result-type="destinationdetails">
+    <div class="result card destinationdetails">
         <a href="{url}">
         </a>
         <div class="image-wrapper">
-            <img src="{image}" alt="Image alt text">
+            <img src="{thumb_image}" class="thumbnail" alt="Image thumbnail">
+            <img src="{image}" alt="Image alt text" onload="mark_loaded(this)">
         </div>
         <div class="breadcrumb">
             {detail_type} > {region} > {destination}
@@ -100,11 +113,14 @@
             <h3 class="title">{title}</h3>
         </div>
     </div>
-    <div data-result-type="tour">
+    </template>
+    <template data-result-type="tour">
+    <div class="tour" class="result card tour">
         <a href="{url}">
         </a>
         <div class="image-wrapper">
-            <img src="{image}" alt="Image alt text">
+            <img src="{thumb_image}" class="thumbnail" alt="Image thumbnail">
+            <img src="{image}" alt="Image alt text" onload="mark_loaded(this)">
         </div>
         <div class="breadcrumb">
             Tours
@@ -114,5 +130,6 @@
             <p class="description">{description}</p>
         </div>
     </div>
+    </template>
 </div>
 </dialog>

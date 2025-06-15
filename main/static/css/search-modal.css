@@ -96,6 +96,32 @@ dialog .header button.close {
     border-color: var(--accent-foreground);
 }
 
+#search-modal:not(:has(input.searching)) .searching-indicator {
+    opacity: 0;
+    transition: opacity 0.5s;
+}
+
+#search-modal input.failed {
+    border-bottom: 5px solid red;
+}
+
+#search-modal .searching-indicator {
+    position: relative;
+    --size: 50px;
+    height: var(--size);
+    transition: opacity 2s;
+}
+
+#search-modal .spinner .lds-ripple div{
+    border: 4px solid black;
+}
+
+#search-modal .spinner{
+    position: absolute;
+    inset: 0;
+    transform: translateX(calc(-100% - 1rem - (70px - var(--size, 80px)) / 2));
+}
+
 #search-modal .result-templates {
     display: none;
 }
@@ -108,7 +134,7 @@ dialog .header button.close {
 #search-modal .results {
     display: grid;
     gap: 1rem;
-    padding: 1rem;
+    padding-block: 1rem;
     grid-template-columns: repeat(auto-fill, minmax(min(20rem,100%), 1fr));
 }
 
@@ -131,10 +157,27 @@ dialog .header button.close {
     overflow: hidden;
     border-radius: 0.5rem;
     margin-bottom: 1rem;
+    aspect-ratio: 3/2;
+    background: lightgrey;
+    position: relative;
 }
 
 #search-modal .results img {
-    transition: transform 0.3s ease-in-out;
+    transition: transform 0.3s ease-in-out, opacity 1s;
+    background: lightgrey;
+    position: absolute;
+}
+
+#search-modal .results img.thumbnail {
+    filter: blur(10px);
+}
+
+#search-modal .results img:not(.thumbnail) {
+    opacity: 0;
+}
+
+#search-modal .results img:not(.thumbnail).loaded {
+    opacity: 1;
 }
 
 #search-modal .results > *:hover img {

@@ -439,7 +439,7 @@
             {% if settings.ai_search_active == 'A' or settings.ai_search_active == 'S' and request.user.is_staff %}
               <div class="login-btns">
               <button class="btn btn-outline-primary toggle-search" type="button">
-                  <i class="bi bi-search"></i>
+                  Search <i class="bi bi-search"></i>
               </button>
               </div>
               {% endif %}
@@ -486,7 +486,7 @@
                 <div class="login-btns">
             {% if settings.ai_search_active == 'A' or settings.ai_search_active == 'S' and request.user.is_staff %}
               <button class="btn btn-outline-primary toggle-search" type="button">
-                  <i class="bi bi-search"></i>
+                  Search <i class="bi bi-search"></i>
               </button>
             {% endif %}
                 {% if admin_subdomain %}

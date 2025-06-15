@@ -16,22 +16,34 @@
     const filters = filter_dialog.querySelector('.body');
     const type_checkboxes = filters.querySelectorAll('#filter-type-checkboxes input');
 
+    window.mark_loaded = (el) => el.classList.add("loaded");
+
+    function preload_thumbs(results) {
+        results.map(res => res.metadata.image.replace(/^\/media\//, "/resized-image/") + "/18x12/")
+            .forEach(preloadImage);
+    }
+
     function generate_result(result) {
         const template = search_result_templates.querySelector(`[data-result-type="${result.type}"]`);
         if (template) {
-            const innerHTML = template.innerHTML.replace(/{([A-z]+)}/g, (_, key) => {
+            const template_content = template.innerHTML.replace(/{([A-z]+)}/g, (_, key) => {
                 if (key === 'date') {
                     return new Date(result.date).toLocaleDateString();
                 } else if (key === 'detail_type') {
                     return result.metadata.type === 'g' ? 'Guides' : 'Tours';
                 } else if (key === 'article_type') {
                     return result.metadata.type === 'a' ? 'Article' : 'News';
+                } else if (key === 'thumb_image') {
+                    return result.metadata.image.replace(/^\/media\//, "/resized-image/") + "/18x12/";
+                } else if (key === 'image') {
+                    return result.metadata.image.replace(/^\/media\//, "/resized-image/") + "/300x200/";
                 }
                 return result.metadata[key];
             });
-            const element = document.createElement('div');
-            element.innerHTML = innerHTML;
-            return element;
+            //const element = document.createElement('div');
+            const el = document.createElement('div');
+            el.innerHTML = template_content;
+            return template_content;
         } else {
             const element = document.createElement('div');
             element.outerHTML = `<div class="result unknown-type"><div class="result-title">${result.title}</div><div class="result-description">${result.description}</div></div>`;
@@ -40,7 +52,9 @@
     }
     
     let last_search_time; // Used to prevent search spamming
+    let last_search;
     async function search() {
+        try {
         const time_since_last_search = Date.now() - last_search_time;
         if (time_since_last_search < 500) return;
         last_search_time = Date.now();
@@ -49,26 +63,45 @@
         if (query.length < 3) return;
 
         console.log(`Searching for ${query}`);
+        search_input.classList.add("searching");
 
         const filter_string = get_filter_string();
         const search_string = filter_string ? `/api/search?q=${query}&${filter_string}` : `/api/search?q=${query}`;
         console.log(search_string);
-        const response = await fetch(search_string)
+        last_search = search_string;
+        const response = await fetch(search_string);
+
+        if (!response.ok) {
+            throw new Error(`Response status: ${response.status}`);
+        }
+
         const results = (await response.json()).results;
         window.results = results;
 
         console.log(results);
 
+        if (last_search !== search_string) return;
         search_results.innerHTML = '';
+        preload_thumbs(results);
         for (const result of results) {
             const element = generate_result(result);
-            search_results.appendChild(element);
+            //search_results.appendChild(element);
+            search_results.insertAdjacentHTML("beforeend", element);
+        }
+        search_input.classList.remove("searching");
+        } catch {
+            search_input.classList.remove("searching");
+            search_input.classList.add("failed");
         }
     }
     
     search_input.addEventListener('input', () => {
-        const time_since_last_search = Date.now() - last_search_time;
-        setTimeout(search, Math.max(0, 500 - time_since_last_search + 1));
+        const cur_input = search_input.value;
+        setTimeout(() => {
+            if (cur_input !== search_input.value) return;
+            const time_since_last_search = Date.now() - last_search_time;
+            setTimeout(search, Math.max(0, 500 - time_since_last_search + 1));
+        }, 500);
     });
 
     let last_ai_search_time; // Used to prevent search spamming
