@@ -66,11 +66,11 @@
 <div class="result-templates">
     <template data-result-type="article">
     <div class="result card article">
-        <a href="{url}">
+        <a template-href="{url}">
         </a>
         <div class="image-wrapper">
-            <img src="{thumb_image}" class="thumbnail" alt="Image thumbnail">
-            <img src="{image}" alt="Image alt text" onload="mark_loaded(this)">
+            <img template-src="{thumb_image}" class="thumbnail" alt="Image thumbnail">
+            <img template-src="{image}" alt="Image alt text" onload="mark_loaded(this)">
         </div>
         <div class="breadcrumb">
             {article_type}
@@ -83,11 +83,11 @@
     </template>
     <template data-result-type="page">
     <div class="result card page">
-        <a href="{url}">
+        <a template-href="{url}">
         </a>
         <div class="image-wrapper">
-            <img src="{thumb_image}" class="thumbnail" alt="Image thumbnail">
-            <img src="{image}" alt="Image alt text" onload="mark_loaded(this)">
+            <img template-src="{thumb_image}" class="thumbnail" alt="Image thumbnail">
+            <img template-src="{image}" alt="Image alt text" onload="mark_loaded(this)">
         </div>
         <div class="breadcrumb">
             {breadcrumb}
@@ -100,11 +100,11 @@
     </template>
     <template data-result-type="destinationdetails">
     <div class="result card destinationdetails">
-        <a href="{url}">
+        <a template-href="{url}">
         </a>
         <div class="image-wrapper">
-            <img src="{thumb_image}" class="thumbnail" alt="Image thumbnail">
-            <img src="{image}" alt="Image alt text" onload="mark_loaded(this)">
+            <img template-src="{thumb_image}" class="thumbnail" alt="Image thumbnail">
+            <img template-src="{image}" alt="Image alt text" onload="mark_loaded(this)">
         </div>
         <div class="breadcrumb">
             {detail_type} > {region} > {destination}
@@ -116,11 +116,11 @@
     </template>
     <template data-result-type="tour">
     <div class="tour" class="result card tour">
-        <a href="{url}">
+        <a template-href="{url}">
         </a>
         <div class="image-wrapper">
-            <img src="{thumb_image}" class="thumbnail" alt="Image thumbnail">
-            <img src="{image}" alt="Image alt text" onload="mark_loaded(this)">
+            <img template-src="{thumb_image}" class="thumbnail" alt="Image thumbnail">
+            <img template-src="{image}" alt="Image alt text" onload="mark_loaded(this)">
         </div>
         <div class="breadcrumb">
             Tours

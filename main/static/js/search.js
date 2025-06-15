@@ -26,20 +26,23 @@
     function generate_result(result) {
         const template = search_result_templates.querySelector(`[data-result-type="${result.type}"]`);
         if (template) {
-            const template_content = template.innerHTML.replace(/{([A-z]+)}/g, (_, key) => {
-                if (key === 'date') {
-                    return new Date(result.date).toLocaleDateString();
-                } else if (key === 'detail_type') {
-                    return result.metadata.type === 'g' ? 'Guides' : 'Tours';
-                } else if (key === 'article_type') {
-                    return result.metadata.type === 'a' ? 'Article' : 'News';
-                } else if (key === 'thumb_image') {
-                    return result.metadata.image.replace(/^\/media\//, "/resized-image/") + "/18x12/";
-                } else if (key === 'image') {
-                    return result.metadata.image.replace(/^\/media\//, "/resized-image/") + "/300x200/";
-                }
-                return result.metadata[key];
-            });
+            const template_content = template.innerHTML
+                .replace(/ template-(.+?)="(.*?)"/g, ' $1="$2"')
+                .replace(/{([A-z]+)}/g, (_, key) => {
+                    if (key === 'date') {
+                        return new Date(result.date).toLocaleDateString();
+                    } else if (key === 'detail_type') {
+                        return result.metadata.type === 'g' ? 'Guides' : 'Tours';
+                    } else if (key === 'article_type') {
+                        return result.metadata.type === 'a' ? 'Article' : 'News';
+                    } else if (key === 'thumb_image') {
+                        return result.metadata.image.replace(/^\/media\//, "/resized-image/") + "/18x12/";
+                    } else if (key === 'image') {
+                        return result.metadata.image.replace(/^\/media\//, "/resized-image/") + "/300x200/";
+                    }
+                    return result.metadata[key];
+                });
+
             //const element = document.createElement('div');
             const el = document.createElement('div');
             el.innerHTML = template_content;
