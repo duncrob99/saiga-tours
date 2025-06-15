@@ -2,7 +2,7 @@ import calendar
 import math
 from os import path
 
-from PIL import Image
+from PIL import Image, UnidentifiedImageError
 from bs4 import BeautifulSoup as bs
 from io import BytesIO
 import base64
@@ -173,6 +173,9 @@ def downscaled_image(context, img: ImageField, width: int = 10):
     except FileNotFoundError:
         print('File not found:', img)
         return ''
+    except UnidentifiedImageError:
+        return ''
+
     image = autorotate(raw_image)
 
     cropped_image = crop_to_dims(image, width, math.ceil(width * image.height / image.width))

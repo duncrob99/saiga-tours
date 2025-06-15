@@ -1,4 +1,5 @@
 import enum
+from PIL import UnidentifiedImageError
 import emoji
 import smtplib
 from dataclasses import dataclass
@@ -671,10 +672,13 @@ def country_tours_info(request, region_slug, country_slug, detail_slug):
 
 def crop_image(request, filename: str, width: int, height: int):
     removed_prefix = filename
+    full_filename = path.join(settings.MEDIA_ROOT, removed_prefix)
     try:
-        raw_image = Image.open(path.join(settings.MEDIA_ROOT, removed_prefix), mode='r')
+        raw_image = Image.open(full_filename, mode='r')
     except FileNotFoundError:
         raise Http404
+    except UnidentifiedImageError:
+        return FileResponse(open(full_filename, "rb"))
     image = autorotate(raw_image)
 
     cropped_image = crop_to_dims(image, width, height)
