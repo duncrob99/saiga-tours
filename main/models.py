@@ -306,9 +306,6 @@ class DestinationDetails(DraftHistory):
     def get_caches_to_invalidate(self, previous):
         return 'all'
 
-    def save(self, *args, **kwargs):
-        super(DestinationDetails, self).save(*args, **kwargs)
-
     class Meta:
         verbose_name_plural = 'Destination details'
         unique_together = [['destination', 'order', 'type'],
