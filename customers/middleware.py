@@ -1,6 +1,9 @@
 from django.shortcuts import redirect
 from django.contrib import messages
+from django.urls import resolve, reverse
 from django.utils.html import format_html
+
+from main.models import Link
 
 class Enforce2FAForAdminsMiddleware:
     def __init__(self, get_response):
@@ -16,8 +19,22 @@ class Enforce2FAForAdminsMiddleware:
             # for message in messages.get_messages(request):
                 # if message.message == message_text:
                     # break
-            if not any([message.message == message_text for message in messages.get_messages(request)]):
+            all_messages = messages.get_messages(request)
+            if not any([message.message == message_text for message in all_messages]):
                 messages.warning(request, message_text, extra_tags='safe')
+            all_messages.used = False
+
+        if request.user.is_staff:
+            num_broken_links = Link.objects.filter(broken=True).count()
+            hidden_paths = ["/api", "/admin/jsi18n", "/media", "/stats", "/resized-image", "/messages", "/static", "/favicon.ico"]
+            if num_broken_links > 0 and not resolve(request.path).view_name.startswith("admin:main_link") and not any([request.path.startswith(path) for path in hidden_paths]):
+                print(resolve(request.path).view_name)
+                message_text = format_html(f"There are {num_broken_links} broken links. <a data-message-origin-path='{request.path}' class='nice-link' href='{reverse('admin:main_link_changelist')}'>See them here</a>")
+
+                all_messages = messages.get_messages(request)
+                if not any([message.message == message_text for message in all_messages]):
+                    messages.warning(request, message_text, extra_tags='safe')
+                all_messages.used = False
 
         response = self.get_response(request)
         return response

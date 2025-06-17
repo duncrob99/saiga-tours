@@ -48,6 +48,10 @@ urlpatterns = [
 
     path('api/search/', views.search, name='search'),
     path('api/ai_answer/', views.ai_answer, name='answer'),
+    path('api/reset_links/', views.reset_broken_links, name='reset_links'),
+    path('api/link_status/', views.get_link_check_status, name='link_status'),
+    path('api/check_links/', views.recheck_links, name='check_links'),
+    path('api/check_broken_links/', views.recheck_broken_links, name='check_broken_links'),
 
     path('<path:path>/', views.page, name='page')
 ]

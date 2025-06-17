@@ -1,7 +1,9 @@
 import json
+import re
 from datetime import timedelta
 from io import BytesIO
 from typing import Tuple, Optional
+from django.db.models.constraints import UniqueConstraint
 from markdownify import markdownify
 
 import requests
@@ -25,6 +27,7 @@ from django.utils.functional import classproperty
 from simple_history.models import HistoricalRecords
 from django.conf import settings
 from django.db.models.functions import Coalesce
+from django.apps import apps
 
 from .images import crop_to_ar, autorotate
 import job_queue.utils as queue
@@ -1100,7 +1103,7 @@ def invalidate_page_cache(sender, instance, **kwargs):
         print("Postsave cache invalidation from sender ", sender, ", and instance ", instance)
         pages_to_invalidate = instance.get_caches_to_invalidate(sender.objects.get(pk=instance.pk) if instance.pk else None)
         #invalidate_pages(pages_to_invalidate)
-        queue.add_task("invalidate_pages", pages_to_invalidate)
+        queue.add_task(invalidate_pages, pages_to_invalidate)
 
 
 class Testimonial(models.Model):
@@ -1119,7 +1122,7 @@ class Testimonial(models.Model):
         return cls.objects.filter(approved=True)
 
     def save(self, *args, **kwargs):
-        if not self.id:
+        if not self.pk:
             self.added = timezone.now()
         super().save(*args, **kwargs)
 
@@ -1132,3 +1135,123 @@ class Testimonial(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Link(models.Model):
+    url = models.URLField(primary_key=True)
+    broken = models.BooleanField(null=True, blank=True)
+    last_checked = models.DateTimeField(null=True, blank=True)
+    error = models.CharField(max_length = 200, null=True, blank=True)
+
+    @property
+    def full_url(self) -> str:
+        if str(self.url).startswith("/"):
+            return f"https://www.saigatours.com{self.url}"
+        else:
+            return self.url
+
+    def check_broken(self):
+        if self.url.startswith("#"):
+            self.broken = False
+        else:
+            try:
+                headers = requests.head(self.full_url, allow_redirects=True)
+                self.broken = not headers.ok
+                if not headers.ok:
+                    self.error = headers.status_code
+            except requests.exceptions.InvalidSchema:
+                self.broken = False
+                self.error = "InvalidSchema"
+            except requests.exceptions.SSLError:
+                self.broken = True
+                self.error = "SSLError"
+            except requests.exceptions.ConnectionError:
+                return
+
+        self.last_checked = timezone.now()
+        self.save()
+        print(self.url, self.broken, self.last_checked)
+
+
+class LinkLocation(models.Model):
+    class Types(models.TextChoices):
+        TEXT = "txt"
+        IMAGE = "img"
+
+    link = models.ForeignKey(Link, on_delete=models.CASCADE, null=True, related_name='locations')
+    model = models.CharField(max_length=200)
+    instance = models.CharField(max_length = 200)
+    field = models.CharField(max_length = 200)
+    type = models.CharField(max_length=3, choices=Types.choices, default=Types.TEXT)
+
+    class Meta:
+        constraints = [
+            UniqueConstraint(fields=["link", "instance", "field", "type"], name="unique_link_at_location"),
+        ]
+
+
+@receiver(post_save)
+def queue_link_registration(sender, instance, **_):
+    normal_model = sender.__module__ == "main.models" and not sender.__name__.startswith("Historical")
+    has_rich_text = any([field for field in sender._meta.get_fields() if field.__class__.__name__ == "RichTextUploadingField"])
+    if not (normal_model and has_rich_text):
+        return
+
+    queue.add_task(register_links, sender.__name__, instance.pk)
+
+def register_links(model_name: str, instance_pk: str) -> None:
+    sender = globals()[model_name]
+    print(model_name, instance_pk, sender)
+    instance = sender.objects.get(pk=instance_pk)
+    rich_text_fields = [field for field in sender._meta.get_fields() if field.__class__.__name__ == "RichTextUploadingField"]
+
+    for field in rich_text_fields:
+        field_name = field.name
+        content = getattr(instance, field.name)
+        text_links = re.findall('href="(.+?)"', content or "")
+        image_links = re.findall('src="(.+?)"', content or "")
+
+        #existing_links = Link.objects.filter(Q(type=Link.Types.TEXT, url__in=text_links) | Q(type=Link.Types.IMAGE, url__in=image_links), model=model_name, instance=instance_pk, field=field_name).values("url", "type")
+
+        removed_links = LinkLocation.objects.filter(Q(type=LinkLocation.Types.TEXT) & ~Q(link__url__in=text_links) | Q(type=LinkLocation.Types.IMAGE) & ~Q(link__url__in=image_links), model=model_name, instance=instance_pk, field=field_name)
+        removed_links.delete()
+
+        Link.objects.bulk_create(
+            [
+                Link(url=link)
+                for link in text_links + image_links
+            ],
+            ignore_conflicts=True
+        )
+        LinkLocation.objects.bulk_create(
+            [
+                LinkLocation(link=Link(url=link), model=model_name, instance=instance_pk, field=field_name, type=LinkLocation.Types.TEXT)
+                for link in text_links
+            ] + [
+                LinkLocation(link=Link(url=link), model=model_name, instance=instance_pk, field=field_name, type=LinkLocation.Types.IMAGE)
+                for link in image_links
+            ],
+            ignore_conflicts=True
+        )
+
+
+def register_all_links():
+    Link.objects.all().delete()
+    LinkLocation.objects.all().delete()
+    all_models = filter(lambda model: not model.__name__.startswith("Historical"), apps.get_app_config('main').get_models())
+    models_with_rich_content = filter(lambda model: any([field.__class__.__name__ == "RichTextUploadingField" for field in model._meta.get_fields()]), all_models)
+    for model in models_with_rich_content:
+        pks = map(lambda pk: pk["pk"], model.objects.all().values('pk'))
+        for pk in pks:
+            queue.add_task(register_links, model.__name__, pk)
+
+def check_links(batch_size=10):
+    unchecked = Link.objects.filter(broken=None)[:batch_size]
+    for link in unchecked:
+        link.check_broken()
+
+    if unchecked.count() < batch_size:
+        oldest = Link.objects.filter(last_checked__lte=timezone.now() - timedelta(days=7))[:batch_size]
+        for link in oldest:
+            link.check_broken()
+

@@ -5,6 +5,7 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import ngettext
 from simple_history.admin import SimpleHistoryAdmin
 
+import main.models
 from .models import *
 
 
@@ -154,6 +155,26 @@ class StopAdmin(admin.ModelAdmin):
     list_filter = ('tour', 'template', 'day', 'marked')
 
 
+class LinkAdmin(admin.ModelAdmin):
+    list_display = ('url', 'contained_models', 'broken', 'error')
+    list_filter = ('broken',)
+    search_fields = ('url',)
+
+    @admin.action
+    def check_all_links(self, request, queryset):
+        register_all_links()
+
+    def contained_models(self, obj):
+        result = ""
+        for loc in obj.locations.all():
+            model_instance = getattr(main.models, loc.model)
+            info = (model_instance._meta.app_label, model_instance._meta.model_name)
+            instance = model_instance.objects.get(pk=loc.instance)
+            admin_url = reverse('admin:%s_%s_change' % info, args=(instance.pk,))
+            result += f"<a href='{admin_url}'>{model_instance._meta.model_name}: {instance}</a>"
+        return mark_safe(result)
+
+
 # Register your models here.
 admin.site.register(Destination, DestinationAdmin)
 admin.site.register(DestinationDetails, DestinationDetailsAdmin)
@@ -175,3 +196,4 @@ admin.site.register(Author, DiffHistoryAdmin)
 admin.site.register(HightlightBox, DiffHistoryAdmin)
 admin.site.register(FileUpload, FileUploadAdmin)
 admin.site.register(Testimonial, TestimonialAdmin)
+admin.site.register(Link, LinkAdmin)

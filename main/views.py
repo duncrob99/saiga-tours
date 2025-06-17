@@ -35,6 +35,7 @@ from .models import *
 from .images import crop_to_dims, get_image_format
 from .widgets import CountrySelectWidget
 
+from job_queue.utils import add_task
 
 import torch
 torch.set_num_threads(1)
@@ -1126,4 +1127,38 @@ def ai_answer(request):
 
     print(chat_completion)
     return JsonResponse({'answer': chat_completion, 'success': True})
+
+
+def reset_broken_links(request):
+    from job_queue.models import Task
+    Task.objects.filter(job="main.models.register_links").delete()
+    add_task(register_all_links)
+    messages.add_message(request, messages.SUCCESS, 'All links are being rechecked now')
+    return redirect('admin:main_link_changelist')
+
+
+def get_link_check_status(request):
+    from job_queue.models import Task
+    latest_reset = Task.objects.filter(job="main.models.register_all_links").latest("started").started
+    objects_to_check = Task.objects.filter(job="main.models.register_links", completed__isnull=True, created__gte=latest_reset).count()
+    checked_objects = Task.objects.filter(job="main.models.register_links", completed__isnull=False, created__gte=latest_reset).count()
+    links_to_check = Link.objects.filter(broken__isnull=True).count()
+    links_checked = Link.objects.filter(broken__isnull=False).count()
+    return JsonResponse({
+        "latest_reset": latest_reset,
+        "objects_to_check": objects_to_check,
+        "checked_objects": checked_objects,
+        "links_to_check": links_to_check,
+        "links_checked": links_checked,
+    })
+
+
+def recheck_links(request):
+    Link.objects.all().update(broken=None, last_checked=None, error=None)
+    return redirect('admin:main_link_changelist')
+
+
+def recheck_broken_links(request):
+    Link.objects.filter(broken=True).update(broken=None, last_checked=None, error=None)
+    return redirect('admin:main_link_changelist')
 

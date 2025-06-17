@@ -1,0 +1,84 @@
+{% load i18n static %}
+{% if cl.search_fields %}
+<div id="toolbar">
+<h2 id="changelist-search-form" class="visually-hidden">{% blocktranslate with name=cl.opts.verbose_name_plural %}Search {{ name }}{% endblocktranslate %}</h2>
+<form id="changelist-search" method="get" role="search" aria-labelledby="changelist-search-form">
+<div><!-- DIV needed for valid HTML -->
+<label for="searchbar"><img src="{% static "admin/img/search.svg" %}" alt="Search"></label>
+<input type="text" size="40" name="{{ search_var }}" value="{{ cl.query }}" id="searchbar"{% if cl.search_help_text %} aria-describedby="searchbar_helptext"{% endif %}>
+<input type="submit" value="{% translate 'Search' %}">
+{% if show_result_count %}
+    <span class="small quiet">{% blocktranslate count counter=cl.result_count %}{{ counter }} result{% plural %}{{ counter }} results{% endblocktranslate %} (<a href="?{% if cl.is_popup %}{{ is_popup_var }}=1{% if cl.add_facets %}&{% endif %}{% endif %}{% if cl.add_facets %}{{ is_facets_var }}{% endif %}">{% if cl.show_full_result_count %}{% blocktranslate with full_result_count=cl.full_result_count %}{{ full_result_count }} total{% endblocktranslate %}{% else %}{% translate "Show all" %}{% endif %}</a>)</span>
+{% endif %}
+{% for pair in cl.params.items %}
+    {% if pair.0 != search_var %}<input type="hidden" name="{{ pair.0 }}" value="{{ pair.1 }}">{% endif %}
+{% endfor %}
+</div>
+{% if cl.search_help_text %}
+<br class="clear">
+<div class="help" id="searchbar_helptext">{{ cl.search_help_text }}</div>
+{% endif %}
+</form>
+<div class="overall-actions">
+	<a href="{% url 'reset_links' %}">Rescan for links</a>
+	<a href="{% url 'check_links' %}">Recheck all links</a>
+	<a href="{% url 'check_broken_links' %}">Recheck all broken links</a>
+</div>
+<div class="link-check-status">
+	<div class="progess-container finding_links">
+		<label>Finding links</label>
+		<progress class="finding_links"></progress>
+		<span class="progress-label"></span>
+	</div>
+	<div class="progess-container checking_links">
+		<label>Checking links</label>
+		<progress class="checking_links"></progress>
+		<span class="progress-label"></span>
+	</div>
+</div>
+	<script>
+	async function updateProgress() {
+		const resp = await fetch("{% url 'link_status' %}");
+		const state = await resp.json();
+		console.log(state);
+
+		const finding_links = state.checked_objects / (state.checked_objects + state.objects_to_check);
+		if (finding_links > 0) document.querySelector("div.link-check-status progress.finding_links").setAttribute("value", finding_links);
+		document.querySelector("div.link-check-status .finding_links .progress-label").innerText = `${state.checked_objects} / ${state.checked_objects + state.objects_to_check}`;
+		const checking_links = state.links_checked / (state.links_checked + state.links_to_check);
+		document.querySelector("div.link-check-status progress.checking_links").setAttribute("value", checking_links);
+		document.querySelector("div.link-check-status .checking_links .progress-label").innerText = `${state.links_checked} / ${state.links_checked + state.links_to_check}`;
+	}
+
+	window.setInterval(updateProgress, 1000)
+	</script>
+<style>
+	#toolbar .overall-actions {
+		padding-block: 0.5rem;
+		display: flex;
+		gap: 0.5rem;
+	}
+
+	#toolbar .overall-actions a {
+		border: 1px solid var(--border-color);
+		font-size: 0.8125rem;
+		padding: 4px 8px;
+		margin: 0;
+		vertical-align: middle;
+		background: var(--body-bg);
+		box-shadow: 0 -15px 20px -10px rgba(0, 0, 0, 0.15) inset;
+		cursor: pointer;
+		color: var(--body-fg);
+		border-radius: 4px;
+	}
+
+	#toolbar .overall-actions a:focus, #toolbar .overall-actions a:hover {
+		border-color: var(--body-quiet-color);
+	}
+
+	td.field-contained_models a {
+		display: block;
+	}
+</style>
+</div>
+{% endif %}
