@@ -141,6 +141,7 @@ img.saiga-border {
     border-color: var(--accent-foreground);
     border-width: 7px;
     border-style: solid;
+    object-fit: cover !important;
 }
 
 img.angle-left {
