@@ -17,13 +17,19 @@ class Command(BaseCommand):
                 run_regular_tasks()
                 continue
 
-            split = task.job.split(".")
-            module = __import__(split[0])
-            fn = reduce(getattr, split[1:], module)
+            try:
+                split = task.job.split(".")
+                module = __import__(split[0])
+                fn = reduce(getattr, split[1:], module)
 
-            print(task.job, fn, task.args, task.kwargs)
-            task.started = timezone.now()
-            task.save()
-            fn(*task.args, **task.kwargs)
-            task.completed = timezone.now()
-            task.save()
+                print(task.job, fn, task.args, task.kwargs)
+                task.started = timezone.now()
+                task.save()
+                fn(*task.args, **task.kwargs)
+                task.completed = timezone.now()
+                task.save()
+            except Exception as e:
+                task.completed = timezone.now()
+                task.error = e
+                task.save()
+
