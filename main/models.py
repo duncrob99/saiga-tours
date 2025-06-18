@@ -1155,7 +1155,7 @@ class Link(models.Model):
             self.broken = False
         else:
             try:
-                headers = requests.head(self.full_url, allow_redirects=True)
+                headers = requests.head(self.full_url, allow_redirects=True, timeout=60)
                 self.broken = not headers.ok
                 if not headers.ok:
                     self.error = headers.status_code
@@ -1233,6 +1233,8 @@ def register_links(model_name: str, instance_pk: str) -> None:
             ],
             ignore_conflicts=True
         )
+
+        Link.objects.filter(locations__count=0).delete()
 
 
 def register_all_links():
