@@ -159,10 +159,15 @@ class LinkAdmin(admin.ModelAdmin):
     list_display = ('url', 'contained_models', 'broken', 'error')
     list_filter = ('broken',)
     search_fields = ('url',)
+    actions = ('recheck_link',)
 
     @admin.action
     def check_all_links(self, request, queryset):
         register_all_links()
+
+    @admin.action(description="Recheck selected links")
+    def recheck_link(self, request, queryset):
+        queryset.update(broken=None, last_checked=None, error=None)
 
     def contained_models(self, obj):
         result = ""
