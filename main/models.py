@@ -1151,11 +1151,13 @@ class Link(models.Model):
             return self.url
 
     def check_broken(self):
+        print(self.url, end=" ", flush=True)
+
         if self.url.startswith("#"):
             self.broken = False
         else:
             try:
-                headers = requests.head(self.full_url, allow_redirects=True, timeout=60)
+                headers = requests.get(self.full_url, allow_redirects=True, timeout=60)
                 self.broken = not headers.ok
                 if not headers.ok:
                     self.error = headers.status_code
@@ -1165,12 +1167,19 @@ class Link(models.Model):
             except requests.exceptions.SSLError:
                 self.broken = True
                 self.error = "SSLError"
+            except requests.exceptions.Timeout:
+                self.broken = True
+                self.error = "Timout"
             except requests.exceptions.ConnectionError:
-                return
+                self.broken = True
+                self.error = "ConnectionError"
+            except Exception as e:
+                self.error = f"Unknown error: {e}"
+                self.broken = True
 
         self.last_checked = timezone.now()
         self.save()
-        print(self.url, self.broken, self.last_checked)
+        print(self.broken, self.error, self.last_checked, flush=True)
 
 
 class LinkLocation(models.Model):
@@ -1255,5 +1264,6 @@ def check_links(batch_size=10):
     if unchecked.count() < batch_size:
         oldest = Link.objects.filter(last_checked__lte=timezone.now() - timedelta(days=7))[:batch_size]
         for link in oldest:
+            print(timezone.now() - link.last_checked, end=" ")
             link.check_broken()
 

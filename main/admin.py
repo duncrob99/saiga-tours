@@ -156,8 +156,8 @@ class StopAdmin(admin.ModelAdmin):
 
 
 class LinkAdmin(admin.ModelAdmin):
-    list_display = ('url', 'contained_models', 'broken', 'error')
-    list_filter = ('broken',)
+    list_display = ('url', 'contained_models', 'link_type', 'broken', 'error')
+    list_filter = ('broken', 'locations__type')
     search_fields = ('url',)
     actions = ('recheck_link',)
 
@@ -178,6 +178,9 @@ class LinkAdmin(admin.ModelAdmin):
             admin_url = reverse('admin:%s_%s_change' % info, args=(instance.pk,))
             result += f"<a href='{admin_url}'>{model_instance._meta.model_name}: {instance}</a>"
         return mark_safe(result)
+
+    def link_type(self, obj):
+        return ", ".join(set(map(lambda typ: typ.get("type", ""), obj.locations.all().values("type"))))
 
 
 # Register your models here.

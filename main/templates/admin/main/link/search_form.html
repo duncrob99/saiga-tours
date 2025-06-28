@@ -35,6 +35,11 @@
 		<progress class="checking_links"></progress>
 		<span class="progress-label"></span>
 	</div>
+	<div class="progess-container old_links">
+		<label>Rechecking Old links</label>
+		<progress class="old_links"></progress>
+		<span class="progress-label"></span>
+	</div>
 </div>
 	<script>
 	async function updateProgress() {
@@ -48,6 +53,10 @@
 		const checking_links = state.links_checked / (state.links_checked + state.links_to_check);
 		document.querySelector("div.link-check-status progress.checking_links").setAttribute("value", checking_links);
 		document.querySelector("div.link-check-status .checking_links .progress-label").innerText = `${state.links_checked} / ${state.links_checked + state.links_to_check}`;
+
+		const old_links = (state.links_checked - state.old_links) / state.links_checked;
+		document.querySelector("div.link-check-status progress.old_links").setAttribute("value", old_links);
+		document.querySelector("div.link-check-status .old_links .progress-label").innerText = `${state.links_checked - state.old_links} / ${state.links_checked}`;
 	}
 
 	window.setInterval(updateProgress, 1000)
@@ -78,6 +87,19 @@
 
 	td.field-contained_models a {
 		display: block;
+	}
+
+	th.field-url {
+		white-space: wrap;
+		max-width: 80ch;
+		white-space: -moz-pre-wrap !important;
+		white-space: -webkit-pre-wrap;
+		white-space: -pre-wrap;
+		white-space: -o-pre-wrap;
+		white-space: pre-wrap;
+		word-wrap: break-word;
+		word-break: break-all;
+		white-space: normal;
 	}
 </style>
 </div>

@@ -1144,12 +1144,15 @@ def get_link_check_status(request):
     checked_objects = Task.objects.filter(job="main.models.register_links", completed__isnull=False, created__gte=latest_reset).count()
     links_to_check = Link.objects.filter(broken__isnull=True).count()
     links_checked = Link.objects.filter(broken__isnull=False).count()
+    old_links = Link.objects.filter(last_checked__lte=timezone.now() - timedelta(days=7)).count()
+
     return JsonResponse({
         "latest_reset": latest_reset,
         "objects_to_check": objects_to_check,
         "checked_objects": checked_objects,
         "links_to_check": links_to_check,
         "links_checked": links_checked,
+        "old_links": old_links,
     })
 
 
