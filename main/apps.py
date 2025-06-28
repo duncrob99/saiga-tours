@@ -6,15 +6,7 @@ class MainConfig(AppConfig):
     name = 'main'
 
     def ready(self):
-        from .models import Article, Page, Tour, DestinationDetails
-        from vectordb.shortcuts import autosync_model_to_vectordb
-
-        autosync_model_to_vectordb(Article)
-        autosync_model_to_vectordb(Page)
-        autosync_model_to_vectordb(Tour)
-        autosync_model_to_vectordb(DestinationDetails)
-
-        #import main.signals
+        import main.signals
         
         # Override silk's implementation of execute_sql to allow for binary data
         from django.core.exceptions import EmptyResultSet
