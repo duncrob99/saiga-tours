@@ -47,11 +47,14 @@ function deactivateEditor() {
         if (Object.keys(CKEDITOR.instances).includes(editor_name)) {
             CKEDITOR.instances[editor_name].destroy();
         }
+        rich_field_map[editor_name].value = document.querySelector(`#${editor_name}`).innerHTML;
     }
 
     for (let input_id in poor_field_map) {
         let input_field = document.querySelector(`#${input_id}`);
         input_field.setAttribute('contenteditable', false);
+        let output_field = document.querySelector(`#${poor_field_map[input_id]}`);
+        output_field.value = input_field.innerText;
     }
 
     if (dated) {
