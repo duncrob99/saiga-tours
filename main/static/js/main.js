@@ -253,6 +253,7 @@ try {
     });
 })();
 
+(function() {
     // Highlight and scroll to objects in query parameter
     const urlParams = new URLSearchParams(window.location.search);
     const highlight_query = urlParams.get('highlight_query');
