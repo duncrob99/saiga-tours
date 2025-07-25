@@ -368,3 +368,7 @@ LOGIN_REDIRECT_URL = 'dashboard'
 
 TWO_FACTOR_WEBAUTHN_RP_NAME = 'SAIGA Tours'
 HIJACK_PERMISSION_CHECK = "hijack.permissions.superusers_and_staff"
+
+DJANGO_VECTOR_DB = {
+    "LOAD_EMBEDDING_MODEL_ON_STARTUP": not DEBUG,
+}

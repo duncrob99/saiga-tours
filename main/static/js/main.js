@@ -252,3 +252,27 @@ try {
         wrapper.appendChild(table);
     });
 })();
+
+    // Highlight and scroll to objects in query parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const highlight_query = urlParams.get('highlight_query');
+    let highlight_style = document.createElement("style");
+    highlight_style.textContent = `
+        ${highlight_query} {
+            border: 5px dashed orange;
+        }
+    `;
+    document.head.appendChild(highlight_style);
+    setTimeout(() => {
+        document.querySelector(highlight_query).scrollIntoView({
+            block: "center",
+            inline: "nearest",
+        });
+    }, 1000);
+    setTimeout(() => {
+        document.querySelector(highlight_query).scrollIntoView({
+            block: "center",
+            inline: "nearest",
+        });
+    }, 100);
+})();

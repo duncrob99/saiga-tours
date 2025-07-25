@@ -1,6 +1,7 @@
 from django.contrib import admin, messages
 from django.core.exceptions import FieldDoesNotExist
 from django.utils.html import format_html
+from django.utils.http import urlencode
 from django.utils.safestring import mark_safe
 from django.utils.translation import ngettext
 from simple_history.admin import SimpleHistoryAdmin
@@ -171,12 +172,18 @@ class LinkAdmin(admin.ModelAdmin):
 
     def contained_models(self, obj):
         result = ""
+        url = obj.url
         for loc in obj.locations.all():
             model_instance = getattr(main.models, loc.model)
             info = (model_instance._meta.app_label, model_instance._meta.model_name)
             instance = model_instance.objects.get(pk=loc.instance)
-            admin_url = reverse('admin:%s_%s_change' % info, args=(instance.pk,))
-            result += f"<a href='{admin_url}'>{model_instance._meta.model_name}: {instance}</a>"
+            try:
+                edit_link = instance.get_absolute_url()
+            except Exception:
+                edit_link = reverse('admin:%s_%s_change' % info, args=(instance.pk,))
+            tag_type = 'a[href' if loc.type == "TXT" else 'img[src'
+            highlight_query = urlencode({'highlight_query': f'{tag_type}="{url}"]'})
+            result += f"<a href='{edit_link}?{highlight_query}'>{model_instance._meta.model_name}: {instance}</a>"
         return mark_safe(result)
 
     def link_type(self, obj):

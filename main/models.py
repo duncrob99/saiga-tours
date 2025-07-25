@@ -491,6 +491,9 @@ class ItineraryDay(models.Model):
         #     check=Q(title__isnull=False, body__isnull=False) | Q(template__isnull=False),
         #     name='template_or_content'
         # )]
+        
+    def get_absolute_url(self):
+        return self.tour.get_absolute_url()
 
     @property
     def date(self):
