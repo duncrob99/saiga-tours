@@ -181,7 +181,7 @@ class LinkAdmin(admin.ModelAdmin):
                 edit_link = instance.get_absolute_url()
             except Exception:
                 edit_link = reverse('admin:%s_%s_change' % info, args=(instance.pk,))
-            tag_type = 'a[href' if loc.type == "TXT" else 'img[src'
+            tag_type = 'a[href' if loc.type == LinkLocation.Types.TEXT else 'img[src'
             highlight_query = urlencode({'highlight_query': f'{tag_type}="{url}"]'})
             result += f"<a href='{edit_link}?{highlight_query}'>{model_instance._meta.model_name}: {instance}</a>"
         return mark_safe(result)
