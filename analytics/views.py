@@ -2,6 +2,7 @@ import datetime
 import json
 import re
 from collections import defaultdict
+from typing import Optional
 
 import requests
 from django.contrib import messages
@@ -178,7 +179,7 @@ def mouse_action(request):
 
 
 @csrf_exempt
-def subscribe(request, return_path: str | None = None):
+def subscribe(request, return_path: Optional[str] = None):
     form = SubscriptionForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         try:
