@@ -153,4 +153,36 @@
         }
     })
 
+    const subscription_forms = document.querySelectorAll('form[action^="/stats/subscribe"]');
+    subscription_forms.forEach(form => form.addEventListener("submit", async ev => {
+        ev.preventDefault();
+        show_spinner();
+        const formData = new FormData(form);
+        console.log("Sending form with data: ", formData);
+
+        try {
+            const response = await fetch('/stats/subscribe/', {
+                method: "POST",
+                body: formData,
+            });
+            hide_spinner();
+            if (response.ok) {
+                console.log("Form submission response: ", response);
+                const body = await response.json();
+                console.log("Form submission body: ", body);
+                if (body.success) {
+                    show_message('Successfully subscribed, now you\'ll get the latest news about tours, travel advice and more!', "info");
+                } else {
+                    show_message(`Subscription error: ${body.errors}`, "danger");
+                }
+            } else {
+                show_message(`Subscription error (${response.status}): ${response.statusText}`, "danger");
+            }
+        } catch (e) {
+            console.error(e);
+            hide_spinner();
+            show_message(`Subscription error: ${e}`, "danger");
+        }
+    }));
+
 })();

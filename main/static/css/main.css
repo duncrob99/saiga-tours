@@ -330,6 +330,11 @@ body * {
     opacity: 0.9;
 }
 
+#messages-container .fadeout .alert {
+    opacity: 0;
+    transition: opacity var(--fade-duration, 5s);
+}
+
 .form-control:not(button), .country-selector {
     border: none;
     background: rgba(0, 0, 0, 1%);

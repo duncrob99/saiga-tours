@@ -178,7 +178,7 @@ def mouse_action(request):
 
 
 @csrf_exempt
-def subscribe(request, return_path: str = None):
+def subscribe(request, return_path: str | None = None):
     form = SubscriptionForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         try:
@@ -190,11 +190,14 @@ def subscribe(request, return_path: str = None):
             user.save()
         except IntegrityError:  # Email already exists
             pass
-        messages.add_message(request, messages.SUCCESS, 'Successfully subscribed')
-
+        # messages.add_message(request, messages.SUCCESS, 'Successfully subscribed')
+        return JsonResponse({"success": True})
     else:
-        errors = "; ".join([f'{field}: {", ".join(errors)}' for field, errors in form.errors.items()])
-        messages.add_message(request, messages.WARNING, f'Invalid attempt to subscribe: {errors}')
+        # errors = "; ".join([f'{field}: {", ".join(errors)}' for field, errors in form.errors.items()])
+        errors = form.errors.as_text()
+        # messages.add_message(request, messages.WARNING, f'Invalid attempt to subscribe: {errors}')
+        return JsonResponse({"success": False, "errors": errors})
+
     if return_path is not None:
         return HttpResponseRedirect(return_path)
     else:
