@@ -925,12 +925,14 @@ class MapPoint(models.Model):
 
     # Validate that either x & y are both set or template is set
     def clean(self):
-        if (self.x is None) != (self.y is None):
-            raise ValidationError('Either both x and y must be set or template must be set')
-        if self.template is not None and (self.x is not None or self.y is not None):
-            raise ValidationError('Either both x and y must be set or template must be set')
+        # if (self.x is None) != (self.y is None):
+        #     raise ValidationError('Either both x and y must be set or template must be set')
+        # if self.template is not None and (self.x is not None or self.y is not None):
+        #     raise ValidationError('Either both x and y must be set or template must be set')
         if self.template is None and (self.x is None or self.y is None):
             raise ValidationError('Either both x and y must be set or template must be set')
+
+
 
     def get_caches_to_invalidate(self, previous):
         region_tours = [reverse("tours", args=[region.slug]) for region in Region.objects.all()]
