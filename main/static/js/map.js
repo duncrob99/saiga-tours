@@ -325,6 +325,7 @@ function setCountryNames(destinations, editable) {
     let selected_country;
     for (let [pk, country] of Object.entries(destinations)) {
         let text_el = country.text_el;
+        if (!text_el) continue;
         let handle_size = 0.3;
         let bbox = SVG('.map svg').rect(text_el.bbox().width, text_el.bbox().height)
             .cx(text_el.cx())
@@ -384,7 +385,7 @@ function setCountryNames(destinations, editable) {
             setMapZooming(false);
             bbox.stroke({color: 'red', width: 0.5});
             for (let [_, country] of Object.entries(destinations)) {
-                country.text_el.node.removeEventListener('click', country.text_el.start_editing);
+                country.text_el?.node.removeEventListener('click', country.text_el.start_editing);
             }
             setTimeout(() => window.addEventListener('mousedown', country.second_click), 100);
 

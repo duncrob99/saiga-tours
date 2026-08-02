@@ -257,6 +257,7 @@ try {
     // Highlight and scroll to objects in query parameter
     const urlParams = new URLSearchParams(window.location.search);
     const highlight_query = urlParams.get('highlight_query');
+    if (!highlight_query) return;
     let highlight_style = document.createElement("style");
     highlight_style.textContent = `
         ${highlight_query} {
