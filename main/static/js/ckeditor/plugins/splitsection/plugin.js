@@ -2,6 +2,7 @@ CKEDITOR.plugins.add('splitsection', {
     requires: 'widget',
     icons: 'splitsection',
     init: function (editor) {
+        editor.filter.allow('h3(underlined-title)', 'headings');
         editor.widgets.add('splitsection', {
             button: 'Create a split section',
 

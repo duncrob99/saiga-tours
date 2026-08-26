@@ -85,7 +85,7 @@ def browser_supports_webp(request) -> bool:
                 return False
 
         return True
-    except KeyError:
+    except (KeyError, TypeError):
         return False
 
 

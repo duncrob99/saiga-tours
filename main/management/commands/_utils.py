@@ -126,9 +126,11 @@ def get_all_media(exclude=None, minimum_file_age=None):
                 if re.match(r'^%s$' % re.escape(e).replace('\\*', '.*'), relpath):
                     break
             else:
-                media.add(path)
+                if path not in media:
+                    media.add(path)
+                    yield path
 
-    return media
+    # return media
 
 
 def get_unused_media(exclude=None, minimum_file_age=None):
