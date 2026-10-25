@@ -60,7 +60,14 @@ pub async fn main(mut req:Request,env:Env,_ctx:worker::Context)->Result<Response
    }
    "/publish"=>{
     save(&bucket,"published.json",&c).await?;
-    return html("<p>Publication requested. The self-hosted publisher will deploy the new static snapshot on its next scheduled run. The public site is unchanged until deployment succeeds.</p><a href=\"/\">Back</a>".into())
+    let hook = env.secret("CLOUDFLARE_BUILD_HOOK")?.to_string();
+    if !hook.starts_with("https://") { return Response::error("Invalid build hook configuration",500); }
+    let mut init = RequestInit::new();
+    init.with_method(Method::Post);
+    let request = Request::new_with_init(&hook,&init)?;
+    let response = Fetch::Request(request).send().await?;
+    if !(200..300).contains(&response.status_code()) { return Response::error("Snapshot saved, but Cloudflare build could not be triggered",502); }
+    return html("<p>Publication build requested on Cloudflare. The live static deployment is unchanged until the build succeeds.</p><a href=\"/\">Back</a>".into())
    }
    _=>return Response::error("Unknown operation",404)
   }
