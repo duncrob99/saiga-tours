@@ -19,7 +19,7 @@ fn island_ready(route:&str, navigation_started:f64,swap_time:f64){
  let d=doc();
  let mut count=0;
  if let Ok(nodes)=d.query_selector_all("[data-island]"){
-  for i in 0..nodes.length(){if let Some(el)=nodes.item(i){el.set_attribute("data-ready","true").ok();count+=1;}}
+  for i in 0..nodes.length(){if let Some(el)=nodes.item(i).and_then(|node| node.dyn_into::<Element>().ok()){let _=el.set_attribute("data-ready","true");count+=1;}}
  }
  log(serde_json::json!({"type":"navigation","route":route,"fetch_and_swap_ms":swap_time-navigation_started,"island_ready_ms":now()-navigation_started,"islands":count,"at_ms":now()}));
 }
@@ -36,10 +36,10 @@ async fn navigate(url:String,push:bool){
  let Some(next)=parsed.get_element_by_id("main") else{let _=w.location().set_href(&url);return};
  let Some(old)=doc().get_element_by_id("main") else{return};
  let _=old.replace_with_with_node_1(&next);
- if let Ok(title)=parsed.title().parse::<String>(){doc().set_title(&title);}
+ doc().set_title(&parsed.title());
  if push{let _=w.history().unwrap().push_state_with_url(&JsValue::NULL,"",Some(&url));}
  let links=doc().query_selector_all("nav a").unwrap();
- for i in 0..links.length(){if let Some(el)=links.item(i){let path=el.get_attribute("href").unwrap_or_default();let state=if path==url{"page"}else{"false"};let _=el.set_attribute("aria-current",state);}}
+ for i in 0..links.length(){if let Some(el)=links.item(i).and_then(|node| node.dyn_into::<Element>().ok()){let path=el.get_attribute("href").unwrap_or_default();let state=if path==url{"page"}else{"false"};let _=el.set_attribute("aria-current",state);}}
  let swapped=now();
  if let Some(m)=doc().get_element_by_id("main"){let _=m.dyn_ref::<web_sys::HtmlElement>().map(|h|h.focus());}
  island_ready(&url,start,swapped);
@@ -78,5 +78,4 @@ pub fn start(){
  doc().add_event_listener_with_callback("click",cb.as_ref().unchecked_ref()).unwrap();cb.forget();
  let back=Closure::<dyn FnMut(Event)>::new(move |_ev:Event|{spawn_local(navigate(href(),false));});
  window().unwrap().add_event_listener_with_callback("popstate",back.as_ref().unchecked_ref()).unwrap();back.forget();
- let _=html_escape("");
 }
