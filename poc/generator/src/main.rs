@@ -55,7 +55,7 @@ fn main(){
  write(out,"/destinations/",page("Destinations","/destinations/",map));
  write(out,"/about/",page("About","/about/",r#"<h1>About this prototype</h1><p>Direct links and reloads resolve to pre-rendered HTML. Navigations use fetch and swap the main document region.</p><a href="/destinations/">Try the map</a>"#.into()));
  // Bundled public assets are immutable for each Cloudflare deployment.
- fs::copy("public/styles.css",out.join("styles.css")).unwrap();
- fs::copy("public/bootstrap.js",out.join("bootstrap.js")).unwrap();
+ fs::copy("generator/public/styles.css",out.join("styles.css")).unwrap();
+ fs::copy("generator/public/bootstrap.js",out.join("bootstrap.js")).unwrap();
 }
 fn escape(s:&str)->String{s.replace('&',"&amp;").replace('<',"&lt;").replace('>',"&gt;").replace('"',"&quot;").replace('\'',"&#39;")}
