@@ -1,0 +1,40 @@
+{
+  "articles": [
+    {
+      "slug": "welcome",
+      "title": "A different way to explore",
+      "body": "SAIGA Tours designs travel around places, history and people.\\n\\nThis **editable article** demonstrates publish-time static rendering.",
+      "revision": 1
+    },
+    {
+      "slug": "silk-road",
+      "title": "Along the Silk Road",
+      "body": "This sample article is rendered into HTML before deployment. Its content can be edited independently of the live version.",
+      "revision": 1
+    }
+  ],
+  "map": {
+    "title": "Central Asian destinations",
+    "points": [
+      {
+        "id": "uz",
+        "label": "Uzbekistan",
+        "x": 190,
+        "y": 110
+      },
+      {
+        "id": "tm",
+        "label": "Turkmenistan",
+        "x": 110,
+        "y": 190
+      },
+      {
+        "id": "kg",
+        "label": "Kyrgyzstan",
+        "x": 290,
+        "y": 145
+      }
+    ]
+  },
+  "counter_label": "Explore more"
+}
