@@ -22,7 +22,7 @@ cargo --version
 cargo install wasm-bindgen-cli --locked
 cargo build --release -p saiga-poc-browser --target wasm32-unknown-unknown
 mkdir -p dist/pkg
-wasm-bindgen ../target/wasm32-unknown-unknown/release/saiga_poc_browser.wasm --target web --out-dir dist/pkg
+wasm-bindgen target/wasm32-unknown-unknown/release/saiga_poc_browser.wasm --target web --out-dir dist/pkg
 if [[ -n "${SAIGA_POC_PUBLISH_URL:-}" && -n "${SAIGA_POC_PUBLISH_TOKEN:-}" ]]; then
   curl --fail --silent --show-error --retry 3 \
     -H "Authorization: Bearer $SAIGA_POC_PUBLISH_TOKEN" \
