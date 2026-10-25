@@ -1,0 +1,11 @@
+[Unit]
+Description=SAIGA Tours POC local validation diagnostics
+After=network.target
+[Service]
+Type=simple
+Environment=SAIGA_POC_DEV_PORT=4194
+ExecStart=%h/.cache/saiga-poc/cargo-target/release/saiga-poc-dev-status
+Restart=on-failure
+RestartSec=5
+[Install]
+WantedBy=default.target
