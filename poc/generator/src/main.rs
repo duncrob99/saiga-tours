@@ -51,7 +51,7 @@ fn main(){
  listing+="</ul>";
  write(out,"/articles/",page("Articles","/articles/",listing));
  let points=c.map.points.iter().map(|p|format!(r#"<g data-point="{}" tabindex="0"><circle cx="{}" cy="{}" r="11"/><text x="{}" y="{}">{}</text></g>"#,escape(&p.id),p.x,p.y,p.x+15.,p.y+5.,escape(&p.label))).collect::<String>();
- let map=format!(r#"<h1>Destinations</h1><section data-island="map"><h2>{}</h2><p>Select a destination marker to view its label.</p><svg role="img" aria-label="Sample editable SVG map" viewBox="0 0 440 300"><path d="M45 55 L340 33 407 180 265 256 68 230 Z" fill="#e7e5dc" stroke="#8c897a"/>{points}</svg><output data-map-selection>Choose a marker</output></section>"#,escape(&c.map.title));
+ let map=format!(r##"<h1>Destinations</h1><section data-island="map"><h2>{}</h2><p>Select a destination marker to view its label.</p><svg role="img" aria-label="Sample editable SVG map" viewBox="0 0 440 300"><path d="M45 55 L340 33 407 180 265 256 68 230 Z" fill="#e7e5dc" stroke="#8c897a"/>{points}</svg><output data-map-selection>Choose a marker</output></section>"##,escape(&c.map.title));
  write(out,"/destinations/",page("Destinations","/destinations/",map));
  write(out,"/about/",page("About","/about/",r#"<h1>About this prototype</h1><p>Direct links and reloads resolve to pre-rendered HTML. Navigations use fetch and swap the main document region.</p><a href="/destinations/">Try the map</a>"#.into()));
  // Bundled public assets are immutable for each Cloudflare deployment.
