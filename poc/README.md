@@ -6,7 +6,7 @@ This folder is intentionally isolated from Django production code. No existing a
 
 - `generator/`: Leptos 0.8 server-side static HTML generator. Writes one real `index.html` per route.
 - `browser/`: Rust WASM client-side router, delegated interactivity, and timing diagnostics.
-- `admin/`: Rust Cloudflare Worker with editable draft articles/map data in R2 and GitHub Actions publication dispatch.
+- `admin/`: Rust Cloudflare Worker with editable draft articles/map data in R2 and Cloudflare Workers Builds deployment hook.
 - `content.json`: seed content and initial published fixture.
 - `public.wrangler.toml`: public Cloudflare *Static Assets*, with no Worker entrypoint.
 - `.github/workflows/saiga-poc-publish.yml`: versioned static deployment on the prototype branch.
@@ -30,27 +30,35 @@ npx wrangler dev -c public.wrangler.toml
 
 The public HTML is pre-rendered during build and can be served without running Rust on incoming requests. Client navigation fetches the next HTML file and swaps `<main>`; delegated WASM handlers continue working after swaps.
 
-## Cloudflare setup (staging only)
+## Cloudflare-native builds (no GitHub Actions, no laptop)
 
-1. Use an existing Cloudflare-managed zone for `saigatours.com`. **Do not replace production routes yet**.
-2. In Cloudflare R2, create a private bucket `saiga-poc-content` (`npx wrangler r2 bucket create saiga-poc-content`). Leave public bucket access disabled.
-3. Authenticate Wrangler with `npx wrangler login`. From `poc/admin`, set:
-   ```sh
-   npx wrangler secret put PUBLISH_TOKEN
-   npx wrangler secret put GITHUB_DISPATCH_TOKEN
-   ```
-   `GITHUB_DISPATCH_TOKEN` is a fine-grained GitHub token scoped to `duncrob99/saiga-tours` with Actions write permission. Do not commit it.
-4. Deploy the Rust admin Worker using `npx wrangler deploy -c admin/wrangler.toml` from `poc`, after successful wasm build. Bind a **staging** hostname such as `admin-poc.saigatours.com`. Set `workers_dev = false` and ensure there are no other public/unprotected routes.
-5. In Cloudflare Zero Trust → Access → Applications, add a self-hosted application matching `admin-poc.saigatours.com/*`. Restrict access to named administrator identities, require MFA, and verify unauthorised users cannot reach any admin endpoint. Access protection must be at the edge; a JWT header-presence check alone is **not** cryptographic validation.
-6. The `/api/published` endpoint is protected by a separate random `PUBLISH_TOKEN`; if Access covers the whole hostname, create a narrow **service-token exception/policy** for this endpoint or provide a separate Worker service binding. Never expose the published snapshot anonymously. Ensure that the bearer-token fetch from GitHub Actions can actually pass your Access configuration.
-7. In GitHub repository Settings → Secrets and variables → Actions, add:
-   - Secrets: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, `SAIGA_POC_PUBLISH_TOKEN`.
-   - Variables: `SAIGA_POC_PUBLISH_URL=https://admin-poc.saigatours.com/api/published`, `SAIGA_POC_ENABLE_DEPLOY=true`.
-   Cloudflare token needs appropriate Workers Scripts edit/deploy permissions for the selected account.
-8. In `poc`, run `npx wrangler deploy -c public.wrangler.toml` after generating `dist`, or let the workflow perform that step. This creates `saiga-poc-public.<account>.workers.dev`; test it first. Associate a staging hostname such as `poc.saigatours.com` with the public Worker through Cloudflare Workers → Settings → Domains & Routes only after verification.
-9. In the admin app, save a changed article or map and select Publish. Watch the `SAIGA POC build and publish` GitHub Action. On success the newly deployed static files should appear at the staging hostname. The admin and public Workers are independently deployed.
+**Current preferred architecture:** Cloudflare Workers Builds checks out this repository and compiles the Rust/WASM static site on Cloudflare build infrastructure. The admin Worker posts to a Cloudflare Workers Builds Deploy Hook after saving a published snapshot in private R2. The public Worker serves bundled Static Assets directly, with no public-request Worker execution.
 
-**Cloudflare Access integration blocker:** the sample GitHub Actions HTTP fetch only supplies its publication bearer token. An Access-protected host will ordinarily require an Access service token as well. Configure that separately or adapt the workflow to send the Access client ID/secret headers before using an Access-protected endpoint. This is intentionally documented rather than implying the sample will work without it.
+Cloudflare Workers Builds documentation: https://developers.cloudflare.com/workers/ci-cd/builds/
+Deploy Hooks documentation: https://developers.cloudflare.com/workers/ci-cd/builds/deploy-hooks/
+
+### One-time staging setup
+
+1. In Cloudflare Workers & Pages, create/connect a Worker named `saiga-poc-public` to GitHub repository `duncrob99/saiga-tours`, branch `poc/cloudflare-leptos-static-publishing`. This build runs **on Cloudflare**, not GitHub Actions. Use root directory `poc`.
+2. Set the Workers Builds build command to `bash cloudflare-build.sh` and deploy command to `npx wrangler deploy -c public.wrangler.toml`. Enable build dependency caching. The build requires Cargo, rustup, Node and the wasm-bindgen CLI; confirm Cloudflare's selected build image supports those prerequisites.
+3. Initially omit content-fetch variables; the static site will use the checked-in seed `content.json`. Test the public Worker at its staging workers.dev hostname. Do not attach `saigatours.com`.
+4. Create a private R2 bucket named `saiga-poc-content` and deploy `poc/admin/wrangler.toml` as a **separate** `saiga-poc-admin` Worker. Attach staging hostname `admin-poc.saigatours.com` and protect its administration routes with Cloudflare Access and MFA. The example checks for an Access assertion header but does not cryptographically verify the JWT: protection must be enforced by Cloudflare Access itself.
+5. In the public Worker's Settings → Builds → Deploy Hooks, create a hook for the POC branch. Copy it directly into the *admin Worker's encrypted secret* named `CLOUDFLARE_BUILD_HOOK` (e.g. via `wrangler secret put CLOUDFLARE_BUILD_HOOK -c admin/wrangler.toml`). Do not commit the URL.
+6. Set admin secret `PUBLISH_TOKEN` to a random high-entropy value. Configure the **Cloudflare Builds environment** with the same value under `SAIGA_POC_PUBLISH_TOKEN` and the published-snapshot endpoint URL under `SAIGA_POC_PUBLISH_URL`. Treat both as sensitive build environment settings.
+7. Configure Cloudflare Access to allow only the intended build-to-admin retrieval of `/api/published`, while keeping all editing routes staff-only. The simple prototype's bearer token is separate from Cloudflare Access. If Access protects this endpoint, supply the appropriate Access service-token headers during the build, or implement a separate narrowly scoped machine-only endpoint. **Do not make the draft API or admin UI public to work around Access.**
+8. Save an article draft, then select Publish. Verify that R2 holds the new published snapshot, the Deploy Hook causes a Workers Build, the build fetches that snapshot, and Cloudflare deploys the new static assets. Inspect build logs and staging URLs before trusting the pipeline.
+
+**Important:** Cloudflare Deploy Hooks are secrets (any holder can trigger builds), and build quotas/limits still apply on Cloudflare; using Cloudflare avoids consuming GitHub Actions minutes, not build-resource constraints. A successful HTTP response to the hook confirms a build request, not deployment success. Concurrent publications and idempotent version tracking need further implementation.
+
+### Manual build (optional, not infrastructure)
+
+```sh
+cd poc
+bash cloudflare-build.sh
+npx wrangler deploy -c public.wrangler.toml
+```
+
+The manual commands are for debugging only; routine builds and publishing are intended to run entirely within Cloudflare.
 
 ## Diagnostics / acceptance tests
 
