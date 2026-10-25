@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "id": "saiga-poc-dev",
+  "displayName": "SAIGA Tours POC Dev Checks",
+  "branch": "dev/leptos-poc-local-validation",
+  "runtimeDir": "$HOME/.local/share/saiga-poc-dev",
+  "dataDir": "$HOME/.local/share/saiga-poc-dev/data",
+  "service": "saiga-poc-dev.service",
+  "healthUrl": "http://127.0.0.1:4194/health",
+  "keepReleases": 3,
+  "requiredFiles": [
+    "poc/Cargo.toml",
+    "poc/dev-check.sh",
+    "poc/dev-status/Cargo.toml",
+    "deploy/saiga-poc-dev.service"
+  ],
+  "buildCommands": [
+    [
+      "bash",
+      "poc/dev-check.sh"
+    ],
+    [
+      "bash",
+      "-lc",
+      "cd poc && CARGO_TARGET_DIR=\"$HOME/.cache/saiga-poc/cargo-target\" cargo build --release -p saiga-poc-dev-status"
+    ]
+  ],
+  "managedCopies": [
+    {
+      "source": "deploy/saiga-poc-dev.service",
+      "destination": "$HOME/.config/systemd/user/saiga-poc-dev.service",
+      "mode": "644"
+    }
+  ],
+  "daemonReload": true,
+  "environment": {
+    "SAIGA_POC_TARGET_DIR": "$HOME/.cache/saiga-poc/cargo-target"
+  },
+  "diagnosticExports": [
+    {
+      "id": "build-status",
+      "path": "/diagnostics/build",
+      "mediaType": "application/json",
+      "maxBytes": 32768,
+      "timeoutMs": 10000,
+      "description": "SAIGA build validator status and release information"
+    }
+  ]
+}
