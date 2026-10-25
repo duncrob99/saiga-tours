@@ -18,6 +18,12 @@ rustup target add wasm32-unknown-unknown
 rustc --version
 cargo --version
 
+# Fail fast on source/type errors before optimized release compilation.
+echo "== Checking browser WASM =="
+cargo check -p saiga-poc-browser --target wasm32-unknown-unknown
+echo "== Checking static page generator =="
+cargo check -p saiga-poc-generator
+
 # Match wasm-bindgen CLI to the crate's pinned version when a lockfile exists.
 # Download the version-matched prebuilt CLI instead of compiling it for 2–3 minutes.
 # The binary comes from the official wasm-bindgen release assets.
