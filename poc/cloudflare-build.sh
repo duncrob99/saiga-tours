@@ -22,14 +22,18 @@ cargo --version
 # Download the version-matched prebuilt CLI instead of compiling it for 2–3 minutes.
 # The binary comes from the official wasm-bindgen release assets.
 WASM_BINDGEN_VERSION=0.2.129
-WASM_BINDGEN_ARCH=x86_64-unknown-linux-gnu
+WASM_BINDGEN_ARCH=x86_64-unknown-linux-musl
 WASM_BINDGEN_ARCHIVE="wasm-bindgen-${WASM_BINDGEN_VERSION}-${WASM_BINDGEN_ARCH}.tar.gz"
-curl --fail --location --silent --show-error --retry 3 \
+if curl --fail --location --silent --show-error --retry 3 \
   "https://github.com/wasm-bindgen/wasm-bindgen/releases/download/${WASM_BINDGEN_VERSION}/${WASM_BINDGEN_ARCHIVE}" \
-  -o /tmp/saiga-wasm-bindgen.tar.gz
-mkdir -p /tmp/saiga-wasm-bindgen
-tar -xzf /tmp/saiga-wasm-bindgen.tar.gz -C /tmp/saiga-wasm-bindgen
-install -m 0755 "/tmp/saiga-wasm-bindgen/wasm-bindgen-${WASM_BINDGEN_VERSION}-${WASM_BINDGEN_ARCH}/wasm-bindgen" "${CARGO_HOME}/bin/wasm-bindgen"
+  -o /tmp/saiga-wasm-bindgen.tar.gz; then
+  mkdir -p /tmp/saiga-wasm-bindgen
+  tar -xzf /tmp/saiga-wasm-bindgen.tar.gz -C /tmp/saiga-wasm-bindgen
+  install -m 0755 "/tmp/saiga-wasm-bindgen/wasm-bindgen-${WASM_BINDGEN_VERSION}-${WASM_BINDGEN_ARCH}/wasm-bindgen" "${CARGO_HOME}/bin/wasm-bindgen"
+else
+  echo "Prebuilt wasm-bindgen binary unavailable; compiling fallback" >&2
+  cargo install wasm-bindgen-cli --version "${WASM_BINDGEN_VERSION}" --locked
+fi
 wasm-bindgen --version
 cargo build --release -p saiga-poc-browser --target wasm32-unknown-unknown
 mkdir -p dist/pkg
