@@ -1,6 +1,5 @@
 use worker::*;
 use serde::{Deserialize,Serialize};
-use wasm_bindgen::JsValue;
 const SEED:&str=include_str!("../../content.json");
 #[derive(Clone,Serialize,Deserialize)]
 struct Content{articles:Vec<Article>,map:MapData,counter_label:String}
@@ -61,16 +60,7 @@ pub async fn main(mut req:Request,env:Env,_ctx:worker::Context)->Result<Response
    }
    "/publish"=>{
     save(&bucket,"published.json",&c).await?;
-    let headers=Headers::new();
-    headers.set("Authorization",&format!("Bearer {}",env.secret("GITHUB_DISPATCH_TOKEN")?))?;
-    headers.set("Accept","application/vnd.github+json")?;
-    headers.set("Content-Type","application/json")?;
-    let mut init=RequestInit::new();
-    init.with_method(Method::Post).with_headers(headers).with_body(Some(JsValue::from_str(r#"{"ref":"poc/cloudflare-leptos-static-publishing"}"#)));
-    let request=Request::new_with_init("https://api.github.com/repos/duncrob99/saiga-tours/actions/workflows/saiga-poc-publish.yml/dispatches",&init)?;
-    let response=Fetch::Request(request).send().await?;
-    if response.status_code()!=204{return Response::error("Snapshot saved; workflow dispatch failed",502)}
-    return html("<p>Static deployment requested; the previous public version remains until deployment succeeds.</p><a href=\"/\">Back</a>".into())
+    return html("<p>Publication requested. The self-hosted publisher will deploy the new static snapshot on its next scheduled run. The public site is unchanged until deployment succeeds.</p><a href=\"/\">Back</a>".into())
    }
    _=>return Response::error("Unknown operation",404)
   }
