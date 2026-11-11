@@ -1,7 +1,10 @@
 /* Progressive navigation: links remain normal links if HTMX is unavailable. */
 (() => {
     const reduced = matchMedia('(prefers-reduced-motion: reduce)');
-    let selected;
+    document.querySelectorAll('form').forEach(form => form.setAttribute('hx-boost','false'));
+    document.addEventListener('htmx:beforeProcessNode', e => {
+        if (e.target.tagName === 'FORM') e.target.setAttribute('hx-boost','false');
+    });
     document.addEventListener('click', e => {
         if (e.button || e.metaKey || e.ctrlKey || e.altKey || e.shiftKey) return;
         const a = e.target.closest('a[href]');
@@ -10,6 +13,8 @@
         if (url.origin !== location.origin || !/^\/(?:replica\/)?(?:tour|article|destination|details)\//.test(url.pathname)) return;
         const card = a.closest('.img-card, .card');
         if (card && !reduced.matches) {
+            const banner = document.querySelector('#site-page #header-banner');
+            if (banner) banner.style.viewTransitionName = 'none';
             document.querySelectorAll('[data-saiga-transition]').forEach(el => { el.style.viewTransitionName = ''; el.removeAttribute('data-saiga-transition'); });
             card.dataset.saigaTransition = 'true';
             card.style.viewTransitionName = 'saiga-card';
@@ -28,6 +33,7 @@
     });
     window.saigaNavigate = (url, map) => {
         if (!window.htmx) { location.href = url; return; }
+        if (location.pathname.startsWith('/replica/') && url.startsWith('/') && !url.startsWith('/replica/')) url='/replica'+url;
         if (map && !reduced.matches) {
             map.animate([{transform:'scale(1)'},{transform:'scale(1.12)'}],{duration:260,easing:'ease-out'});
         }

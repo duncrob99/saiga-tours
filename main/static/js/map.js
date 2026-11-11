@@ -1475,7 +1475,7 @@ function setup_country_links(destinations, hoverable) {
     if (!hoverable) return;
 
     for (let [pk, data] of Object.entries(destinations)) {
-        dest_path = document.querySelector(`[title="${data.name}"]`);
+        let dest_path = document.querySelector(`[title="${data.name}"]`);
         if (dest_path === null) continue;
 
         dest_path.classList.add('available')
