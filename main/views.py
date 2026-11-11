@@ -99,35 +99,16 @@ def front_page(request):
             row.colour_before = rows[i].colour
             rows[i].colour_after = row.colour
 
-    section = request.GET.get('saiga_section') if request.method == 'GET' and not request.user.is_staff else None
-    if section is not None:
-        try:
-            index = int(request.GET.get('row', '-1'))
-        except ValueError:
-            raise Http404
-        if section != 'row' or index < 0 or index >= len(rows):
-            raise Http404
-        row = rows[index]
-        return render(request, 'main/front-page-row.html', {
-            'row': row, 'row_number': index + 1,
-            'progressive': True,
-            'tours': Tour.visible(False).filter(display=True) if row.type == 'tours' else None,
-            'destinations': Destination.visible(False) if row.type == 'map' else None,
-            'points': MapPoint.objects.all().select_related('template') if row.type == 'map' else None,
-        })
-
-    progressive = request.method == 'GET' and not request.user.is_staff and request.GET.get('full') != '1'
     context = {
         'tours': Tour.visible(request.user.is_staff).filter(display=True),
         'banners': BannerPhoto.objects.filter(active=True).order_by('?'),
         'frontpage_sections': Page.visible(request.user.is_staff).filter(
             front_page_pos__isnull=False).order_by('front_page_pos'),
         'highlights': HightlightBox.visible(request.user.is_staff),
-        'destinations': Destination.visible(request.user.is_staff) if not progressive else None,
-        'points': MapPoint.objects.all().select_related('template') if not progressive else None,
+        'destinations': Destination.visible(request.user.is_staff),
+        'points': MapPoint.objects.all().select_related('template'),
         'testimonials': Testimonial.visible(request.user.is_staff),
         'rows': rows,
-        'progressive': progressive,
         'meta': MetaInfo(
             request.build_absolute_uri(),
             'SAIGA Tours Homepage',
@@ -258,8 +239,6 @@ def details_page(request, region_slug, country_slug, detail_slug, detail_type):
 
 # Just to get type hinting, not actually needed
 def navbar(request):
-    if request.method != 'GET':
-        raise Http404
     context = {
         'regions': Region.visible(request.user.is_staff),
         'pages': Page.visible(request.user.is_staff).filter(parent=None)
@@ -272,10 +251,6 @@ def navbar(request):
 def tour(request, slug):
     tour_obj = get_object_or_404(Tour, slug=slug)
     assert_visible(request, tour_obj)
-    section = request.GET.get('saiga_section') if request.method == 'GET' and not request.user.is_staff else None
-    allowed_sections = {'overview', 'itinerary', 'map', 'more'}
-    if section is not None and section not in allowed_sections:
-        raise Http404
 
     extensions = tour_obj.extensions.visible(request.user.is_staff)
 
@@ -327,14 +302,13 @@ def tour(request, slug):
 
     related_tours = None
     settings = Settings.load()
-    if (request.user.is_staff or section == 'more' or section is None and request.GET.get('full') == '1') and (settings.related_tours_active == Settings.ActiveChoices.ACTIVE or settings.related_tours_active == Settings.ActiveChoices.STAFF_ONLY and request.user.is_staff):
+    if settings.related_tours_active == Settings.ActiveChoices.ACTIVE or settings.related_tours_active == Settings.ActiveChoices.STAFF_ONLY and request.user.is_staff:
         related_tours = map(lambda result: result.content_object, vectordb.filter(metadata__published=True, content_type__model='tour').search(tour_obj, k=3))
 
     context = {
         'tour': tour_obj,
         'all_tours': all_tours,
         'related_tours': related_tours,
-        'progressive': request.method == 'GET' and not request.user.is_staff and request.GET.get('full') != '1',
         'form': form,
         'itinerary_forms': itinerary_formset,
         'stop_forms': stops_formset,
@@ -351,8 +325,6 @@ def tour(request, slug):
             type=MetaInfoTypes.ARTICLE
         )
     }
-    if section is not None:
-        return render(request, 'main/tour-section-'+section+'.html', context)
     return render(request, 'main/tour.html', context)
 
 
@@ -1192,5 +1164,4 @@ def recheck_links(request):
 def recheck_broken_links(request):
     Link.objects.filter(broken=True).update(broken=None, last_checked=None, error=None)
     return redirect('admin:main_link_changelist')
-
 

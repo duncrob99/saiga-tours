@@ -1475,7 +1475,7 @@ function setup_country_links(destinations, hoverable) {
     if (!hoverable) return;
 
     for (let [pk, data] of Object.entries(destinations)) {
-        let dest_path = document.querySelector(`[title="${data.name}"]`);
+        dest_path = document.querySelector(`[title="${data.name}"]`);
         if (dest_path === null) continue;
 
         dest_path.classList.add('available')
@@ -1486,8 +1486,7 @@ function setup_country_links(destinations, hoverable) {
         dest_path.addEventListener('mouseup', (end_ev) => {
             if (start_ev !== undefined && !map_settings.editable) {
                 if ((start_ev.x - end_ev.x) ** 2 + (start_ev.y - end_ev.y) ** 2 < 10 ** 2) {
-                    if (window.saigaNavigate) window.saigaNavigate(data.url, dest_path);
-                    else window.location.href = data.url;
+                    window.location.href = data.url;
                 }
                 start_ev = undefined;
             }
@@ -1558,4 +1557,3 @@ function create_position_template(input) {
         }
     });
 }
-

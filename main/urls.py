@@ -5,7 +5,6 @@ from . import views
 
 urlpatterns = [
     path('', views.front_page, name='front-page'),
-    path('navigation/', views.navbar, name='navbar'),
     path('contact/', views.contact, name='contact'),
     path('testimonials/', views.testimonials, name='testimonials'),
 
@@ -56,4 +55,3 @@ urlpatterns = [
 
     path('<path:path>/', views.page, name='page')
 ]
-

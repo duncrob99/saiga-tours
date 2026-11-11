@@ -3,7 +3,7 @@ html, body {
     overflow-x: hidden;
     height: 100%;
     position: relative;
-    scroll-behavior: auto;
+    scroll-behavior: smooth;
 }
 
 :root {

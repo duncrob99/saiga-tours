@@ -4,6 +4,7 @@
     const search_close = search_modal.querySelector('.search-close');
     const search_results = search_modal.querySelector('.results');
     const search_result_templates = search_modal.querySelector('.result-templates');
+    const search_togglers = document.querySelectorAll('.toggle-search');
     const ai_answer = search_modal.querySelector('.ai-answer');
     const ai_wrapper = search_modal.querySelector('.ai-wrapper');
     const ai_search_button = search_modal.querySelector('.ai-button');
@@ -235,8 +236,8 @@
         console.log('close');
     }
 
-    document.addEventListener('click', event => {
-        if (event.target.closest('.toggle-search')) open_modal(search_modal);
+    search_togglers.forEach(toggler => {
+        toggler.addEventListener('click', () => open_modal(search_modal));
     });
 
     search_close.addEventListener('click', () => close_modal(search_modal));

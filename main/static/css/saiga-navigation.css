@@ -1,5 +1,0 @@
-
-[data-saiga-stage] { display: block; min-height: 5rem; }
-.saiga-skeleton { min-height: 5rem; padding: 1.5rem; margin: 1rem 0; border-radius: var(--border-radius); background: #f6f4ed; color: #465248; }
-.saiga-skeleton-copy { min-height: 12rem; }
-.saiga-retry { margin: 1rem 0; border: 1px solid currentColor; padding: .75rem 1rem; border-radius: .4rem; background: transparent; }
