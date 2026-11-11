@@ -1,8 +1,4 @@
-@media (prefers-reduced-motion: no-preference) {
-  #site-page.saiga-page-enter { animation: saiga-page-enter 180ms ease-out both; }
-  @keyframes saiga-page-enter { from { opacity: .96; transform: translateY(4px); } to { opacity: 1; transform: none; } }
-  .saiga-card-opening { transform: scale(1.015); transition: transform 180ms ease-out; }
-}
+
 [data-saiga-stage] { display: block; min-height: 5rem; }
 .saiga-skeleton { min-height: 5rem; padding: 1.5rem; margin: 1rem 0; border-radius: var(--border-radius); background: #f6f4ed; color: #465248; }
 .saiga-skeleton-copy { min-height: 12rem; }
