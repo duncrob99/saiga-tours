@@ -12,7 +12,10 @@
     function pump() {
         if (inFlight && inFlight.isConnected) return;
         inFlight = pending()[0] || null;
-        if (!inFlight) return;
+        if (!inFlight) {
+            document.dispatchEvent(new Event('saiga:stages-complete'));
+            return;
+        }
         if (!window.htmx) {
             const url = new URL(location.href);
             url.searchParams.set('full', '1');

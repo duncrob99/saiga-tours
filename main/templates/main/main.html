@@ -147,6 +147,7 @@
     <script defer src="{% static 'js/main.js' %}"></script>
     <script defer src="{% static 'js/saiga-navigation.js' %}"></script>
     <script defer src="{% static 'js/saiga-stages.js' %}"></script>
+    <script defer src="{% static 'js/saiga-navbar.js' %}"></script>
     <link rel="stylesheet" href="{% static 'css/saiga-navigation.css' %}">
     <script defer src="{% static 'js/messages.js' %}"></script>
     <script defer src="{% static 'js/spinner.js' %}"></script>
@@ -177,7 +178,13 @@
 </head>
 <body hx-boost="true" hx-target="#site-page" hx-select="#site-page" hx-swap="outerHTML show:top">
 {#<body style="background-image: url('{% static "images/background_a.jpg" %}');">#}
+{% if progressive %}
+<div id="saiga-navbar-container" class="sticky-top" data-nav-url="{% url 'navbar' %}">
+    {% include 'main/navbar-lite.html' %}
+</div>
+{% else %}
 {% include 'main/navbar.html' %}
+{% endif %}
 
 <div id="messages-container"></div>
 

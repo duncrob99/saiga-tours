@@ -7,10 +7,11 @@ const launched = [];
 const document = {
   currentScript:{src:'https://example.test/static/js/saiga-stages.js'},readyState:'interactive',head:{appendChild(){}},
   querySelectorAll(){return stages.filter(s=>s.isConnected&&!s.attrs.has('data-saiga-started'))},
-  addEventListener(type,handler){handlers.set(type,handler)}
+  addEventListener(type,handler){handlers.set(type,handler)},
+  dispatchEvent(event){handlers.get(event.type)?.(event)}
 };
 const htmx={trigger(element){launched.push(element.dataset.priority)}};
-const context={document,window:{htmx},location:{href:'https://example.test/'},URL,htmx,setTimeout:callback=>callback(),minimise_images(){}};
+const context={document,window:{htmx},location:{href:'https://example.test/'},URL,Event:class Event {constructor(type){this.type=type}},htmx,setTimeout:callback=>callback(),minimise_images(){}};
 vm.runInNewContext(fs.readFileSync('main/static/js/saiga-stages.js','utf8'),context);
 assert.deepEqual(launched,[],'wait for HTMX to process the initial DOM');
 handlers.get('DOMContentLoaded')();

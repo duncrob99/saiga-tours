@@ -18,8 +18,10 @@ function resizeText() {
     let navbar = document.querySelector('.navbar');
     let menus = document.querySelector('#navbarNav > .navbar-nav');
     let menu_eg = document.querySelector('.nav-link.main-nav');
+    if (!navbar || !menus || !menu_eg) return;
     navbar.style.fontSize = '';
-    while (menus.getBoundingClientRect().right > document.documentElement.getBoundingClientRect().right) {
+    let shrink = 0;
+    while (menus.getBoundingClientRect().right > document.documentElement.getBoundingClientRect().right && shrink++ < 100) {
         navbar.style.fontSize = parseFloat(window.getComputedStyle(navbar, null).getPropertyValue('font-size')) - 0.1 + 'px';
     }
 
@@ -36,5 +38,6 @@ function resizeText() {
 hideOffscreen();
 window.addEventListener('resize', hideOffscreen);
 
+window.saigaRefreshNavbar = () => { hideOffscreen(); resizeText(); };
 resizeText();
 window.addEventListener('resize', resizeText);

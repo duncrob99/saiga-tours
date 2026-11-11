@@ -258,6 +258,8 @@ def details_page(request, region_slug, country_slug, detail_slug, detail_type):
 
 # Just to get type hinting, not actually needed
 def navbar(request):
+    if request.method != 'GET':
+        raise Http404
     context = {
         'regions': Region.visible(request.user.is_staff),
         'pages': Page.visible(request.user.is_staff).filter(parent=None)
