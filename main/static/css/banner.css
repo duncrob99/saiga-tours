@@ -71,3 +71,39 @@
 .banner {
     margin-bottom: -80px;
 }
+
+/* A banner must occupy layout space before any scripts or images arrive. */
+#site-page .banner {
+    position: relative;
+    display: block;
+    height: calc(100vh - 100px);
+    height: calc(100dvh - 100px);
+    min-height: 360px;
+    margin: 0;
+    overflow: hidden;
+    isolation: isolate;
+}
+#banner-slideshow { position: absolute; inset: 0; z-index: 0; }
+#site-page .banner-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 0;
+    display: block !important;
+    opacity: 0;
+    transition: opacity 250ms ease-in-out;
+}
+#site-page .banner-img:first-child { opacity: 1; }
+#site-page .banner-img.show { opacity: 1; z-index: 1; }
+#site-page .banner-img.hide { opacity: 0; }
+#site-page .banner-text {
+    position: absolute;
+    z-index: 2;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: min(100% - 2rem, 42rem);
+}
+#site-page #content-container { position: relative; }
