@@ -10,22 +10,14 @@
         let index = 0, timer, disposed = false;
         const initial = Math.max(0, Number(banner.dataset.bannerInitialDelay || 4) * 1000);
         const interval = Math.max(1500, Number(banner.dataset.bannerDelay || 7) * 1000);
-        const navbar = document.getElementById('saiga-navbar-container') || document.querySelector('nav.navbar');
+        
         function size() {
             if (disposed || !banner.isConnected) return;
-            const navbarHeight = navbar?.getBoundingClientRect().height || 0;
-            const available = Math.max(200, window.innerHeight - navbarHeight - 50);
-            banner.style.height = available + 'px';
-            // The sticky wrapper already occupies layout space. Do not offset twice.
-            banner.style.top = '0px';
-            const ratio = window.innerWidth / available;
+            const ratio = banner.clientWidth / Math.max(1, banner.clientHeight);
             images.forEach(img => {
-                img.style.top = '0px';
-                img.style.height = available + 'px';
                 const min = Number(img.getAttribute('min_ar'));
                 const max = Number(img.getAttribute('max_ar'));
                 img.classList.toggle('well-sized', !(Number.isFinite(min) && Number.isFinite(max)) || (min < ratio && ratio < max));
-                img.classList.remove('badly-sized');
             });
         }
         function display(next) {
