@@ -40,5 +40,5 @@
         event.preventDefault();
         loadNavbar(true);
     });
-    document.addEventListener('saiga:stages-complete', () => loadNavbar());
+    // HTMX loads sections on reveal; navigation is fetched on first menu interaction.
 })();
