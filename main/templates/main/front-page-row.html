@@ -1,0 +1,112 @@
+{% load static %}
+{% load main_tags %}
+{% if progressive %}<div data-saiga-fragment>{% endif %}
+        <div class="front-page-row">
+            {% if row.type == 'tours' %}
+                <h1 class="section-title">Tours
+                    <div class="underline"></div>
+                </h1>
+                {% include 'main/tours_cards.html' with max_num=6 %}
+                <div class="d-flex justify-content-center mb-5">
+                <a href="{% url 'tours' %}" class="nice-link">
+                    VIEW MORE
+                </a>
+                </div>
+            {% elif row.type == 'section' %}
+                {% if not row.colour_before %}
+                    {% include 'main/separator.svg' with colour=row.colour pos="pre" %}
+                {% endif %}
+                {% with section=row.contents %}
+                    <div class="page-section wide-bg d-flex justify-content-center flex-column"
+                         style="--background: {{ section.front_page_colour }}"
+                         id="page-section-{{ row_number }}">
+                        <h1 class="section-title">{{ section.title }}
+                            <div class="underline"></div>
+                        </h1>
+                        {{ section.content | delay_images:request }}
+                    </div>
+                {% endwith %}
+                {% include 'main/separator.svg' with colour=row.colour pos="post" %}
+            {% elif row.type == 'map' %}
+                <div {# class="wide-bg" #} style='--background: #e1f8ff'>
+                    {% include 'main/map.html' with no_controls=True %}
+                </div>
+                {% if progressive %}{% include 'main/front-page-map-init.html' %}{% endif %}
+            {% elif row.type == 'highlight' %}
+                <div class="row m-5 d-flex align-items-stretch">
+                    {% for highlight in row.contents %}
+                        <div class="col flex-grow-1 d-flex flex-column">
+                            <div class="card d-flex flex-grow-1"
+                                 style="background-color: {{ highlight.background_colour }}; border: 5px solid {{ highlight.border_colour }}">
+                                <div class="card-header">
+                                    <h6 class="display-6">{{ highlight.title }}</h6>
+                            </div>
+                            <div class="card-body">
+                                {{ highlight.content | delay_images:request }}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% elif row.type == 'testimonials' %}
+            <h1 class="section-title testimonial-start">Testimonials
+                <div class="underline"></div>
+            </h1>
+            <div id="testimonial-sizer" class="not-fold"></div>
+            {% include 'main/testimonials.html' %}
+            <link rel="stylesheet" href="{% static 'css/testimonials.css' %}">
+            <script defer src="{% static 'js/testimonials.js' %}"></script>
+        {% elif row.type == 'articles' %}
+            <h1 class="section-title">{{ row.title }}
+                <div class="underline"></div>
+            </h1>
+            <div class="row mb-5 article-section">
+                {% for article in row.contents %}
+                    <div class="d-flex flex-column col-xl-4 col-lg-6 col-md-12 g-4">
+                        <div class="card order-2 text-card flex-grow-1">
+                            <div class="card-body">
+                                {{ article.excerpt | default:"Introductory info" }}
+                            </div>
+                            <div class="card-footer">
+                                <table class="table table-borderless styled-table">
+                                    {% if article.date %}
+                                        <tr>
+                                            <th class="table-icon"><i class="bi bi-calendar4-range"></i></th>
+                                            <td class="table-value">{{ article.date|date }}</td>
+                                        </tr>
+                                    {% endif %}
+                                    <tr{% if not article.author %} style="opacity: 0" {% endif %}>
+                                        <th class="table-icon"><i class="bi bi-person"></i></th>
+                                        <td class="table-value">{{ article.author }}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <a class="stretched-link" aria-label="View article {{ article }}"
+                               href="{% url 'article' article.slug %}"></a>
+                        </div>
+
+                        <div class="card order-1 img-title-card img-card mt-4">
+                            <div class="img-card-contents">
+                                <img src="{% downscaled_image article.card_img %}" data-filename="{{ article.card_img.name }}" class="card-img" alt="{{ article }}">
+                                <div class="card-img-overlay">
+                                    <h5 class="card-title">{{ article }}</h5>
+                                </div>
+                            </div>
+                            <a class="stretched-link"
+                               href="{% url 'article' article.slug %}"></a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+                <div class="d-flex justify-content-center mb-5">
+                    <a href="{{ row.link }}" class="nice-link">
+                        VIEW MORE
+                    </a>
+                </div>
+            </div>
+        {% else %}
+            {{ row }}
+        {% endif %}
+        </div>
+
+{% if progressive %}</div>{% endif %}

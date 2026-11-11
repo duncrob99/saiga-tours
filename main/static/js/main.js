@@ -93,7 +93,7 @@ let saigaImageGeneration = 0;
 function minimise_images() {
     const generation = ++saigaImageGeneration;
     if (saigaImageObserver) saigaImageObserver.disconnect();
-    const images = [...document.querySelectorAll('img:not([data-no-minimise])')];
+    const images = [...document.querySelectorAll('img:not([data-no-minimise]):not([data-full-size-loaded])')];
     const pending = new Set(images);
     const active = new Set();
     const attempted = new WeakSet();

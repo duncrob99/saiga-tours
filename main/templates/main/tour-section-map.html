@@ -1,0 +1,58 @@
+<div data-saiga-fragment>
+{% load static %}
+{% load main_tags %}
+    {% if tour.stops.count %}
+        {% include 'main/map.html' with destinations=tour.destinations.all hoverable=0 %}
+    {% endif %}
+
+
+{% if tour.stops.count %}
+        <script>
+    (async () => {
+        await window.saigaLoadMap();
+            window.destinations = {};
+            {% for destination in tour.destinations.all %}
+                destinations[{{ destination.pk }}] = {
+                    name: {{ destination.name | js_str }},
+                    url: "{% url 'destination' destination.region.slug destination.slug %}",
+                };
+            {% endfor %}
+
+            window.stops = [];
+            {% for stop in tour.stops.all %}
+                {% comment %}
+                stops.push(["{{ stop.name }}", {{ stop.x }}, {{ stop.y }}, {{ stop.day }}, {{ forloop.counter0 }}])
+                {% endcomment %}
+                stops.push({
+                    name: {{ stop.name|js_str }},
+                    x: {{ stop.x|convert_None }},
+                    y: {{ stop.y|convert_None }},
+                    day: {{ stop.day }},
+                    marked: {{ stop.marked|lower }},
+                    form_ix: {{ forloop.counter0 }},
+                    text_x: {{ stop.text_x }},
+                    text_y: {{ stop.text_y }},
+                    prestrength: {{ stop.prestrength }},
+                    poststrength: {{ stop.poststrength }},
+                    arrow_break: {{ stop.arrow_break|lower }},
+                    {% if stop.template is not None %}
+                        template: {{ stop.template.pk }}
+                    {% endif %}
+                });
+            {% endfor %}
+
+            window.position_templates = {};
+            {% for template in position_templates %}
+                position_templates[{{ template.pk }}] = {
+                    x: {{ template.x | convert_None }},
+                    y: {{ template.y | convert_None }},
+                    name: {{ template.name|js_str }}
+                };
+            {% endfor %}
+
+            window.tour_scale = {{ tour.map_scale }};
+        make_map_work(destinations, undefined, 500, false, stops);
+    })();
+        </script>
+{% endif %}
+</div>

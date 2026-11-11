@@ -1,0 +1,9 @@
+<div data-saiga-fragment>
+{% load static %}
+{% load main_tags %}
+    <hr>
+    <div id="tour-desc">
+        {{ tour.description | delay_images:request }}
+    </div>
+
+</div>

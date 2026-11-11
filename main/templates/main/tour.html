@@ -177,6 +177,13 @@
             </div>
         </div>
     </div>
+    {% if progressive %}
+        <noscript><p><a href="?full=1">View the complete tour page</a></p></noscript>
+        <section data-saiga-stage data-priority="0" hx-get="?saiga_section=overview" hx-trigger="saiga-load" hx-target="this" hx-select="[data-saiga-fragment]" hx-swap="outerHTML" aria-label="Tour overview"><div class="saiga-skeleton saiga-skeleton-copy">Loading tour overview…</div></section>
+        <section data-saiga-stage data-priority="3" hx-get="?saiga_section=itinerary" hx-trigger="saiga-load" hx-target="this" hx-select="[data-saiga-fragment]" hx-swap="outerHTML" aria-label="Tour itinerary"><div class="saiga-skeleton">Loading itinerary…</div></section>
+        <section data-saiga-stage data-priority="4" hx-get="?saiga_section=map" hx-trigger="saiga-load" hx-target="this" hx-select="[data-saiga-fragment]" hx-swap="outerHTML" aria-label="Tour map"><div class="saiga-skeleton">Loading map…</div></section>
+        <section data-saiga-stage data-priority="5" hx-get="?saiga_section=more" hx-trigger="saiga-load" hx-target="this" hx-select="[data-saiga-fragment]" hx-swap="outerHTML" aria-label="More tours"><div class="saiga-skeleton">Loading more tours…</div></section>
+    {% else %}
     <hr>
     <div id="tour-desc">
         {{ tour.description | delay_images:request }}
@@ -234,6 +241,7 @@
         {% include 'main/tours_cards.html' with tours=related_tours uid="related-tours" %}
     {% endif %}
 
+    {% endif %}
     {% if request.user.is_staff %}
         <div class="offcanvas offcanvas-start" tabindex="-1" id="editor-offcanvas">
             {% if not tour.stops.count %}
@@ -362,7 +370,7 @@
 {% endblock %}
 
 {% block js %}
-    {% if tour.stops.count %}
+    {% if tour.stops.count and not progressive %}
         <script defer src="{% static 'js/svg.js' %}"></script>
         <script defer src="{% static 'js/svg.panzoom.min.js' %}"></script>
         <script defer src="{% static 'js/svg.easing.min.js' %}"></script>
@@ -437,3 +445,4 @@
     <script defer src="{% static 'js/ckeditor_styling.js' %}"></script>
     <script defer src="{% static 'js/header-banner.js' %}"></script>
 {% endblock %}
+
