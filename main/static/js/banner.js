@@ -1,194 +1,85 @@
-(function () {
-    let current_idx = 0;
-    let banner_width = 10;
-    let banner_height = 10;
-    let banner_timeout = null;
-    let latest_progression = null;
-    let click_throttle = banner_transition_time * 1000;
-    let latest_direction = null;
-    console.log('banner_transition_time', banner_transition_time);
-
-    function resize() {
-        let navbar_height = document.querySelector('.navbar').getBoundingClientRect().height;
-        let aspect_ratio = document.documentElement.clientWidth / (document.documentElement.clientHeight - navbar_height);
-        let bottom_margin = 50;
-
-        banner_width = Math.max(Math.round(document.documentElement.clientWidth * window.devicePixelRatio), banner_width);
-        banner_height = Math.max(Math.round(document.documentElement.clientHeight - navbar_height - bottom_margin * window.devicePixelRatio), banner_height);
-
-        let banner_imgs = document.querySelectorAll('#banner-slideshow img');
-
-        banner_imgs.forEach(el => {
-            el.style.top = navbar_height + "px";
-            el.style.height = document.documentElement.clientHeight - navbar_height - bottom_margin + 'px';
-            let min_ar = parseFloat(el.getAttribute('min_ar'));
-            let max_ar = parseFloat(el.getAttribute('max_ar'));
-            if (min_ar < aspect_ratio && aspect_ratio < max_ar) {
-                el.classList.add('well-sized');
-                el.classList.remove('badly-sized');
-            } else {
-                el.classList.remove('well-sized');
-                el.classList.add('badly-sized');
-            }
-        });
-
-        document.querySelector('.banner').style.top = navbar_height + "px";
-        document.querySelector('.banner').style.height = document.documentElement.clientHeight - navbar_height - bottom_margin + "px";
-    }
-
-    function hide(banner_el) {
-        if (banner_el !== undefined) {
-            setTimeout(() => {
-                banner_el.classList.add('hide-right');
-                banner_el.addEventListener('transitionend', () => {
-                    banner_el.classList.add('hide');
-                    banner_el.classList.remove('show');
-                    banner_el.classList.add('hide-left');
-                    banner_el.classList.remove('hide-right');
-                }, {
-                    capture: false,
-                    once: true,
-                    passive: false
-                })
-            }, 1);
-        }
-    }
-
-    function show(el) {
-        el.classList.remove('hide');
-        el.classList.add('show');
-        setTimeout(() => {
-            el.classList.remove('hide-left');
-            el.classList.remove('hide-right');
-        }, 0)
-    }
-
-    window.addEventListener('load', () => {
-        //scheduleBannerChange(new Date().getTime());
-        Visibility.onVisible(() => {
-            resize();
-            progress(0, banner_init_delay * 1000);
-        })
-        document.querySelector('.banner-img:last-child').classList.add('hide');
-
-        document.querySelectorAll('.banner-img').forEach(el => {
-            el.addEventListener('transitionstart', () => {
-                el.classList.add('transitioning');
+/* Banner slideshow: safe on direct loads and HTMX page swaps. */
+(() => {
+    let cleanup = () => {};
+    function init() {
+        cleanup();
+        const banner = document.querySelector('#site-page .banner');
+        if (!banner) { cleanup = () => {}; return; }
+        const images = [...banner.querySelectorAll('.banner-img')];
+        if (!images.length) return;
+        let index = 0, timer, disposed = false;
+        const initial = Math.max(0, Number(banner.dataset.bannerInitialDelay || 4) * 1000);
+        const interval = Math.max(1500, Number(banner.dataset.bannerDelay || 7) * 1000);
+        const navbar = document.getElementById('saiga-navbar-container') || document.querySelector('nav.navbar');
+        function size() {
+            if (disposed || !banner.isConnected) return;
+            const navbarHeight = navbar?.getBoundingClientRect().height || 0;
+            const available = Math.max(200, window.innerHeight - navbarHeight - 50);
+            banner.style.height = available + 'px';
+            // The sticky wrapper already occupies layout space. Do not offset twice.
+            banner.style.top = '0px';
+            const ratio = window.innerWidth / available;
+            images.forEach(img => {
+                img.style.top = '0px';
+                img.style.height = available + 'px';
+                const min = Number(img.getAttribute('min_ar'));
+                const max = Number(img.getAttribute('max_ar'));
+                img.classList.toggle('well-sized', !(Number.isFinite(min) && Number.isFinite(max)) || (min < ratio && ratio < max));
+                img.classList.remove('badly-sized');
             });
-            el.addEventListener('transitionend', () => {
-                el.classList.remove('transitioning');
-            });
-        });
-
-        document.querySelector('.banner').addEventListener('click', (ev) => {
-            let transitioning = document.querySelectorAll('.banner-img.transitioning').length > 0;
-
-            let direction;
-            if (ev.clientX < document.documentElement.clientWidth / 3) {
-                direction = 1;
-            } else if (ev.clientX > document.documentElement.clientWidth * 2 / 3) {
-                direction = -1;
-            }
-
-            if (transitioning && direction === latest_direction) {
-                return;
-            }
-
-            progress(direction);
-        });
-
-    });
-    window.addEventListener('resize', resize);
-
-    function shortestModDistance(origin, target, mod) {
-        let raw_diff = Math.abs(target - origin);
-        let mod_diff = raw_diff % mod;
-
-        if (mod_diff > mod / 2) {
-            return target > origin ? (mod_diff - mod) : (mod - mod_diff);
-        } else {
-            return origin > target ? (-1 * mod_diff) : mod_diff;
         }
-    }
-
-    function progress(step, delay) {
-        step = step ?? 1;
-        delay = delay ?? banner_delay * 1000;
-        clearTimeout(banner_timeout);
-        current_idx = (current_idx + step + document.querySelectorAll('.banner-img').length) % document.querySelectorAll('.banner-img').length;
-        latest_direction = Math.sign(step);
-        if (!Visibility.hidden()) {
-            let all_els = Array.from(document.querySelectorAll('.banner-img'));
-            let allowed_els = Array.from(document.querySelectorAll('.banner-img.well-sized'));
-
-            if (!allowed_els.includes(all_els[current_idx])) {
-                if (step < 0) {
-                    all_els.reverse();
-                    let next_allowed = all_els.slice(all_els.length - current_idx - 1).findIndex((el) => el.classList.contains('well-sized'));
-                    if (next_allowed === -1) {
-                        current_idx = all_els.length - all_els.findIndex((el) => el.classList.contains('well-sized'));
-                    } else {
-                        current_idx = current_idx - next_allowed;
-                    }
-                    all_els.reverse();
-                } else {
-                    let next_allowed = all_els.slice(current_idx).findIndex((el) => el.classList.contains('well-sized'));
-                    if (next_allowed === -1) {
-                        current_idx = all_els.findIndex((el) => el.classList.contains('well-sized'));
-                    } else {
-                        current_idx = current_idx + next_allowed;
-                    }
-                }
-            }
-
-            console.log('new current_idx', current_idx);
-
-            let allowed_index = allowed_els.findIndex((el) => el === all_els[current_idx]);
-            all_els.forEach((el, ix) => {
-                let dist;
-                if (allowed_els.includes(el)) {
-                    let idx = allowed_els.findIndex((element) => element === el);
-                    dist = shortestModDistance(allowed_index, idx, allowed_els.length);
-                } else {
-                    dist = shortestModDistance(current_idx, ix, all_els.length);
-                }
-                el.setAttribute('dist', dist);
-
-                if (dist > 1) {
-                    el.classList.add('left');
-                    el.classList.remove('right');
-                    el.classList.add('below');
-                    el.classList.add('hide');
-                } else if (dist === 1) {
-                    el.classList.add('left');
-                    el.classList.remove('below');
-                    el.classList.remove('right');
-                    el.classList.remove('hide');
-                } else if (dist === 0) {
-                    el.classList.remove('left');
-                    el.classList.remove('right');
-                    el.classList.remove('below');
-                    el.classList.remove('hide');
-                } else if (dist === -1) {
-                    el.classList.add('right');
-                    el.classList.remove('left');
-                    el.classList.remove('below');
-                    el.classList.remove('hide');
-                } else {
-                    el.classList.add('right');
-                    el.classList.remove('left');
-                    el.classList.add('below');
-                    el.classList.add('hide');
-                }
-            })
-
-            banner_timeout = setTimeout(progress, delay, 1, banner_delay * 1000);
-        } else {
-            banner_timeout = setTimeout(() => {
-                Visibility.onVisible(() => progress(step, delay));
+        function display(next) {
+            if (disposed || !banner.isConnected) return;
+            // Prefer an aspect-matched banner, but never hide every image.
+            const eligible = images.filter(img => img.classList.contains('well-sized'));
+            const candidates = eligible.length ? eligible : images;
+            index = ((next % candidates.length) + candidates.length) % candidates.length;
+            const active = candidates[index];
+            images.forEach(img => {
+                const shown = img === active;
+                img.classList.toggle('hide', !shown);
+                img.classList.toggle('show', shown);
+                img.classList.remove('left', 'right', 'below', 'hide-left', 'hide-right');
+            });
+        }
+        function advance(direction = 1) {
+            const eligible = images.filter(img => img.classList.contains('well-sized'));
+            const candidates = eligible.length ? eligible : images;
+            const current = candidates.findIndex(img => img.classList.contains('show'));
+            display((current < 0 ? 0 : current) + direction);
+        }
+        function schedule(delay) {
+            clearTimeout(timer);
+            timer = setTimeout(() => {
+                if (!document.hidden) advance();
+                schedule(interval);
             }, delay);
         }
-        latest_progression = new Date().getTime();
+        const onClick = event => {
+            if (event.target.closest('a, button, input, form')) return;
+            if (event.clientX < innerWidth / 3) advance(-1);
+            else if (event.clientX > innerWidth * 2 / 3) advance(1);
+            else return;
+            schedule(interval);
+        };
+        const onVisibility = () => { if (!document.hidden) schedule(interval); };
+        size();
+        display(0);
+        schedule(initial || interval);
+        banner.addEventListener('click', onClick);
+        window.addEventListener('resize', size);
+        document.addEventListener('visibilitychange', onVisibility);
+        cleanup = () => {
+            disposed = true;
+            clearTimeout(timer);
+            banner.removeEventListener('click', onClick);
+            window.removeEventListener('resize', size);
+            document.removeEventListener('visibilitychange', onVisibility);
+        };
     }
-
+    document.addEventListener('htmx:afterSwap', event => {
+        if (event.detail.target?.id === 'site-page') init();
+    });
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, {once: true});
+    else init();
 })();
