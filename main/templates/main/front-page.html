@@ -52,10 +52,10 @@ Home
 {% endblock %}
 
 {% block banner %}
-    <div class="banner">
+    <div class="banner" data-banner-delay="{{ settings.banner_delay }}" data-banner-initial-delay="{{ settings.banner_initial_delay }}">
         <div id="banner-slideshow">
             {% for banner in banners %}
-                <img alt="" data-filename="{{ banner.img.name }}" class="banner-img hide to-load"
+                <img alt="" data-filename="{{ banner.img.name }}" class="banner-img {% if not forloop.first %}hide{% endif %} to-load"
                      idx="{{ forloop.counter0 }}" min_ar="{{ banner.min_AR }}"
                      max_ar="{{ banner.max_AR }}" src="{% downscaled_image banner.img 20 %}">
             {% endfor %}
@@ -100,7 +100,6 @@ Home
         let banner_delay = {{ settings.banner_delay }};
         let banner_init_delay = {{ settings.banner_initial_delay }};
     </script>
-    <script defer src="{% static 'js/banner.js' %}"></script>
 
     {% if request.user.is_staff %}
         <script defer src="{% static 'nouislider/nouislider.js' %}"></script>
