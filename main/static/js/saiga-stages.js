@@ -1,106 +1,25 @@
-/* Load page sections in content priority order, independently of scroll position. */
+/* HTMX loads the section placeholders with hx-trigger=load/revealed.
+   Only the legacy interactive SVG map requires an on-demand script loader. */
 (() => {
     const scriptURL = document.currentScript.src;
-    let inFlight = null;
     let mapScripts;
-
-    function pending() {
-        return [...document.querySelectorAll('#site-page [data-saiga-stage]:not([data-saiga-started])')]
-            .sort((a, b) => Number(a.dataset.priority) - Number(b.dataset.priority));
-    }
-
-    function pump() {
-        if (inFlight && inFlight.isConnected) return;
-        inFlight = pending()[0] || null;
-        if (!inFlight) {
-            document.dispatchEvent(new Event('saiga:stages-complete'));
-            return;
-        }
-        if (!window.htmx) {
-            const url = new URL(location.href);
-            url.searchParams.set('full', '1');
-            location.replace(url.href);
-            return;
-        }
-        inFlight.dataset.saigaStarted = 'true';
-        htmx.trigger(inFlight, 'saiga-load');
-    }
-
-    function failed(target) {
-        if (target !== inFlight) return;
-        target.removeAttribute('data-saiga-started');
-        target.setAttribute('data-saiga-failed', 'true');
-        target.dataset.saigaStarted = 'true';
-        target.innerHTML = '<button type="button" class="saiga-retry">Section unavailable. Try again</button>';
-        target.querySelector('button').addEventListener('click', () => {
-            target.removeAttribute('data-saiga-failed');
-            target.removeAttribute('data-saiga-started');
-            target.innerHTML = '<div class="saiga-skeleton">Loading…</div>';
-            inFlight = null;
-            pump();
-        });
-        inFlight = null;
-        pump();
-    }
-
-    document.addEventListener('htmx:beforeTransition', e => {
-        if (e.detail.target?.hasAttribute('data-saiga-stage')) e.preventDefault();
+    const addScript = name => new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = new URL(name, scriptURL).href;
+        script.onload = resolve;
+        script.onerror = () => reject(new Error('Map script unavailable: ' + name));
+        document.head.appendChild(script);
     });
-    document.addEventListener('htmx:afterSwap', e => {
-        if (e.detail.target?.id === 'site-page') {
-            inFlight = null;
-            activate();
-            if (typeof minimise_images === 'function') minimise_images();
-            return;
-        }
-        if (e.detail.target?.hasAttribute('data-saiga-stage')) inFlight = null;
-        if (typeof minimise_images === 'function') minimise_images();
-        pump();
-    });
-    document.addEventListener('htmx:beforeSwap', e => {
-        const target = e.detail.target;
-        if (!target?.hasAttribute('data-saiga-stage')) return;
-        const response = e.detail.xhr?.responseText;
-        if (!e.detail.isError && (typeof response !== 'string' || response.includes('data-saiga-fragment'))) return;
-        e.detail.shouldSwap = false;
-        failed(target);
-    });
-    document.addEventListener('htmx:responseError', e => failed(e.detail.elt));
-    document.addEventListener('htmx:sendError', e => failed(e.detail.elt));
-    document.addEventListener('htmx:timeout', e => failed(e.detail.elt));
-    // A deferred script can run before HTMX's DOMContentLoaded initialization.
-    // Process each placeholder explicitly before dispatching its first trigger.
-    function activate() {
-        if (window.htmx) document.querySelectorAll('#site-page [data-saiga-stage]')
-            .forEach(stage => htmx.process(stage));
-        pump();
-    }
-    document.addEventListener('htmx:load', () => setTimeout(pump, 0));
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', activate, {once:true});
-    else activate();
-
-    function addScript(name) {
-        return new Promise((resolve, reject) => {
-            const script = document.createElement('script');
-            script.src = new URL(name, scriptURL).href;
-            script.onload = resolve;
-            script.onerror = () => reject(new Error(`Could not load ${name}`));
-            document.head.appendChild(script);
-        });
-    }
     window.saigaLoadMap = async () => {
-        // map.js binds its SVG when evaluated, so wait until the fragment is in the DOM.
-        if (typeof window.make_map_work === 'function') {
-            map_svg = SVG('.map svg');
-            return;
+        if (!mapScripts) {
+            mapScripts = (async () => {
+                if (!window.SVG) await addScript('svg.min.js');
+                await addScript('svg.panzoom.min.js');
+                await addScript('svg.easing.min.js');
+                await addScript('map.js');
+            })().catch(error => { mapScripts = null; throw error; });
         }
-        if (!mapScripts) mapScripts = (async () => {
-            if (!window.SVG) await addScript('svg.js');
-            await addScript('svg.panzoom.min.js');
-            await addScript('svg.easing.min.js');
-            await addScript('map.js');
-        })().catch(error => { mapScripts = null; throw error; });
         await mapScripts;
-        map_svg = SVG('.map svg');
+        if (window.SVG && document.querySelector('.map svg')) window.map_svg = SVG('.map svg');
     };
 })();
