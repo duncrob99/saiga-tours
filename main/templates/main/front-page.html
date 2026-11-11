@@ -52,9 +52,9 @@ Home
     <div class="banner" data-banner-delay="{{ settings.banner_delay }}" data-banner-initial-delay="{{ settings.banner_initial_delay }}">
         <div id="banner-slideshow">
             {% for banner in banners %}
-                <img alt="" data-filename="{{ banner.img.name }}" class="banner-img {% if not forloop.first %}hide{% endif %} to-load"
+                <img alt="" data-filename="{{ banner.img.name }}" class="banner-img{% if forloop.first %} show{% endif %}" data-no-minimise loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
                      idx="{{ forloop.counter0 }}" min_ar="{{ banner.min_AR }}"
-                     max_ar="{{ banner.max_AR }}" src="{% downscaled_image banner.img 20 %}">
+                     max_ar="{{ banner.max_AR }}" src="{{ banner.img.url }}">
             {% endfor %}
         </div>
         <div class="banner-text">
@@ -77,7 +77,7 @@ Home
     {% if progressive %}
         <noscript><p><a href="?full=1">View the complete homepage</a></p></noscript>
         {% for row in rows %}
-            <section data-saiga-stage data-priority="{% if row.type == 'section' or row.type == 'highlight' %}0{% elif row.type == 'tours' %}1{% elif row.type == 'map' %}5{% elif row.type == 'testimonials' %}6{% else %}7{% endif %}" hx-get="{% url 'front-page' %}?saiga_section=row&amp;row={{ forloop.counter0 }}" hx-trigger="saiga-load" hx-target="this" hx-select="[data-saiga-fragment]" hx-swap="outerHTML" aria-label="{{ row.title|default:row.type }}">
+            <section data-saiga-stage hx-get="{% url 'front-page' %}?saiga_section=row&amp;row={{ forloop.counter0 }}" hx-trigger="{% if forloop.first %}load{% else %}revealed{% endif %}" hx-target="this" hx-select="[data-saiga-fragment]" hx-swap="outerHTML" aria-label="{{ row.title|default:row.type }}">
                 <div class="saiga-skeleton">Loading {{ row.title|default:row.type }}…</div>
             </section>
         {% endfor %}
