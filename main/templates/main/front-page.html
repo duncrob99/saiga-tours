@@ -46,9 +46,6 @@ Home
             transform: scale(1.2);
         }
     </style>
-    <script>
-        let banner_transition_time = {{ settings.banner_transition_time }};
-    </script>
 {% endblock %}
 
 {% block banner %}
@@ -96,10 +93,6 @@ Home
     <script defer src="{% static 'js/visibility/visibility.core.js' %}"></script>
     <script defer src="{% static 'js/visibility/visibility.fallback.js' %}"></script>
     <script defer src="{% static 'js/visibility/visibility.timers.js' %}"></script>
-    <script>
-        let banner_delay = {{ settings.banner_delay }};
-        let banner_init_delay = {{ settings.banner_initial_delay }};
-    </script>
 
     {% if request.user.is_staff %}
         <script defer src="{% static 'nouislider/nouislider.js' %}"></script>
