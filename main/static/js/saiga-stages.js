@@ -52,8 +52,11 @@
     document.addEventListener('htmx:responseError', e => failed(e.detail.elt));
     document.addEventListener('htmx:sendError', e => failed(e.detail.elt));
     document.addEventListener('htmx:timeout', e => failed(e.detail.elt));
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', pump);
-    else pump();
+    // Deferred scripts run while readyState is often "interactive", before HTMX
+    // has processed hx-trigger attributes at DOMContentLoaded.
+    document.addEventListener('htmx:load', () => setTimeout(pump, 0));
+    if (document.readyState === 'complete') pump();
+    else document.addEventListener('DOMContentLoaded', () => setTimeout(pump, 0), {once:true});
 
     function addScript(name) {
         return new Promise((resolve, reject) => {
