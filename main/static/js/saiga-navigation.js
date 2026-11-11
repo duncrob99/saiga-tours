@@ -50,6 +50,12 @@
                 svg.animate([{transform:'scale(1)',transformOrigin:`${x}px ${y}px`},{transform:'scale(1.35)',transformOrigin:`${x}px ${y}px`}],{duration:300,easing:'ease-out',fill:'forwards'});
             }
         }
+        // The legacy map scripts keep global SVG state; a fresh document avoids
+        // retaining that state after the map leaves the page.
+        if (map) {
+            setTimeout(() => { location.href = url; }, reduced.matches ? 0 : 300);
+            return;
+        }
         const a=document.createElement('a');
         a.href=url; a.hidden=true; document.body.appendChild(a);
         htmx.process(a); a.click(); setTimeout(() => a.remove(),1000);
