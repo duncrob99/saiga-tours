@@ -181,7 +181,7 @@
         <link rel="canonical" href="{{ request.build_absolute_uri | strip_params }}">
     {% endif %}
 </head>
-<body hx-boost="true" hx-target="#site-page" hx-select="#site-page" hx-swap="outerHTML show:none">
+<body hx-boost="true" hx-target="#site-page" hx-select="#site-page" hx-swap="outerHTML show:window:top">
 {#<body style="background-image: url('{% static "images/background_a.jpg" %}');">#}
 {% if progressive %}
 <div id="saiga-navbar-container" class="sticky-top" data-nav-url="{% url 'navbar' %}">
