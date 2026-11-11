@@ -88,71 +88,41 @@ async function minimise_image(img, downscale) {
     });
 }
 
+let saigaImageObserver;
+let saigaImageGeneration = 0;
 function minimise_images() {
-    let images = document.querySelectorAll('img');
-    let general_observer = new IntersectionObserver(async entries => {
-        for (const entry of entries) {
-            if (entry.intersectionRatio > 0) {
-                general_observer.unobserve(entry.target);
-                // entry.target.setAttribute('observing-intersection', 'false');
-                await minimise_image(entry.target).catch(reason => {
-                    console.warn("Failed to minimise image: ", entry.target, reason);
-                });
-            }
+    const generation = ++saigaImageGeneration;
+    if (saigaImageObserver) saigaImageObserver.disconnect();
+    const images = [...document.querySelectorAll('img:not([data-no-minimise])')];
+    const pending = new Set(images);
+    const active = new Set();
+    const attempted = new WeakSet();
+    const visible = img => {
+        const r = img.getBoundingClientRect();
+        return r.width > 0 && r.height > 0 && r.bottom > 0 && r.top < innerHeight && r.right > 0 && r.left < innerWidth;
+    };
+    function pump() {
+        if (generation !== saigaImageGeneration) return;
+        const candidates = [...pending].filter(img => img.isConnected && !attempted.has(img));
+        const inView = candidates.filter(visible);
+        const visibleBusy = [...active].some(visible);
+        const choices = inView.length ? inView : visibleBusy ? [] : candidates.filter(img => {
+            const r = img.getBoundingClientRect();
+            return r.width > 0 && r.height > 0;
+        }).sort((a,b) => Math.abs(a.getBoundingClientRect().top) - Math.abs(b.getBoundingClientRect().top));
+        while (active.size < 2 && choices.length) {
+            const img = choices.shift();
+            attempted.add(img); pending.delete(img); active.add(img);
+            Promise.resolve(minimise_image(img)).catch(() => {}).finally(() => {
+                active.delete(img);
+                if (generation === saigaImageGeneration) setTimeout(pump, 0);
+            });
         }
-    }, {threshold: [0], rootMargin: '20%', root: document.body});
-    let blurred_observer = new IntersectionObserver(async entries => {
-        for (const entry of entries) {
-            if (entry.intersectionRatio > 0) {
-                blurred_observer.unobserve(entry.target);
-                await minimise_image(entry.target, 50).catch(reason => {
-                    console.warn("Failed to blur image: ", entry.target, reason);
-                });
-                general_observer.observe(entry.target);
-            }
-        }
-    }, {threshold: [0], rootMargin: '200%', root: document.body});
-    let banner_observer = new IntersectionObserver(async entries => {
-        for (const entry of entries) {
-            if (entry.intersectionRatio > 0) {
-                banner_observer.unobserve(entry.target);
-                entry.target.setAttribute('observing-intersection', 'false');
-                await minimise_image(entry.target);
-            }
-        }
-    }, {threshold: [0], rootMargin: '20%', root: document.body});
-    images.forEach(img => {
-        if (img.hasAttribute('data-no-minimise')) return;
-        if (img.hasAttribute('data-lazy-load') && img.getAttribute('data-lazy-load') === 'false') {
-            minimise_image(img).then();
-            return;
-        }
-        if (img.classList.contains('banner-img')) {
-            banner_observer.observe(img);
-        } else {
-            // blurred_observer.observe(img);
-            general_observer.observe(img);
-        }
-        img.setAttribute('observing-intersection', 'true');
-    });
-
-    let resize_observer = new ResizeObserver(entries => {
-        entries.forEach(async entry => {
-            if (entry.target.hasAttribute('observing-intersection') && entry.target.getAttribute('observing-intersection') === 'false') {
-                if (entry.target.classList.contains('banner-img')) {
-                    banner_observer.observe(entry.target);
-                } else {
-                    // blurred_observer.observe(entry.target);
-                    general_observer.observe(entry.target);
-                }
-                entry.target.setAttribute('observing-intersection', 'true');
-            }
-        });
-    });
-    images.forEach(img => {
-        if (img.hasAttribute('data-no-minimise')) return;
-        resize_observer.observe(img);
-    })
+    }
+    saigaImageObserver = new IntersectionObserver(pump, {rootMargin:'0px'});
+    images.forEach(img => saigaImageObserver.observe(img));
+    // Let layout and immediately visible images settle before starting background work.
+    requestAnimationFrame(pump);
 }
 
 minimise_images();
@@ -278,3 +248,4 @@ try {
         });
     }, 100);
 })();
+

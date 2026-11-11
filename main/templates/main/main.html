@@ -122,8 +122,6 @@
         }
     </script>
 
-    {% block extrahead %}
-    {% endblock %}
 
     <script
       src="https://js.sentry-cdn.com/1f5ae5931ba8a0f23daeb6eb0ac4671e.min.js"
@@ -144,7 +142,11 @@
     
       });
     </script>
+    <meta name="htmx-config" content='{"globalViewTransitions":true,"historyCacheSize":0,"selfRequestsOnly":false}'>
+    <script defer src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.4/dist/htmx.min.js"></script>
     <script defer src="{% static 'js/main.js' %}"></script>
+    <script defer src="{% static 'js/saiga-navigation.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'css/saiga-navigation.css' %}">
     <script defer src="{% static 'js/messages.js' %}"></script>
     <script defer src="{% static 'js/spinner.js' %}"></script>
     {#<script src="https://unpkg.com/@popperjs/core@2"></script>#}
@@ -156,8 +158,6 @@
     <script defer src="{% static 'js/visibility/visibility.core.js' %}"></script>
     <script defer src="{% static 'js/visibility/visibility.timers.js' %}"></script>
     <script defer src="{% static 'js/search.js' %}"></script>
-    {% block js %}
-    {% endblock %}
     {% analytics_script %}
 
     <!-- Google tag (gtag.js) -->
@@ -174,12 +174,14 @@
         <link rel="canonical" href="{{ request.build_absolute_uri | strip_params }}">
     {% endif %}
 </head>
-<body>
+<body hx-boost="true" hx-target="#site-page" hx-select="#site-page" hx-swap="outerHTML show:top">
 {#<body style="background-image: url('{% static "images/background_a.jpg" %}');">#}
 {% include 'main/navbar.html' %}
 
 <div id="messages-container"></div>
 
+<main id="site-page" hx-history-elt>
+{% block extrahead %}{% endblock %}
 {% block banner %}
 {% endblock %}
     <div class="container p-3 p-sm-5" id="content-container">
@@ -189,6 +191,8 @@
         </div>
     </div>
 
+{% block js %}{% endblock %}
+</main>
 <div class="loader">
     <div class="spinner">
         <div class="lds-ripple"><div></div><div></div></div>
@@ -203,3 +207,4 @@
 
 </body>
 </html>
+

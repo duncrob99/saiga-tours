@@ -1486,7 +1486,8 @@ function setup_country_links(destinations, hoverable) {
         dest_path.addEventListener('mouseup', (end_ev) => {
             if (start_ev !== undefined && !map_settings.editable) {
                 if ((start_ev.x - end_ev.x) ** 2 + (start_ev.y - end_ev.y) ** 2 < 10 ** 2) {
-                    window.location.href = data.url;
+                    if (window.saigaNavigate) window.saigaNavigate(data.url, dest_path);
+                    else window.location.href = data.url;
                 }
                 start_ev = undefined;
             }
@@ -1557,3 +1558,4 @@ function create_position_template(input) {
         }
     });
 }
+
