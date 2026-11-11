@@ -55,11 +55,16 @@
     document.addEventListener('htmx:responseError', e => failed(e.detail.elt));
     document.addEventListener('htmx:sendError', e => failed(e.detail.elt));
     document.addEventListener('htmx:timeout', e => failed(e.detail.elt));
-    // Deferred scripts run while readyState is often "interactive", before HTMX
-    // has processed hx-trigger attributes at DOMContentLoaded.
+    // A deferred script can run before HTMX's DOMContentLoaded initialization.
+    // Process each placeholder explicitly before dispatching its first trigger.
+    function activate() {
+        if (window.htmx) document.querySelectorAll('#site-page [data-saiga-stage]')
+            .forEach(stage => htmx.process(stage));
+        pump();
+    }
     document.addEventListener('htmx:load', () => setTimeout(pump, 0));
-    if (document.readyState === 'complete') pump();
-    else document.addEventListener('DOMContentLoaded', () => setTimeout(pump, 0), {once:true});
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', activate, {once:true});
+    else activate();
 
     function addScript(name) {
         return new Promise((resolve, reject) => {

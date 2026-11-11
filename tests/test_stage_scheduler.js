@@ -10,11 +10,11 @@ const document = {
   addEventListener(type,handler){handlers.set(type,handler)},
   dispatchEvent(event){handlers.get(event.type)?.(event)}
 };
-const htmx={trigger(element){launched.push(element.dataset.priority)}};
+const processed=[];
+const htmx={process(element){processed.push(element.dataset.priority)},trigger(element){assert(processed.includes(element.dataset.priority));launched.push(element.dataset.priority)}};
 const context={document,window:{htmx},location:{href:'https://example.test/'},URL,Event:class Event {constructor(type){this.type=type}},htmx,setTimeout:callback=>callback(),minimise_images(){}};
 vm.runInNewContext(fs.readFileSync('main/static/js/saiga-stages.js','utf8'),context);
-assert.deepEqual(launched,[],'wait for HTMX to process the initial DOM');
-handlers.get('DOMContentLoaded')();
+assert.deepEqual(processed,[7,5,2,1,6],'process stage triggers before DOMContentLoaded');
 assert.deepEqual(launched,[1]);
 for(let i=0;i<stages.length;i++){
   const current=stages.find(s=>s.isConnected && s.dataset.priority==launched.at(-1));
