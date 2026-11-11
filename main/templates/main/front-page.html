@@ -80,7 +80,7 @@ Home
     {% if progressive %}
         <noscript><p><a href="?full=1">View the complete homepage</a></p></noscript>
         {% for row in rows %}
-            <section data-saiga-stage data-priority="{% if row.type == 'tours' %}1{% elif row.type == 'section' or row.type == 'highlight' %}2{% elif row.type == 'map' %}5{% elif row.type == 'testimonials' %}6{% else %}7{% endif %}" hx-get="?saiga_section=row&amp;row={{ forloop.counter0 }}" hx-trigger="saiga-load" hx-target="this" hx-select="[data-saiga-fragment]" hx-swap="outerHTML" aria-label="{{ row.title|default:row.type }}">
+            <section data-saiga-stage data-priority="{% if row.type == 'section' or row.type == 'highlight' %}0{% elif row.type == 'tours' %}1{% elif row.type == 'map' %}5{% elif row.type == 'testimonials' %}6{% else %}7{% endif %}" hx-get="{% url 'front-page' %}?saiga_section=row&amp;row={{ forloop.counter0 }}" hx-trigger="saiga-load" hx-target="this" hx-select="[data-saiga-fragment]" hx-swap="outerHTML" aria-label="{{ row.title|default:row.type }}">
                 <div class="saiga-skeleton">Loading {{ row.title|default:row.type }}…</div>
             </section>
         {% endfor %}

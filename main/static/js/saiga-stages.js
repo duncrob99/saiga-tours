@@ -47,10 +47,23 @@
         if (e.detail.target?.hasAttribute('data-saiga-stage')) e.preventDefault();
     });
     document.addEventListener('htmx:afterSwap', e => {
-        if (e.detail.target?.id === 'site-page') inFlight = null;
+        if (e.detail.target?.id === 'site-page') {
+            inFlight = null;
+            activate();
+            if (typeof minimise_images === 'function') minimise_images();
+            return;
+        }
         if (e.detail.target?.hasAttribute('data-saiga-stage')) inFlight = null;
         if (typeof minimise_images === 'function') minimise_images();
         pump();
+    });
+    document.addEventListener('htmx:beforeSwap', e => {
+        const target = e.detail.target;
+        if (!target?.hasAttribute('data-saiga-stage')) return;
+        const response = e.detail.xhr?.responseText;
+        if (!e.detail.isError && (typeof response !== 'string' || response.includes('data-saiga-fragment'))) return;
+        e.detail.shouldSwap = false;
+        failed(target);
     });
     document.addEventListener('htmx:responseError', e => failed(e.detail.elt));
     document.addEventListener('htmx:sendError', e => failed(e.detail.elt));

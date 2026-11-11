@@ -123,6 +123,7 @@
     </script>
 
 
+    {% if request.user.is_staff %}
     <script
       src="https://js.sentry-cdn.com/1f5ae5931ba8a0f23daeb6eb0ac4671e.min.js"
       crossorigin="anonymous"
@@ -142,7 +143,8 @@
     
       });
     </script>
-    <meta name="htmx-config" content='{"globalViewTransitions":true,"historyCacheSize":0,"selfRequestsOnly":false}'>
+    {% endif %}
+    <meta name="htmx-config" content='{"globalViewTransitions":false,"historyCacheSize":0,"selfRequestsOnly":false}'>
     <script defer src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.4/dist/htmx.min.js"></script>
     <script defer src="{% static 'js/main.js' %}"></script>
     <script defer src="{% static 'js/saiga-navigation.js' %}"></script>
@@ -160,7 +162,7 @@
     <script defer src="{% static 'js/visibility/visibility.core.js' %}"></script>
     <script defer src="{% static 'js/visibility/visibility.timers.js' %}"></script>
     <script defer src="{% static 'js/search.js' %}"></script>
-    {% analytics_script %}
+    {% if request.user.is_staff %}{% analytics_script %}
 
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-4SZK6XKZB4"></script>
@@ -171,12 +173,13 @@
 
       gtag('config', 'G-4SZK6XKZB4');
     </script>
+    {% endif %}
 
     {% if not no_canonical %}
         <link rel="canonical" href="{{ request.build_absolute_uri | strip_params }}">
     {% endif %}
 </head>
-<body hx-boost="true" hx-target="#site-page" hx-select="#site-page" hx-swap="outerHTML show:top">
+<body hx-boost="true" hx-target="#site-page" hx-select="#site-page" hx-swap="outerHTML show:none">
 {#<body style="background-image: url('{% static "images/background_a.jpg" %}');">#}
 {% if progressive %}
 <div id="saiga-navbar-container" class="sticky-top" data-nav-url="{% url 'navbar' %}">

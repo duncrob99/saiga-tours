@@ -22,4 +22,9 @@ for(let i=0;i<stages.length;i++){
   handlers.get('htmx:afterSwap')({detail:{target:current}});
 }
 assert.deepEqual(launched,[1,2,5,6,7]);
+const newStage={dataset:{priority:0},isConnected:true,attrs:new Set(),hasAttribute(name){return this.attrs.has(name)},setAttribute(name){this.attrs.add(name)},removeAttribute(name){this.attrs.delete(name)}};
+stages.push(newStage);
+handlers.get('htmx:afterSwap')({detail:{target:{id:'site-page'}}});
+assert(processed.at(-1)===0,'process the destination page stage after navigation');
+assert(launched.at(-1)===0,'start the destination page stage after navigation');
 console.log('stages request one at a time in priority order');

@@ -12,6 +12,9 @@
                 return response.text();
             }).then(html => {
                 container.innerHTML = html;
+                // The wrapper owns the sticky position; nested sticky navs can
+                // jump over the newly swapped page on mobile.
+                container.querySelector('nav.navbar')?.classList.remove('sticky-top');
                 if (window.htmx) htmx.process(container);
                 if (window.saigaRefreshNavbar) window.saigaRefreshNavbar();
                 return container;

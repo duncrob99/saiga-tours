@@ -14,11 +14,7 @@
         if (url.origin !== location.origin || !/^\/(?:replica\/)?(?:tour|article|destination|details)\//.test(url.pathname)) return;
         const card = a.closest('.img-card, .card');
         if (card && !reduced.matches) {
-            const banner = document.querySelector('#site-page #header-banner');
-            if (banner) banner.style.viewTransitionName = 'none';
-            document.querySelectorAll('[data-saiga-transition]').forEach(el => { el.style.viewTransitionName = ''; el.removeAttribute('data-saiga-transition'); });
-            card.dataset.saigaTransition = 'true';
-            card.style.viewTransitionName = 'saiga-card';
+            card.classList.add('saiga-card-opening');
         }
     }, true);
     document.addEventListener('htmx:validateUrl', e => {
@@ -28,7 +24,13 @@
         if (e.detail.target.id !== 'site-page') return;
         mapNavigation = false;
         if (typeof minimise_images === 'function') minimise_images();
-        window.scrollTo({top:0, behavior:'instant'});
+        window.scrollTo(0, 0);
+        const page = document.getElementById('site-page');
+        if (page && !reduced.matches) {
+            page.classList.remove('saiga-page-enter');
+            void page.offsetWidth;
+            page.classList.add('saiga-page-enter');
+        }
     });
     // Capturing the whole detailed SVG in a view transition can stall a browser.
     document.addEventListener('htmx:beforeTransition', e => {
