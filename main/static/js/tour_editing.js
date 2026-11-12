@@ -358,25 +358,41 @@ form.addEventListener("submit", async ev => {
     ev.preventDefault();
     deactivateEditor();
     editing.checked = false;
-    show_spinner();
+
+    // Finish copying every editable field into its Django form input before
+    // FormData is constructed. This makes changes to itinerary days explicit.
+    for (const editorName in rich_field_map) {
+        rich_field_map[editorName].value = document.getElementById(editorName).innerHTML;
+    }
     const formData = new FormData(form);
-    console.log("Sending form with data: ", formData);
+    show_spinner();
 
     try {
-        const response = await fetch('', {
+        const response = await fetch(window.location.href, {
             method: "POST",
             body: formData,
+            credentials: "same-origin",
+            cache: "no-store"
         });
-        console.log("Form submission response: ", response);
-        hide_spinner();
-        if (response.ok) {
-            show_message('Successfully saved, <a href="#" target="_blank" class="nice-link">check it\'s correct by clicking here to reload</a>', "info");
-        } else {
-            show_message(`Saving error (${response.status}): ${response.statusText}`, "danger");
+        const contentType = response.headers.get("content-type") || "";
+        const result = contentType.includes("application/json")
+            ? await response.json()
+            : null;
+        if (!response.ok || result?.success !== true) {
+            throw new Error(result?.error || (
+                result === null
+                    ? "The site returned the editing form instead of confirming a save. Check the required fields and try again."
+                    : "The server did not confirm that your changes were saved."
+            ));
         }
-    } catch (e) {
-        console.error(e);
+        // Reading the saved data back also prevents an old page from appearing
+        // to retain stale content after a successful local database update.
+        window.location.reload();
+    } catch (error) {
         hide_spinner();
-        show_message(`Saving error: ${e}`, "danger");
+        console.error("Tour save failed", error);
+        show_message("Saving error: " + error.message, "danger");
+        editing.checked = true;
+        checkEditing();
     }
 });
