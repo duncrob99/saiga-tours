@@ -162,15 +162,6 @@ checkEditing();
 
 desc.addEventListener('input', editorChange);
 
-window.addEventListener('load', () => {
-    document.getElementById('editor-form').addEventListener('submit', (ev) => {
-        deactivateEditor();
-        for (let editor_name in rich_field_map) {
-            rich_field_map[editor_name].value = document.querySelector(`#${editor_name}`).innerHTML;
-        }
-    })
-})
-
 function editorChange() {
     document.querySelector('textarea[name="description"]').value = desc.innerHTML;
 }
@@ -394,15 +385,22 @@ function restoreOriginalMediaInSubmittedHtml(formData) {
 const form = document.querySelector("#editor-form");
 form.addEventListener("submit", async ev => {
     ev.preventDefault();
-    deactivateEditor();
-    editing.checked = false;
 
-    // Finish copying every editable field into its Django form input before
-    // FormData is constructed. This makes changes to itinerary days explicit.
-    for (const editorName in rich_field_map) {
-        rich_field_map[editorName].value = document.getElementById(editorName).innerHTML;
-    }
+    // Keep the live editor untouched until the user explicitly leaves it.
+    // CKEditor's getData() is authoritative; destroying an inline instance
+    // first may restore stale HTML and silently discard the edited text.
     const formData = new FormData(form);
+    for (const editorName in rich_field_map) {
+        const input = rich_field_map[editorName];
+        const editor = window.CKEDITOR?.instances?.[editorName];
+        const content = editor ? editor.getData() : document.getElementById(editorName).innerHTML;
+        formData.set(input.name, content);
+    }
+    for (const displayId in poor_field_map) {
+        const input = document.getElementById(poor_field_map[displayId]);
+        const display = document.getElementById(displayId);
+        if (input && display) formData.set(input.name, display.innerText);
+    }
     restoreOriginalMediaInSubmittedHtml(formData);
     show_spinner();
 
@@ -433,7 +431,6 @@ form.addEventListener("submit", async ev => {
         hide_spinner();
         console.error("Tour save failed", error);
         show_message("Saving error: " + error.message, "danger");
-        editing.checked = true;
-        checkEditing();
+        // Leave the editor and its current unsaved contents intact.
     }
 });
