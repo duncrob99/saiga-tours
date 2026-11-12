@@ -353,6 +353,44 @@ function create_itinerary_template(input) {
     })
 }
 
+// A replica page can display images through its own prefixed URLs.
+// Submit original media references instead of persisting a temporary
+// signed proxy URL inside tour descriptions or itinerary content.
+function restoreOriginalMediaReference(value) {
+    if (!value || !/\\/replica(?:-assets|\\/media|\\/resized-image)/.test(value)) return value;
+    let url;
+    try { url = new URL(value, window.location.origin); } catch (_) { return value; }
+    if (url.origin !== window.location.origin) return value;
+    const path = url.pathname;
+    const source = path.lastIndexOf('media/');
+    if (source >= 0) {
+        let filename = path.slice(source + 6);
+        if (path.includes('/resized-image/')) filename = filename.replace(/\\/\\d{1,4}x\\d{1,4}\\/?$/, '');
+        return '/media/' + filename;
+    }
+    const sized = path.match(/\\/(?:replica\\/)?resized-image\\/(.+?)\\/\\d{1,4}x\\d{1,4}\\/?$/);
+    if (sized) return '/media/' + sized[1];
+    return value;
+}
+
+function restoreOriginalMediaInSubmittedHtml(formData) {
+    for (const [key, value] of formData.entries()) {
+        if (typeof value !== 'string' || !/(?:^description$|^itinerary-\\d+-body$)/.test(key)) continue;
+        if (!value.includes('/replica-assets/') && !value.includes('/replica/media/') && !value.includes('/replica/resized-image/')) continue;
+        const doc = new DOMParser().parseFromString(value, 'text/html');
+        for (const element of doc.querySelectorAll('img, a, source')) {
+            for (const attr of ['src', 'href', 'full-size-src', 'data-filename', 'data-cke-saved-src', 'srcset']) {
+                if (!element.hasAttribute(attr)) continue;
+                if (attr === 'srcset') continue; // Do not reinterpret arbitrary srcset syntax.
+                const original = element.getAttribute(attr);
+                const restored = restoreOriginalMediaReference(original);
+                if (restored !== original) element.setAttribute(attr, restored);
+            }
+        }
+        formData.set(key, doc.body.innerHTML);
+    }
+}
+
 const form = document.querySelector("#editor-form");
 form.addEventListener("submit", async ev => {
     ev.preventDefault();
@@ -365,6 +403,7 @@ form.addEventListener("submit", async ev => {
         rich_field_map[editorName].value = document.getElementById(editorName).innerHTML;
     }
     const formData = new FormData(form);
+    restoreOriginalMediaInSubmittedHtml(formData);
     show_spinner();
 
     try {
