@@ -357,7 +357,7 @@ function create_itinerary_template(input) {
 // Submit original media references instead of persisting a temporary
 // signed proxy URL inside tour descriptions or itinerary content.
 function restoreOriginalMediaReference(value) {
-    if (!value || !/\\/replica(?:-assets|\\/media|\\/resized-image)/.test(value)) return value;
+    if (!value || !/\/replica(?:-assets|\/media|\/resized-image)/.test(value)) return value;
     let url;
     try { url = new URL(value, window.location.origin); } catch (_) { return value; }
     if (url.origin !== window.location.origin) return value;
@@ -365,17 +365,17 @@ function restoreOriginalMediaReference(value) {
     const source = path.lastIndexOf('media/');
     if (source >= 0) {
         let filename = path.slice(source + 6);
-        if (path.includes('/resized-image/')) filename = filename.replace(/\\/\\d{1,4}x\\d{1,4}\\/?$/, '');
+        if (path.includes('/resized-image/')) filename = filename.replace(/\/\d{1,4}x\d{1,4}\/?$/, '');
         return '/media/' + filename;
     }
-    const sized = path.match(/\\/(?:replica\\/)?resized-image\\/(.+?)\\/\\d{1,4}x\\d{1,4}\\/?$/);
+    const sized = path.match(/\/(?:replica\/)?resized-image\/(.+?)\/\d{1,4}x\d{1,4}\/?$/);
     if (sized) return '/media/' + sized[1];
     return value;
 }
 
 function restoreOriginalMediaInSubmittedHtml(formData) {
     for (const [key, value] of formData.entries()) {
-        if (typeof value !== 'string' || !/(?:^description$|^itinerary-\\d+-body$)/.test(key)) continue;
+        if (typeof value !== 'string' || !/(?:^description$|^itinerary-\d+-body$)/.test(key)) continue;
         if (!value.includes('/replica-assets/') && !value.includes('/replica/media/') && !value.includes('/replica/resized-image/')) continue;
         const doc = new DOMParser().parseFromString(value, 'text/html');
         for (const element of doc.querySelectorAll('img, a, source')) {
