@@ -157,10 +157,19 @@ function checkEditing() {
 }
 
 editing.addEventListener('change', checkEditing);
-// Keyboard-driven mobile resizes must not reinitialise an active editor.
+window.addEventListener('resize', checkEditing);
 checkEditing();
 
 desc.addEventListener('input', editorChange);
+
+window.addEventListener('load', () => {
+    document.getElementById('editor-form').addEventListener('submit', (ev) => {
+        deactivateEditor();
+        for (let editor_name in rich_field_map) {
+            rich_field_map[editor_name].value = document.querySelector(`#${editor_name}`).innerHTML;
+        }
+    })
+})
 
 function editorChange() {
     document.querySelector('textarea[name="description"]').value = desc.innerHTML;
@@ -344,93 +353,30 @@ function create_itinerary_template(input) {
     })
 }
 
-// A replica page can display images through its own prefixed URLs.
-// Submit original media references instead of persisting a temporary
-// signed proxy URL inside tour descriptions or itinerary content.
-function restoreOriginalMediaReference(value) {
-    if (!value || !/\/replica(?:-assets|\/media|\/resized-image)/.test(value)) return value;
-    let url;
-    try { url = new URL(value, window.location.origin); } catch (_) { return value; }
-    if (url.origin !== window.location.origin) return value;
-    const path = url.pathname;
-    const source = path.lastIndexOf('media/');
-    if (source >= 0) {
-        let filename = path.slice(source + 6);
-        if (path.includes('/resized-image/')) filename = filename.replace(/\/\d{1,4}x\d{1,4}\/?$/, '');
-        return '/media/' + filename;
-    }
-    const sized = path.match(/\/(?:replica\/)?resized-image\/(.+?)\/\d{1,4}x\d{1,4}\/?$/);
-    if (sized) return '/media/' + sized[1];
-    return value;
-}
-
-function restoreOriginalMediaInSubmittedHtml(formData) {
-    for (const [key, value] of formData.entries()) {
-        if (typeof value !== 'string' || !/(?:^description$|^itinerary-\d+-body$)/.test(key)) continue;
-        if (!value.includes('/replica-assets/') && !value.includes('/replica/media/') && !value.includes('/replica/resized-image/')) continue;
-        const doc = new DOMParser().parseFromString(value, 'text/html');
-        for (const element of doc.querySelectorAll('img, a, source')) {
-            for (const attr of ['src', 'href', 'full-size-src', 'data-filename', 'data-cke-saved-src', 'srcset']) {
-                if (!element.hasAttribute(attr)) continue;
-                if (attr === 'srcset') continue; // Do not reinterpret arbitrary srcset syntax.
-                const original = element.getAttribute(attr);
-                const restored = restoreOriginalMediaReference(original);
-                if (restored !== original) element.setAttribute(attr, restored);
-            }
-        }
-        formData.set(key, doc.body.innerHTML);
-    }
-}
-
 const form = document.querySelector("#editor-form");
 form.addEventListener("submit", async ev => {
     ev.preventDefault();
-
-    // Keep the live editor untouched until the user explicitly leaves it.
-    // CKEditor's getData() is authoritative; destroying an inline instance
-    // first may restore stale HTML and silently discard the edited text.
-    const formData = new FormData(form);
-    for (const editorName in rich_field_map) {
-        const input = rich_field_map[editorName];
-        const editor = window.CKEDITOR?.instances?.[editorName];
-        const content = editor ? editor.getData() : document.getElementById(editorName).innerHTML;
-        formData.set(input.name, content);
-    }
-    for (const displayId in poor_field_map) {
-        const input = document.getElementById(poor_field_map[displayId]);
-        const display = document.getElementById(displayId);
-        if (input && display) formData.set(input.name, display.innerText);
-    }
-    restoreOriginalMediaInSubmittedHtml(formData);
+    deactivateEditor();
+    editing.checked = false;
     show_spinner();
+    const formData = new FormData(form);
+    console.log("Sending form with data: ", formData);
 
     try {
-        const response = await fetch(window.location.href, {
+        const response = await fetch('', {
             method: "POST",
             body: formData,
-            credentials: "same-origin",
-            cache: "no-store"
         });
-        const contentType = response.headers.get("content-type") || "";
-        const result = contentType.includes("application/json")
-            ? await response.json()
-            : null;
-        if (!response.ok || result?.success !== true) {
-            throw new Error(result?.error || (
-                result === null
-                    ? "The site returned the editing form instead of confirming a save. Check the required fields and try again."
-                    : "The server did not confirm that your changes were saved."
-            ));
+        console.log("Form submission response: ", response);
+        hide_spinner();
+        if (response.ok) {
+            show_message('Successfully saved, <a href="#" target="_blank" class="nice-link">check it\'s correct by clicking here to reload</a>', "info");
+        } else {
+            show_message(`Saving error (${response.status}): ${response.statusText}`, "danger");
         }
-        // Deliberately keep the current editing session intact. A server-side
-        // save must not discard unsaved in-browser work; verification is manual.
+    } catch (e) {
+        console.error(e);
         hide_spinner();
-        show_message('Save confirmed by the server. Your current page has not been reloaded; <a href="' +
-            window.location.href + '" target="_blank" rel="noopener" class="nice-link">open a separate tab to verify the saved version</a>.', 'info');
-    } catch (error) {
-        hide_spinner();
-        console.error("Tour save failed", error);
-        show_message("Saving error: " + error.message, "danger");
-        // Leave the editor and its current unsaved contents intact.
+        show_message(`Saving error: ${e}`, "danger");
     }
 });
