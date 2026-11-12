@@ -157,7 +157,7 @@ function checkEditing() {
 }
 
 editing.addEventListener('change', checkEditing);
-window.addEventListener('resize', checkEditing);
+// Keyboard-driven mobile resizes must not reinitialise an active editor.
 checkEditing();
 
 desc.addEventListener('input', editorChange);
