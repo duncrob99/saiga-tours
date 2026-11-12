@@ -385,9 +385,11 @@ form.addEventListener("submit", async ev => {
                     : "The server did not confirm that your changes were saved."
             ));
         }
-        // Reading the saved data back also prevents an old page from appearing
-        // to retain stale content after a successful local database update.
-        window.location.reload();
+        // Deliberately keep the current editing session intact. A server-side
+        // save must not discard unsaved in-browser work; verification is manual.
+        hide_spinner();
+        show_message('Save confirmed by the server. Your current page has not been reloaded; <a href="' +
+            window.location.href + '" target="_blank" rel="noopener" class="nice-link">open a separate tab to verify the saved version</a>.', 'info');
     } catch (error) {
         hide_spinner();
         console.error("Tour save failed", error);
